@@ -77,18 +77,23 @@ for (const { label, project, turns } of sessions) {
       await fitTailRange(page, width, tailRangePx);
       await expect(list).toHaveAttribute("data-transcript-render-weight", "6");
 
-      await viewport(page).evaluate((element) => {
+      const offsetBefore = await viewport(page).evaluate((element, id) => {
         element.dispatchEvent(
           new WheelEvent("wheel", { bubbles: true, deltaY: -120 }),
         );
         element.scrollTop = 0;
+        // Capture the baseline before the scroll event can request history.
+        const row = element.querySelector(`[data-render-id="${id}"]`);
+        if (!row) throw new Error(`Row ${id} is not rendered`);
+        const offset =
+          row.getBoundingClientRect().top - element.getBoundingClientRect().top;
         element.dispatchEvent(new Event("scroll"));
-      });
+        return offset;
+      }, tailTop);
       const follow = page.getByRole("button", {
         name: "Follow latest session output",
       });
       await expect(follow).toBeVisible();
-      const offsetBefore = await rowOffset(page, tailTop);
 
       await expect(list).toHaveAttribute(
         "data-transcript-render-weight",

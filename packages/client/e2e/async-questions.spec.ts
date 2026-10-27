@@ -5,6 +5,10 @@ import { expect, test } from "@playwright/test";
 import type { Message } from "@vibeallday/shared/transcript/message";
 import { decodeJsonFrame, type RemoteClientMessage } from "@vibeallday/shared";
 import {
+  drainManagedRoutes,
+  routeWithDrain,
+} from "./support/managed-routes.js";
+import {
   startVibeAllDayServerProcess,
   disposeVibeAllDayServerProcess,
 } from "./support/vibeallday-server-process";
@@ -776,7 +780,7 @@ test("async questions preserve context, drafts, scroll and ordinary delivery", a
     }
 
     // A populated additive field alone cannot enable a new capability.
-    await page.route("**/api/version*", async (route) => {
+    await routeWithDrain(page, "**/api/version*", async (route) => {
       const response = await route.fetch();
       await route.fulfill({
         json: {
@@ -855,7 +859,14 @@ test("async questions preserve context, drafts, scroll and ordinary delivery", a
     expect(browserErrors).toEqual([]);
   } finally {
     replyGate.release?.();
-    await page.unrouteAll({ behavior: "wait" });
-    await disposeVibeAllDayServerProcess(backend);
+    try {
+      try {
+        await drainManagedRoutes(page);
+      } finally {
+        await page.unrouteAll({ behavior: "wait" });
+      }
+    } finally {
+      await disposeVibeAllDayServerProcess(backend);
+    }
   }
 });

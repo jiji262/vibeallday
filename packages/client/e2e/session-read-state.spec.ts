@@ -20,6 +20,7 @@ test("read toggles stay synchronized across sidebar, session menu and inbox", as
   const updatedAt = new Date(Date.now() - 60_000).toISOString();
   const backend = await startVibeAllDayServerProcess({
     label: "session read state",
+    env: { ENABLED_PROVIDERS: "claude" },
     serveBuiltClient: true,
     mockClaudeSession: {
       projectPath: clientPath,
