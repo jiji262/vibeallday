@@ -81,6 +81,34 @@ async function textPoints(page: Page, markers: string[]) {
   }, markers);
 }
 
+async function stopFollowingWithWheel(page: Page) {
+  const scroller = page.locator(".session-messages");
+  await scroller.hover();
+  await scroller.evaluate((element) => {
+    let before = element.scrollTop;
+    if (before <= 0)
+      throw new Error("Transcript must overflow before scrolling");
+    let armed = false;
+    element.dataset.testWheelComplete = "false";
+    const arm = (event: Event) => {
+      if (!(event instanceof WheelEvent) || event.deltaY >= 0) return;
+      before = element.scrollTop;
+      armed = true;
+    };
+    const finish = (event: Event) => {
+      if (!armed || event.target !== element || element.scrollTop >= before)
+        return;
+      element.dataset.testWheelComplete = "true";
+      element.removeEventListener("wheel", arm);
+      element.removeEventListener("scrollend", finish);
+    };
+    element.addEventListener("wheel", arm, { passive: true });
+    element.addEventListener("scrollend", finish);
+  });
+  await page.mouse.wheel(0, -200);
+  await expect(scroller).toHaveAttribute("data-test-wheel-complete", "true");
+}
+
 async function openLiveSession(page: Page) {
   const projectPath = dirname(dirname(fileURLToPath(import.meta.url)));
   const backend = await startVibeAllDayServerProcess({
@@ -309,9 +337,7 @@ test("a drag keeps its press point when the browser loses it mid-drag", async ({
   const session = await openLiveSession(page);
   const activity = session.startActivity();
   try {
-    const scroller = page.locator(".session-messages");
-    await scroller.hover();
-    await page.mouse.wheel(0, -200);
+    await stopFollowingWithWheel(page);
     await expect(
       page.getByRole("button", {
         name: "Follow latest session output",
