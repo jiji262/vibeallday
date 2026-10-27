@@ -3861,7 +3861,9 @@ describe("MessageInput", () => {
       expect(textarea.value).toBe(completed);
 
       textarea.setSelectionRange(0, textarea.value.length);
-      act(() => frames.splice(0).forEach((frame) => frame(0)));
+      act(() => {
+        for (const frame of frames.splice(0)) frame(0);
+      });
       expect(textarea.selectionStart).toBe(0);
       expect(textarea.selectionEnd).toBe(completed.length);
       textarea.setRangeText(
