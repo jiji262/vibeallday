@@ -12,6 +12,16 @@ const mockProjectPath = join(e2ePaths.tempDir, "mockproject");
 const projectId = Buffer.from(mockProjectPath).toString("base64url");
 const sessionId = "mock-session-001";
 const objective = "Keep goal changes visible during work and after reload";
+const COMMAND_UPDATE_INTERVAL_MS = 50;
+
+interface GoalTypingSample {
+  expected: string;
+  keyAt: number;
+  inputAt: number;
+  inputValue: string;
+  frameAt: number;
+  frameValue: string;
+}
 
 test.use({ serviceWorkers: "block" });
 
@@ -70,6 +80,80 @@ async function captureMenu(page: Page, name: string) {
   if (!directory) return;
   mkdirSync(directory, { recursive: true });
   await page.getByRole("menu").screenshot({ path: join(directory, name) });
+}
+
+async function installGoalTypingProbe(page: Page) {
+  await page.locator("[data-composer-input]").evaluate((element) => {
+    const samples: GoalTypingSample[] = [];
+    Object.assign(window, { goalTypingSamples: samples });
+    let expected = "";
+    let keyAt = 0;
+    element.addEventListener("keydown", (event) => {
+      const key = event as KeyboardEvent;
+      if (key.key.length !== 1 || key.ctrlKey || key.metaKey || key.altKey)
+        return;
+      expected += key.key;
+      keyAt = performance.now();
+    });
+    element.addEventListener("input", () => {
+      const sample: GoalTypingSample = {
+        expected,
+        keyAt,
+        inputAt: performance.now(),
+        inputValue: (element as HTMLTextAreaElement).value,
+        frameAt: 0,
+        frameValue: "",
+      };
+      samples.push(sample);
+      requestAnimationFrame(() => {
+        sample.frameAt = performance.now();
+        sample.frameValue = (element as HTMLTextAreaElement).value;
+      });
+    });
+  });
+}
+
+async function typeGoalDraftDuringUpdates(
+  page: Page,
+  text: string,
+  update: () => void,
+) {
+  const composer = page.locator("[data-composer-input]");
+  await installGoalTypingProbe(page);
+  const timer = setInterval(update, COMMAND_UPDATE_INTERVAL_MS);
+  try {
+    let prefix = "";
+    for (const character of text) {
+      await composer.pressSequentially(character);
+      prefix += character;
+      await expect(composer).toHaveValue(prefix, { timeout: 100 });
+      await page.evaluate(
+        () =>
+          new Promise<void>((resolve) => {
+            requestAnimationFrame(() => resolve());
+          }),
+      );
+    }
+  } finally {
+    clearInterval(timer);
+  }
+  const samples = await page.evaluate(
+    () => Reflect.get(window, "goalTypingSamples") as GoalTypingSample[],
+  );
+  expect(samples).toHaveLength(text.length);
+  for (const sample of samples) {
+    expect(sample.inputValue).toBe(sample.expected);
+    expect(sample.frameValue).toBe(sample.expected);
+    expect(sample.frameAt).toBeGreaterThanOrEqual(sample.inputAt);
+    expect(sample.inputAt - sample.keyAt).toBeLessThanOrEqual(100);
+    expect(sample.frameAt - sample.keyAt).toBeLessThanOrEqual(100);
+  }
+  const max = Math.max(
+    ...samples.map((sample) => sample.frameAt - sample.keyAt),
+  );
+  console.log(
+    `[goal typing] ${samples.length} keys, maximum ${max.toFixed(1)} ms during command updates`,
+  );
 }
 
 test("shows provider-owned slash hints and argument completions", async ({
@@ -460,7 +544,28 @@ test("toggles the observed goal during work without consuming the draft", async 
   await expect(composer).toBeVisible({ timeout: 30_000 });
   await expect(flag).toHaveAttribute("data-goal-status", "active");
   await expect.poll(() => !!publish).toBe(true);
-  await composer.fill("Keep this draft while the agent works");
+  await composer.fill("/go");
+  await composer.press("Tab");
+  await expect(composer).toHaveValue("/goal ");
+  await composer.press("ControlOrMeta+A");
+  let typingUpdates = 0;
+  await typeGoalDraftDuringUpdates(
+    page,
+    "Keep this draft while the agent works",
+    () => {
+      typingUpdates += 1;
+      publish?.("message", {
+        type: "system",
+        subtype: "commands_changed",
+        uuid: `typing-commands-${typingUpdates}`,
+        slash_command_inventory: commands().map((command) => ({
+          ...command,
+          description: `${command.description} revision ${typingUpdates}`,
+        })),
+      });
+    },
+  );
+  expect(typingUpdates).toBeGreaterThan(0);
   await page.waitForTimeout(150);
   await flag.hover();
   await expect(page.getByRole("tooltip")).toContainText("Goal: Active");
