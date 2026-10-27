@@ -394,10 +394,12 @@ test("a held button stops follow scrolling and a click resumes it", async ({
       .poll(() => page.getByText("Streamed paragraph 5").count())
       .toBeGreaterThan(0);
     const followingFrom = await metrics();
-    await page.waitForTimeout(800);
-    const followingTo = await metrics();
-    expect(followingTo.height).toBeGreaterThan(followingFrom.height);
-    expect(followingTo.fromBottom).toBeLessThan(4);
+    // A streamed batch lays out before ResizeObserver applies its follow
+    // scroll. Wait for both preconditions instead of sampling that gap.
+    await expect
+      .poll(async () => (await metrics()).height)
+      .toBeGreaterThan(followingFrom.height);
+    await expect.poll(async () => (await metrics()).fromBottom).toBeLessThan(4);
 
     const box = await scroller.boundingBox();
     if (!box) throw new Error("Missing transcript scroller");

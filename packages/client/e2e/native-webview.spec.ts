@@ -178,6 +178,39 @@ for (const viewport of [
     );
     await expect(composer).toHaveValue("Offline draft");
     await composer.clear();
+    await composer.evaluate((input) => input.blur());
+    await expect(composer).not.toBeFocused();
+    await expect(composer).toBeEnabled();
+    await page.evaluate(
+      () =>
+        new Promise((resolve) =>
+          requestAnimationFrame(() => requestAnimationFrame(resolve)),
+        ),
+    );
+    // Native UiAutomator taps the editor's center. Expanded handle hit areas
+    // must leave both that point and the first editable line unobstructed.
+    await expect
+      .poll(() =>
+        composer.evaluate((input) => {
+          const rect = input.getBoundingClientRect();
+          const centerX = rect.x + rect.width / 2;
+          const textTop = Number.parseFloat(getComputedStyle(input).paddingTop);
+          return (
+            document.elementFromPoint(centerX, rect.y + rect.height / 2) ===
+              input &&
+            document.elementFromPoint(centerX, rect.y + textTop + 1) === input
+          );
+        }),
+      )
+      .toBe(true);
+    const editorBounds = await composer.boundingBox();
+    expect(editorBounds).not.toBeNull();
+    if (!editorBounds) throw new Error("Composer has no pointer target");
+    await page.mouse.click(
+      editorBounds.x + editorBounds.width / 2,
+      editorBounds.y + editorBounds.height / 2,
+    );
+    await expect(composer).toBeFocused();
 
     await page.evaluate(() => {
       const host = (

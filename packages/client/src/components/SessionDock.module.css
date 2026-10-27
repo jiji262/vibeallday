@@ -41,7 +41,8 @@
 }
 
 .dock :global(.speech-draft-field) {
-  --speech-draft-padding: 12px 14px 4px;
+  /* 留出顶部按钮的扩展触摸区域，避免遮挡第一行文字。 */
+  --speech-draft-padding: 24px 14px 4px;
   --speech-draft-font-size: 16px;
   --speech-draft-line-height: 24px;
   background: transparent;

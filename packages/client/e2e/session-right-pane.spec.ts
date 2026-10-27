@@ -706,6 +706,7 @@ test("Apps saves on defocus without losing typing during a pending save", async 
     page.getByRole("button", { name: /Save.*settings/ }),
   ).toHaveCount(0);
   const table = page.getByRole("table", { name: "Hosted apps" });
+  const routeStack = page.locator(".navigation-route-stack");
   const back = page.getByRole("button", {
     name: "Minimize details",
     exact: true,
@@ -717,16 +718,20 @@ test("Apps saves on defocus without losing typing during a pending save", async 
   ]) {
     await back.click();
     await page.setViewportSize(size);
-    await expect(table.getByRole("row")).toHaveCount(41);
-    const header = table.getByRole("row").first();
-    await header.scrollIntoViewIfNeeded();
-    await expect(header).toBeInViewport();
     await page.evaluate(
       () =>
         new Promise((done) =>
           requestAnimationFrame(() => requestAnimationFrame(done)),
         ),
     );
+    await expect(table.getByRole("row")).toHaveCount(41);
+    await table.evaluate((element) =>
+      element.scrollIntoView({ block: "start" }),
+    );
+    await expect(routeStack).toHaveJSProperty("scrollTop", 0);
+    await expect(routeStack).toHaveJSProperty("scrollLeft", 0);
+    await expect(table.getByRole("row").first()).toBeInViewport();
+    await expect(table.getByRole("row").nth(1)).toBeInViewport();
     await recordUiCapture(page, `apps-table-${size.width}`);
     await table
       .getByRole("button", { name: "service-2 .example.com", exact: true })
@@ -747,6 +752,8 @@ test("Apps saves on defocus without losing typing during a pending save", async 
     await back
       .locator("../..")
       .evaluate((element) => element.scrollIntoView({ block: "start" }));
+    await expect(routeStack).toHaveJSProperty("scrollTop", 0);
+    await expect(routeStack).toHaveJSProperty("scrollLeft", 0);
     await recordUiCapture(page, `apps-detail-${size.width}`);
   }
   await back.click();
