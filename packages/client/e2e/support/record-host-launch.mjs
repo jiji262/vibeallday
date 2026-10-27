@@ -1,30 +1,26 @@
 // @ts-check
-/** Observe real host launches without replacing their runtime or lifetime. */
+/** Observe owned fixture launches without replacing their runtime or lifetime. */
 import childProcess from "node:child_process";
 import { randomUUID } from "node:crypto";
 import { mkdirSync, renameSync, rmSync, writeFileSync } from "node:fs";
 import { syncBuiltinESMExports } from "node:module";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { captureProcessIdentity } from "../../../../scripts/provider-process-identity.mjs";
+import {
+  captureProcessIdentity,
+  processGroupAlive,
+  providerHostCapability,
+} from "../../../../scripts/provider-process-identity.mjs";
 
 const hostEntrypoint = resolve(
   dirname(fileURLToPath(import.meta.url)),
   "../../../../scripts/provider-runtime-host.mjs",
 );
 const spawn = childProcess.spawn;
-/**
- * @returns {import("node:child_process").ChildProcess}
- * @param {string} command
- * @param {readonly string[] | import("node:child_process").SpawnOptions} [args]
- * @param {import("node:child_process").SpawnOptions} [options]
- */
-function observedSpawn(command, args, options) {
-  const argumentsArray = Array.isArray(args) ? args : undefined;
-  const runtimeDir = options?.env?.VIBEALLDAY_PROVIDER_HOST_RUNTIME_DIR;
-  if (!runtimeDir || argumentsArray?.[0] !== hostEntrypoint)
-    return Reflect.apply(spawn, childProcess, [command, args, options]);
+const canTrackDetached = providerHostCapability({ probe: false }).supported;
 
+/** @param {string} runtimeDir */
+function createLaunchReceipt(runtimeDir) {
   const directory = join(runtimeDir, "e2e-launches");
   mkdirSync(directory, { recursive: true, mode: 0o700 });
   const file = join(directory, `${randomUUID()}.json`);
@@ -34,12 +30,51 @@ function observedSpawn(command, args, options) {
     writeFileSync(temporary, JSON.stringify(record), { mode: 0o600 });
     renameSync(temporary, file);
   };
-  // This marker precedes spawn itself: a crash before identity publication
-  // cannot make descriptor absence look like successful reclamation.
-  write({ pending: true, label: "E2E provider host launch" });
+  // Publish before spawn so a crash cannot look like successful reclamation.
+  const label = "E2E fixture process launch";
+  write({ pending: true, label });
+  return { file, write, label };
+}
+
+/**
+ * @param {readonly string[] | import("node:child_process").SpawnOptions} [args]
+ * @param {import("node:child_process").SpawnOptions} [options]
+ */
+function launchOptions(args, options) {
+  return (
+    options ??
+    (Array.isArray(args)
+      ? undefined
+      : /** @type {import("node:child_process").SpawnOptions | undefined} */ (
+          args
+        ))
+  );
+}
+
+/**
+ * @returns {import("node:child_process").ChildProcess}
+ * @param {string} command
+ * @param {readonly string[] | import("node:child_process").SpawnOptions} [args]
+ * @param {import("node:child_process").SpawnOptions} [options]
+ */
+function observedSpawn(command, args, options) {
+  const argumentsArray = Array.isArray(args) ? args : [];
+  const spawnOptions = launchOptions(args, options);
+  const runtimeDir = (spawnOptions?.env ?? process.env)
+    .VIBEALLDAY_PROVIDER_HOST_RUNTIME_DIR;
+  // Model discovery also detaches; it must release the private profile before
+  // cleanup. Only launches carrying this fixture's runtime marker are owned.
+  if (
+    !runtimeDir ||
+    (argumentsArray[0] !== hostEntrypoint &&
+      !(canTrackDetached && spawnOptions?.detached))
+  )
+    return Reflect.apply(spawn, childProcess, [command, args, options]);
+
+  const { file, write, label } = createLaunchReceipt(runtimeDir);
   let child;
   try {
-    child = spawn(command, argumentsArray, options ?? {});
+    child = spawn(command, argumentsArray, spawnOptions ?? {});
   } catch (error) {
     rmSync(file, { force: true }); // No child was created.
     throw error;
@@ -55,9 +90,14 @@ function observedSpawn(command, args, options) {
     write({
       pid: child.pid,
       leaderStartTime: identity.startTime,
-      label: "E2E provider host launch",
+      label,
     });
   } catch (error) {
+    // A short-lived detached probe may exit before identity capture finishes.
+    if (canTrackDetached && !processGroupAlive(child.pid)) {
+      rmSync(file, { force: true });
+      return child;
+    }
     // The live handle proves ownership. Leave the pending marker if capture
     // or persistence failed so coordinator cleanup cannot silently succeed.
     try {
