@@ -193,6 +193,7 @@ class VibeAllDayNativeWebAppInstrumentedTest {
                 val proof = activity.nativeTransportDiagnostics() ?: org.json.JSONObject()
                 proof.remove("profileId")
                 proof.put("uploadBytes", uploadBytes).put("typingMaxMs", latency)
+                proof.put("typingTiming", org.json.JSONTokener(timing).nextValue())
                 instrumentation.sendStatus(2, android.os.Bundle().apply { putString("vibeAllDayNativeWebProof", proof.toString()) })
             }
 
@@ -262,8 +263,8 @@ class VibeAllDayNativeWebAppInstrumentedTest {
             assertTrue(device.wait(Until.hasObject(By.desc("Tabs, 3 open")), 5_000))
             assertEquals(beforeLink, evaluate(scenario, "performance.timeOrigin"))
             awaitWebLink(device, "Native internal link").click()
-            await(scenario, "location.pathname === '/projects' && location.search === '?nativeTabProbe=1'")
             assertTrue(device.wait(Until.hasObject(By.desc("Tabs, 4 open")), 5_000))
+            awaitProbeTab(scenario)
             device.findObject(By.desc("Tabs, 4 open")).click()
             captureTabs(device, application, "native-tabs.png")
             device.wait(Until.findObject(By.desc("Switch to tab: $hostLabel, /projects/$projectId/sessions/android-preview-session")), 5_000).click()
@@ -407,6 +408,35 @@ class VibeAllDayNativeWebAppInstrumentedTest {
         Build.FINGERPRINT.contains("emulator", ignoreCase = true) ||
         Build.MODEL.contains("Emulator", ignoreCase = true) ||
         Build.HARDWARE == "ranchu"
+
+    private fun awaitProbeTab(scenario: ActivityScenario<out WebClientActivity>, timeoutSeconds: Long = 30) {
+        val deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(timeoutSeconds)
+        while (System.nanoTime() < deadline) {
+            val result = AtomicReference<String>()
+            val done = CountDownLatch(1)
+            var issued = false
+            scenario.onActivity { activity ->
+                val view = activity.findViewById<WebView>(R.id.web_client)
+                val url = view?.url?.let(android.net.Uri::parse)
+                if (activity.nativeTransportDiagnostics() != null && view?.progress == 100 &&
+                    url?.encodedPath == "/projects" && url.encodedQuery == "nativeTabProbe=1") {
+                    // Check and evaluate the same current document in one UI task.
+                    // A departing popup document can discard its JS callback.
+                    issued = true
+                    view.evaluateJavascript("location.pathname === '/projects' && location.search === '?nativeTabProbe=1'") {
+                        result.set(it)
+                        done.countDown()
+                    }
+                }
+            }
+            if (issued) {
+                assertTrue("Probe tab JavaScript callback timed out", done.await(5, TimeUnit.SECONDS))
+                if (result.get() == "true") return
+            }
+            Thread.sleep(100)
+        }
+        throw AssertionError("The current probe tab document did not become ready")
+    }
 
     // Initial direct 1 MiB emulator proof completed in 9.1 s; 30 s gives ~3x
     // that full-run maximum for ordinary document readiness on this testbed.
