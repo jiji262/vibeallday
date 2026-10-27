@@ -39,13 +39,9 @@ final class LiveAppTests: XCTestCase {
     password.typeText("native-fixture-password")
     app.buttons["host-sign-in"].tap()
     XCTAssertTrue(app.webViews.firstMatch.waitForExistence(timeout: 15), app.debugDescription)
-    capture(app, "ios-live-projects")
+    capture(app, "ios-live-inbox")
     let skip = app.buttons["Skip all"]
     if skip.waitForExistence(timeout: 2) { skip.tap() }
-    let project = app.links.matching(NSPredicate(format: "label CONTAINS %@", "preview-project"))
-      .firstMatch
-    XCTAssertTrue(project.waitForExistence(timeout: 10), app.debugDescription);
-    project.coordinate(withNormalizedOffset: CGVector(dx: 0.75, dy: 0.8)).tap()
     let session = app.links.matching(
       NSPredicate(format: "label CONTAINS %@", "Android conversation fixture")
     ).firstMatch
@@ -116,17 +112,16 @@ final class LiveAppTests: XCTestCase {
     let relaunched = app.webViews.textViews.firstMatch
     XCTAssertTrue(relaunched.waitForExistence(timeout: 15), app.debugDescription)
     XCTAssertEqual(relaunched.value as? String, text)
-    let sidebarOpener = app.buttons["Open sidebar"]
-    XCTAssertTrue(sidebarOpener.isHittable, app.debugDescription)
-    // Use the current WebKit element frame, as with the project/session links.
-    // On iOS 18 the default tap after relaunch left the drawer closed.
-    sidebarOpener.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap()
-    // AX existence/hittability can precede WebKit's painted drawer. The QA
+    let more = app.links["More"]
+    XCTAssertTrue(more.waitForExistence(timeout: 5), app.debugDescription)
+    XCTAssertTrue(more.isHittable, app.debugDescription)
+    more.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap()
+    // AX existence/hittability can precede WebKit's painted page. The QA
     // marker requires its Switch Host button to win DOM hit testing for two
     // frames; all host-picker and draft/input assertions stay unchanged.
     XCTAssertTrue(
       app.staticTexts["QA host switch ready"].waitForExistence(timeout: 5), app.debugDescription)
-    capture(app, "ios-host-sidebar")
+    capture(app, "ios-host-more")
     let switchHost = app.buttons.matching(NSPredicate(format: "label CONTAINS[c] 'Switch host'"))
       .firstMatch
     XCTAssertTrue(switchHost.waitForExistence(timeout: 5), app.debugDescription)

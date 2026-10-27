@@ -5200,6 +5200,34 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0b928f33d975fc6ad9f86c8f283853ad26bdd5b10b7f1542aa2fa15e2289105a"
 
 [[package]]
+name = "vibeallday-desktop"
+version = "0.4.1"
+dependencies = [
+ "dirs 5.0.1",
+ "libc",
+ "objc2",
+ "objc2-app-kit",
+ "objc2-foundation",
+ "rand 0.8.8",
+ "reqwest 0.12.28",
+ "rustls",
+ "semver",
+ "serde",
+ "serde_json",
+ "tauri",
+ "tauri-build",
+ "tauri-plugin-autostart",
+ "tauri-plugin-process",
+ "tauri-plugin-single-instance",
+ "tauri-plugin-updater",
+ "tauri-plugin-window-state",
+ "tempfile",
+ "tokio",
+ "url",
+ "windows-sys 0.61.2",
+]
+
+[[package]]
 name = "vswhom"
 version = "0.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -6219,34 +6247,6 @@ checksum = "32e45ad4206f6d2479085147f02bc2ef834ac85886624a23575ae137c8aa8156"
 dependencies = [
  "libc",
  "rustix",
-]
-
-[[package]]
-name = "vibeallday-desktop"
-version = "0.4.1"
-dependencies = [
- "dirs 5.0.1",
- "libc",
- "objc2",
- "objc2-app-kit",
- "objc2-foundation",
- "rand 0.8.8",
- "reqwest 0.12.28",
- "rustls",
- "semver",
- "serde",
- "serde_json",
- "tauri",
- "tauri-build",
- "tauri-plugin-autostart",
- "tauri-plugin-process",
- "tauri-plugin-single-instance",
- "tauri-plugin-updater",
- "tauri-plugin-window-state",
- "tempfile",
- "tokio",
- "url",
- "windows-sys 0.61.2",
 ]
 
 [[package]]
