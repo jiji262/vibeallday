@@ -3831,6 +3831,51 @@ describe("MessageInput", () => {
     expect(onSend).toHaveBeenCalledWith("/goal", expect.anything());
   });
 
+  it.each([
+    ["/go", "/goal "],
+    ["/goal", "/goal Ship safely "],
+  ])(
+    "preserves a new selection immediately after completing %s",
+    (query, completed) => {
+      const frames: FrameRequestCallback[] = [];
+      vi.spyOn(window, "requestAnimationFrame").mockImplementation(
+        (callback) => {
+          frames.push(callback);
+          return frames.length;
+        },
+      );
+      const textarea = renderMessageInput(undefined, {
+        slashCommands: [
+          {
+            name: "goal",
+            description: "Keep working",
+            argumentCompletions: [
+              { value: "Ship safely", description: "Current goal" },
+            ],
+          },
+        ],
+      }) as HTMLTextAreaElement;
+      textarea.focus();
+      fireEvent.change(textarea, { target: { value: query } });
+      fireEvent.keyDown(textarea, { key: "Tab" });
+      expect(textarea.value).toBe(completed);
+
+      textarea.setSelectionRange(0, textarea.value.length);
+      act(() => frames.splice(0).forEach((frame) => frame(0)));
+      expect(textarea.selectionStart).toBe(0);
+      expect(textarea.selectionEnd).toBe(completed.length);
+      textarea.setRangeText(
+        "/go",
+        textarea.selectionStart,
+        textarea.selectionEnd,
+        "end",
+      );
+      fireEvent.input(textarea);
+      expect(textarea.value).toBe("/go");
+      expect(screen.getByRole("menuitem", { name: "/goal" })).toBeTruthy();
+    },
+  );
+
   it("submits instead of completing a slash token after existing text", () => {
     const onSend = vi.fn();
     const textarea = renderMessageInput(

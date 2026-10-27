@@ -6,6 +6,7 @@ import { decodeJsonFrame, type RemoteClientMessage } from "@vibeallday/shared";
 import type { ViteDevServer } from "vite";
 import { createTestViteServer as createServer } from "./support/vite-server";
 import { e2ePaths, expect, test } from "./fixtures.js";
+import { routeWithDrain } from "./support/managed-routes.js";
 
 const mockProjectPath = join(e2ePaths.tempDir, "mockproject");
 const projectId = Buffer.from(mockProjectPath).toString("base64url");
@@ -75,7 +76,8 @@ test("shows provider-owned slash hints and argument completions", async ({
   page,
 }) => {
   test.setTimeout(120_000);
-  await page.route(
+  await routeWithDrain(
+    page,
     (url) =>
       url.pathname === `/api/projects/${projectId}/sessions/${sessionId}`,
     async (route) => {
@@ -223,7 +225,8 @@ test("restarts the provider only after verified stop and reloads saved turns", a
   let refuseStop = true;
   let restarted = false;
   let reads = 0;
-  await page.route(
+  await routeWithDrain(
+    page,
     (url) =>
       url.pathname === `/api/projects/${projectId}/sessions/${sessionId}`,
     async (route) => {
@@ -379,7 +382,8 @@ test("toggles the observed goal during work without consuming the draft", async 
       invocation: { kind: "native", prefix: "/" },
     },
   ];
-  await page.route(
+  await routeWithDrain(
+    page,
     (url) =>
       url.pathname === `/api/projects/${projectId}/sessions/${sessionId}`,
     async (route) => {

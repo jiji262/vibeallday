@@ -2388,6 +2388,23 @@ export function MessageInput({
     ],
   );
 
+  const prepareSlashCompletionSelection = useCallback(
+    (nextText: string, nextCursor: number) => {
+      const restore = (textarea: HTMLTextAreaElement) => {
+        textarea.focus();
+        textarea.setSelectionRange(nextCursor, nextCursor);
+      };
+      pendingTextareaSelectionRef.current = null;
+      if (nextText === text) {
+        const textarea = textareaRef.current;
+        if (textarea) restore(textarea);
+        return;
+      }
+      pendingTextareaSelectionRef.current = { value: nextText, restore };
+    },
+    [text],
+  );
+
   // Handle slash command selection - run active client commands or insert text.
   const handleSlashCommand = useCallback(
     (command: SlashCommand, completionPrefix?: string) => {
@@ -2441,13 +2458,10 @@ export function MessageInput({
         inputType: "insertText",
       });
       noteComposerEdit(nextText);
+      prepareSlashCompletionSelection(nextText, nextCursor);
       setText(nextText);
       setComposerCursor(nextCursor);
       setDismissedSlashQuery(null);
-      requestAnimationFrame(() => {
-        textareaRef.current?.focus();
-        textareaRef.current?.setSelectionRange(nextCursor, nextCursor);
-      });
     },
     [
       composerCursor,
@@ -2456,6 +2470,7 @@ export function MessageInput({
       onCustomCommand,
       noteComposerEdit,
       noteDraftTextChange,
+      prepareSlashCompletionSelection,
     ],
   );
 
@@ -2473,15 +2488,18 @@ export function MessageInput({
         inputType: "insertText",
       });
       noteComposerEdit(nextText);
+      prepareSlashCompletionSelection(nextText, nextCursor);
       setText(nextText);
       setComposerCursor(nextCursor);
       setDismissedSlashQuery(null);
-      requestAnimationFrame(() => {
-        textareaRef.current?.focus();
-        textareaRef.current?.setSelectionRange(nextCursor, nextCursor);
-      });
     },
-    [noteComposerEdit, noteDraftTextChange, setText, text],
+    [
+      noteComposerEdit,
+      noteDraftTextChange,
+      prepareSlashCompletionSelection,
+      setText,
+      text,
+    ],
   );
 
   // Apply a highlighted/clicked bang menu row. A history row replaces the
