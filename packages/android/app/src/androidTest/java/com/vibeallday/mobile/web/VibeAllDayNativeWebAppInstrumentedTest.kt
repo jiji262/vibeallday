@@ -124,10 +124,7 @@ class VibeAllDayNativeWebAppInstrumentedTest {
             // DOM focus alone does not establish Android's input connection.
             // Run 37200938972 injected 29 characters but only the final 21
             // reached the editor after the old readiness fallback proceeded.
-            val composer = UiDevice.getInstance(instrumentation).wait(
-                Until.findObject(By.clazz("android.widget.EditText")), 30_000)
-            assertTrue("Composer is absent from Android accessibility", composer != null)
-            checkNotNull(composer).click()
+            ComposerInputProbe.tap({ evaluate(scenario, it) }, { await(scenario, it) })
             awaitInputReady(scenario)
             assertSafeAreasAppliedOnce(scenario)
 
@@ -309,9 +306,9 @@ class VibeAllDayNativeWebAppInstrumentedTest {
             await(scenario, "location.pathname.endsWith('/sessions/android-preview-session') && document.body.textContent.includes('Preview message 50')")
             assertSafeAreasAppliedOnce(scenario)
             assertEquals(200, runBlocking { sibling.request("GET", "/version").status })
-            evaluate(scenario, "if (!document.querySelector('.sidebar-switch-host')) document.querySelector('.sidebar-toggle')?.click(); true")
-            await(scenario, "!!document.querySelector('.sidebar-switch-host')")
-            evaluate(scenario, "document.querySelector('.sidebar-switch-host').click(); true")
+            evaluate(scenario, NativeWebNavigation.OPEN_MORE)
+            await(scenario, NativeWebNavigation.SWITCH_HOST_READY)
+            evaluate(scenario, NativeWebNavigation.SWITCH_HOST)
             assertTrue("Switch Host did not open native management", device.wait(Until.hasObject(By.text("Servers")), 5_000))
             assertTrue(device.wait(Until.hasObject(By.text(hostLabel)), 5_000))
             scenario.close()
@@ -387,16 +384,23 @@ class VibeAllDayNativeWebAppInstrumentedTest {
                 val view = activity.findViewById<WebView>(R.id.web_client)
                 focused = view.hasWindowFocus() && view.hasFocus()
                 acceptingText = activity.getSystemService(InputMethodManager::class.java).isAcceptingText
-                if (focused && acceptingText) size = Pair(view.width, view.height)
+                size = Pair(view.width, view.height)
             }
             val editorReady = evaluate(scenario, "document.activeElement?.matches('textarea[data-composer-input]') === true && document.fonts.status === 'loaded'") == "true"
-            stableSamples = if (editorReady && size != null && size == lastSize) stableSamples + 1 else 0
+            stableSamples = if (focused && acceptingText && editorReady && size != null && size == lastSize) stableSamples + 1 else 0
             observed = "viewFocused=$focused imeAcceptingText=$acceptingText editorReady=$editorReady size=$size"
             lastSize = size
             if (stableSamples >= 3) return
             Thread.sleep(100)
         }
-        throw AssertionError("Composer input connection and viewport did not become ready: $observed")
+        val editor = evaluate(scenario, """
+            (() => { const input = document.querySelector('textarea[data-composer-input]');
+              const rect = input?.getBoundingClientRect();
+              return JSON.stringify({active:document.activeElement?.outerHTML.slice(0,200),
+                rect, hit:rect && document.elementFromPoint(rect.x+rect.width/2,rect.y+rect.height/2)?.outerHTML.slice(0,200),
+                fonts:document.fonts.status, events:window.nativeComposerTapTrace}); })()
+        """.trimIndent())
+        throw AssertionError("Composer input connection and viewport did not become ready: $observed; editor=$editor")
     }
 
     private fun isEmulator(): Boolean = Build.FINGERPRINT.startsWith("generic") ||

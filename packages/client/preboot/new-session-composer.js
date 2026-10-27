@@ -45,8 +45,8 @@ import { restorePrebootComposer } from "../src/lib/prebootComposer";
     `${minimized ? 0 : expanded && innerWidth >= sidebarWidth + 600 ? sidebarWidth : 56}px`,
   );
 
-  // Page padding and the project-column gap use rem units. Match the saved
-  // UI scale before the app initializes its fonts (default 115%).
+  // The project-column gap uses rem units. Match the saved UI scale before
+  // the app initializes its fonts (default 115%). Page/card insets use pixels.
   var storedFontScale = localStorage.getItem("vibeallday-font-size");
   var legacyFontScales = { small: 85, default: 100, large: 115, larger: 130 };
   var fontScale =
@@ -85,7 +85,8 @@ import { restorePrebootComposer } from "../src/lib/prebootComposer";
     // Wide screens center the page at the reader's content width.
     "@media (min-width:1100px){#vibeallday-preboot-composer{" +
     "left:var(--preboot-sidebar-width);justify-content:center;padding-left:0;padding-right:0}" +
-    "#vibeallday-preboot-composer>div{box-sizing:border-box;padding:0 var(--preboot-page-padding);" +
+    "#vibeallday-preboot-composer>div{box-sizing:border-box;" +
+    "padding:0 calc(var(--console-page-inset,clamp(16px,3.2vw,36px)) + var(--space-6,24px) + 1px);" +
     "width:min(100%,var(--content-max-width,830px))}" +
     "#vibeallday-preboot-composer>div>*{max-width:calc(100% - 280px - var(--preboot-page-padding))}}" +
     "#vibeallday-preboot-composer textarea{display:block;width:100%;" +

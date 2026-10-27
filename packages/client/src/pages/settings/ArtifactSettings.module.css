@@ -160,7 +160,8 @@
 .domainName {
   display: inline;
 }
-.table button[aria-expanded] {
+.table td > button[aria-expanded] {
+  padding-block: 4px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;

@@ -18,6 +18,7 @@ import com.vibeallday.mobile.VibeAllDayApplication
 import com.vibeallday.mobile.connection.VibeAllDayConnectionPhase
 import com.vibeallday.mobile.profiles.VibeAllDayServerRoute
 import com.vibeallday.mobile.web.WebClientActivity
+import com.vibeallday.mobile.web.NativeWebNavigation
 import java.io.File
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
@@ -74,7 +75,8 @@ class VibeAllDayHostSwitchInstrumentedTest {
                 // Scroll the owned card fully into view. A clipped LazyColumn
                 // card must never fall back to another saved host's Open button.
                 hostCard(device).findObject(By.text("Open full app")).click()
-                try { waitFor { evaluate("document.body.textContent.includes('preview-project')") == "true" } }
+                val routeReady = if (attempt == 0) "document.body.textContent.includes('preview-project')" else "location.pathname === '/more'"
+                try { waitFor { evaluate("${NativeWebNavigation.HOST_READY} && $routeReady") == "true" } }
                 catch (error: Throwable) {
                     var diagnostics = ""
                     main.onActivity { diagnostics = it.nativeTransportDiagnostics().toString() }
@@ -83,15 +85,16 @@ class VibeAllDayHostSwitchInstrumentedTest {
                 runBlocking { withTimeout(10_000) { manager.state.first { it.phase == VibeAllDayConnectionPhase.CONNECTED } } }
                 val identity = evaluate("performance.timeOrigin")
                 if (documentIdentity == null) documentIdentity = identity else assertEquals(documentIdentity, identity)
+                assertEquals("true", evaluate(if (attempt == 0) "document.body.textContent.includes('preview-project')" else "location.pathname === '/more'"))
                 if (attempt == 1) {
                     control("resume-hold?enabled=true")
                     control("disconnect")
                     waitFor { control("resume-hold", false).getInt("heldResumes") > 0 }
                     assertNull(runBlocking { runtime.pairedServers.snapshot(profile.id)?.resumeCredential })
                 }
-                evaluate("if (!document.querySelector('.sidebar-switch-host')) document.querySelector('.sidebar-toggle')?.click(); true")
-                waitFor { evaluate("!!document.querySelector('.sidebar-switch-host')") == "true" }
-                evaluate("document.querySelector('.sidebar-switch-host').click(); true")
+                evaluate(NativeWebNavigation.OPEN_MORE)
+                waitFor { evaluate(NativeWebNavigation.SWITCH_HOST_READY) == "true" }
+                evaluate(NativeWebNavigation.SWITCH_HOST)
                 assertTrue(device.wait(Until.hasObject(By.text("Servers")), 5_000))
                 runBlocking { withTimeout(10_000) {
                     manager.state.first { it.phase == VibeAllDayConnectionPhase.IDLE }
@@ -104,7 +107,9 @@ class VibeAllDayHostSwitchInstrumentedTest {
                 assertTrue(device.takeScreenshot(File(app.getExternalFilesDir(null), "host-switch-$attempt.png")))
             }
             hostCard(device).findObject(By.text("Open full app")).click()
-            waitFor { evaluate("document.body.textContent.includes('preview-project')") == "true" }
+            waitFor { evaluate(NativeWebNavigation.HOST_READY) == "true" }
+            assertEquals("true", evaluate("location.pathname === '/more'"))
+            assertEquals(documentIdentity, evaluate("performance.timeOrigin"))
             // The retained page is visible before transport finishes resuming.
             runBlocking { withTimeout(10_000) { manager.state.first { it.phase == VibeAllDayConnectionPhase.CONNECTED } } }
             assertEquals(VibeAllDayConnectionPhase.CONNECTED, manager.state.value.phase)

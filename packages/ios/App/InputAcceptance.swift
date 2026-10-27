@@ -37,7 +37,22 @@
               ready.textContent='QA keyboard ready';
             }));
           });
-          let count = 0, issued = 0, max = 0, maxKey = 0, domMax = 0, taskMax = 0, dropped = 0, stream = 0;
+          let count = 0, issued = 0, max = 0, maxKey = 0, domMax = 0, taskMax = 0, dropped = 0, stream = 0, sample = null, peak = null;
+          const setItem = Storage.prototype.setItem;
+          Storage.prototype.setItem = function(...args) {
+            const start = performance.now();
+            try { return setItem.apply(this, args); }
+            finally { if (sample) sample.storage += performance.now() - start; }
+          };
+          const publish = () => {
+            let report = document.getElementById('qa-input-metrics');
+            if (!report) {
+              report = document.createElement('div'); report.id = 'qa-input-metrics';
+              report.style.cssText = 'position:fixed;top:0;right:0;z-index:99999;font:10px monospace;background:white;color:black';
+              document.body.append(report);
+            }
+            report.textContent = `QA input=${count};max=${Math.ceil(max)};dropped=${dropped};key=${maxKey};dom=${Math.ceil(domMax)};task=${Math.ceil(taskMax)};peak=${JSON.stringify(peak)};stream=${stream}`;
+          };
           new MutationObserver(records => {
             if (issued > 0 && issued < 37 && document.activeElement?.matches?.('textarea[data-composer-input]') && records.some(record => (record.target.closest?.('.message-list') || record.target.parentElement?.closest?.('.message-list')))) stream++;
           }).observe(document, {subtree:true,childList:true,characterData:true});
@@ -45,18 +60,23 @@
             const input = event.target;
             if (!input.matches?.('textarea[data-composer-input]')) return;
             const start = performance.now(), before = input.value, key = ++issued;
-            input.addEventListener('input', () => { domMax = Math.max(domMax, performance.now()-start) }, {once:true});
-            setTimeout(() => { taskMax = Math.max(taskMax, performance.now()-start) }, 0);
-            requestAnimationFrame(() => {
+            const timing = sample = {key, storage:0};
+            input.addEventListener('input', () => { timing.dom = performance.now()-start; domMax = Math.max(domMax, timing.dom) }, {once:true});
+            document.addEventListener('input', () => {
+              timing.bubble = performance.now()-start;
+              queueMicrotask(() => { timing.micro = performance.now()-start; });
+            }, {once:true});
+            setTimeout(() => {
+              timing.task = performance.now()-start; taskMax = Math.max(taskMax, timing.task);
+              if (peak === timing) publish();
+            }, 0);
+            requestAnimationFrame(stamp => {
               count++; const latency = performance.now()-start; if (latency>max) {max=latency;maxKey=key}
+              timing.frame = stamp-start; timing.raf = latency;
+              if (sample === timing) sample = null;
+              if (!peak || timing.raf > peak.raf) peak = timing;
               if (input.value === before) dropped++;
-              let report = document.getElementById('qa-input-metrics');
-              if (!report) {
-                report = document.createElement('div'); report.id = 'qa-input-metrics';
-                report.style.cssText = 'position:fixed;top:0;right:0;z-index:99999;font:10px monospace;background:white;color:black';
-                document.body.append(report);
-              }
-              report.textContent = `QA input=${count};max=${Math.ceil(max)};dropped=${dropped};key=${maxKey};dom=${Math.ceil(domMax)};task=${Math.ceil(taskMax)};stream=${stream}`;
+              publish();
             });
           }, true);
         })();
