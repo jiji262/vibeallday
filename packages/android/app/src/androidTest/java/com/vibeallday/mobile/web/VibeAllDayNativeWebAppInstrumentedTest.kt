@@ -413,7 +413,11 @@ class VibeAllDayNativeWebAppInstrumentedTest {
     private fun await(scenario: ActivityScenario<out WebClientActivity>, script: String, timeoutSeconds: Long = 30) {
         val deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(timeoutSeconds)
         var actual = ""
+        val device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
         while (System.nanoTime() < deadline) {
+            // DOM polling must also give the emulator-only launcher watcher a
+            // chance to dismiss its system dialog before the AX editor lookup.
+            device.runWatchers()
             // Reload can discard an evaluateJavascript callback sent to the
             // departing renderer. Wait for the replacement native handshake.
             var ready = false
@@ -425,7 +429,7 @@ class VibeAllDayNativeWebAppInstrumentedTest {
             if (actual == "true") return
             Thread.sleep(100)
         }
-        val body = evaluate(scenario, "JSON.stringify({body: document.body.textContent.slice(0, 1800), value: document.querySelector('textarea[data-composer-input]')?.value, active: document.activeElement?.outerHTML.slice(0,200), latencies: window.nativeTypingLatencies})")
+        val body = evaluate(scenario, "JSON.stringify({body: document.body.textContent.slice(0, 1800), value: document.querySelector('textarea[data-composer-input]')?.value, active: document.activeElement?.outerHTML.slice(0,200), latencies: window.nativeTypingLatencies, tap:window.nativeComposerTapSample, bounds:window.nativeComposerTapBounds, events:window.nativeComposerTapTrace})")
         throw AssertionError("Expected $script; got $actual; page=$body")
     }
 

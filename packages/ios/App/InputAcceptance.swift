@@ -17,7 +17,7 @@
             let frames = 0;
             const check = () => {
               const button = drawer ? document.querySelector('.sidebar-switch-host')
-                : [...document.querySelectorAll('main button')].find(button => button.textContent.trim().startsWith('Switch host'));
+                : [...document.querySelectorAll('main button')].find(button => button.textContent.trim().toLowerCase().startsWith('switch host'));
               const rect = button?.getBoundingClientRect();
               const hit = rect && document.elementFromPoint(rect.x + rect.width / 2, rect.y + rect.height / 2);
               const settled = button?.closest('aside, main')?.getAnimations().every(animation => animation.playState !== 'running');

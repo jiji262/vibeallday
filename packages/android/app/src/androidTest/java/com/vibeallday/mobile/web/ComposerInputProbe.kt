@@ -11,6 +11,7 @@ internal object ComposerInputProbe {
             (() => {
               window.nativeComposerTapReady = false;
               window.nativeComposerTapTrace = [];
+              window.nativeComposerTapSample = {samples:0};
               for (const type of ['pointerdown', 'pointerup', 'focusin', 'focusout']) {
                 document.addEventListener(type, event => {
                   window.nativeComposerTapTrace.push({type, at:performance.now(),
@@ -23,6 +24,9 @@ internal object ComposerInputProbe {
                 const rect = input?.getBoundingClientRect();
                 const hit = rect && document.elementFromPoint(rect.x + rect.width/2, rect.y + rect.height/2);
                 const geometry = rect && JSON.stringify([rect.x, rect.y, rect.width, rect.height]);
+                window.nativeComposerTapSample = {samples:window.nativeComposerTapSample.samples+1,
+                  rect, hit:hit?.outerHTML.slice(0,200), disabled:input?.disabled,
+                  fonts:document.fonts.status, visibility:document.visibilityState, focus:document.hasFocus()};
                 stable = input && !input.disabled && hit === input && document.fonts.status === 'loaded'
                   && geometry === previous ? stable + 1 : 0;
                 previous = geometry;
@@ -34,8 +38,15 @@ internal object ComposerInputProbe {
             })()
         """.trimIndent())
         awaitReady("window.nativeComposerTapReady === true")
+        clickEditor(evaluate)
+    }
+
+    private fun clickEditor(evaluate: (String) -> String) {
         val device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
         val composer = device.wait(Until.findObject(By.clazz("android.widget.EditText")), 30_000)
-        checkNotNull(composer) { "Composer is absent from Android accessibility" }.click()
+        val editor = checkNotNull(composer) { "Composer is absent from Android accessibility" }
+        val bounds = editor.visibleBounds
+        evaluate("window.nativeComposerTapBounds = [${bounds.left},${bounds.top},${bounds.right},${bounds.bottom}]; true")
+        editor.click()
     }
 }

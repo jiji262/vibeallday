@@ -9,6 +9,40 @@ const pathB = `/projects/${projectId}/sessions/switch-scroll-b`;
 
 test.use({ serviceWorkers: "block" });
 
+const originalStars = new Map<string, boolean>();
+test.beforeEach(async ({ request, baseURL }) => {
+  // Recent is capped at eight entries. Own stable Favorites shortcuts so this
+  // test exercises direct session switching regardless of the other fixtures.
+  for (const id of ["switch-scroll-a", "switch-scroll-b"]) {
+    const metadata = await request.get(
+      `${baseURL}/api/projects/${projectId}/sessions/${id}/metadata`,
+    );
+    expect(metadata.ok()).toBeTruthy();
+    originalStars.set(id, (await metadata.json()).session.isStarred === true);
+    const response = await request.put(
+      `${baseURL}/api/sessions/${id}/metadata`,
+      {
+        headers: { "X-VibeAllDay": "true" },
+        data: { starred: true },
+      },
+    );
+    expect(response.ok()).toBeTruthy();
+  }
+});
+test.afterEach(async ({ request, baseURL }) => {
+  for (const [id, starred] of originalStars) {
+    const response = await request.put(
+      `${baseURL}/api/sessions/${id}/metadata`,
+      {
+        headers: { "X-VibeAllDay": "true" },
+        data: { starred },
+      },
+    );
+    expect(response.ok()).toBeTruthy();
+  }
+  originalStars.clear();
+});
+
 async function dismissOnboardingIfVisible(page: Page) {
   const skip = page.locator(".onboarding-skip-all");
   if (await skip.isVisible().catch(() => false)) await skip.click();

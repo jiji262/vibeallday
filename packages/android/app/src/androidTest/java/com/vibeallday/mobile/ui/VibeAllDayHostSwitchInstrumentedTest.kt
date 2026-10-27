@@ -152,7 +152,8 @@ class VibeAllDayHostSwitchInstrumentedTest {
 
     private fun waitFor(condition: () -> Boolean) {
         val deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(10)
-        while (System.nanoTime() < deadline) { if (condition()) return; Thread.sleep(50) }
+        val device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
+        while (System.nanoTime() < deadline) { device.runWatchers(); if (condition()) return; Thread.sleep(50) }
         val instrumentation = InstrumentationRegistry.getInstrumentation()
         UiDevice.getInstance(instrumentation).takeScreenshot(File(instrumentation.targetContext.getExternalFilesDir(null), "host-switch-failure.png"))
         error("Host switch condition did not settle: " + evaluate("JSON.stringify({url:location.href, body:document.body.innerText.slice(0,1500), native:typeof window.vibeAllDayNativeTransport})"))

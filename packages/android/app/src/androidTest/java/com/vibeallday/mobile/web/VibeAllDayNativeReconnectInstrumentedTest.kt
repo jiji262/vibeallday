@@ -550,6 +550,7 @@ class VibeAllDayNativeReconnectInstrumentedTest {
         val deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(timeoutSeconds)
         var actual = ""
         while (System.nanoTime() < deadline) {
+            UiDevice.getInstance(InstrumentationRegistry.getInstrumentation()).runWatchers()
             var ready = false
             scenario.onActivity { activity ->
                 ready = activity.nativeTransportDiagnostics() != null && activity.findViewById<WebView>(R.id.web_client)?.progress == 100

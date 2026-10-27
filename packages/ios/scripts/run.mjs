@@ -2,6 +2,7 @@ import { spawn } from "node:child_process";
 import { copyFile, mkdir, readFile, stat, writeFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import { availableParallelism } from "node:os";
+import { setTimeout as delay } from "node:timers/promises";
 import {
   readHostCapacity,
   readHostSample,
@@ -144,7 +145,14 @@ if (phase === "build") {
   const { startTLSFixture } = await import("./tls-fixture.mjs");
   let simulator, tls, simulatorApp;
   const capacity = await readHostCapacity();
-  const host = { capacity, start: null, readiness: [], during: [], end: null };
+  const host = {
+    capacity,
+    start: null,
+    readiness: [],
+    inputReady: [],
+    during: [],
+    end: null,
+  };
   let sampleTimer, sampling;
   const hostPath = join(ios, `build/host-${Date.now()}.json`);
   const sample = async () => ({
@@ -157,7 +165,10 @@ if (phase === "build") {
     ),
     swap: await run("sysctl", ["vm.swapusage"], ios, true),
   });
-  async function waitForInputHeadroom() {
+  async function waitForInputHeadroom({
+    signal,
+    phase = "before-ui-suite",
+  } = {}) {
     // The first local split run spent ~75s at 0% idle during first-use
     // simulator services. Allow 4x that observation to settle, with two
     // consecutive samples showing CPU and memory room for UI measurement.
@@ -165,14 +176,25 @@ if (phase === "build") {
     const deadline = Date.now() + 300_000;
     let ready = 0;
     while (Date.now() < deadline) {
+      signal?.throwIfAborted();
       const value = await sample();
+      signal?.throwIfAborted();
       host.readiness.push(value);
       const idle = [...value.cpuAndVM.matchAll(/([\d.]+)% idle/g)].at(-1)?.[1];
       const available = value.system.memory.effectiveAvailableBytes;
       ready =
         Number(idle) >= 20 && available >= 1024 * 1024 * 1024 ? ready + 1 : 0;
-      if (ready >= 2) return;
-      await new Promise((done) => setTimeout(done, 5000));
+      if (ready >= 2) {
+        const completed = {
+          phase,
+          at: new Date().toISOString(),
+          sample: host.readiness.length - 1,
+        };
+        host.inputReady.push(completed);
+        console.log(`Input host ready: ${JSON.stringify(completed)}`);
+        return;
+      }
+      await delay(5000, undefined, { signal });
     }
     throw new Error(
       "Simulator host lacks CPU/memory headroom for input acceptance; see host diagnostics",
@@ -184,7 +206,10 @@ if (phase === "build") {
   process.once("SIGINT", interrupt);
   process.once("SIGTERM", interrupt);
   try {
-    tls = await startTLSFixture(fixture.endpoint, join(ios, "build/tls"));
+    tls = await startTLSFixture(fixture.endpoint, join(ios, "build/tls"), {
+      waitForInputHeadroom: ({ signal }) =>
+        waitForInputHeadroom({ signal, phase: "before-composer-typing" }),
+    });
     await writeFile(
       join(ios, "build/fixture.json"),
       JSON.stringify({

@@ -4,12 +4,17 @@ import { createServer as https } from "node:https";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
 import { createRequire } from "node:module";
+import { createInputHeadroomHandler } from "./input-headroom.mjs";
 
 const { WebSocket, WebSocketServer } = createRequire(
   new URL("../../server/package.json", import.meta.url),
 )("ws");
 
-export async function startTLSFixture(endpoint, directory) {
+export async function startTLSFixture(
+  endpoint,
+  directory,
+  { waitForInputHeadroom } = {},
+) {
   await mkdir(directory, { recursive: true });
   async function openssl(args) {
     await new Promise((done, fail) => {
@@ -128,12 +133,16 @@ export async function startTLSFixture(endpoint, directory) {
   const servers = [];
   const stats = { trusted: 0, wrongHost: 0, untrusted: 0, expired: 0 };
   const addresses = {};
+  const headroom = waitForInputHeadroom
+    ? createInputHeadroomHandler(waitForInputHeadroom)
+    : null;
   const listen = (server) =>
     new Promise((done, fail) => {
       server.once("error", fail);
       server.listen(0, "127.0.0.1", () => done(server.address().port));
     });
   const stop = async () => {
+    headroom?.stop();
     for (const socket of sockets) socket.terminate();
     await Promise.all(
       servers.map(
@@ -215,12 +224,18 @@ export async function startTLSFixture(endpoint, directory) {
       if (name === "trusted")
         addresses.wrongHost = `wss://127.0.0.1:${port}/api/ws`;
     }
-    const status = http((_, response) => {
+    const status = http(async (request, response) => {
+      if (headroom && (await headroom.handle(request, response))) return;
       response.setHeader("Content-Type", "application/json");
       response.end(JSON.stringify(stats));
     });
     servers.push(status);
     addresses.status = `http://127.0.0.1:${await listen(status)}/`;
+    if (headroom)
+      addresses.inputHeadroom = new URL(
+        "input-headroom",
+        addresses.status,
+      ).href;
     return { addresses, root: resolve(directory, "trusted.crt"), stop };
   } catch (error) {
     await stop();

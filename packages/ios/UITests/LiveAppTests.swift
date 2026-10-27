@@ -13,6 +13,28 @@ final class LiveAppTests: XCTestCase {
     let attachment = XCTAttachment(screenshot: app.screenshot())
     attachment.name = name; attachment.lifetime = .keepAlways; add(attachment)
   }
+  private func requireInputHostReady(_ data: [String: Any]) async throws {
+    #if targetEnvironment(simulator)
+      // XCTest and keyboard startup can exhaust a previously idle host.
+      // Recheck the same gate before the producer and the first real key.
+      let tls = try XCTUnwrap(data["tls"] as? [String: String])
+      let address = try XCTUnwrap(tls["inputHeadroom"])
+      let url = try XCTUnwrap(URL(string: address))
+      var request = URLRequest(url: url)
+      request.httpMethod = "POST"
+      request.timeoutInterval = 330 // The unchanged host budget is 300s.
+      let (body, response) = try await URLSession.shared.data(for: request)
+      let result = try JSONSerialization.jsonObject(with: body) as? [String: Any]
+      guard (response as? HTTPURLResponse)?.statusCode == 200,
+        result?["ready"] as? Bool == true
+      else {
+        throw URLError(.resourceUnavailable, userInfo: [
+          NSLocalizedDescriptionKey: "Input host not ready: \(String(decoding: body, as: UTF8.self))"
+        ])
+      }
+      print("Input host ready before producer: \(Date())")
+    #endif
+  }
   @MainActor
   func testNativeLoginWebConversationTypingAndRelaunch() async throws {
     let fixture = try XCTUnwrap(
@@ -56,6 +78,7 @@ final class LiveAppTests: XCTestCase {
     composer.tap()
     let keyboardReady = app.staticTexts["QA keyboard ready"]
     XCTAssertTrue(keyboardReady.waitForExistence(timeout: 10), app.debugDescription)
+    try await requireInputHostReady(data)
     let control = AppendControl()
     let updater: Task<Int, Never>? = externalProducer ? nil : Task.detached {
       var successes = 0
@@ -91,6 +114,7 @@ final class LiveAppTests: XCTestCase {
       .firstMatch
     XCTAssertTrue(metrics.waitForExistence(timeout: 5), app.debugDescription)
     let report = metrics.label
+    print(report)
     XCTAssertTrue(report.contains("input=\(text.count);"), report)
     XCTAssertTrue(report.contains("dropped=0"), report)
     let stream = Int(report.components(separatedBy: "stream=").last ?? "0") ?? 0

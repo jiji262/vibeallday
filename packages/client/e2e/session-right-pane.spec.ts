@@ -718,8 +718,14 @@ test("Apps saves on defocus without losing typing during a pending save", async 
     await back.click();
     await page.setViewportSize(size);
     await expect(table.getByRole("row")).toHaveCount(41);
-    await table.evaluate((element) =>
-      element.scrollIntoView({ block: "start" }),
+    const header = table.getByRole("row").first();
+    await header.scrollIntoViewIfNeeded();
+    await expect(header).toBeInViewport();
+    await page.evaluate(
+      () =>
+        new Promise((done) =>
+          requestAnimationFrame(() => requestAnimationFrame(done)),
+        ),
     );
     await recordUiCapture(page, `apps-table-${size.width}`);
     await table
