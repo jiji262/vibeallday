@@ -16,8 +16,7 @@ or across a LAN or private network. It has its own password, separate from the
 3. Enter a password of at least 6 characters in both. The block says whether
    they match, then choose **Require password** beside them.
 
-The page you are on immediately sends you to the login screen: the VibeAllDay
-Anywhere logo, **Enter your password to continue**, a single **Password**
+The page you are on immediately sends you to the login screen: the VibeAllDay logo, **Enter your password to continue**, a single **Password**
 field and a **Login** button. There is no username. Sign in with the password you just set.
 That browser then stays signed in for 30 days (`AUTH_SESSION_TTL_DAYS`) or
 until you sign out.

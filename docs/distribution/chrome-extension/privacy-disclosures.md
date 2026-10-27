@@ -6,8 +6,7 @@ each later package before submission. The console has fields for all four
 install permissions; the optional per-site host-access explanation is included
 in the `activeTab` justification.
 
-**Single purpose:** Let users supervise coding-agent sessions on their own VibeAllDay
-Anywhere servers and find the sessions related to a GitHub issue, pull request
+**Single purpose:** Let users supervise coding-agent sessions on their own VibeAllDay servers and find the sessions related to a GitHub issue, pull request
 or Jira ticket beside the page they are reviewing.
 
 | Permission | Justification |

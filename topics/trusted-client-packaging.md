@@ -246,8 +246,7 @@ cannot inject into or debug its pages, and its storage belongs to it alone.
   respect the optional repository/project allowlist. Opening a session
   navigates the existing VIBEALLDAY tab in place, or opens one.
 - **Opening the app.** The side panel header has an "Open VibeAllDay"
-  button, and the toolbar button's right-click menu has "Open VibeAllDay
-  Anywhere" and "Open VibeAllDay in a popup window". "Open VibeAllDay"
+  button, and the toolbar button's right-click menu has "Open VibeAllDay" and "Open VibeAllDay in a popup window". "Open VibeAllDay"
   brings the most recently used VIBEALLDAY tab or popup forward without
   navigating it, or opens a new app page. The popup item always opens a
   new popup window. When the toolbar button is set to open the app, the

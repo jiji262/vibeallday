@@ -24,8 +24,7 @@ Related:
   not be framed as a cut-down phone companion.
 - The first viewport identifies subscription-plan support as a primary benefit.
   VibeAllDay launches the official Claude Code or Codex process and uses its
-  active provider-managed authentication. Public copy must not imply that VibeAllDay
-  Anywhere grants plan eligibility, bypasses provider limits, or prevents an
+  active provider-managed authentication. Public copy must not imply that VibeAllDay grants plan eligibility, bypasses provider limits, or prevents an
   API-key or pay-as-you-go configuration from incurring provider charges.
 - The default workflow should feel familiar to people who already use Claude
   Code or Codex in a CLI or desktop app. Advanced coordination, review,

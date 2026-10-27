@@ -40,8 +40,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [site-v1.10.0] - 2026-08-31
 
 ### Changed
-- State directly that every Claude Code and Codex session appears in VibeAllDay
-  Anywhere, including sessions started in their CLI, VS Code, and first-party
+- State directly that every Claude Code and Codex session appears in VibeAllDay, including sessions started in their CLI, VS Code, and first-party
   desktop interfaces.
 - Present Claude Gateway as the advanced route for compatible endpoints and
   Claude + Ollama as legacy compatibility rather than a current experimental

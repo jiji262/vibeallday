@@ -27,8 +27,7 @@ home directory. `VIBEALLDAY_DATA_DIR` can override the npm/source location.
 ## Provider is missing or cannot start
 
 Run the provider's official CLI directly on the same host and user account.
-Confirm it is installed, authenticated, and usable before debugging VibeAllDay
-Anywhere. Desktop installs do not bundle Claude Code or Codex credentials.
+Confirm it is installed, authenticated, and usable before debugging VibeAllDay. Desktop installs do not bundle Claude Code or Codex credentials.
 
 If `ENABLED_PROVIDERS` is set, confirm the provider is included. Experimental
 providers may need additional executables, endpoints, or Settings values.

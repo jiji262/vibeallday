@@ -403,8 +403,7 @@ optional depth rather than prerequisites. Mention that the application UI is
 available in six languages without implying that the public website is already
 localized.
 
-Make existing subscription-plan access a first-viewport benefit. State that VibeAllDay
-Anywhere uses the account already authenticated in the official Claude Code or
+Make existing subscription-plan access a first-viewport benefit. State that VibeAllDay uses the account already authenticated in the official Claude Code or
 Codex process. Keep plan eligibility, limits, credits, and API-key or
 pay-as-you-go charges explicitly provider-controlled.
 
@@ -424,8 +423,7 @@ collapsed. Keep the opt-in public-share privacy exception explicit and phrase
 the survey as what the project found rather than an eternal universal claim.
 Acknowledge Claude Code and ChatGPT's useful first-party remote experiences,
 then compare through durable differences—provider-neutral browser access, host
-choice, session management, and self-hosting. State positively that VibeAllDay
-Anywhere's complete workspace works in any browser, not only on a phone; do not
+choice, session management, and self-hosting. State positively that VibeAllDay's complete workspace works in any browser, not only on a phone; do not
 make a blanket claim that first-party control is always phone-only.
 
 Add concrete security-maintenance proof near the trust story: the deliberately

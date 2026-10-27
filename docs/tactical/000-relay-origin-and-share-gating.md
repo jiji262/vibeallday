@@ -205,8 +205,7 @@ long-term contract for production routing.
 
 ### 5. Documentation
 
-- Update relay docs to say the public relay is intended for VibeAllDay
-  Anywhere-controlled browser origins plus non-browser clients.
+- Update relay docs to say the public relay is intended for VibeAllDay-controlled browser origins plus non-browser clients.
 - Update remote-access docs to distinguish:
   - frontend web origins (`vibeallday.navs.dpdns.org`, `custom.example.test`,
     `staging.vibeallday.navs.dpdns.org`);
