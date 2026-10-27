@@ -18,6 +18,8 @@ test.use({ serviceWorkers: "block" });
 // activity.
 
 const ROWS = 24;
+const TRANSCRIPT_START = Date.parse("2026-01-01T00:00:00Z");
+const MESSAGE_INTERVAL_MS = 1000;
 
 function transcript() {
   const messages: object[] = [];
@@ -25,11 +27,17 @@ function transcript() {
     messages.push({
       uuid: `u-${i}`,
       type: "user",
+      timestamp: new Date(
+        TRANSCRIPT_START + messages.length * MESSAGE_INTERVAL_MS,
+      ).toISOString(),
       content: `User message ${i}: please explain the next step.`,
     });
     messages.push({
       uuid: `a-${i}`,
       type: "assistant",
+      timestamp: new Date(
+        TRANSCRIPT_START + messages.length * MESSAGE_INTERVAL_MS,
+      ).toISOString(),
       content: [
         {
           type: "text",
@@ -41,21 +49,36 @@ function transcript() {
   return messages;
 }
 
-async function textPoint(page: Page, marker: string) {
-  return page.locator(".message-list").evaluate((list, text) => {
-    const walker = document.createTreeWalker(list, NodeFilter.SHOW_TEXT);
-    for (let node = walker.nextNode(); node; node = walker.nextNode()) {
-      const textNode = node as Text;
-      const index = textNode.data.indexOf(text);
-      if (index < 0) continue;
-      const range = document.createRange();
-      range.setStart(textNode, index);
-      range.setEnd(textNode, index + 1);
-      const rect = range.getBoundingClientRect();
-      return { x: rect.left + 1, y: rect.top + rect.height / 2 };
-    }
-    throw new Error(`Marker not found: ${text}`);
-  }, marker);
+async function textPoints(page: Page, markers: string[]) {
+  return page.locator(".message-list").evaluate((list, texts) => {
+    const scroller = list.closest(".session-messages");
+    if (!scroller) throw new Error("Missing transcript scroller");
+    const bounds = scroller.getBoundingClientRect();
+    return texts.map((text) => {
+      const walker = document.createTreeWalker(list, NodeFilter.SHOW_TEXT);
+      for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+        const textNode = node as Text;
+        const index = textNode.data.indexOf(text);
+        if (index < 0) continue;
+        const range = document.createRange();
+        range.setStart(textNode, index);
+        range.setEnd(textNode, index + 1);
+        const rect = range.getBoundingClientRect();
+        const point = { x: rect.left + 1, y: rect.top + rect.height / 2 };
+        const hit = document.caretRangeFromPoint(point.x, point.y);
+        if (
+          point.x < bounds.left ||
+          point.x >= bounds.right ||
+          point.y < bounds.top ||
+          point.y >= bounds.bottom ||
+          hit?.startContainer !== textNode
+        )
+          throw new Error(`Text is not an exposed pointer target: ${text}`);
+        return point;
+      }
+      throw new Error(`Marker not found: ${text}`);
+    });
+  }, markers);
 }
 
 async function openLiveSession(page: Page) {
@@ -286,14 +309,26 @@ test("a drag keeps its press point when the browser loses it mid-drag", async ({
   const session = await openLiveSession(page);
   const activity = session.startActivity();
   try {
+    const scroller = page.locator(".session-messages");
+    await scroller.hover();
+    await page.mouse.wheel(0, -200);
+    await expect(
+      page.getByRole("button", {
+        name: "Follow latest session output",
+      }),
+    ).toBeVisible();
     await page
       .locator(".message-list")
       .getByText("Reply 20 opens here")
-      .scrollIntoViewIfNeeded();
-    await page.mouse.wheel(0, -200);
-    await page.waitForTimeout(400);
-    const start = await textPoint(page, "Reply 20 middle");
-    const end = await textPoint(page, "Reply 21 middle");
+      .evaluate((element) => element.scrollIntoView({ block: "center" }));
+    await page.evaluate(async () => {
+      await document.fonts.ready;
+    });
+    const [start, end] = await textPoints(page, [
+      "Reply 20 middle",
+      "Reply 21 middle",
+    ]);
+    if (!start || !end) throw new Error("Missing drag endpoints");
     const anchor = () =>
       page.evaluate(() => {
         const s = document.getSelection();
@@ -316,7 +351,8 @@ test("a drag keeps its press point when the browser loses it mid-drag", async ({
     }
     // What live activity was observed to cause: the browser restarts the
     // selection where the pointer is instead of extending from the press.
-    const lost = await textPoint(page, "Reply 21 opens");
+    const [lost] = await textPoints(page, ["Reply 21 opens"]);
+    if (!lost) throw new Error("Missing lost selection target");
     await page.evaluate(
       ({ x, y }) => {
         const range = document.caretRangeFromPoint(x, y);
