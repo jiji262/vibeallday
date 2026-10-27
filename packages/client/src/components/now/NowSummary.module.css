@@ -1,0 +1,107 @@
+/*
+ * "Now" summary: the sentence that says what waits on the user, then the
+ * running and unread chips beside the page filters.
+ */
+
+.summary {
+  display: grid;
+  gap: var(--space-2);
+  margin: var(--space-1) 0 var(--space-2);
+}
+
+.headlineRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.headline {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--space-3);
+  min-height: var(--tap-min);
+  padding: var(--space-1) 0;
+  border: 0;
+  background: none;
+  color: var(--text-primary);
+  font-family: var(--font-display);
+  font-size: 26px;
+  font-weight: 560;
+  font-variation-settings: "opsz" 72;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  text-align: left;
+  cursor: pointer;
+}
+
+.headline:disabled {
+  cursor: default;
+}
+
+.signal {
+  width: 10px;
+  height: 10px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  transform: translateY(-3px);
+}
+
+.waiting .signal {
+  background: var(--rose);
+  box-shadow: 0 0 0 4px var(--rose-soft);
+}
+
+.clear {
+  color: var(--text-secondary);
+}
+
+.clear .signal {
+  background: var(--mint);
+  box-shadow: 0 0 0 4px var(--mint-soft);
+}
+
+.glanceRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+}
+
+/* The pill is 22px; the button keeps a full-height hit area around it. */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+  padding: 0 2px;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+.chip .chipPill {
+  min-height: 28px;
+  padding: 0 10px;
+  font-size: 12.5px;
+}
+
+.filters {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-left: auto;
+  min-width: 0;
+}
+
+@media (width <= 600px) {
+  .headline {
+    font-size: 24px;
+  }
+}

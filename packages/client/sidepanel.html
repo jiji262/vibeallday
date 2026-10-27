@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>VibeAllDay</title>
+    <style>
+      html { background-color: #fbf8f2; }
+      html[data-theme="dark"] { background-color: #14131a; }
+      html[data-theme="verydark"] { background-color: #0b0a0f; }
+      @media (prefers-color-scheme: dark) {
+        html:not([data-theme]), html[data-theme="auto"] { background-color: #14131a; }
+      }
+      body { margin: 0; background-color: inherit; }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/extension/sidepanel/main.tsx"></script>
+  </body>
+</html>

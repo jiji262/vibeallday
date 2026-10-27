@@ -1,0 +1,119 @@
+.window {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  background: var(--bg-card);
+  box-shadow: var(--shadow-md);
+}
+
+.anchor {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-muted);
+  overflow-wrap: anywhere;
+}
+
+.snippet {
+  margin: 0;
+  max-height: 6em;
+  overflow: auto;
+  padding: var(--space-2);
+  border-radius: var(--radius-sm);
+  background: var(--bg-sunken);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  white-space: pre;
+}
+
+.input {
+  width: 100%;
+  resize: vertical;
+  padding: var(--space-3);
+  border: 1px solid var(--border-input);
+  border-radius: var(--radius-md);
+  background: var(--bg-input);
+  color: var(--text-primary);
+  font: inherit;
+  font-size: 16px;
+}
+
+.error {
+  color: var(--rose-ink);
+  font-size: 14px;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--space-2);
+}
+
+.actions button,
+.submitActions button {
+  min-height: var(--tap-min);
+  padding: 0 var(--space-4);
+  color: var(--text-primary);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 550;
+  background: var(--bg-card);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+}
+
+.submitActions {
+  display: flex;
+  flex: 1 1 280px;
+  flex-wrap: wrap;
+  align-items: end;
+  justify-content: flex-end;
+  gap: var(--space-2);
+}
+
+.destination {
+  display: grid;
+  flex: 1 1 220px;
+  gap: 2px;
+  min-width: 0;
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.destination select {
+  min-width: 0;
+  width: 100%;
+  min-height: var(--tap-min);
+  padding: 0 var(--space-3);
+  color: var(--text-primary);
+  font: inherit;
+  font-size: 16px;
+  background: var(--bg-input);
+  border: 1px solid var(--border-input);
+  border-radius: var(--radius-md);
+}
+
+.destinationError {
+  align-self: center;
+  color: var(--rose-ink);
+  font-size: 13px;
+}
+
+.defaultSessionTarget {
+  display: inline-flex;
+}
+
+.actions > .submit,
+.submitActions > .submit {
+  background: var(--indigo);
+  color: var(--ink-on);
+  border-color: transparent;
+}
+
+.submit:disabled {
+  opacity: 0.5;
+}

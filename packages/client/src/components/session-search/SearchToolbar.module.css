@@ -1,0 +1,222 @@
+/*
+ * Sessions toolbar: the search field and Filters button, the quick chips, the
+ * scope line and the selection bar. The page module makes the first two rows
+ * sticky.
+ */
+
+.searchRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.field {
+  position: relative;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.searchIcon {
+  position: absolute;
+  top: 50%;
+  left: var(--space-3);
+  transform: translateY(-50%);
+  color: var(--text-dimmed);
+  pointer-events: none;
+}
+
+.input {
+  width: 100%;
+  height: var(--tap-min);
+  padding: 0 var(--space-3) 0 calc(var(--space-3) + 26px);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-lg);
+  background: var(--bg-card);
+  color: var(--text-primary);
+  font: inherit;
+  font-size: 16px;
+  box-shadow: var(--shadow-xs);
+  appearance: none;
+}
+
+.input::placeholder {
+  color: var(--text-dimmed);
+}
+
+.input:focus {
+  border-color: var(--indigo);
+  outline: 2px solid var(--indigo-soft-2);
+  outline-offset: 0;
+}
+
+.filtersButton {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: var(--radius-pill);
+  background: var(--indigo);
+  color: var(--ink-on);
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  column-gap: var(--space-1);
+}
+
+.chips .selectToggle {
+  margin-left: auto;
+}
+
+/* Scope line: "in 34 sessions", quiet mono metadata under the chips. */
+.statusArea {
+  position: relative;
+  min-width: 0;
+}
+
+.statusButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 28px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.statusButton:disabled {
+  cursor: default;
+}
+
+.scanIndicator {
+  flex: 0 0 1em;
+  color: var(--indigo);
+}
+
+.statusDetails {
+  position: absolute;
+  left: 0;
+  top: 100%;
+  z-index: 20;
+  width: max-content;
+  max-width: min(320px, calc(100dvw - 32px));
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  background: var(--bg-card);
+  box-shadow: var(--shadow-md);
+  color: var(--text-primary);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+/* Selection bar: shown only once selecting. */
+.selection {
+  display: grid;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-3) var(--space-3);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  background: var(--bg-sunken);
+}
+
+.selectionTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.selectionCount {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: var(--tap-min);
+  padding: 0 var(--space-1);
+  border: 0;
+  background: transparent;
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 15px;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.selectionActions {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.selectionActions > * {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.selectionHelp {
+  margin: var(--space-1) 0 0;
+  color: var(--text-muted);
+  font-size: 12.5px;
+  line-height: 1.4;
+}
+
+.selectionHelp svg {
+  vertical-align: -0.2em;
+}
+
+.clearIcon {
+  color: var(--rose-ink);
+}
+
+/* Selection manager sheet: one checkbox row per session. */
+.manager {
+  display: grid;
+}
+
+.managerRow {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  min-height: var(--tap-min);
+  padding: var(--space-2) 0;
+  border-bottom: 1px dashed var(--dash);
+  font-size: 15px;
+  line-height: 1.35;
+}
+
+.managerRow:last-child {
+  border-bottom: 0;
+}
+
+.managerRow input {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  margin: 2px 0 0;
+  accent-color: var(--indigo);
+}
+
+.managerRow small {
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 12px;
+}

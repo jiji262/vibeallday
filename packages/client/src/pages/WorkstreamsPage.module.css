@@ -1,0 +1,408 @@
+/*
+ * Workstreams page: toolbar, create form, lane table, badges, and the
+ * neutral/error state panel. On phones the lane table becomes one card per
+ * lane (title and status, branch, kind and queue, path).
+ *
+ * The caller-side layout composition
+ * `.main-content-constrained.workstreams-main-content .page-content-inner`
+ * stays in `styles/index.css`. It constrains the MainContent shell this page
+ * only tags with the literal `workstreams-main-content` inner class, so the
+ * relationship belongs to the layout, not to this module. The shared
+ * `page-scroll-container`, `page-content-inner`, and `loading` primitives stay
+ * global for the same reason.
+ */
+
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.toolbar {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.actionButton,
+.secondaryButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: var(--tap-min);
+  padding: 0 var(--space-4);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-md);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 550;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.actionButton {
+  color: var(--text-primary);
+  background: var(--bg-card);
+  box-shadow: var(--shadow-xs);
+}
+
+.actionButton:hover:not(:disabled) {
+  background: var(--bg-tertiary);
+}
+
+.primaryButton {
+  border-color: transparent;
+  background: var(--indigo);
+  color: var(--ink-on);
+}
+
+.primaryButton:hover:not(:disabled) {
+  background: var(--indigo-2);
+}
+
+.secondaryButton {
+  color: var(--text-secondary);
+  background: transparent;
+}
+
+.secondaryButton:hover:not(:disabled) {
+  color: var(--text-primary);
+  background: var(--bg-tertiary);
+}
+
+.actionButton:disabled,
+.secondaryButton:disabled {
+  cursor: default;
+  opacity: 0.55;
+}
+
+.createForm {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-5);
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xs);
+}
+
+.createField {
+  display: grid;
+  gap: var(--space-1);
+}
+
+.createField label,
+.createPreview > span {
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.createField input {
+  width: 100%;
+  min-height: var(--tap-min);
+  padding: 0 var(--space-3);
+  color: var(--text-primary);
+  background: var(--bg-input);
+  border: 1px solid var(--border-input);
+  border-radius: var(--radius-md);
+  font: inherit;
+  font-size: 16px;
+}
+
+.createPreview {
+  display: grid;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.createPreview code {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.createPreview em {
+  color: var(--text-muted);
+  font-size: 14px;
+  font-style: normal;
+}
+
+.createError {
+  margin: 0;
+  color: var(--rose-ink);
+  font-size: 14px;
+}
+
+.createActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-2);
+}
+
+.tableWrapper {
+  overflow-x: auto;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xs);
+}
+
+.table {
+  width: 100%;
+  min-width: 820px;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.table th,
+.table td {
+  padding: 16px;
+  text-align: left;
+  vertical-align: middle;
+  border-bottom: 1px dashed var(--dash);
+}
+
+.table thead th {
+  background: var(--bg-sunken);
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.table tbody th {
+  color: var(--text-primary);
+  font-family: var(--font-ui);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.table tbody tr:last-child th,
+.table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.table th:nth-child(1) {
+  width: 18%;
+}
+
+.table th:nth-child(2),
+.table th:nth-child(4),
+.table th:nth-child(5),
+.table th:nth-child(6) {
+  width: 10%;
+}
+
+.table th:nth-child(3) {
+  width: 14%;
+}
+
+.table th:nth-child(7) {
+  width: 28%;
+}
+
+.laneLabel,
+.kind,
+.status,
+.path,
+.branch {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.kind {
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+.path,
+.branch {
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+
+.branch {
+  color: var(--text-secondary);
+}
+
+.path {
+  color: var(--text-muted);
+}
+
+.placeholder {
+  color: var(--text-muted);
+}
+
+.badge,
+.status {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  min-height: 22px;
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-pill);
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.badgeRunning {
+  background: var(--mint-soft);
+  color: var(--mint-ink);
+}
+
+.badgePaused {
+  background: var(--sand-soft);
+  color: var(--sand-ink);
+}
+
+.statusActive {
+  background: var(--grey-soft);
+  color: var(--text-secondary);
+}
+
+.statusArchived {
+  border: 1px dashed var(--line-strong);
+  color: var(--text-muted);
+}
+
+.statusLanded {
+  background: var(--indigo-soft);
+  color: var(--indigo);
+}
+
+.state {
+  padding: var(--space-4);
+  color: var(--text-secondary);
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xs);
+}
+
+.state h2 {
+  margin: 0;
+  color: var(--text-primary);
+  font-family: var(--font-display);
+  font-size: 19px;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.state p {
+  margin: var(--space-1) 0 0;
+  font-size: 15px;
+  line-height: 1.45;
+}
+
+.stateError {
+  color: var(--rose-ink);
+  border-color: color-mix(in srgb, var(--rose) 40%, var(--border-color));
+  background: var(--rose-soft);
+}
+
+.stateError h2 {
+  color: var(--rose-ink);
+}
+
+/* Phone: one card per lane instead of a sideways-scrolling table. */
+@media (width <= 700px) {
+  .tableWrapper {
+    overflow: visible;
+    background: transparent;
+    border: 0;
+    box-shadow: none;
+  }
+
+  .table,
+  .table tbody {
+    display: block;
+    min-width: 0;
+  }
+
+  .table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+
+  .table tbody tr {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "lane status"
+      "branch branch"
+      "kind queue"
+      "path path";
+    gap: var(--space-2) var(--space-3);
+    align-items: center;
+    margin-bottom: var(--space-3);
+    padding: var(--space-3) var(--space-4);
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-xs);
+  }
+
+  .table th:nth-child(n) {
+    width: auto;
+  }
+
+  .table tbody th,
+  .table tbody td {
+    display: block;
+    min-width: 0;
+    padding: 0;
+    border: 0;
+  }
+
+  .table tbody th {
+    grid-area: lane;
+  }
+
+  .table tbody td:nth-of-type(1) {
+    grid-area: kind;
+  }
+
+  .table tbody td:nth-of-type(2) {
+    grid-area: branch;
+  }
+
+  .table tbody td:nth-of-type(3) {
+    grid-area: queue;
+    justify-self: end;
+  }
+
+  .table tbody td:nth-of-type(4) {
+    grid-area: status;
+  }
+
+  .table tbody td:nth-of-type(5) {
+    display: none;
+  }
+
+  .table tbody td:nth-of-type(6) {
+    grid-area: path;
+  }
+
+  .path {
+    overflow-wrap: anywhere;
+    white-space: normal;
+  }
+
+  .laneLabel {
+    white-space: normal;
+  }
+}

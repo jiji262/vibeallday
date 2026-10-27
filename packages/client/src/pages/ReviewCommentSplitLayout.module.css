@@ -1,0 +1,15 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.source {
+  min-width: 0;
+}
+
+.editor {
+  padding: var(--space-3);
+  border-block: 1px solid var(--border-color);
+  background: var(--bg-secondary);
+}

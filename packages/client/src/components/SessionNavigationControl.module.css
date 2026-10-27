@@ -1,0 +1,6 @@
+.back {
+  flex-shrink: 0;
+  width: var(--tap-min);
+  height: var(--tap-min);
+  text-decoration: none;
+}

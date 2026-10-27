@@ -1,0 +1,89 @@
+/* Browser-settings transfer cards, between the category groups and
+   "Advanced & debug" on the Settings home. */
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  background: var(--bg-card);
+  box-shadow: var(--shadow-xs);
+}
+
+.title {
+  color: var(--text-primary);
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.buttons {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-2);
+}
+
+.buttons :global(.settings-button) {
+  min-height: 44px;
+  width: 100%;
+  padding-inline: var(--space-2);
+  text-align: center;
+  white-space: normal;
+}
+
+.status {
+  min-height: 1.2em;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+.error {
+  color: var(--rose-ink);
+}
+
+.text {
+  width: 100%;
+  min-height: 6rem;
+  box-sizing: border-box;
+  padding: var(--space-2);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-md);
+  background: var(--bg-input);
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  resize: vertical;
+}
+
+.changes {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-height: 14rem;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  list-style: none;
+  font-size: var(--font-size-xs);
+}
+
+.change {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  padding: 2px 0;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.changeKey {
+  color: var(--text-secondary);
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}
+
+.changeValues {
+  overflow: hidden;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

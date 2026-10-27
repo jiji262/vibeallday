@@ -1,0 +1,204 @@
+/* Saved hosts and the ways to add one, inside the shared auth shell. */
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.sectionTitle {
+  margin: 0 var(--space-1);
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  overflow: hidden;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  background: var(--bg-card);
+  box-shadow: none;
+}
+
+.host {
+  display: flex;
+  align-items: stretch;
+}
+
+.host + .host {
+  border-top: 1px dashed var(--dash);
+}
+
+.hostMain {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: var(--space-3);
+  min-width: 0;
+  min-height: 76px;
+  padding: var(--space-3) var(--space-2) var(--space-3) var(--space-4);
+  border: 0;
+  background: transparent;
+  color: var(--text-primary);
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+
+.hostMain:hover:not(:disabled) {
+  background: var(--bg-tertiary);
+}
+
+.hostMain:disabled {
+  cursor: wait;
+}
+
+.dot {
+  flex-shrink: 0;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+}
+
+.online {
+  background: var(--mint);
+}
+
+.offline {
+  background: var(--rose);
+}
+
+.checking {
+  background: var(--sand);
+  animation: host-pulse 1.5s ease-in-out infinite;
+}
+
+.unknown {
+  background: var(--text-dimmed);
+}
+
+@keyframes host-pulse {
+  50% {
+    opacity: 0.35;
+  }
+}
+
+.hostText {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.hostName {
+  overflow: hidden;
+  font-family: var(--font-display);
+  font-size: 17px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.hostMeta {
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+
+.spinner {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--line-strong);
+  border-top-color: var(--indigo);
+  border-radius: 50%;
+  animation: host-spin 0.8s linear infinite;
+}
+
+@keyframes host-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Always visible: touch has no hover to reveal it. */
+.remove {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: var(--tap-min);
+  border: 0;
+  background: transparent;
+  color: var(--text-dimmed);
+  cursor: pointer;
+}
+
+.remove:hover {
+  background: var(--rose-soft);
+  color: var(--rose-ink);
+}
+
+.options {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.option {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: 76px;
+  padding: var(--space-3) var(--space-3) var(--space-3) var(--space-4);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-lg);
+  background: var(--bg-card);
+  box-shadow: none;
+  color: var(--text-primary);
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+
+.option:hover {
+  background: var(--bg-tertiary);
+}
+
+.optionText {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.optionTitle {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.optionDesc {
+  color: var(--text-muted);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.chevron {
+  display: flex;
+  flex-shrink: 0;
+  color: var(--text-dimmed);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .checking,
+  .spinner {
+    animation: none;
+  }
+}

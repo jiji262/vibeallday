@@ -1,0 +1,151 @@
+/* Garden sheet: bottom sheet on phones, centered dialog on wider screens.
+   Doubles the global .modal vocabulary so it wins over the legacy shell. */
+
+:global(.modal-overlay).sheetOverlay {
+  align-items: center;
+  padding: var(--space-4);
+  backdrop-filter: blur(2px);
+}
+
+:global(.modal).sheet {
+  width: min(520px, 100%);
+  height: auto;
+  max-height: min(80dvh, 720px);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-xl);
+  background: var(--bg-card);
+  box-shadow: var(--shadow-lg);
+}
+
+:global(.modal).compact {
+  width: min(300px, 100%);
+}
+
+.sheet :global(.modal-header) {
+  min-height: 64px;
+  padding: var(--space-2) var(--space-2) var(--space-2) var(--space-4);
+  border-bottom: 1px dashed var(--dash);
+  border-radius: 0;
+  background: transparent;
+}
+
+.sheet :global(.modal-title) {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 600;
+}
+
+.sheet :global(.modal-close) {
+  width: var(--tap-min);
+  height: var(--tap-min);
+  padding: 0;
+  color: var(--text-muted);
+  font-size: 22px;
+}
+
+.sheet :global(.modal-content) {
+  padding: var(--space-5);
+}
+
+.compact :global(.modal-header) {
+  display: none;
+}
+
+.compact :global(.modal-content) {
+  padding: var(--space-1);
+}
+
+@media (width <= 600px) {
+  :global(.modal-overlay).sheetOverlay {
+    align-items: flex-end;
+    padding: max(24px, env(safe-area-inset-top, 0px)) 0 0;
+  }
+
+  :global(.modal).sheet,
+  :global(.modal).compact {
+    width: 100%;
+    max-width: 100%;
+    max-height: 100%;
+    border-width: 1px 0 0;
+    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    animation: sheet-rise 200ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+
+  :global(.modal).sheet::before {
+    content: "";
+    align-self: center;
+    flex-shrink: 0;
+    width: 36px;
+    height: 5px;
+    margin-top: var(--space-2);
+    border-radius: var(--radius-pill);
+    background: var(--line-strong);
+  }
+
+  .compact :global(.modal-header) {
+    display: flex;
+  }
+
+  .compact :global(.modal-content) {
+    padding: var(--space-2) var(--space-3) var(--space-4);
+  }
+}
+
+/* `dialog`: ordinary prompts and forms. Desktop keeps the global dialog; on
+   phones the body gets padding and the dialog sizes to its content instead of
+   the full-height, edge-to-edge shape that file and diff viewers use. */
+@media (width <= 600px) {
+  :global(.modal).dialog {
+    height: auto;
+    max-height: 100%;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    animation: sheet-rise 200ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+
+  :global(.modal).dialog::before {
+    content: "";
+    align-self: center;
+    flex-shrink: 0;
+    width: 36px;
+    height: 5px;
+    margin-top: var(--space-2);
+    border-radius: var(--radius-pill);
+    background: var(--line-strong);
+  }
+
+  /* Keeps the 44px close button and its focus ring off the screen edge. */
+  .dialog :global(.modal-header) {
+    padding: var(--space-1) var(--space-2) var(--space-1) var(--space-4);
+  }
+
+  .dialog :global(.modal-title) {
+    font-family: var(--font-display);
+    font-size: 22px;
+    font-weight: 600;
+  }
+
+  .dialog :global(.modal-close) {
+    width: var(--tap-min);
+    height: var(--tap-min);
+  }
+
+  .dialog :global(.modal-content) {
+    padding: var(--space-5);
+  }
+}
+
+@keyframes sheet-rise {
+  from {
+    transform: translateY(24px);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :global(.modal).sheet,
+  :global(.modal).compact,
+  :global(.modal).dialog {
+    animation: none;
+  }
+}

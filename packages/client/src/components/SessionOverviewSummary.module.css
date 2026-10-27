@@ -1,0 +1,106 @@
+.summary {
+  display: grid;
+  gap: var(--space-4);
+  margin-bottom: var(--space-6);
+}
+.controls {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-3);
+}
+.counts {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  overflow: hidden;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  background: var(--bg-card);
+  box-shadow: var(--shadow-xs);
+}
+.control {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: var(--space-1);
+  min-width: 0;
+  min-height: 96px;
+  padding: var(--space-4) var(--space-5);
+  border: 0;
+  background: transparent;
+  color: var(--text-primary);
+  font: inherit;
+  text-decoration: none;
+  cursor: pointer;
+}
+.control + .control {
+  border-inline-start: 1px dashed var(--dash);
+}
+.control:hover:not(:disabled) {
+  background: var(--bg-sunken);
+}
+.control:disabled {
+  cursor: default;
+}
+.control:focus-visible {
+  outline: 2px solid var(--indigo);
+  outline-offset: -3px;
+}
+.value {
+  font-family: var(--font-display);
+  font-size: 34px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+.label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+.label::before {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--text-dimmed);
+  content: "";
+}
+.control[data-tone="rose"] .label::before {
+  background: var(--rose-ink);
+}
+.control[data-tone="mint"] .label::before {
+  background: var(--mint-ink);
+}
+.control[data-tone="sand"] .label::before {
+  background: var(--sand-ink);
+}
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+.note {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+@media (width < 600px) {
+  .controls {
+    gap: var(--space-1);
+  }
+  .control {
+    min-height: 80px;
+    padding: var(--space-3);
+  }
+  .value {
+    font-size: 28px;
+  }
+  .label {
+    font-size: 11px;
+  }
+}

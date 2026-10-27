@@ -1,0 +1,628 @@
+import {
+  CAPABILITY_ID_ENCODING_VERSION,
+  CLAUDE_ADDITIONAL_MODELS_CAPABILITY,
+  CODEX_STREAM_DURABLE_ID_ALIGNMENT_CAPABILITY,
+  DEVICE_BRIDGE_CAPABILITY,
+  DEVICE_BRIDGE_DOWNLOAD_CAPABILITY,
+  DEVICE_BRIDGE_UPDATE_CAPABILITY,
+  PROJECT_QUEUE_CAPABILITY,
+  PROJECT_QUEUE_ATTACHMENT_EDITING_CAPABILITY,
+  PROJECT_QUEUE_NEW_SESSION_SHORTCUT_SETTING_CAPABILITY,
+  PROJECT_SESSION_DEFAULTS_CAPABILITY,
+  SERVER_CAPABILITIES,
+  SESSION_SANDBOXING_CAPABILITY,
+  SESSION_SANDBOXING_STATUS_CAPABILITY,
+  SUBAGENT_MAX_DEPTH_SETTING_CAPABILITY,
+  VOICE_INPUT_CAPABILITY,
+  serverHasCapability,
+} from "@vibeallday/shared";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+
+// Dynamic import so vi.resetModules() gives us fresh module state (clears cache)
+async function importVersion() {
+  const mod = await import("../src/routes/version.js");
+  return mod;
+}
+
+// Both speech vocabulary capabilities are advertised only once SQLite is
+// ready, because that readiness is what says the learned table's own database
+// can be opened here at all (topics/pluggable-speech-recognition.md § Keyterm
+// Biasing). Every other capability answers the same way with or without a
+// SQLite status reader.
+const SQLITE_GATED_CAPABILITY_NAMES: ReadonlySet<string> = new Set([
+  SERVER_CAPABILITIES.speechVocabulary.name,
+  SERVER_CAPABILITIES.speechVocabularySessionTerms.name,
+]);
+
+describe("GET /version", () => {
+  it("advertises router recovery only when local router support is available", async () => {
+    const { getServerCapabilities } = await importVersion();
+    for (const available of [true, false]) {
+      const capabilities = getServerCapabilities({
+        agentAuthRouterAvailable: available,
+      });
+      expect(
+        capabilities.includes(SERVER_CAPABILITIES.agentAuthRouter.name),
+      ).toBe(available);
+      expect(
+        capabilities.includes(SERVER_CAPABILITIES.agentAuthRouterRecovery.name),
+      ).toBe(available);
+      expect(
+        capabilities.includes(SERVER_CAPABILITIES.agentAuthRouterPools.name),
+      ).toBe(available);
+    }
+  });
+  const originalFetch = global.fetch;
+
+  beforeEach(() => {
+    vi.resetModules();
+    // The version route answers from local facts only; any request it makes
+    // would be an update or analytics call this fork does not perform.
+    global.fetch = vi.fn(() => {
+      throw new Error("The version route must not make network requests");
+    }) as unknown as typeof fetch;
+  });
+
+  afterEach(() => {
+    global.fetch = originalFetch;
+  });
+
+  it("advertises subagent depth on an untagged source build in every encoding", async () => {
+    const { createVersionRoutes } = await importVersion();
+    const routes = createVersionRoutes({
+      getCurrentVersionInfo: async () => ({
+        version: "5756cfd",
+        installSource: "source",
+      }),
+      getSessionSandboxAvailability: async () => ({
+        state: "unsupported-platform",
+        platform: "test",
+      }),
+    });
+    for (const query of [
+      "/",
+      "/?clientVersion=0.8.1",
+      "/?capabilities=compact-v1",
+    ]) {
+      const version = await (await routes.request(query)).json();
+      expect(version.current).toBe("5756cfd");
+      expect(
+        serverHasCapability(
+          version,
+          SERVER_CAPABILITIES.speechBackendSetup.name,
+        ),
+      ).toBe(true);
+      expect(
+        serverHasCapability(version, SUBAGENT_MAX_DEPTH_SETTING_CAPABILITY),
+      ).toBe(true);
+    }
+  });
+
+  it.each(["disabled", "unsupported", "ready", "error"] as const)(
+    "reports retained SQLite %s status and gates vocabulary in every encoding",
+    async (state) => {
+      const { createVersionRoutes } = await importVersion();
+      const getSqliteStatus = vi.fn(() => ({ state }));
+      const options = {
+        getCurrentVersionInfo: async () => ({
+          version: "0.8.1",
+          installSource: "source" as const,
+        }),
+        getSessionSandboxAvailability: async () => ({
+          state: "unsupported-platform" as const,
+          platform: "test",
+        }),
+      };
+      const legacy = createVersionRoutes(options);
+      const routes = createVersionRoutes({ ...options, getSqliteStatus });
+      for (const query of [
+        "/",
+        "/?clientVersion=0.8.1",
+        "/?capabilities=compact-v1",
+      ]) {
+        const before = await (await legacy.request(query)).json();
+        const after = await (await routes.request(query)).json();
+        expect(before.sqlite).toBeUndefined();
+        expect(before.serverRuntime).toEqual({
+          kind: process.versions.bun ? "bun" : "node",
+          version: process.versions.bun ?? process.versions.node,
+        });
+        for (const { name } of Object.values(SERVER_CAPABILITIES)) {
+          expect(serverHasCapability(after, name), name).toBe(
+            SQLITE_GATED_CAPABILITY_NAMES.has(name)
+              ? state === "ready"
+              : serverHasCapability(before, name),
+          );
+        }
+        // Compare other metadata after checking capabilities semantically;
+        // their wire representation differs between the negotiated encodings.
+        for (const field of [
+          "capabilities",
+          "capabilityBits",
+          "optionalCapabilityBits",
+        ]) {
+          delete before[field];
+          delete after[field];
+        }
+        expect(after).toEqual({ ...before, sqlite: { state } });
+      }
+      // Each response reads retained readiness for capabilities and status.
+      expect(getSqliteStatus).toHaveBeenCalledTimes(6);
+    },
+  );
+
+  it("reads the immutable desktop build without consulting an ambient checkout", async () => {
+    const directory = mkdtempSync(
+      join(tmpdir(), "vibeallday-desktop-version-"),
+    );
+    const { readDesktopBuildVersion } = await importVersion();
+    try {
+      expect(readDesktopBuildVersion(directory)).toEqual({
+        version: "unknown",
+        installSource: "release-package",
+      });
+      const manifest = join(directory, "desktop-runtime-manifest.json");
+      writeFileSync(
+        manifest,
+        JSON.stringify({ vibeAllDayVersion: "v0.9.1-56-g1002ac1c9" }),
+      );
+      expect(readDesktopBuildVersion(directory)).toEqual({
+        version: "0.9.1-56-g1002ac1c9",
+        installSource: "release-package",
+      });
+      for (const contents of [
+        "{",
+        "null",
+        JSON.stringify({ vibeAllDayVersion: "dev" }),
+      ]) {
+        writeFileSync(manifest, contents);
+        expect(readDesktopBuildVersion(directory)).toEqual({
+          version: "unknown",
+          installSource: "release-package",
+        });
+      }
+    } finally {
+      rmSync(directory, { recursive: true, force: true });
+    }
+  });
+
+  it.each([false, true])(
+    "reports no update state and contacts no update feed (desktop=%s)",
+    async (desktopRuntime) => {
+      const { createVersionRoutes } = await importVersion();
+      const routes = createVersionRoutes({
+        desktopRuntime,
+        getCurrentVersionInfo: async () => ({
+          version: "0.9.1-56-g1002ac1c9",
+          installSource: "release-package",
+        }),
+      });
+      for (const path of ["/", "/?fresh=1"]) {
+        const response = await routes.request(path);
+        expect(response.status).toBe(200);
+        const json = await response.json();
+        expect(json).toMatchObject({
+          current: "0.9.1-56-g1002ac1c9",
+          installSource: "release-package",
+        });
+        expect(json).not.toHaveProperty("latest");
+        expect(json).not.toHaveProperty("updateAvailable");
+        expect(json.desktopRuntime).toBe(desktopRuntime || undefined);
+      }
+      expect(global.fetch).not.toHaveBeenCalled();
+    },
+  );
+
+  it("reports a source checkout's commit, date and changed-file time", async () => {
+    const { createVersionRoutes, porcelainPaths } = await importVersion();
+    expect(
+      porcelainPaths(
+        " M packages/a.ts\0R  packages/new.ts\0packages/old.ts\0?? packages/b.ts\0",
+      ),
+    ).toEqual(["packages/a.ts", "packages/new.ts", "packages/b.ts"]);
+    const json = await (await createVersionRoutes().request("/")).json();
+    // Tests run from the workspace source, whose package version is 0.0.1.
+    expect(json.installSource).toBe("source");
+    expect(json.sourceRevision.commit).toMatch(/^[0-9a-f]{40}$/);
+    expect(Number.isNaN(Date.parse(json.sourceRevision.committedAt))).toBe(
+      false,
+    );
+    expect(typeof json.sourceRevision.modified).toBe("boolean");
+    if (json.sourceRevision.modifiedAt)
+      expect(json.sourceRevision.modified).toBe(true);
+  });
+
+  it("normalizes only VIBEALLDAY semver git describe versions", async () => {
+    const { normalizeGitDescribeVersion } = await importVersion();
+
+    expect(normalizeGitDescribeVersion("v0.5.1-38-ge2ac56ed\n")).toBe(
+      "0.5.1-38-ge2ac56ed",
+    );
+    expect(normalizeGitDescribeVersion("e2ac56ed\n")).toBe("e2ac56ed");
+    expect(normalizeGitDescribeVersion("site-v1.6.1-38-ge2ac56ed\n")).toBe(
+      "site-v1.6.1-38-ge2ac56ed",
+    );
+  });
+
+  it("includes capabilities and compatibility metadata", async () => {
+    const { REMOTE_COMPATIBILITY_LEVEL, createVersionRoutes } =
+      await importVersion();
+    const routes = createVersionRoutes();
+    const res = await routes.request("/");
+    const json = await res.json();
+
+    expect(json.resumeProtocolVersion).toBeTypeOf("number");
+    expect(json.remoteCompatibilityLevel).toBe(REMOTE_COMPATIBILITY_LEVEL);
+    expect(Array.isArray(json.capabilities)).toBe(true);
+    expect(json.capabilities).toContain(CLAUDE_ADDITIONAL_MODELS_CAPABILITY);
+    expect(json.capabilities).toContain(
+      CODEX_STREAM_DURABLE_ID_ALIGNMENT_CAPABILITY,
+    );
+    expect(json.capabilities).toContain(SESSION_SANDBOXING_STATUS_CAPABILITY);
+  });
+
+  it("advertises session sandboxing only for an available host backend", async () => {
+    const { createVersionRoutes } = await importVersion();
+    const availableRoutes = createVersionRoutes({
+      getSessionSandboxAvailability: async () => ({
+        state: "available",
+        platform: "linux",
+        backend: "bubblewrap",
+        version: "0.4.0",
+      }),
+    });
+    const available = await (await availableRoutes.request("/")).json();
+    expect(available.sessionSandboxing).toEqual({
+      state: "available",
+      platform: "linux",
+      backend: "bubblewrap",
+      version: "0.4.0",
+    });
+    expect(available.capabilities).toContain(SESSION_SANDBOXING_CAPABILITY);
+
+    const unsupportedRoutes = createVersionRoutes({
+      getSessionSandboxAvailability: async () => ({
+        state: "unsupported-platform",
+        platform: "darwin",
+      }),
+    });
+    const unsupported = await (await unsupportedRoutes.request("/")).json();
+    expect(unsupported.sessionSandboxing).toEqual({
+      state: "unsupported-platform",
+      platform: "darwin",
+    });
+    expect(unsupported.capabilities).not.toContain(
+      SESSION_SANDBOXING_CAPABILITY,
+    );
+  });
+
+  it("advertises validated server-routed voice backends", async () => {
+    const { createVersionRoutes } = await importVersion();
+    const routes = createVersionRoutes({
+      getEnabledVoiceBackends: () => ["vibeallday-dummy"],
+      getVoiceBackendCapabilities: () => ({ "vibeallday-dummy": {} }),
+    });
+    const res = await routes.request("/");
+    const json = await res.json();
+
+    expect(json.capabilities).toContain(VOICE_INPUT_CAPABILITY);
+    expect(json.voiceBackends).toEqual(["vibeallday-dummy"]);
+    expect(json.voiceBackendCapabilities).toEqual({ "vibeallday-dummy": {} });
+  });
+
+  it("negotiates version-implied and optional-bit capabilities", async () => {
+    const { createVersionRoutes } = await importVersion();
+    const routes = createVersionRoutes({
+      getCurrentVersionInfo: async () => ({
+        version: "0.8.1",
+        installSource: "source",
+      }),
+      getSessionSandboxAvailability: async () => ({
+        state: "unsupported-platform",
+        platform: "darwin",
+      }),
+    });
+    const response = await routes.request("/?capabilities=compact-v1");
+    const version = await response.json();
+
+    expect(version.capabilities).toBeUndefined();
+    expect(version.optionalCapabilityBits).toEqual([
+      [0, 1],
+      // Current optional bits remain; retired IDs 70 and 71 are absent.
+      [2, 12288],
+      // Bits 109, 110 and 126: file replacement, app deletion, vhost OAuth.
+      [3, 1073766400],
+    ]);
+    expect(
+      serverHasCapability(
+        version,
+        SERVER_CAPABILITIES.claudeGatewayServices.name,
+      ),
+    ).toBe(true);
+    expect(
+      serverHasCapability(version, SERVER_CAPABILITIES.computerControl.name),
+    ).toBe(false);
+    expect(
+      serverHasCapability(
+        version,
+        SERVER_CAPABILITIES.computerControlReleases.name,
+      ),
+    ).toBe(false);
+    expect(serverHasCapability(version, PROJECT_QUEUE_CAPABILITY)).toBe(true);
+    expect(
+      serverHasCapability(
+        version,
+        CODEX_STREAM_DURABLE_ID_ALIGNMENT_CAPABILITY,
+      ),
+    ).toBe(true);
+    expect(serverHasCapability(version, VOICE_INPUT_CAPABILITY)).toBe(true);
+    expect(serverHasCapability(version, DEVICE_BRIDGE_CAPABILITY)).toBe(false);
+  });
+
+  it("selects ID capabilities from the client semantic version", async () => {
+    const { createVersionRoutes } = await importVersion();
+    const routes = createVersionRoutes({
+      getCurrentVersionInfo: async () => ({
+        version: "0.7.1",
+        installSource: "source",
+      }),
+      getSessionSandboxAvailability: async () => ({
+        state: "unsupported-platform",
+        platform: "darwin",
+      }),
+    });
+    const response = await routes.request("/", {
+      headers: { "X-VibeAllDay-Client-Version": "0.7.1" },
+    });
+    const version = await response.json();
+
+    expect(version.capabilities).toBeUndefined();
+    expect(version.capabilityEncoding).toBe(CAPABILITY_ID_ENCODING_VERSION);
+    expect(Array.isArray(version.capabilityBits)).toBe(true);
+    expect(serverHasCapability(version, PROJECT_QUEUE_CAPABILITY)).toBe(true);
+    expect(serverHasCapability(version, VOICE_INPUT_CAPABILITY)).toBe(true);
+    expect(serverHasCapability(version, DEVICE_BRIDGE_CAPABILITY)).toBe(false);
+  });
+
+  it("sends negative IDs for withdrawn version-implied contracts", async () => {
+    const { createVersionRoutes } = await importVersion();
+    const routes = createVersionRoutes({
+      deniedCapabilities: [PROJECT_SESSION_DEFAULTS_CAPABILITY],
+      getCurrentVersionInfo: async () => ({
+        version: "0.7.1",
+        installSource: "source",
+      }),
+      getSessionSandboxAvailability: async () => ({
+        state: "unsupported-platform",
+        platform: "darwin",
+      }),
+    });
+    const encodedResponse = await routes.request("/", {
+      headers: { "X-VibeAllDay-Client-Version": "0.7.1" },
+    });
+    const encodedVersion = await encodedResponse.json();
+
+    expect(encodedVersion.deniedCapabilityBits).toBeDefined();
+    expect(
+      serverHasCapability(encodedVersion, PROJECT_SESSION_DEFAULTS_CAPABILITY),
+    ).toBe(false);
+
+    const legacyResponse = await routes.request("/", {
+      headers: { "X-VibeAllDay-Client-Version": "0.7.0" },
+    });
+    const legacyVersion = await legacyResponse.json();
+    expect(legacyVersion.deniedCapabilityBits).toBeUndefined();
+    expect(legacyVersion.capabilities).not.toContain(
+      PROJECT_SESSION_DEFAULTS_CAPABILITY,
+    );
+  });
+
+  it("keeps legacy names for a pre-ID client version", async () => {
+    const { createVersionRoutes } = await importVersion();
+    const routes = createVersionRoutes();
+    const response = await routes.request("/", {
+      headers: { "X-VibeAllDay-Client-Version": "0.7.0" },
+    });
+    const version = await response.json();
+
+    expect(version.capabilityEncoding).toBeUndefined();
+    expect(version.capabilityBits).toBeUndefined();
+    expect(version.capabilities).toContain(PROJECT_QUEUE_CAPABILITY);
+  });
+
+  it("reports configured speech backends while validation is pending", async () => {
+    const { createVersionRoutes } = await importVersion();
+    const routes = createVersionRoutes({
+      getEnabledVoiceBackends: () => [],
+      getVoiceBackendStatuses: () => [
+        {
+          id: "vibeallday-nemo",
+          label: "Local NeMo Parakeet",
+          enabled: false,
+          validationStatus: "pending",
+          capabilities: {},
+        },
+      ],
+    });
+    const res = await routes.request("/");
+    const json = await res.json();
+
+    expect(json.voiceBackends).toEqual([]);
+    expect(json.voiceBackendStatuses).toEqual([
+      expect.objectContaining({
+        id: "vibeallday-nemo",
+        enabled: false,
+        validationStatus: "pending",
+      }),
+    ]);
+  });
+
+  it("advertises streaming voice backend capabilities", async () => {
+    const { createVersionRoutes } = await importVersion();
+    const routes = createVersionRoutes({
+      getEnabledVoiceBackends: () => ["vibeallday-grok"],
+      getVoiceBackendCapabilities: () => ({
+        "vibeallday-grok": { streaming: true, smartTurn: true },
+      }),
+    });
+    const res = await routes.request("/");
+    const json = await res.json();
+
+    expect(json.voiceBackendCapabilities).toEqual({
+      "vibeallday-grok": { streaming: true, smartTurn: true },
+    });
+  });
+
+  it("includes server-learned client defaults", async () => {
+    const { createVersionRoutes } = await importVersion();
+    const routes = createVersionRoutes({
+      getClientDefaults: () => ({
+        speech: {
+          voiceInputEnabled: true,
+          speechMethod: "vibeallday-grok",
+        },
+        sessionToolbarPresence: {
+          microphone: "pin",
+          slashMenu: "hidden",
+        },
+      }),
+    });
+    const res = await routes.request("/");
+    const json = await res.json();
+
+    expect(json.clientDefaults).toEqual({
+      speech: {
+        voiceInputEnabled: true,
+        speechMethod: "vibeallday-grok",
+      },
+      sessionToolbarPresence: {
+        microphone: "pin",
+        slashMenu: "hidden",
+      },
+    });
+  });
+
+  it("does not advertise voice backends when voice input is disabled", async () => {
+    const { createVersionRoutes } = await importVersion();
+    const routes = createVersionRoutes({
+      voiceInputEnabled: false,
+      getEnabledVoiceBackends: () => ["vibeallday-dummy"],
+    });
+    const res = await routes.request("/");
+    const json = await res.json();
+
+    expect(json.capabilities).not.toContain(VOICE_INPUT_CAPABILITY);
+    expect(json.voiceBackends).toEqual([]);
+    expect(json.voiceBackendCapabilities).toEqual({});
+  });
+
+  it("advertises Project Queue support as a server capability", async () => {
+    const { getServerCapabilities } = await importVersion();
+
+    expect(getServerCapabilities()).toContain(PROJECT_QUEUE_CAPABILITY);
+    expect(getServerCapabilities()).toContain(
+      PROJECT_QUEUE_ATTACHMENT_EDITING_CAPABILITY,
+    );
+    expect(getServerCapabilities()).toContain(
+      PROJECT_QUEUE_NEW_SESSION_SHORTCUT_SETTING_CAPABILITY,
+    );
+  });
+
+  it("reports update-available for stale bridge binaries", async () => {
+    const { createVersionRoutes } = await importVersion();
+    const routes = createVersionRoutes({
+      isDeviceBridgeEnabled: () => true,
+      getDeviceBridgeStatus: async () => ({
+        state: "update-available",
+        installedVersion: "0.1.0",
+        latestVersion: "0.2.0",
+      }),
+    });
+    const res = await routes.request("/");
+    const json = await res.json();
+
+    expect(json.deviceBridgeState).toBe("update-available");
+    expect(json.deviceBridgeVersion).toBe("0.1.0");
+    expect(json.latestDeviceBridgeVersion).toBe("0.2.0");
+    expect(json.capabilities).toContain(DEVICE_BRIDGE_DOWNLOAD_CAPABILITY);
+    expect(json.capabilities).toContain(DEVICE_BRIDGE_UPDATE_CAPABILITY);
+    expect(json.capabilities).not.toContain(DEVICE_BRIDGE_CAPABILITY);
+  });
+
+  it("preserves legacy sync bridge state for compatibility helpers", async () => {
+    const { getServerCapabilities } = await importVersion();
+    const capabilities = getServerCapabilities({
+      getDeviceBridgeState: () => "downloadable",
+      isDeviceBridgeEnabled: () => true,
+    });
+
+    expect(capabilities).toContain(DEVICE_BRIDGE_DOWNLOAD_CAPABILITY);
+    expect(capabilities).not.toContain(DEVICE_BRIDGE_UPDATE_CAPABILITY);
+  });
+});
+
+describe("process-generation version facts", () => {
+  beforeEach(() => {
+    vi.resetModules();
+  });
+
+  it("probes the install once no matter how many requests arrive", async () => {
+    const { createVersionRoutes, getCurrentVersionInfoComputations } =
+      await importVersion();
+    // Keep the real install probe; remote updates and host preflight are
+    // separate concerns. A live update fetch can exhaust its 5 s deadline.
+    const app = createVersionRoutes({
+      getSessionSandboxAvailability: async () => ({
+        state: "unsupported-platform",
+        platform: "test",
+      }),
+    });
+
+    for (let request = 0; request < 20; request += 1) {
+      const response = await app.request("/");
+      expect(response.status).toBe(200);
+    }
+
+    expect(getCurrentVersionInfoComputations()).toBe(1);
+  });
+
+  it("shares one probe across concurrent first requests", async () => {
+    const { createVersionRoutes, getCurrentVersionInfoComputations } =
+      await importVersion();
+    // Keep the real install probe; remote updates and host preflight are
+    // separate concerns. A live update fetch can exhaust its 5 s deadline.
+    const app = createVersionRoutes({
+      getSessionSandboxAvailability: async () => ({
+        state: "unsupported-platform",
+        platform: "test",
+      }),
+    });
+
+    await Promise.all(Array.from({ length: 10 }, () => app.request("/")));
+
+    expect(getCurrentVersionInfoComputations()).toBe(1);
+  });
+
+  it("keeps the version snapshot across an explicit fresh request", async () => {
+    const { createVersionRoutes, getCurrentVersionInfoComputations } =
+      await importVersion();
+    // Keep the real install probe; remote updates and host preflight are
+    // separate concerns. A live update fetch can exhaust its 5 s deadline.
+    const app = createVersionRoutes({
+      getSessionSandboxAvailability: async () => ({
+        state: "unsupported-platform",
+        platform: "test",
+      }),
+    });
+
+    const first = await (await app.request("/")).json();
+    const fresh = await (await app.request("/?fresh=1")).json();
+
+    // fresh=1 promises a fresh check of dynamic sandbox/device facts only.
+    expect(fresh.version).toBe(first.version);
+    expect(getCurrentVersionInfoComputations()).toBe(1);
+  });
+});

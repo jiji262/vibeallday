@@ -1,0 +1,78 @@
+/*
+ * Projects page: a count and the Add project button, the source and sort
+ * pills, then the project cards. The card itself lives in ProjectCard.
+ */
+
+.page {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: var(--console-page-width);
+  margin-inline: auto;
+  /* Clears the header's 24px fade. */
+  padding: var(--space-6) var(--console-page-inset);
+  padding-bottom: var(--space-7);
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+.count {
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+}
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-5);
+}
+
+/* Phones stretch every FilterDropdown to the row; these stay pill-sized. */
+.filters .pill {
+  width: auto;
+  flex: 0 1 auto;
+}
+
+.cards {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  overflow: clip;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  background: var(--bg-card);
+  box-shadow: var(--shadow-xs);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.note {
+  margin: var(--space-2) 0;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+.loadError {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-5);
+  color: var(--rose-ink);
+  font-size: 14px;
+}
+
+.showMore {
+  display: flex;
+  justify-content: center;
+  padding: var(--space-4) 0;
+}

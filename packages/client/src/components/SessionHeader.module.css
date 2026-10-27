@@ -1,0 +1,269 @@
+/*
+ * Shared by every composer of the global `.session-header` row: `PageHeader`
+ * and `SessionPage`'s own header.
+ *
+ * The shared `.session-header-inner` keeps a tight 0.25rem left inset because
+ * the sidebar toggle or back button that normally leads the row supplies the
+ * rest through its own padding. With no such control — the desktop case, where
+ * the sidebar carries its own toggle — the title would otherwise sit 4px from
+ * the content column's edge.
+ */
+.row {
+  --header-control-size: 36px;
+  --header-row-size: 44px;
+}
+
+.row:global(.session-header-inner) {
+  min-height: var(--header-row-size);
+  padding-block: calc(
+    (var(--header-row-size) - var(--header-control-size)) /
+    2
+  );
+}
+
+.row :global(.sidebar-toggle) {
+  min-width: var(--header-control-size);
+  min-height: var(--header-control-size);
+}
+
+:global(.session-header-inner).noLeadingControl {
+  padding-left: 0.75rem;
+}
+
+/* A badge after the title (clearloop remaining count) must stay visible when
+   the title ellipsizes: the text shrinks, the badge does not. */
+.titleWithBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.titleWithBadge > :global(.session-title-text) {
+  flex: 0 1 auto;
+}
+
+.titleWithBadge > :not(:global(.session-title-text)) {
+  flex-shrink: 0;
+}
+
+/* The pinned router account is secondary to the title: it yields space first
+   and leaves narrow headers entirely; Session Info carries the full pin. */
+.routerAccount {
+  flex: 0 8 auto;
+  min-width: 2.5rem;
+  max-width: 10rem;
+  margin-left: var(--space-1);
+  padding: 0 var(--space-2);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font: inherit;
+  font-size: 0.6875rem;
+  line-height: 1.25rem;
+  color: var(--text-secondary);
+  background: none;
+  border: 1px solid var(--border-color);
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.routerAccount:hover,
+.routerAccount:focus-visible {
+  color: var(--text-primary);
+}
+
+.header .left {
+  overflow: visible;
+}
+
+.header .titleRow {
+  min-width: 3rem;
+}
+
+.header .actions {
+  flex-wrap: nowrap;
+}
+
+.header .modelButton {
+  align-items: center;
+  min-height: var(--header-control-size);
+  max-width: 14rem;
+  transform: none;
+}
+
+.header .menuTrigger {
+  min-width: var(--header-control-size);
+  min-height: var(--header-control-size);
+  opacity: 1;
+}
+
+.header .project {
+  max-width: 8.5rem;
+  flex-shrink: 0;
+  min-width: 0;
+}
+
+.header .project > :global(.project-breadcrumb) {
+  display: block;
+  min-width: 0;
+  flex-shrink: 1;
+  overflow: hidden;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.header[data-header-layout="compact"] .project {
+  max-width: 5rem;
+  overflow: hidden;
+}
+
+/* Narrow headers give the project its natural width up to half the meta line
+   (the model and state follow it); the menu below must not be clipped. */
+.header[data-header-layout="narrow"] .project {
+  max-width: 55%;
+  flex: 0 1 auto;
+}
+
+.header[data-header-layout="narrow"] .modelButton {
+  max-width: 8rem;
+}
+
+/* Preserve the mounted inline field if a roomy header shrinks mid-edit. */
+.header[data-inline-rename="true"][data-header-layout="narrow"]
+:global(.session-header-inner),
+.header[data-inline-rename="true"][data-header-layout="narrow"] .left {
+  flex-wrap: wrap;
+}
+
+.header[data-inline-rename="true"][data-header-layout="narrow"] .left,
+.header[data-inline-rename="true"][data-header-layout="narrow"] .titleRow {
+  flex-basis: 100%;
+}
+
+@media (pointer: coarse) {
+  .row {
+    --header-control-size: 44px;
+  }
+}
+
+/* The project App button is a square home icon, level with the session's
+   last-view icon beside it. */
+.projectAppButton {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+}
+
+@media (width <= 700px) {
+  .routerAccount {
+    display: none;
+  }
+}
+
+/* Garden header: a hairline instead of the legacy fade, a display-serif title
+   and a mono meta line. The wrappers vanish on wide headers so the children
+   keep flowing in one row; narrow headers lay them out as two lines. */
+.header:global(.session-header) {
+  /* A hairline that adds no height to the row. */
+  box-shadow: 0 1px 0 var(--border-color);
+}
+
+.header:global(.session-header)::after {
+  content: none;
+}
+
+.header :global(.session-title) {
+  font-family: var(--font-display);
+  font-size: 17px;
+  font-weight: 600;
+  font-optical-sizing: auto;
+  letter-spacing: -0.005em;
+  line-height: 24px;
+}
+
+.header :global(.sidebar-toggle) {
+  color: var(--text-muted);
+}
+
+.leadingTools,
+.metaRow {
+  display: contents;
+}
+
+@media (width < 600px) {
+  .header[data-header-layout="narrow"]:not([data-inline-rename="true"]) .row {
+    --header-row-size: 56px;
+  }
+
+  .header[data-header-layout="narrow"]:not([data-inline-rename="true"])
+    .row:global(.session-header-inner) {
+    padding-block: 0;
+  }
+
+  .header[data-header-layout="narrow"]:not([data-inline-rename="true"]) .left {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-areas:
+      "toggle title tools"
+      "toggle meta tools";
+    align-items: center;
+    gap: 0 2px;
+  }
+
+  .header[data-header-layout="narrow"]:not([data-inline-rename="true"])
+    .left
+    > :global(.sidebar-toggle) {
+    grid-area: toggle;
+  }
+
+  .header[data-header-layout="narrow"]:not([data-inline-rename="true"])
+    .titleRow {
+    grid-area: title;
+    min-height: 36px;
+    padding-inline-start: 6px;
+  }
+
+  /* The title fills its row, so the whole 36px line opens the recents menu. */
+  .header[data-header-layout="narrow"]:not([data-inline-rename="true"])
+    .titleRow
+    > :global(.session-title-recent-trigger) {
+    align-self: stretch;
+  }
+
+  /* The project link is a 20px line of mono type; a larger invisible target
+     keeps it tappable without making the meta row taller. */
+  .header[data-header-layout="narrow"]
+    .project
+    > :global(.project-breadcrumb)::after {
+    position: absolute;
+    inset: -10px -6px;
+    content: "";
+  }
+
+  .header[data-header-layout="narrow"]:not([data-inline-rename="true"])
+    .metaRow {
+    display: flex;
+    grid-area: meta;
+    min-width: 0;
+    align-items: center;
+    gap: 6px;
+    padding-inline-start: 6px;
+  }
+
+  .header[data-header-layout="narrow"]:not([data-inline-rename="true"])
+    .leadingTools {
+    display: flex;
+    grid-area: tools;
+    align-items: center;
+  }
+
+  /* The title itself opens the recent-sessions menu; the chevron repeats it. */
+  .header[data-header-layout="narrow"] :global(.session-title-chevron-trigger) {
+    display: none;
+  }
+}

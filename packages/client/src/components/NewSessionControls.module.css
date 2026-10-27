@@ -1,0 +1,285 @@
+/*
+ * New session chrome: the composer and its Start button, the project chip,
+ * the New project button and the model-list provenance line. The layout of
+ * the form, its chips and its sheet lives in NewSessionForm.module.css.
+ */
+
+.root:global(.new-session-container) {
+  width: 100%;
+  max-width: 1000px;
+  margin-inline: auto;
+  padding: var(--space-6);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-xl);
+  background: var(--bg-card);
+  box-shadow: var(--shadow-xs);
+}
+
+/*
+ * Composer: the prompt field is the card, the toolbar sits under it with 44px
+ * controls, and Start says what it does.
+ */
+.root :global(.new-session-form-textarea) {
+  padding: 14px 16px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-lg);
+  background: var(--bg-card);
+  box-shadow: var(--shadow-xs);
+  font-size: 16px;
+  line-height: 1.45;
+}
+
+.root :global(.new-session-form-textarea):focus {
+  border-color: var(--indigo);
+  box-shadow: 0 0 0 3px var(--indigo-soft-2);
+}
+
+.root :global(.new-session-form-toolbar) {
+  --composer-control-size: var(--tap-min);
+  --composer-primary-control-size: var(--tap-min);
+  margin-top: var(--space-2);
+}
+
+.root :global(.new-session-form-toolbar-actions) {
+  gap: var(--space-2);
+}
+
+.startButton.startButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  width: auto;
+  min-width: var(--tap-min);
+  height: var(--tap-min);
+  padding: 0 var(--space-4) 0 var(--space-3);
+  border: 0;
+  border-radius: var(--radius-md);
+  background: var(--indigo);
+  color: var(--ink-on);
+  font-size: 15px;
+  font-weight: 600;
+  box-shadow: var(--shadow-sm);
+}
+
+.startButton.startButton:hover:not(:disabled) {
+  background: var(--indigo-2);
+}
+
+.startButton.startButton:disabled {
+  background: var(--grey-soft);
+  color: var(--text-dimmed);
+  box-shadow: none;
+}
+
+.startLabel {
+  line-height: 1;
+}
+
+/* Project: a single chip until the user opens it. */
+.root :global(.new-session-project-chooser) {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+}
+
+.root :global(.new-session-project-summary) {
+  min-height: var(--tap-min);
+  padding: 8px 14px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-lg);
+  background: var(--bg-card);
+  box-shadow: var(--shadow-xs);
+}
+
+.root :global(.new-session-project-summary-title) {
+  font-family: var(--font-ui);
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.root :global(.new-session-project-summary-path) {
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+
+.root :global(.new-session-project-input) {
+  min-height: var(--tap-min);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-lg);
+  background: var(--bg-card);
+  font-size: 16px;
+}
+
+.root :global(.new-session-project-input):focus {
+  border-color: var(--indigo);
+  box-shadow: 0 0 0 3px var(--indigo-soft-2);
+}
+
+.root :global(.new-session-project-panel) {
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-lg);
+  background: var(--bg-card);
+  box-shadow: var(--shadow-md);
+}
+
+.root :global(.new-session-project-option) {
+  min-height: var(--tap-min);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  background: var(--bg-card);
+}
+
+.root :global(.new-session-project-option):hover {
+  background: var(--bg-tertiary);
+}
+
+.root :global(.new-session-project-option.selected),
+.root :global(.new-session-project-option-custom) {
+  border-color: var(--indigo);
+  background: var(--indigo-soft);
+}
+
+.root :global(.new-session-project-option-path) {
+  font-family: var(--font-mono);
+}
+
+.newProjectRow.newProjectRow {
+  margin-top: 0;
+}
+
+.newProjectButton.newProjectButton {
+  min-height: var(--tap-min);
+  padding: 0 var(--space-4);
+  font-size: 14px;
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--radius-lg);
+  background: transparent;
+  color: var(--text-secondary);
+  font-weight: 550;
+}
+
+.newProjectButton.newProjectButton:hover:not(:disabled) {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+
+/* Model list provenance reads as quiet metadata under the chips. */
+.catalogStatusMuted,
+.catalogStatus {
+  padding: 0 var(--space-1);
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+
+@media (width <= 600px) {
+  /* Phones show the chosen project alone; opening the chip reveals the
+     search field and the suggestions. */
+  .root
+    :global(.new-session-project-chooser):not(:global(.expanded))
+    :global(.new-session-project-inline-field) {
+    display: none;
+  }
+}
+
+/* Model list provenance under the model picker: muted while the list is live
+   and current, warning-toned when it is the built-in fallback or a refresh
+   failed. */
+.catalogStatus,
+.catalogStatusMuted {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  font-size: var(--font-size-sm);
+  line-height: 1.35;
+  color: var(--text-muted);
+  padding: 0.55rem 0.65rem;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+}
+
+.catalogStatus {
+  border-color: color-mix(
+    in srgb,
+    var(--warning-color) 38%,
+    var(--border-color)
+  );
+  background: color-mix(in srgb, var(--warning-color) 8%, var(--bg-code));
+}
+
+/* Refresh sits on the quiet line instead of centring in the reserved warning
+   height below it. */
+.catalogStatusMuted {
+  align-items: flex-start;
+  justify-content: flex-start;
+  color: var(--text-dimmed);
+}
+
+/* Reserve the notice's wrapping height before its catalog arrives, in the
+   muted state too: a catalog that lands as the fallback or a failed refresh
+   swaps the quiet line for a wrapped warning, and an unreserved block would
+   push the permission control and Advanced options down as data arrives. The
+   muted and warning states share one gap so the text wraps at the same width
+   in both. */
+.catalogMessage {
+  display: grid;
+}
+
+.catalogMessage::before {
+  content: attr(data-sizing-text);
+  visibility: hidden;
+}
+
+.catalogMessage::before,
+.catalogMessage > span {
+  grid-area: 1 / 1;
+}
+
+.catalogAction {
+  flex: none;
+  min-height: 2rem;
+  padding: 0.3rem 0.6rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* Centres the button on the first text line. A translate moves only the
+   painted box, so the notice keeps the warning state's height at every width
+   and a catalog that lands as a warning does not move the controls below. */
+.catalogStatusMuted .catalogAction {
+  translate: 0 calc((1lh - 100%) / 2);
+  border-color: transparent;
+  background: none;
+  color: inherit;
+  font-weight: inherit;
+  text-decoration: underline;
+}
+
+.catalogAction:hover:not(:disabled) {
+  border-color: var(--text-dimmed);
+  background: var(--bg-hover);
+}
+
+.catalogStatusMuted .catalogAction:hover:not(:disabled) {
+  background: none;
+  color: var(--text-primary);
+}
+
+.catalogAction:disabled {
+  cursor: wait;
+  opacity: 0.55;
+}
+
+@media (width < 900px) {
+  .newProjectRow.newProjectRow {
+    flex: 0 0 auto;
+  }
+}

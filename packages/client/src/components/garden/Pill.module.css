@@ -1,0 +1,68 @@
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 22px;
+  padding: 0 8px;
+  border: 1px solid color-mix(in srgb, currentcolor 14%, transparent);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-ui);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.dot {
+  width: 6px;
+  height: 6px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: currentcolor;
+}
+
+.pulse {
+  animation: pill-pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes pill-pulse {
+  50% {
+    opacity: 0.35;
+  }
+}
+
+.mint {
+  background: var(--mint-soft);
+  color: var(--mint-ink);
+}
+
+.rose {
+  background: var(--rose-soft);
+  color: var(--rose-ink);
+}
+
+.peach {
+  background: var(--peach-soft);
+  color: var(--peach-ink);
+}
+
+.sand {
+  background: var(--sand-soft);
+  color: var(--sand-ink);
+}
+
+.indigo {
+  background: var(--indigo-soft);
+  color: var(--indigo);
+}
+
+.grey {
+  background: var(--grey-soft);
+  color: var(--text-muted);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pulse {
+    animation: none;
+  }
+}

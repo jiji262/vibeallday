@@ -1,0 +1,33 @@
+.page {
+  display: flex;
+  min-height: 100%;
+  flex-direction: column;
+  background: var(--bg-surface);
+}
+
+.parentLink {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--tap-min);
+  color: var(--link-color);
+  font-size: 14px;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.parentLink:hover,
+.parentLink:focus-visible {
+  text-decoration: underline;
+}
+
+.main {
+  min-height: 0;
+  flex: 1 1 auto;
+  overflow: auto;
+}
+
+.status {
+  margin: var(--space-4);
+  color: var(--text-muted);
+  font-size: 15px;
+}

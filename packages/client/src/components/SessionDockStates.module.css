@@ -1,0 +1,171 @@
+/*
+ * Companion to SessionDock.module.css: the dock's status captions, overflow
+ * tray, software-keyboard row and collapsed composer (an approval or question
+ * is open above). Same `.dock` anchor on the session footer.
+ */
+/* Overflow menu: one tray above the card rather than a strip that grows
+   sideways off the screen. The card (or the dock's inner box while an approval
+   is open) becomes the containing block, and both legacy groups flow into it. */
+.dock :global(.message-input-toolbar),
+.dock :global(.composer-bottom-overflow) {
+  position: static;
+}
+
+/* On phones the status chips float; here they become quiet mono captions just
+   above the card's left edge (the card is their containing block). */
+.dock
+  :global(.message-input-toolbar):global(.status-floats)
+  :global(.composer-status-ages) {
+  right: auto;
+  bottom: calc(100% + 4px);
+  left: 6px;
+  transform: none;
+}
+
+.dock
+  :global(.message-input-toolbar):global(.status-floats)
+  :global(.composer-status-chip) {
+  padding: 0;
+  background: none;
+  border: 0;
+  box-shadow: none;
+  color: var(--text-muted);
+  font-size: 11px;
+  opacity: 1;
+}
+
+/* Chips are separated by a mid dot, so two ages read as one caption. */
+.dock
+  :global(.status-floats)
+  :global(.composer-status-chip)
+  + :global(.composer-status-chip)::before {
+  margin-inline-end: 6px;
+  color: var(--text-dimmed);
+  content: "\00b7";
+}
+
+/* While an approval or question is open the toolbar stands alone under the
+   card, outside the composer card: no status caption to anchor there. */
+.dock :global(.session-input-inner) > :global(.message-input-toolbar) {
+  min-height: 52px;
+}
+
+.dock
+  :global(.session-input-inner)
+  > :global(.message-input-toolbar)
+  :global(.composer-status-ages) {
+  display: none;
+}
+
+.dock :global(.composer-bottom-overflow-menu) {
+  position: absolute;
+  z-index: 70;
+  right: 8px;
+  bottom: calc(100% + 8px);
+  left: 8px;
+  display: flex;
+  width: auto;
+  height: auto;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px;
+  padding: 6px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-md);
+  pointer-events: auto;
+}
+
+.dock :global(.composer-bottom-overflow-menu-group) {
+  display: contents;
+}
+
+/* Software-keyboard row (phones, while typing): more, mic and a wide Send. */
+.dock :global(.message-input-keyboard-compact) {
+  padding: 0 6px 6px;
+}
+
+.dock :global(.message-input-keyboard-actions) {
+  align-items: center;
+  gap: 4px;
+}
+
+.dock :global(.message-input-keyboard-more),
+.dock
+  :global(.message-input-keyboard-secondary-slot)
+  :global(.voice-input-button) {
+  background: transparent;
+  border-color: transparent;
+  border-radius: var(--radius-pill);
+  color: var(--text-muted);
+}
+
+.dock :global(.message-input-keyboard-more):global(.is-open) {
+  background: var(--bg-hover);
+  border-color: transparent;
+  color: var(--text-primary);
+}
+
+.dock :global(.message-input-keyboard-action) {
+  border-radius: var(--radius-pill);
+}
+
+/* Send is the default primary; steer, queue and project-queue keep their own
+   legacy colors. */
+.dock :global(.message-input-keyboard-primary)[data-action-kind="send"] {
+  background: var(--indigo);
+  color: var(--ink-on);
+}
+
+.dock
+  :global(.message-input-keyboard-primary)[data-action-kind="send"]:disabled {
+  background: var(--bg-tertiary);
+  color: var(--text-dimmed);
+  opacity: 1;
+}
+
+/* Collapsed (an approval or question is open above): a slim card of its own. */
+.dock :global(.message-input-collapsed) {
+  margin-top: 0;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-xs);
+  opacity: 1;
+}
+
+.dock :global(.message-input-collapsed):focus-within {
+  border-color: var(--indigo);
+  box-shadow: 0 0 0 3px var(--indigo-soft);
+}
+
+.dock :global(.message-input-collapsed) :global(.speech-draft-field) {
+  --speech-draft-padding: 10px 14px;
+  --speech-draft-font-size: 16px;
+  --speech-draft-line-height: 24px;
+}
+
+.dock :global(.message-input-collapsed) textarea {
+  padding: 10px 56px 10px 14px;
+  font-size: 16px;
+}
+
+.dock :global(.message-input-collapsed-actions) {
+  right: 6px;
+}
+
+.dock :global(.message-input-collapsed-send) {
+  --composer-control-size: 36px;
+  --composer-primary-control-size: 36px;
+  background: var(--indigo);
+  border-radius: 50%;
+  box-shadow: none;
+  color: var(--ink-on);
+}
+
+.dock :global(.message-input-collapsed-send):disabled {
+  background: var(--bg-tertiary);
+  color: var(--text-dimmed);
+  opacity: 1;
+}

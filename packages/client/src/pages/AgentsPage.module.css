@@ -1,0 +1,401 @@
+/*
+ * Agents page: section shells, process cards, provider/state pills, and the
+ * host process metrics popover. Garden cards: paper edge, Fraunces title,
+ * mono metadata, soft-tinted pills.
+ *
+ * The two `.context-usage-indicator` composition rules stay in
+ * `styles/index.css`. That class belongs to ContextUsageIndicator, so the
+ * relationship is anchored on the global `agent-card-meta` and
+ * `agent-metrics-wrap` hooks the elements below still carry.
+ */
+
+.section {
+  overflow: clip;
+  margin-bottom: var(--space-6);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  background: var(--bg-card);
+}
+
+.section h2 {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 56px;
+  margin: 0;
+  padding: var(--space-3) var(--space-5);
+  border-bottom: 1px dashed var(--dash);
+  background: var(--bg-sunken);
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.empty {
+  margin: 0;
+  padding: var(--space-5);
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+.killFeedback {
+  margin: 0 0 var(--space-4);
+  padding: var(--space-3);
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  font-size: 14px;
+}
+
+.killFeedbackSuccess {
+  background: var(--mint-soft);
+  color: var(--mint-ink);
+}
+
+.killFeedbackError {
+  background: var(--rose-soft);
+  color: var(--rose-ink);
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.card {
+  display: block;
+  width: 100%;
+  padding: var(--space-5);
+  border: 0;
+  border-bottom: 1px dashed var(--dash);
+  border-radius: 0;
+  background: var(--bg-card);
+  box-shadow: none;
+  color: inherit;
+  text-align: left;
+  text-decoration: none;
+  transition: border-color 120ms ease;
+}
+
+@media (hover: hover) {
+  .card:hover {
+    border-color: var(--line-strong);
+  }
+}
+
+.card:has(.metricsWrapOpen) {
+  position: relative;
+  z-index: 40;
+}
+
+.cardTerminated {
+  border-style: dashed;
+  background: transparent;
+  box-shadow: none;
+}
+
+.cardHeader {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.cardTitle {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.cardSessionTitle {
+  display: -webkit-box;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  font-family: var(--font-ui);
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--text-primary);
+  overflow-wrap: anywhere;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.cardTerminated .cardSessionTitle {
+  color: var(--text-muted);
+}
+
+/* An external row is read-only; only its correlated title opens the session. */
+.cardSessionLink {
+  text-decoration: none;
+}
+
+.cardSessionLink:hover,
+.cardSessionLink:focus-visible {
+  text-decoration: underline;
+}
+
+.cardBadges {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.cardProject {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.stateBadge,
+.providerBadge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 22px;
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-pill);
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.stateInput {
+  background: var(--rose-soft);
+  color: var(--rose-ink);
+}
+
+.stateIdle {
+  background: var(--grey-soft);
+  color: var(--text-muted);
+}
+
+.stateTerminated {
+  border: 1px dashed var(--line-strong);
+  background: transparent;
+  color: var(--text-muted);
+}
+
+.stateExternal {
+  background: var(--sand-soft);
+  color: var(--sand-ink);
+}
+
+/* Provider pills: soft tint of the provider hue, ink in the hue itself
+   (each hue keeps >= 4.5:1 on the page). */
+.providerClaude {
+  background: var(--peach-soft);
+  color: var(--peach-ink);
+}
+
+.providerCodex {
+  background: var(--mint-soft);
+  color: var(--mint-ink);
+}
+
+.providerGemini {
+  background: var(--indigo-soft);
+  color: var(--indigo);
+}
+
+.providerGrok {
+  background: var(--grey-soft);
+  color: var(--text-secondary);
+}
+
+.providerOpencode {
+  background: color-mix(in srgb, var(--provider-opencode) 14%, transparent);
+  color: var(--provider-opencode);
+}
+
+.providerPi {
+  background: color-mix(in srgb, var(--provider-pi) 14%, transparent);
+  color: var(--provider-pi);
+}
+
+.providerLocal {
+  background: var(--grey-soft);
+  color: var(--text-muted);
+}
+
+.killButton {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--tap-min);
+  margin: calc(var(--space-2) * -1) calc(var(--space-2) * -1) 0 0;
+  padding: 0 var(--space-3);
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--text-muted);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 550;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.killButton:hover:not(:disabled) {
+  background: var(--rose-soft);
+  color: var(--rose-ink);
+}
+
+.killButton:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.cardMeta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1) var(--space-3);
+  margin-top: var(--space-2);
+}
+
+.cardUptime,
+.cardPid {
+  flex-shrink: 0;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.metricsWrap {
+  position: relative;
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+.metricsWrapOpen {
+  z-index: 40;
+}
+
+.metrics {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-height: 26px;
+  padding: 0 var(--space-2);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-pill);
+  background: var(--bg-sunken);
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+/* Reach a 44px touch target without growing the chip. */
+.metrics::after {
+  content: "";
+  position: absolute;
+  inset: -9px -6px;
+}
+
+.metrics:hover,
+.metrics:focus-visible,
+.metrics[aria-expanded="true"] {
+  border-color: var(--line-strong);
+  color: var(--text-primary);
+}
+
+.metricsPopover {
+  position: absolute;
+  z-index: 30;
+  top: calc(100% + var(--space-1));
+  right: 0;
+  width: max-content;
+  max-width: min(22rem, calc(100dvw - 2rem));
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  background: var(--bg-card);
+  box-shadow: var(--shadow-md);
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.5;
+  white-space: pre-line;
+}
+
+.cardExternal {
+  cursor: default;
+}
+
+.cardDetails {
+  margin-top: var(--space-3);
+  padding-top: var(--space-2);
+  border-top: 1px dashed var(--dash);
+}
+
+.providerChildren {
+  display: flex;
+  flex-direction: column;
+  margin-top: var(--space-3);
+  padding-top: var(--space-1);
+  border-top: 1px dashed var(--dash);
+}
+
+.providerChild {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  min-height: var(--tap-min);
+  min-width: 0;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.providerChildBranch,
+.providerChildType {
+  flex-shrink: 0;
+  color: var(--text-muted);
+}
+
+.providerChildType {
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+
+.providerChildTitle {
+  overflow: hidden;
+  color: var(--text-primary);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.detailRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-1) 0;
+}
+
+.detailLabel {
+  flex-shrink: 0;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+.detailValue {
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  text-align: right;
+  word-break: break-all;
+}

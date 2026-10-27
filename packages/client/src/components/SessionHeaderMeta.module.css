@@ -1,0 +1,58 @@
+/* Phone header meta tail: "· model · state" after the project link. The
+   separators are drawn here so the project link and these spans read as one
+   mono line. */
+.model {
+  position: relative;
+  display: inline-flex;
+  min-width: 0;
+  align-items: center;
+  gap: 6px;
+  padding: 0;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 20px;
+  transform: none;
+}
+
+.model::before,
+.state::before {
+  content: "·";
+  margin-inline-end: 6px;
+  color: var(--text-dimmed);
+}
+
+.model::before {
+  margin-inline-end: 0;
+}
+
+/* A larger invisible target around the mono line. */
+.model::after {
+  position: absolute;
+  inset: -10px -6px;
+  content: "";
+}
+
+.state {
+  flex-shrink: 0;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 20px;
+  white-space: nowrap;
+}
+
+.quiet {
+  color: var(--text-muted);
+}
+
+.running {
+  color: var(--mint-ink);
+}
+
+.needsYou {
+  color: var(--rose-ink);
+}
+
+.external {
+  color: var(--sand-ink);
+}

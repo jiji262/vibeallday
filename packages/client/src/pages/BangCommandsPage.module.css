@@ -1,0 +1,107 @@
+/*
+ * Cross-session `!!` bang-command history page: the page shell, its empty
+ * state, and each entry's meta row (time, cwd, open-session link, and the
+ * three per-entry action buttons).
+ *
+ * The block body inside each entry belongs to BangCommandDisplayObject and
+ * keeps its own `bang-command-*` vocabulary; the composer's
+ * `bang-composer-chip` and `bang-history-item` classes belong to
+ * MessageInput. See topics/bang-commands.md § Top-level history view.
+ *
+ * The meta row's `bang-history-entry-time` and `bang-history-entry-cwd`
+ * literals stay in the component: they are unstyled DOM hooks with no rule in
+ * any stylesheet, so there is nothing here for them to name.
+ */
+
+.page {
+  width: 100%;
+  max-width: var(--console-page-width);
+  margin-inline: auto;
+  padding: var(--space-6) var(--console-page-inset) var(--space-8);
+}
+
+.entry {
+  margin-bottom: var(--space-4);
+  padding: var(--space-4) var(--space-5);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  background: var(--bg-card);
+}
+
+/* Time and place on the left, the three actions on the right. */
+.entryMeta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+  padding-bottom: var(--space-3);
+  border-bottom: 1px dashed var(--dash);
+}
+
+.entryWhen {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+
+.entryWhere {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0 var(--space-3);
+  min-width: 0;
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.entrySession {
+  position: relative;
+  color: var(--link-color);
+  font-family: var(--font-ui);
+  text-decoration: none;
+}
+
+/* A 44px touch target on a text-height link. */
+.entrySession::after {
+  content: "";
+  position: absolute;
+  inset: -12px -8px;
+}
+
+.entrySession:hover {
+  text-decoration: underline;
+}
+
+.entryActions {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+}
+
+.entryAction {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--tap-min);
+  height: var(--tap-min);
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.entryAction svg {
+  width: 20px;
+  height: 20px;
+}
+
+.entryAction:hover {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+}

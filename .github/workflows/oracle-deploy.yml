@@ -1,0 +1,103 @@
+name: Deploy Oracle Remote Client
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: oracle-production
+  cancel-in-progress: false
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
+jobs:
+  deploy:
+    if: github.ref == 'refs/heads/main' && vars.ORACLE_DEPLOY_ENABLED == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    environment:
+      name: oracle-production
+      url: https://vibeallday.navs.dpdns.org/
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: 24
+          cache: pnpm
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Test release boundaries
+        run: python3 -m unittest discover -s scripts -p oracle_release_test.py
+      - name: Check code and types
+        run: |
+          pnpm lint
+          pnpm format:check
+          pnpm typecheck
+      - name: Run unit and integration tests
+        run: pnpm test
+      - name: Install browser
+        run: pnpm --filter @vibeallday/client exec playwright install --with-deps chromium
+      - name: Verify real relay login with the production client
+        run: >-
+          pnpm --filter @vibeallday/client exec playwright test
+          e2e/relay-integration.spec.ts
+          --grep "connect via relay, login, and verify app loads" --workers=1
+      - name: Build Oracle client
+        env:
+          VITE_DEFAULT_RELAY_URL: ${{ vars.ORACLE_REMOTE_RELAY_URL }}
+        run: |
+          test -n "$VITE_DEFAULT_RELAY_URL"
+          pnpm --filter @vibeallday/client exec vite build --config vite.config.remote.ts --base /
+          python3 scripts/oracle_bundle.py --dist packages/client/dist-remote \
+            --commit "$GITHUB_SHA" --output "$RUNNER_TEMP/remote.tar.gz" > "$RUNNER_TEMP/bundle.sha256"
+      - name: Skip superseded commits
+        id: latest
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          latest=$(gh api "repos/$GITHUB_REPOSITORY/commits/main" --jq .sha)
+          if [ "$latest" = "$GITHUB_SHA" ]; then
+            echo "deploy=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice::A newer main commit is queued; skipping this deployment."
+          fi
+      - name: Deploy and verify; roll back failed health checks
+        if: steps.latest.outputs.deploy == 'true'
+        env:
+          ORACLE_DEPLOY_KEY: ${{ secrets.ORACLE_DEPLOY_KEY }}
+          ORACLE_KNOWN_HOSTS: ${{ secrets.ORACLE_KNOWN_HOSTS }}
+          ORACLE_SSH_HOST: ${{ vars.ORACLE_SSH_HOST }}
+          ORACLE_PUBLIC_ORIGIN: ${{ vars.ORACLE_PUBLIC_ORIGIN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          ssh_dir=$(mktemp -d "$RUNNER_TEMP/oracle-ssh.XXXXXX")
+          trap 'rm -f "$ssh_dir/key" "$ssh_dir/known_hosts"; rmdir "$ssh_dir"' EXIT
+          printf '%s\n' "$ORACLE_DEPLOY_KEY" > "$ssh_dir/key"
+          printf '%s\n' "$ORACLE_KNOWN_HOSTS" > "$ssh_dir/known_hosts"
+          chmod 600 "$ssh_dir/key" "$ssh_dir/known_hosts"
+          ssh_options=(-T -i "$ssh_dir/key" -o IdentitiesOnly=yes -o BatchMode=yes
+            -o StrictHostKeyChecking=yes -o "UserKnownHostsFile=$ssh_dir/known_hosts"
+            -o ConnectTimeout=10 -o ServerAliveInterval=10 -o ServerAliveCountMax=3)
+          checksum=$(cat "$RUNNER_TEMP/bundle.sha256")
+          timeout 70 ssh "${ssh_options[@]}" "vibeallday-deploy@$ORACLE_SSH_HOST" \
+            "release $GITHUB_SHA $checksum" < "$RUNNER_TEMP/remote.tar.gz" > "$RUNNER_TEMP/release.json"
+          cat "$RUNNER_TEMP/release.json"
+          if python3 scripts/oracle_verify.py --origin "$ORACLE_PUBLIC_ORIGIN" \
+            --commit "$GITHUB_SHA" --dist packages/client/dist-remote; then
+            echo "Deployed and verified $GITHUB_SHA at $ORACLE_PUBLIC_ORIGIN" >> "$GITHUB_STEP_SUMMARY"
+          else
+            previous=$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["previous"] or "")' "$RUNNER_TEMP/release.json")
+            if [ -n "$previous" ] && [ "$previous" != "$GITHUB_SHA" ]; then
+              timeout 70 ssh "${ssh_options[@]}" "vibeallday-deploy@$ORACLE_SSH_HOST" \
+                "rollback $GITHUB_SHA $previous"
+              echo "::error::Health check failed; restored the previous release."
+            fi
+            exit 1
+          fi

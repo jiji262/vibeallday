@@ -1,0 +1,270 @@
+/* Device list: one card per device, grouped by class. */
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  overflow: hidden;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  background: var(--bg-card);
+}
+
+.groupTitle {
+  margin: 0;
+  padding: var(--space-4) var(--space-5);
+  border-bottom: 1px dashed var(--dash);
+  background: var(--bg-sunken);
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-5);
+  background: var(--bg-card);
+  border: 0;
+  border-bottom: 1px dashed var(--dash);
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.itemInfo {
+  display: flex;
+  flex: 1 1 160px;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.itemName {
+  overflow-wrap: anywhere;
+  font-family: var(--font-ui);
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--text-primary);
+}
+
+/* State as a quiet mono label with a dot: mint = running, grey = stopped. */
+.itemStatus {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.itemStatus.running::before,
+.itemStatus.stopped::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentcolor;
+}
+
+.itemStatus.running {
+  color: var(--mint-ink);
+}
+
+.itemStatus.stopped {
+  color: var(--text-muted);
+}
+
+.itemActions {
+  display: flex;
+  gap: var(--space-2);
+}
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--tap-min);
+  padding: 0 var(--space-4);
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 550;
+  cursor: pointer;
+  transition: background-color 120ms ease;
+}
+
+.btnPrimary {
+  background: var(--indigo);
+  color: var(--ink-on);
+  box-shadow: var(--shadow-sm);
+}
+
+.btnPrimary:hover {
+  background: var(--indigo-2);
+}
+
+.btnSecondary {
+  background: var(--bg-card);
+  border-color: var(--line-strong);
+  color: var(--text-primary);
+  box-shadow: var(--shadow-xs);
+}
+
+.btnSecondary:hover {
+  background: var(--bg-tertiary);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+/* Stream view */
+.streamView {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  max-height: 100dvh;
+  background: var(--bg-surface);
+}
+
+.streamHeader {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  border-bottom: 1px dashed var(--dash);
+}
+
+.connectionState {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-muted);
+  text-align: center;
+  text-transform: capitalize;
+}
+
+.streamHeaderActions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.keyboardState {
+  padding: var(--space-2) var(--space-4);
+  border-bottom: 1px dashed var(--dash);
+  background: var(--bg-sunken);
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+
+.profileState {
+  padding: var(--space-2) var(--space-4);
+  border-bottom: 1px dashed var(--dash);
+  background: var(--bg-sunken);
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+
+.profileTimeline {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-2) var(--space-4);
+  border-bottom: 1px dashed var(--dash);
+  background: var(--bg-surface);
+}
+
+.profileTimelineItem {
+  display: flex;
+  gap: var(--space-2);
+  overflow: hidden;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.profileTimelineItem.latest {
+  color: var(--text-primary);
+}
+
+.profileTimelineTime {
+  font-variant-numeric: tabular-nums;
+}
+
+.profileTimelineDetail {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* The video surface stays black in every theme. */
+.streamContainer {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #000;
+  overflow: hidden;
+}
+
+/* Status messages */
+.empty {
+  padding: var(--space-8) var(--space-5);
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--radius-lg);
+  background: var(--bg-card);
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.error {
+  margin: var(--space-2) 0;
+  padding: var(--space-3) var(--space-4);
+  background: var(--rose-soft);
+  border-radius: var(--radius-md);
+  color: var(--rose-ink);
+  font-size: 15px;
+}
+
+.connecting {
+  padding: var(--space-6);
+  text-align: center;
+  color: var(--text-secondary);
+}
+
+/* Download prompt */
+.downloadPrompt {
+  padding: var(--space-7) var(--space-5);
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.downloadPrompt p {
+  margin: 0 0 var(--space-4);
+}
+
+.downloadPrompt .error {
+  margin-bottom: var(--space-4);
+}

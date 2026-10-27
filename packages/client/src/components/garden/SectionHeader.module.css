@@ -1,0 +1,60 @@
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  min-height: 56px;
+  margin: 0;
+  padding: var(--space-3) var(--space-5);
+  border-bottom: 1px dashed var(--dash);
+  background: var(--bg-sunken);
+}
+
+.title {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: var(--radius-pill);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.default {
+  background: var(--bg-tertiary);
+  color: var(--text-muted);
+}
+
+.rose {
+  background: var(--rose-soft);
+  color: var(--rose-ink);
+}
+
+.mint {
+  background: var(--mint-soft);
+  color: var(--mint-ink);
+}
+
+.sand {
+  background: var(--sand-soft);
+  color: var(--sand-ink);
+}
+
+.action {
+  display: flex;
+  flex-shrink: 0;
+}

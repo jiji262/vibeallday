@@ -1,0 +1,235 @@
+/* Persistent repo/branch status header. */
+.bar {
+  position: static;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  margin-bottom: var(--space-3);
+  font-size: 14px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+}
+
+.bar.warn {
+  border-color: var(--sand);
+  box-shadow: inset 3px 0 0 var(--sand);
+}
+
+.bar.inline {
+  min-width: 0;
+  flex: 1 1 auto;
+  flex-wrap: nowrap;
+  gap: 6px;
+  padding: 0;
+  margin: 0;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+/* `.copy-button` is a shared global primitive owned by `CopyButton`, and a
+   later `index.css` rule of the same name restyles it for settings surfaces.
+   Passing this class through `CopyButton`'s `className` prop keeps the compact
+   presentation at the two-class specificity the old descendant rule had. */
+.bar .copyButton {
+  position: relative;
+  padding: 2px;
+  background: transparent;
+  border: 0;
+}
+
+/* The glyph stays small; the touch target grows around it. */
+.bar .copyButton::after {
+  content: "";
+  position: absolute;
+  inset: -12px;
+}
+
+.bar .copyButton:hover {
+  background: var(--bg-tertiary);
+}
+
+.branch {
+  display: inline-flex;
+  min-width: 0;
+  flex: 0 1 auto;
+  align-items: center;
+  gap: var(--space-1);
+  color: var(--text-secondary);
+}
+
+.branchName {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 14px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* The branch name is navigation to its tip commit; the adjacent icon copies. */
+.branchLink {
+  color: var(--text-primary);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.branchLink:hover,
+.branchLink:focus-visible {
+  text-decoration: underline;
+}
+
+.upstream,
+.sync {
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+
+.bar.inline.warn .branch,
+.bar.inline.warn .sync {
+  color: var(--sand-ink);
+}
+
+.upstream {
+  flex: 0 1 auto;
+  max-width: 9rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.badge {
+  margin-left: auto;
+  padding: 3px 10px;
+  border-radius: var(--radius-pill);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.bar.inline .badge {
+  margin-left: 0;
+  flex-shrink: 0;
+}
+
+.badge.clean {
+  color: var(--mint-ink);
+  background: var(--mint-soft);
+}
+
+.badge.dirty {
+  color: var(--sand-ink);
+  background: var(--sand-soft);
+}
+
+.badgeAction {
+  position: relative;
+  border: none;
+  cursor: pointer;
+}
+
+.badgeAction::after {
+  content: "";
+  position: absolute;
+  inset: -10px -6px;
+}
+
+.badgeAction:hover {
+  background: color-mix(in srgb, var(--sand) 26%, transparent);
+}
+
+.upstreamButton {
+  position: relative;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+}
+
+.upstreamButton::after {
+  content: "";
+  position: absolute;
+  inset: -12px -6px;
+}
+
+.upstreamButton:hover,
+.upstreamButton:focus-visible {
+  color: var(--text-primary);
+  text-decoration: underline;
+}
+
+.incomingDialog {
+  width: min(42rem, 80vw);
+}
+
+.incomingIntro,
+.incomingState,
+.incomingTruncated {
+  margin: 0;
+  color: var(--text-secondary);
+}
+
+.incomingList {
+  display: grid;
+  gap: var(--space-2);
+  padding: 0;
+  margin: var(--space-3) 0 0;
+  list-style: none;
+}
+
+.incomingCommit {
+  display: grid;
+  gap: 3px;
+  padding: var(--space-3);
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+}
+
+.incomingCommitHeader {
+  display: flex;
+  min-width: 0;
+  align-items: baseline;
+  gap: var(--space-2);
+}
+
+.incomingCommitHeader code {
+  flex-shrink: 0;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+
+.incomingSubject {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.incomingMeta {
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+
+.incomingTruncated {
+  margin-top: var(--space-3);
+}
+
+@media (width <= 600px) {
+  .incomingDialog {
+    width: auto;
+  }
+
+  .incomingCommitHeader {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 2px;
+  }
+}

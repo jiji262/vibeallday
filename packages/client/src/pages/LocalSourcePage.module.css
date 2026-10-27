@@ -1,0 +1,9 @@
+/* The browsed directory is outside the project, so its full path leads the
+   page as quiet mono context; the header carries only its name. */
+.path {
+  margin: 0;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}

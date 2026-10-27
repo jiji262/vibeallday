@@ -1,0 +1,19 @@
+.plainNotice {
+  padding: 0.45rem 0.75rem;
+  color: var(--text-secondary);
+  font-size: 0.78rem;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
+}
+
+/* In the phone modal the content runs edge to edge, so the revision label and
+   file actions above the diff carry their own inset and touch height. */
+.modalHeaderActions {
+  min-height: var(--tap-min);
+  padding-inline: var(--space-3);
+}
+
+/* The toolbar's width-adaptive layout is the shared `ViewerHeader.module.css`,
+   the same one the file viewer and the session right pane use. Do not add a
+   toolbar-specific breakpoint here: it would stop the diff toolbar wrapping on
+   the same terms as the file viewer at the same width. */

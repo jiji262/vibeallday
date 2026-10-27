@@ -1,0 +1,94 @@
+/* Public share chrome: Garden type and badges over the legacy
+   `.public-share-*` layout vocabulary in `styles/index.css`. The doubled
+   selectors win over those single-class rules without editing them. */
+
+.titleRow :global(.public-share-title) {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.titleRow :global(.public-share-project) {
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+
+.page :global(.public-share-badge) {
+  padding: 2px var(--space-3);
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: var(--mint-soft);
+  color: var(--mint-ink);
+  font-family: var(--font-ui);
+  font-size: 12px;
+}
+
+.page :global(.public-share-caution) {
+  border-radius: var(--radius-md);
+  font-size: 13px;
+}
+
+.page :global(.public-share-caution--live) {
+  border-color: transparent;
+  background: var(--rose-soft);
+  color: var(--rose-ink);
+}
+
+.page :global(.public-share-notice) {
+  font-size: 13px;
+}
+
+/* Touch: the floating conversation toggle is a 44px target. */
+@media (pointer: coarse) {
+  .page
+    :global(.public-share-floating-controls .public-share-conversation-toggle),
+  .page :global(.public-share-floating-controls .message-follow-toggle) {
+    height: var(--tap-min);
+  }
+
+  .page
+    :global(.public-share-floating-controls .public-share-conversation-toggle) {
+    width: var(--tap-min);
+  }
+}
+
+/* Phone: brand and badges on one row, the project and title on the next, so
+   the title keeps a readable column instead of squeezing to a few glyphs. */
+@media (width <= 600px) {
+  .page:global(.public-share-page) {
+    --public-share-header-height: 76px;
+  }
+
+  .headerInner:global(.public-share-header-inner) {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "brand actions"
+      "title title";
+    align-items: center;
+    row-gap: 2px;
+    padding: var(--space-2) var(--space-3);
+  }
+
+  .headerLeft:global(.public-share-header-left) {
+    display: contents;
+  }
+
+  .brand {
+    grid-area: brand;
+  }
+
+  .headerInner > :global(.public-share-header-actions) {
+    grid-area: actions;
+  }
+
+  .titleRow:global(.public-share-title-row) {
+    grid-area: title;
+    gap: var(--space-2);
+  }
+
+  .titleRow :global(.public-share-project) {
+    max-width: 6rem;
+    flex-shrink: 0;
+  }
+}

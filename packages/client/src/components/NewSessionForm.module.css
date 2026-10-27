@@ -1,0 +1,562 @@
+/* A muted composer holds a draft the launch will not send — a fork copies the
+   provider transcript instead. It stays readable so it can still inform the
+   choice, but reads as inert and gives its height back to the options below. */
+.mutedComposer textarea {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.mutedComposer textarea:focus {
+  outline: none;
+}
+
+.fullPaneToggle[aria-pressed="true"] {
+  color: var(--app-accent);
+  border-color: color-mix(in srgb, var(--app-accent) 62%, var(--border-input));
+  background: color-mix(in srgb, var(--app-accent) 10%, transparent);
+}
+
+.projectControlsSlot,
+.secondaryOptions {
+  display: grid;
+  align-content: start;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+/*
+ * The sheet holds one column of options with sentence-case labels, as neutral
+ * 44px pickers. The dropdown tints a trigger that has a selection with
+ * indigo; inside this sheet every picker has one, so the tint would only be
+ * noise. Scoping the tokens reaches the pickers of components this form does
+ * not own (router pool, machine control) as well.
+ */
+.secondaryOptions {
+  --indigo: var(--line-strong);
+  --indigo-soft: var(--bg-card);
+  --indigo-ink: var(--text-primary);
+  gap: var(--space-4);
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.secondaryOptions.secondaryOptions :is(h3) {
+  margin: 0 0 var(--space-1);
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.advancedSection {
+  grid-area: advanced;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-3);
+}
+
+.advancedSummary {
+  flex: 1 1 8rem;
+  min-width: 0;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.advancedToggle {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--tap-min);
+  padding: 0 var(--space-4);
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--text-secondary);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 550;
+  cursor: pointer;
+}
+
+.advancedToggle:hover {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+
+.advancedCount {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: var(--radius-pill);
+  background: var(--indigo);
+  color: var(--ink-on);
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.selectedChoice {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  min-width: 0;
+  text-align: left;
+}
+
+.leftAlignedTrigger {
+  text-align: left;
+}
+
+.selectedChoice :global(.mode-option-dot),
+.selectedChoice :global(.model-switch-indicator-dot) {
+  width: 10px;
+  height: 10px;
+}
+
+.selectedChoiceText {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.selectedChoiceText > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.choiceStatus {
+  color: var(--warning-color);
+  font-size: var(--font-size-xs);
+  line-height: 1.2;
+}
+
+.effortSection {
+  grid-column: auto;
+}
+
+.optionPlaceholder {
+  visibility: hidden;
+}
+
+/*
+ * Provider, model and thinking read as context chips: one pill each, the
+ * heading kept for screen readers. The triple class beats the dropdown's own
+ * "has selection" tint, which would paint every chip indigo.
+ */
+.chipTrigger.chipTrigger.chipTrigger {
+  min-height: var(--tap-min);
+  padding: 0 var(--space-3);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-pill);
+  background: var(--bg-card);
+  color: var(--text-primary);
+  font-size: 14px;
+  box-shadow: var(--shadow-xs);
+}
+
+.chipTrigger.chipTrigger.chipTrigger:hover {
+  background: var(--bg-tertiary);
+}
+
+.chipLabel {
+  flex-shrink: 0;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  border: 0;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.optionLayout :global(.new-session-provider-slot) {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-2);
+}
+
+.optionLayout :global(.new-session-provider-slot) .compactProviderSection {
+  grid-column: auto;
+}
+
+/* Permission mode: one segmented control with its one-line meaning. */
+.permissionSlot.permissionSlot {
+  grid-area: permission;
+  display: grid;
+  gap: var(--space-1);
+  min-width: 0;
+  margin: 0;
+}
+
+.permissionHint {
+  margin: 0;
+  padding-inline: var(--space-1);
+  color: var(--text-muted);
+  font-size: 13px;
+  line-height: 1.35;
+}
+
+.secondaryOptions > * {
+  min-width: 0;
+}
+
+.secondaryOptions > :global(.new-session-helper-section),
+.secondaryOptions > :global(.new-session-mode-section) {
+  margin-bottom: 0;
+}
+
+.templateProjectSlot {
+  grid-area: template;
+  min-width: 0;
+  padding: 16px;
+  border: 1px solid var(--border-input);
+  border-radius: 8px;
+  background: var(--bg-secondary);
+}
+.templateProjectSlot[hidden] {
+  display: none;
+}
+
+.projectSearchAnchor {
+  position: relative;
+}
+.newProject {
+  grid-area: newproject;
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+  padding: 16px;
+  border: 1px solid var(--border-input);
+  border-radius: 8px;
+  background: var(--bg-secondary);
+}
+/* The row spans the page; a path field that wide would be hard to scan. */
+.newProjectField,
+.newProjectTarget {
+  max-width: 36rem;
+}
+.newProjectField {
+  display: grid;
+  gap: 4px;
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+}
+.newProjectField input {
+  min-width: 0;
+  min-height: 40px;
+  padding: 8px 10px;
+  color: var(--text-primary);
+  background: var(--bg-input);
+  border: 1px solid var(--border-input);
+  border-radius: var(--radius-md);
+  font: inherit;
+  font-family: var(--font-mono);
+}
+.newProjectTarget {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+  overflow-wrap: anywhere;
+}
+.newProjectGit {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 32px;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+.newProjectPlan {
+  margin: 0;
+  padding-left: 8px;
+  border-left: 2px solid var(--border-color);
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+  overflow-wrap: anywhere;
+}
+
+@media (width < 900px) {
+  .optionLayout.optionLayout {
+    grid-template-areas:
+      "main"
+      "project"
+      "newproject"
+      "template"
+      "provider"
+      "permission"
+      "advanced";
+  }
+
+  .optionLayoutWithoutProvider.optionLayoutWithoutProvider {
+    grid-template-areas:
+      "main"
+      "project"
+      "newproject"
+      "template"
+      "permission"
+      "advanced";
+  }
+}
+
+@media (width >= 600px) {
+  .optionLayout :global(.new-session-provider-slot) {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (width >= 900px) {
+  .optionLayout.optionLayout {
+    grid-template-areas:
+      "main project"
+      "newproject newproject"
+      "template template"
+      "provider provider"
+      "permission permission"
+      "advanced advanced";
+  }
+
+  .optionLayoutWithoutProject.optionLayoutWithoutProject {
+    grid-template-areas:
+      "main main"
+      "provider provider"
+      "permission permission"
+      "advanced advanced";
+  }
+
+  /* A limited user's fixed launch can leave no provider picker in this slot. */
+  .optionLayoutWithoutProvider.optionLayoutWithoutProvider {
+    grid-template-areas:
+      "main project"
+      "newproject newproject"
+      "template template"
+      "permission permission"
+      "advanced advanced";
+  }
+
+  .optionLayoutWithoutProject.optionLayoutWithoutProvider {
+    grid-template-areas:
+      "main main"
+      "permission permission"
+      "advanced advanced";
+  }
+}
+
+.captionToggle {
+  display: inline-grid;
+  place-items: center;
+  width: var(--tap-min);
+  height: var(--tap-min);
+  padding: 0;
+  margin-inline-start: auto;
+  border: 1px solid var(--border-color);
+  border-radius: 50%;
+  background: transparent;
+  color: var(--text-muted);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.captionToggle:hover,
+.captionToggle[aria-pressed="true"] {
+  border-color: var(--indigo);
+  color: var(--indigo-ink);
+  background: var(--indigo-soft);
+}
+
+.optionCaption {
+  margin: var(--space-2) 0 0;
+  color: var(--text-muted);
+  font-size: var(--font-size-sm);
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+/* A risk the selected option carries; shown whether or not captions are. */
+.optionWarning {
+  composes: optionCaption;
+  color: var(--warning-color);
+}
+
+.captionedRecapDuration {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.captionedRecapDuration :global(.recap-after-seconds-label) {
+  white-space: normal;
+}
+
+/* The page or modal header remains visible. Everything below it yields to the
+   editing surface until this mode is restored. */
+:global(.page-scroll-container):has(.fullPane) {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+:global(.page-content-inner):has(.fullPane) {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  align-items: center;
+  min-height: 0;
+  width: 100%;
+}
+
+:global(.modal):has(.fullPane) > :global(.modal-content) {
+  overflow: hidden;
+}
+
+:global(.modal):has(.fullPane) {
+  height: calc(100dvh - 1.5rem);
+  max-height: calc(100dvh - 1.5rem);
+}
+
+:global(.model-switch-content):has(.fullPane) {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
+:global(.model-switch-content):has(.fullPane) > :not(:has(.fullPane)) {
+  display: none;
+}
+
+:global(.model-switch-content):has(.fullPane) > :has(.fullPane) {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  align-items: center;
+  min-height: 0;
+}
+
+.fullPane {
+  display: flex;
+  align-self: center;
+  flex: 1 1 auto;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 0;
+  margin-bottom: 0;
+  overflow: hidden;
+}
+
+.fullPane > :global(.new-session-header),
+.fullPane :global(.new-session-project-slot),
+.fullPane .newProject,
+.fullPane :global(.new-session-provider-slot),
+.fullPane .advancedSection,
+.fullPane .secondaryOptions {
+  display: none;
+}
+
+.fullPane :global(.new-session-top-layout),
+.fullPane :global(.new-session-main-stack) {
+  display: block;
+  min-height: 0;
+  width: 100%;
+}
+
+.fullPane :global(.new-session-input-area) {
+  min-height: 0;
+}
+
+.fullPane :global(.speech-draft-field textarea) {
+  max-height: 100%;
+}
+
+.fullPaneWide {
+  width: 100%;
+  max-width: none;
+}
+
+:global(.main-content-constrained)
+  :global(.page-content-inner.new-session-page-shell):has(.fullPaneWide) {
+  max-width: none;
+}
+
+:global(.model-switch-content):has(.fullPaneWide) {
+  width: 100%;
+  max-width: none;
+}
+
+@media (width <= 600px) {
+  :global(.modal):has(.fullPane) {
+    height: 100dvh;
+    max-height: 100dvh;
+  }
+}
+
+.pendingFilesList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+}
+
+/* Narrow layouts put New project beside the project chip, not under it. */
+@media (width < 900px) {
+  .projectSearchAnchor {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  .projectSearchAnchor > :global(.new-session-project-controls) {
+    flex: 1 1 9rem;
+    grid-template-columns: minmax(0, 1fr);
+    min-width: 0;
+  }
+
+  .projectSearchAnchor > :global(.new-session-project-empty) {
+    flex-basis: 100%;
+  }
+
+  /* An open chooser needs the whole row for its search field. */
+  :global(.new-session-project-chooser.expanded)
+    .projectSearchAnchor
+    > :global(.new-session-project-controls) {
+    flex-basis: 100%;
+  }
+}
+
+/* Rows are spaced by margins: the empty New project and template rows of the
+   grid would otherwise each add a gap of their own. */
+.optionLayout.optionLayout {
+  row-gap: 0;
+}
+
+.optionLayout > :not(:global(.new-session-main-stack)) {
+  margin-top: var(--space-4);
+}
+
+@media (width >= 900px) {
+  .optionLayout > .projectControlsSlot {
+    margin-top: 0;
+  }
+}
+
+.secondaryOptions button[aria-haspopup="listbox"] {
+  min-height: var(--tap-min);
+  border-radius: var(--radius-md);
+  background: var(--bg-card);
+  font-size: 15px;
+}

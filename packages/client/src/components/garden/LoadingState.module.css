@@ -1,0 +1,116 @@
+.state {
+  width: 100%;
+  min-width: 0;
+  margin-block: var(--space-4);
+  overflow: hidden;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  background: var(--bg-card);
+}
+
+.caption {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 48px;
+  padding: var(--space-3) var(--space-4);
+  color: var(--text-muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.spinner {
+  flex: 0 0 16px;
+  height: 16px;
+  border: 2px solid var(--border-color);
+  border-top-color: var(--indigo);
+  border-radius: 50%;
+  animation: rotate 900ms linear infinite;
+}
+
+.rows {
+  border-top: 1px dashed var(--dash);
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: 76px;
+  padding: var(--space-4);
+}
+
+.row + .row {
+  border-top: 1px dashed var(--dash);
+}
+
+.marker,
+.title,
+.detail,
+.badge {
+  display: block;
+  border-radius: var(--radius-xs);
+  background: var(--bg-tertiary);
+  animation: breathe 1.8s ease-in-out infinite;
+}
+
+.marker {
+  flex: 0 0 30px;
+  height: 30px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+}
+
+.lines {
+  display: grid;
+  flex: 1;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.title {
+  width: 62%;
+  height: 12px;
+}
+
+.detail {
+  width: 38%;
+  height: 8px;
+}
+
+.row:nth-child(even) .title {
+  width: 46%;
+}
+
+.badge {
+  width: 52px;
+  height: 22px;
+}
+
+.compact {
+  margin-block: var(--space-2);
+  border-style: dashed;
+  background: var(--bg-surface);
+}
+
+@keyframes rotate {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes breathe {
+  50% {
+    opacity: 0.45;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spinner,
+  .marker,
+  .title,
+  .detail,
+  .badge {
+    animation: none;
+  }
+}

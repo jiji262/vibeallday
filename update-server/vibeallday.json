@@ -1,0 +1,45 @@
+[
+  {
+    "id": "vibeallday",
+    "displayName": "VibeAllDay",
+    "hostnames": ["vibeallday.navs.dpdns.org"],
+    "githubRepo": "jiji262/vibeallday",
+    "tagPrefix": "v",
+    "tauriUpdates": false
+  },
+  {
+    "id": "vibeallday-desktop",
+    "displayName": "VibeAllDay Desktop",
+    "hostnames": ["vibeallday.navs.dpdns.org"],
+    "githubRepo": "jiji262/vibeallday",
+    "tagPrefix": "desktop-v",
+    "tauriUpdates": true,
+    "pathPrefix": "/desktop",
+    "channels": {
+      "stable": {
+        "displayName": "Stable",
+        "tagPrefix": "desktop-v",
+        "releaseKind": "release"
+      },
+      "latest": {
+        "displayName": "Latest",
+        "tagPrefix": "desktop-latest-v",
+        "releaseKind": "prerelease"
+      }
+    },
+    "downloads": {
+      "macos-arm64": { "asset": "VibeAllDay_*_aarch64.dmg" },
+      "macos-x64": { "asset": "VibeAllDay_*_x64.dmg" },
+      "windows-x64": { "asset": "VibeAllDay_*_x64-setup.exe" }
+    }
+  },
+  {
+    "id": "vibeallday-bridge",
+    "displayName": "VibeAllDay Bridge",
+    "hostnames": ["vibeallday.navs.dpdns.org"],
+    "githubRepo": "jiji262/vibeallday",
+    "tagPrefix": "bridge-v",
+    "tauriUpdates": false,
+    "pathPrefix": "/bridge"
+  }
+]

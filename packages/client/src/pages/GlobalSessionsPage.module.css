@@ -1,0 +1,229 @@
+/*
+ * Sessions page: a sticky search + chips block over a list of session cards.
+ * The toolbar controls themselves live in components/session-search.
+ */
+
+.page {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: var(--console-page-width);
+  margin-inline: auto;
+  padding: var(--space-5) var(--console-page-inset);
+  padding-bottom: var(--space-7);
+}
+
+.page.withBulkBar {
+  /* Keeps the last results clear of the fixed bulk bar. */
+  padding-bottom: 96px;
+}
+
+/* The scroll container is the page's own; the block pins under the header.
+   It sits above the header's own 24px fade so the search field stays crisp. */
+.sticky {
+  position: sticky;
+  top: 0;
+  z-index: 11;
+  display: grid;
+  gap: 0;
+  margin: 0;
+  padding: 0 0 var(--space-3);
+  background: var(--bg-surface);
+}
+
+.meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  margin: 0 0 var(--space-1);
+}
+
+.stack {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.results {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0;
+  overflow: clip;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  background: var(--bg-card);
+  box-shadow: var(--shadow-xs);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* A card's link is a flex item: without this a one-line title match (which
+   cannot wrap) stretches the card past the screen instead of truncating. */
+.results :global(.session-list-item__link) {
+  min-width: 0;
+}
+
+.results:empty {
+  display: none;
+}
+
+/* Card rows show their select box only while selecting. The native input
+   stays the control; it is drawn as a 22px box inside a 44px touch target. */
+.results :global(.session-list-item__checkbox) {
+  display: none;
+}
+
+.selecting :global(.session-list-item__checkbox) {
+  display: inline-block;
+  position: relative;
+  align-self: center;
+  width: var(--tap-min);
+  height: var(--tap-min);
+  margin: 0 -6px 0 -12px;
+  border: 0;
+  background: transparent;
+  appearance: none;
+}
+
+.selecting :global(.session-list-item__checkbox)::before {
+  content: "";
+  position: absolute;
+  inset: 11px;
+  border: 1.5px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  background: var(--bg-card);
+}
+
+.selecting :global(.session-list-item__checkbox):checked::before {
+  border-color: var(--indigo);
+  background: var(--indigo);
+}
+
+.selecting :global(.session-list-item__checkbox):checked::after {
+  content: "";
+  position: absolute;
+  top: 14px;
+  left: 17px;
+  width: 6px;
+  height: 11px;
+  border: solid var(--ink-on);
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+.selecting :global(.session-list-item__checkbox):focus-visible::before {
+  outline: 2px solid var(--focus-border);
+  outline-offset: 2px;
+}
+
+.progress {
+  margin: var(--space-2) 0;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+.error {
+  margin: var(--space-2) 0;
+  color: var(--error-color);
+  font-size: 13px;
+}
+
+.note {
+  margin: var(--space-3) 0 0;
+  color: var(--text-muted);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.more {
+  min-height: var(--tap-min);
+}
+
+.footer {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-3);
+  align-items: start;
+  margin-top: var(--space-3);
+}
+
+/* Project call to action: arriving from a project card. */
+.projectCta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  background: var(--indigo-soft);
+}
+
+.projectCtaCopy {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+  font-size: 14px;
+}
+
+.projectCtaCopy strong {
+  color: var(--text-primary);
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.projectCtaCopy span {
+  color: var(--text-muted);
+  overflow-wrap: anywhere;
+}
+
+.projectCta code {
+  padding: 1px 6px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.projectCta button {
+  flex-shrink: 0;
+}
+
+@media (width <= 480px) {
+  .projectCta {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+/* A turn match opens beside the list on wide screens. */
+.withDetail {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 40%);
+  grid-template-rows: auto minmax(0, 1fr);
+  max-width: none;
+}
+
+.detailHost {
+  grid-area: 1 / 2 / 3 / 3;
+  min-height: 0;
+  min-width: 0;
+  border-left: 1px solid var(--border-color);
+}
+
+@media (width < 1100px) {
+  .withDetail {
+    display: flex;
+  }
+
+  .detailHost {
+    position: fixed;
+    inset: 0 0 0 20px;
+    z-index: 100;
+    box-shadow: -8px 0 24px #0005;
+  }
+}

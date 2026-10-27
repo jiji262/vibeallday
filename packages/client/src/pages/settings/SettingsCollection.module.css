@@ -1,0 +1,110 @@
+.root {
+  container-type: inline-size;
+  container-name: settings-collection;
+  min-width: 0;
+}
+.collection {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+.open {
+  grid-template-columns: minmax(0, 1fr) minmax(17rem, 1fr);
+}
+.list {
+  min-width: 0;
+  max-height: 65vh;
+  overflow: auto;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  background: var(--bg-card);
+}
+.list table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  font-size: 14px;
+}
+.list th,
+.list td {
+  padding: 12px 16px;
+  text-align: left;
+  border-bottom: 1px dashed var(--dash);
+  overflow-wrap: anywhere;
+}
+.list th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--bg-sunken);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+.list td:first-child {
+  padding-left: 16px;
+}
+.list th:first-child {
+  width: var(--settings-first-column-width, 50%);
+}
+.list button[aria-expanded] {
+  display: block;
+  width: 100%;
+  padding: 12px 16px;
+  text-align: left;
+  overflow-wrap: anywhere;
+  border-color: transparent;
+  background: transparent;
+}
+.list button[aria-expanded="true"] {
+  color: var(--accent-color);
+  background: var(--bg-hover);
+  border-color: var(--border-color);
+}
+/* The whole row expands, so the whole row shows it is one target. */
+.list tr[data-expandable] {
+  cursor: pointer;
+}
+.list tr[data-expandable]:hover > td {
+  background: var(--bg-hover);
+}
+.detail {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+  max-height: 65vh;
+  overflow: auto;
+  padding: var(--space-5);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  background: var(--bg-card);
+}
+.heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+.heading h4 {
+  flex: 1 1 10rem;
+  min-width: 0;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+@container settings-collection (max-width: 560px) {
+  .open {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .open .list {
+    display: none;
+  }
+  .detail {
+    max-height: none;
+  }
+  .list button[aria-expanded],
+  .heading button {
+    min-height: 44px;
+  }
+}

@@ -1,0 +1,253 @@
+/*
+ * "Now" content: tier sections, the pending Project Queue rows and the
+ * review outcome cards. Tier headings come from garden/SectionHeader and
+ * the summary from now/NowSummary.
+ *
+ * `inbox-item-badge` stays global because `SessionListItem.tsx` produces
+ * it: it composes the class with the `customBadge.className` supplied from
+ * here, and the badge classes below double that hook to win over the global
+ * rule.
+ *
+ * `spin` is duplicated here rather than shared: CSS Modules scopes
+ * keyframe names, and the global copies in `styles/index.css` still
+ * animate `.system-message-icon.spinning`.
+ */
+
+/* A reading column on wide screens; phones use the full width. */
+.root {
+  width: 100%;
+  max-width: var(--console-page-width);
+  margin-inline: auto;
+  padding: var(--space-6) var(--console-page-inset);
+  padding-bottom: var(--space-6);
+}
+
+.refreshSpinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.tiers {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-5);
+}
+
+.section {
+  overflow: clip;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  background: var(--bg-card);
+  box-shadow: var(--shadow-xs);
+  margin: 0;
+}
+
+/* Rows without a provider inherit the tier color for their accent rule. */
+.accentRose {
+  --row-accent: var(--rose);
+}
+
+.accentMint {
+  --row-accent: var(--mint);
+}
+
+.accentSand {
+  --row-accent: var(--sand);
+}
+
+/* Approval and question badges are pills: rose asks for a decision,
+   indigo for an answer. */
+.badgeApproval:global(.inbox-item-badge),
+.badgeQuestion:global(.inbox-item-badge) {
+  display: inline-flex;
+  align-items: center;
+  min-height: 22px;
+  padding: 0 8px;
+  border-radius: var(--radius-pill);
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.badgeApproval:global(.inbox-item-badge) {
+  background: var(--rose-soft);
+  color: var(--rose-ink);
+}
+
+.badgeQuestion:global(.inbox-item-badge) {
+  background: var(--indigo-soft);
+  color: var(--indigo-ink);
+}
+
+.reviewOutcomeList {
+  display: grid;
+  gap: var(--space-2);
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.reviewOutcomeCard {
+  display: grid;
+  gap: var(--space-2);
+  padding: 14px 16px;
+  color: var(--text-primary);
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-left: 3px solid var(--indigo);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xs);
+}
+
+.reviewOutcomeHead,
+.reviewOutcomeMeta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.reviewOutcomeHead {
+  color: var(--indigo-ink);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+}
+
+.reviewOutcomeHead a,
+.reviewOutcomeMeta a {
+  color: var(--link-color);
+}
+
+.reviewOutcomeText {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.reviewOutcomeMeta {
+  justify-content: flex-start;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+
+.queueItem {
+  list-style: none;
+}
+
+.queueItemLink {
+  display: block;
+  padding: 14px 16px 13px 18px;
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--radius-lg);
+  background: var(--bg-card);
+  color: inherit;
+  text-decoration: none;
+}
+
+.queueItemLink:hover {
+  border-color: var(--indigo);
+}
+
+.queueItemFailed .queueItemLink {
+  border-style: solid;
+  border-color: var(--rose);
+}
+
+.queueItemTitleRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.queueItemTitle {
+  display: -webkit-box;
+  flex: 1;
+  overflow: hidden;
+  color: var(--text-primary);
+  font-family: var(--font-display);
+  font-size: 16.5px;
+  font-weight: 560;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.queueItemTargetBadge {
+  flex-shrink: 0;
+  padding: 3px 8px;
+  border-radius: var(--radius-pill);
+  background: var(--indigo-soft);
+  color: var(--indigo-ink);
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.queueItemPreview {
+  display: -webkit-box;
+  overflow: hidden;
+  margin-top: var(--space-1);
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.queueItemMeta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: 6px;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+
+.queueItemProject {
+  overflow: hidden;
+  max-width: 160px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.queueItemStatus {
+  flex-shrink: 0;
+  padding: 3px 8px;
+  border: 1px solid
+    color-mix(in srgb, var(--project-queue-action-bg) 32%, transparent);
+  border-radius: var(--radius-pill);
+  color: var(--indigo-ink);
+  font-size: 11.5px;
+  font-weight: 600;
+}
+
+.queueItemStatusFailed {
+  border-color: color-mix(in srgb, var(--rose) 45%, transparent);
+  color: var(--rose-ink);
+}
+
+.queueItemStatusDispatching {
+  background: var(--indigo-soft);
+}
+
+.collection:global(.sessions-list) {
+  gap: 0;
+  margin: 0;
+  padding: 0;
+}

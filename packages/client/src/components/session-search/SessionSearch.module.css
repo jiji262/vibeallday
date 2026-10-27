@@ -1,0 +1,28 @@
+/* Search result pieces shared by the title and the diagnostics list. The page,
+   toolbar and filter sheet carry their own modules. */
+
+.matchedTitle {
+  flex: 1;
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.diagnostics {
+  margin-top: var(--space-3);
+  font-size: 12px;
+  color: var(--text-muted);
+  overflow-wrap: anywhere;
+}
+
+.diagnostics q {
+  font-weight: 600;
+}
+
+.diagnostics > summary {
+  cursor: pointer;
+  min-height: 28px;
+  align-content: center;
+}

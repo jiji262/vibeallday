@@ -1,0 +1,61 @@
+/* Icon tile for a settings category. One Garden tint for every category; the
+   per-category hues of the old rail are gone so a screen keeps one accent. */
+.tile {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-md);
+}
+
+.tile svg {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+}
+
+.flat {
+  background: var(--indigo-soft);
+  color: var(--indigo);
+}
+
+.flatWhite {
+  background: var(--text-primary);
+  color: var(--bg-surface);
+}
+
+.emoji {
+  background: transparent;
+  color: var(--text-primary);
+  font-family:
+    "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
+  font-size: 1.4rem;
+  line-height: 1;
+}
+
+.compact {
+  width: 28px;
+  height: 28px;
+}
+
+.compact svg {
+  width: 16px;
+  height: 16px;
+}
+
+.compact.emoji {
+  font-size: 1.2rem;
+}
+
+/* In the Appearance icon-style picker the chosen option is indigo-filled. */
+:global(.settings-icon-style-option.active) .flat {
+  background: rgb(255 255 255 / 0.2);
+  color: var(--ink-on);
+}
+
+:global(.settings-icon-style-option.active) .flatWhite {
+  background: var(--ink-on);
+  color: var(--indigo);
+}

@@ -1,0 +1,21 @@
+.breadcrumb:global(.settings-breadcrumb) {
+  gap: var(--space-3);
+}
+
+.breadcrumb :global(.settings-breadcrumb-current) {
+  font-family: var(--font-display);
+  font-size: 36px;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  line-height: 1.1;
+}
+
+.breadcrumb :global(.settings-breadcrumb-description) {
+  font-size: 13px;
+}
+
+@media (width < 600px) {
+  .breadcrumb :global(.settings-breadcrumb-current) {
+    font-size: 27px;
+  }
+}

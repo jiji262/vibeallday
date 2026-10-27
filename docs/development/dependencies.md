@@ -1,0 +1,246 @@
+# Dependency maintenance
+
+[Contributor guide](../../DEVELOPMENT.md) · [Development docs](README.md)
+
+Commands and code paths below are relative to the repository root unless stated
+otherwise.
+
+## Dependency Security Maintenance
+
+CI runs `pnpm audit --prod` on every pull request and push to `main` (the
+`audit` job in `ci.yml`) and it must exit 0. Pay special attention to the
+`web-push -> asn1.js -> bn.js` chain.
+Keep `bn.js` patched (currently via pnpm override) until `web-push` ships an
+upstream fix.
+
+When a transitive dep has no direct upgrade path, prefer a pnpm override. Pin it
+exactly if a newer major would escape the parent's declared range — `fast-uri`
+is pinned to `3.1.9` rather than `^3.1.9` because 4.x is published and `ajv`
+declares `^3.0.1`. When the parent's declared range already contains the patched
+version, no override is needed: refresh the lockfile with
+`pnpm -r update <pkg> --depth=Infinity` (plain `pnpm update` skips transitive
+deps). That refresh can leave a stale transitive copy in place and bump the
+direct dependents instead: `jsdom@25` (client tests only) stayed on
+`ws@8.19.0`, inside two `ws` advisories, although its `^8.18.0` range admits
+the patched 8.21. The scoped `"jsdom>ws": "^8.21.3"` override moves only that
+edge. Drop it when a newer jsdom resolves a patched `ws` without it.
+
+The 2026-09-29 audit refresh moves `fast-uri` to 3.1.7 and the MCP SDK's
+`express-rate-limit -> ip-address` edge to 10.7.2 (within its `^10.2.0`
+range). This resolves GHSA-qw65-cvwx-89v3, GHSA-58mr-gqgx-xq4g,
+GHSA-rpw4-54j3-4h4q, and GHSA-2vr4-cq9g-pvrc without new audit exclusions.
+
+During the 2026-09-30 CI isolation campaign, the unchanged lockfile's audit
+began reporting four additional advisories. The existing exact `fast-uri`
+override moves to [3.1.8](https://github.com/advisories/GHSA-hrr3-gc8f-f4qj),
+and the Firestore `minimatch` edge resolves `brace-expansion` to 2.1.7 within
+its declared 2.x range. That release fixes
+[nested recursion](https://github.com/advisories/GHSA-qhr7-859c-m2p7),
+[comma recursion](https://github.com/advisories/GHSA-6j4f-fj2g-mc7p), and
+[quadratic expansion](https://github.com/advisories/GHSA-q2hr-2g5m-vwhr).
+No new audit exclusions are added; unrelated resolutions remain unchanged.
+
+The 2026-10-01 CI audit repair resolves `@grpc/grpc-js` to 1.14.5 and
+`dompurify` to 3.4.16 within their parents' declared ranges, fixing
+[the gRPC certificate advisory](https://github.com/advisories/GHSA-m9gg-hp2v-232j),
+[gRPC error disclosure](https://github.com/advisories/GHSA-f596-whhp-79r4), and
+[the DOMPurify hook advisory](https://github.com/advisories/GHSA-p98j-92pf-mc4p).
+A fresh audit also reported [Hono JSX boundary escaping](https://github.com/advisories/GHSA-hxh3-vqpv-xpqv);
+all Hono workspace consumers now resolve 4.13.12, above its 4.13.7 patch floor.
+No new advisory exclusions or install-script permissions are added.
+
+The 2026-10-03 CI repair resolves Firebase Admin's `@fastify/busboy` edge
+to 3.2.2 within its declared range, above the 3.2.1 patch floor for
+[multipart resource exhaustion](https://github.com/advisories/GHSA-xjh9-v7x6-24jw)
+and [prototype-named headers](https://github.com/advisories/GHSA-x8mw-p69m-v3mx).
+Unrelated resolutions and advisory exclusions remain unchanged.
+
+The 2026-10-06 CI audit repair moves three transitive edges within their
+parents' declared ranges: the MCP SDK's `express -> proxy-addr` to 2.0.8
+([IPv4-mapped IP spoofing](https://github.com/advisories/GHSA-jqcg-44mw-7w3h)),
+`postcss -> source-map-js` to 1.2.2
+([event-loop denial of service](https://github.com/advisories/GHSA-68fv-2mgg-jv7q)),
+and the relay's `pino-pretty -> fast-copy` to 4.1.2
+([stack exhaustion](https://github.com/advisories/GHSA-jggr-w7fw-pc2j)).
+`pnpm -r update --depth=Infinity` also re-resolved unrelated jsdom CSS
+dependencies, so these were moved with temporary exact overrides that were
+then removed. [KaTeX's prototype-pollution gadget](https://github.com/advisories/GHSA-238p-pmpm-9mq7)
+is patched only in 0.18.2, outside mermaid's `^0.16.47` range (12.1.0 too),
+so the scoped `"mermaid>katex": "^0.18.6"` override shares the 0.18 copy the
+client and server already use. Mermaid calls only `renderToString` with
+`throwOnError`, `displayMode` and `output`, untouched by the 0.17 and 0.18
+breaking changes. Drop the override when mermaid declares a patched KaTeX.
+No new advisory exclusions are added.
+
+The 2026-10-07 CI audit repair moves the server's exact
+`@modelcontextprotocol/sdk` pin from 1.29.0 to 1.32.1, above the 1.31.0 patch
+floor for [OAuth credentials sent to an MCP-chosen authorization server](https://github.com/advisories/GHSA-6qxp-vccf-f47h).
+VIBEALLDAY code imports nothing from the SDK; the pin satisfies
+`@anthropic-ai/claude-agent-sdk`'s `^1.29.0` peer range, which 1.32.1 stays
+within. No new advisory exclusions are added.
+
+The 2026-10-20 release audit moves the server's exact `markdown-it` pin to
+15.0.2 for [quadratic smartquotes processing](https://github.com/advisories/GHSA-r7fv-28h4-cvq7).
+VIBEALLDAY already sets `typographer: false`; the patch removes the vulnerable
+dependency without adding an advisory exclusion.
+
+The same day's CI audit repair moves that pin to 15.0.3 for
+[quadratic link reference definitions](https://github.com/advisories/GHSA-gfr2-rv44-r23c)
+and [quadratic inline HTML](https://github.com/advisories/GHSA-vfgh-jcmw-g37q),
+raises the server's `sanitize-html` floor to 2.18.1 for
+[`nonTextTags` early close](https://github.com/advisories/GHSA-x3q4-9hxx-gx8m),
+[`meta` refresh URLs](https://github.com/advisories/GHSA-cv27-6wvh-8x7j), and
+[SMIL namespace prefixes](https://github.com/advisories/GHSA-374f-7chj-9948),
+and resolves `http-proxy -> follow-redirects` to 1.16.1 within its declared
+range ([GHSA-q3jh-wrc6-jgq8](https://github.com/advisories/GHSA-q3jh-wrc6-jgq8),
+[GHSA-8r9p-f939-6h3c](https://github.com/advisories/GHSA-8r9p-f939-6h3c)).
+The refresh also re-resolved jsdom 29's `undici` and `tldts` to patch
+releases. No new advisory exclusions are added.
+
+The 2026-10-23 CI audit repair refreshes `mermaid -> dompurify` to 3.4.17
+for the [shadow-root template bypass](https://github.com/advisories/GHSA-cg2g-xh64-v4q7),
+[detached-subtree event handlers](https://github.com/advisories/GHSA-mrv2-3pqr-j5jr)
+and [XHTML SMIL guard bypass](https://github.com/advisories/GHSA-c6gr-qvv4-5v3f),
+and the MCP SDK's `express-rate-limit -> ip-address` edge to 10.7.4 for
+[quadratic IPv6 zone parsing](https://github.com/advisories/GHSA-rxp7-6hxx-x8q5).
+Both patches fit their parents' declared ranges; no new overrides or advisory
+exclusions are needed. Unrelated lockfile resolutions remain unchanged.
+
+The 2026-10-24 security refresh raises the Zod floor to 4.6.7 for
+[oversized constrained collections](https://github.com/advisories/GHSA-mrhx-c7xc-m3w5),
+resolves `express -> body-parser` to 2.4.0 within its declared range for
+[compressed request trailing bytes](https://github.com/advisories/GHSA-27r3-jxmh-p828),
+and moves the existing exact `fast-uri` override to 3.1.9 for its URI
+normalization advisories. Vitest and its mocker move together to 4.1.12 for
+[manual mock injection](https://github.com/advisories/GHSA-qxg6-89mg-rqv8)
+and [Windows redirect traversal](https://github.com/advisories/GHSA-xp26-3454-mjgp).
+Desktop Tokio resolves to 1.51.6 for
+[AsyncFd I/O safety](https://rustsec.org/advisories/RUSTSEC-2026-0386.html).
+No new audit exclusions or install-script permissions are added.
+
+Zod 4.6.7 requires a key whose schema is `z.undefined()` to be present;
+the Write acknowledgement's absent `file` key is explicitly optional so
+captured native and live results retain their existing rich presentation.
+The pnpm patch for Zod changes only explanatory comments in its ESM and
+CommonJS builds: the comments accidentally contain Rollup's pure-annotation
+token, which makes the warning-free client build fail. The executable
+annotation and runtime code remain intact. Drop this patch when an upstream
+release removes the misplaced annotation token.
+
+### Install-script allowlist
+
+Dependency install scripts (preinstall/install/postinstall) are blocked by
+default via `onlyBuiltDependencies` in `pnpm-workspace.yaml`; only
+`bcrypt` may run its native build. Relay and push broker used to add
+`better-sqlite3` here; they now use the runtime's built-in SQLite through
+`@vibeallday/shared/sqlite`, so the repository has no SQLite addon to build
+or ignore and needs no compiler on any host.
+This neutralizes the `"preinstall": "node setup.mjs"` vector used
+by npm supply-chain attacks. If a newly added dep needs its build script,
+`pnpm install` warns `build scripts that were ignored: <pkg>` and the
+package will be missing its native binary at runtime — vet the script,
+then add the package name to the allowlist. Blocked today and listed under
+`ignoredBuiltDependencies` so installs stay quiet, each verified a no-op with
+no performance fallback: `esbuild` (native binary ships via
+`@esbuild/*` optional deps; the postinstall only swaps the bin shim, and
+there is no silent WASM fallback), `@firebase/util` (bakes
+`FIREBASE_WEBAPP_CONFIG` into web-SDK defaults; unset here), `protobufjs`
+(prints a version-scheme warning).
+
+### Known-unreachable advisories
+
+Advisories triaged as unreachable are suppressed via
+`auditConfig.ignoreGhsas` in `pnpm-workspace.yaml`; that list and this
+table must stay in sync — every ignored GHSA needs a row here, and removing a
+row means removing the ignore. As of 2026-09-26 two advisories are triaged as
+unreachable with no fix compatible with VIBEALLDAY's current dependency and runtime
+constraints. Re-check when the listed trigger fires rather than re-deriving the
+analysis:
+
+| Advisory | Why unreachable | Revisit when |
+|---|---|---|
+| `react-router` RSC-mode CSRF (GHSA-qwww-vcr4-c8h2) | Client is SPA-only — `BrowserRouter`/`Routes`, no `createBrowserRouter`, RSC, or server actions | Migrating to react-router v8. The fix lands in 8.3.0 and `react-router-dom` never reaches it (v8 consolidated into `react-router`) |
+| `uuid` buffer bounds (GHSA-w5hq-g745-h8pq) | Only path is `firebase-admin -> @google-cloud/storage -> gaxios@6`, which calls `uuid.v4()` with no arguments; the defect needs v3/v5/v6 with a caller-supplied `buf`. Patched only in `>=11.1.1`, outside gaxios 6's `^9` range | `firebase-admin`/`gaxios` declare uuid `>=11`, or a 9.x patch release appears |
+
+Anything not on this list is untriaged — treat a new advisory as actionable.
+
+`ignoreGhsas` only quiets `pnpm audit`. GitHub's Dependabot alerts for the
+same advisories are dismissed per alert, as "vulnerable code not used", with
+a comment pointing here. Dependabot also scans manifests outside pnpm; these
+advisories were triaged as not applying and dismissed the same way on
+2026-09-28:
+
+| Advisory | Manifest | Why it does not apply | Revisit when |
+|---|---|---|---|
+| `accelerate` sharded-checkpoint path traversal (GHSA-4j2p-28q2-5m79) | `requirements/stt-known-good-2026-06-16.txt` | The affected functions are `load_checkpoint_in_model` and `load_checkpoint_and_dispatch`. VIBEALLDAY's speech workers load models by operator-configured id through `from_pretrained` and never call either function | A speech worker loads raw accelerate checkpoints, or a patched release lands (then bump the pin) |
+| `torch` `torch.jit.script` memory corruption (GHSA-rrmf-rvhw-rf47) | same snapshot | Needs crafted input to `torch.jit.script` on the local host; VIBEALLDAY only runs inference and never scripts code | Moving the snapshot to torch ≥ 2.13, which also frees the setuptools pin |
+| `setuptools` sdist MANIFEST.in bypass (GHSA-h35f-9h28-mq5c) | same snapshot | Affects building sdists on macOS filesystems. The snapshot is a Linux runtime env, and `torch==2.12.0` requires `setuptools<82`, so the patched 83 cannot be pinned | Same torch move |
+| `pytorch-lightning` `load_from_checkpoint` pickle loading (GHSA-75m9-98v2-hjpm) | `requirements/stt-nemo.txt` | NeMo 2.0.0 needs `pytorch-lightning==2.4.0`. The NeMo worker loads through `ASRModel.from_pretrained`, never `LightningModule.load_from_checkpoint`. The current NeMo env (`stt-nemo-recent.txt`) resolves 2.6.5 | Retiring the in-place NeMo 2.0.0 add-on |
+| `glib` `VariantStrIter` unsoundness (GHSA-wrw7-89jp-8q8g) | `packages/desktop/src-tauri/Cargo.lock` | gtk-rs 0.18 is the last GTK3 binding and Tauri's Linux backend requires it, so no patched `glib` is reachable. Neither the desktop crate nor its Tauri/GTK dependencies iterate string-array variants | Tauri moves its Linux backend off gtk-rs 0.18 |
+| `rand` unsound with a custom logger (GHSA-cq8v-f236-94qc) | same `Cargo.lock` | `rand 0.7.3` is used only by `phf_generator` during the build. The defect requires a custom `log` logger that itself draws random numbers | `phf_generator` moves off rand 0.7 |
+
+The patched Python pins in that snapshot (`anyio`, `msgpack`, `pip`) were
+dry-run resolved against the live `stt` env before they were committed.
+
+## Automated Dependency Updates
+
+The hosted Mend Renovate app proposes updates from `renovate.json`, using
+GitHub's Dependabot alerts and OSV as advisory sources. Dependabot security
+and version updates stay off so the same bump never arrives twice. Update
+PRs open weekly, at most five at a time, after a release is 3 days old;
+security fixes skip both waits. The Dependency Dashboard issue lists
+everything pending.
+
+- Routine runtime updates are grouped for manual review: stable npm
+  web/server dependencies (plus 0.x patches), Android libraries, stable Go
+  bridge modules, and Rust crate patches. Provider SDKs and Tauri retain
+  their separate audit/group boundaries. Android build tools and Go
+  language/toolchain directives stay outside the library groups.
+- Major upgrades and 0.x minor upgrades require dashboard approval before
+  creating a PR and never automerge. Request migrations individually;
+  approving the entire pending queue defeats that boundary.
+- Renovate automerges only non-major devDependency updates at 1.0 or later
+  and non-major GitHub Actions updates and digest pins. Everything else waits
+  for review.
+- `platformAutomerge` is off: `main` has no required status checks, so
+  GitHub's native automerge could merge a PR with failing checks. Renovate
+  merges only after every check on the branch passes.
+- Initial GitHub Action digest pins skip the release-age wait: they freeze
+  references that already float to those commits. Renovate ages pins against
+  the newest matching release, which can otherwise leave a frequently
+  releasing Action unpinned indefinitely. Version upgrades and subsequent
+  digest updates retain the 3-day wait. See
+  [Renovate's pinDigest guidance](https://docs.renovatebot.com/key-concepts/minimum-release-age/#pindigest-updates).
+- Workflow runtime inputs (`node-version`, `go-version`, `toolchain`,
+  `java-version`) are not updated; CI deliberately runs at the supported
+  Node floor.
+- Major updates to `pnpm-workspace.yaml` overrides are disabled; see the
+  exact `fast-uri` pin above.
+- `vite` updates bump the declared ranges instead of updating only the
+  lockfile. The client and desktop declare different vite majors, and a
+  lockfile-only group update passes both versions to one recursive
+  `pnpm update`, which forces a single version onto both importers and
+  fails `--frozen-lockfile`. Apply the same rule to any other package
+  declared at two majors in the workspace.
+- `@playwright/test` is held below 1.61. From 1.61 the runner loads test
+  files through `module.registerHooks`, and on Node 22.16 through 22.22 and
+  on 23.11 that fails to load CommonJS dependencies such as `sanitize-html`
+  with `request for './Parser.js' is not in cache`, so every e2e shard fails
+  at the supported Node floor. Node 22.23 and 24 load them. Lift the hold
+  when the supported floor moves past the fix. Playwright's
+  `PLAYWRIGHT_FORCE_ASYNC_LOADER` avoids the path but is undocumented.
+  The held release also refuses to install browsers on Ubuntu 26.04
+  (`Playwright does not support chromium on ubuntu26.04-x64`; 1.64 knows
+  that image), so every workflow job that runs `playwright install` pins
+  `ubuntu-24.04` instead of `ubuntu-latest`. Return those jobs to
+  `ubuntu-latest` together with lifting the hold.
+- `@anthropic-ai/claude-agent-sdk` and the pixi STT environment update
+  only when requested from the dashboard, because they follow the
+  [provider refresh](../../topics/provider-refresh.md) audit and the
+  known-good STT snapshot respectively.
+
+Renovate 44's validator requires Node.js `^24.11.0`; use that runtime for
+this tooling even when the application uses another supported Node version.
+Before changing `renovate.json`, run
+`npx --yes --package=renovate@44 -- renovate-config-validator --strict`.
+Revisit the validator major/runtime when the hosted app moves to a new major.

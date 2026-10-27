@@ -1,0 +1,62 @@
+.track {
+  display: flex;
+  gap: 2px;
+  padding: 2px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-md);
+  background: var(--bg-sunken);
+}
+
+.segment {
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 40px;
+  padding: 0 var(--space-2);
+  border: 0;
+  border-radius: calc(var(--radius-md) - 2px);
+  background: transparent;
+  color: var(--text-secondary);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.2;
+  cursor: pointer;
+  transition:
+    background-color 120ms ease,
+    color 120ms ease;
+}
+
+.segment:hover:not(:disabled):not([aria-pressed="true"]) {
+  background: var(--bg-tertiary);
+}
+
+.segment[aria-pressed="true"] {
+  background: var(--bg-card);
+  color: var(--indigo-ink);
+  font-weight: 600;
+  box-shadow:
+    0 0 0 1px var(--indigo),
+    var(--shadow-xs);
+}
+
+.segment:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.segment:focus-visible {
+  outline: 2px solid var(--focus-border);
+  outline-offset: 1px;
+}
+
+@media (pointer: coarse) {
+  .segment {
+    min-height: var(--tap-min);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .segment {
+    transition: none;
+  }
+}

@@ -1,0 +1,78 @@
+/* Source Control mode tabs: a Garden segmented control. Top-right in a wide
+   header, a full-width row on phones. */
+.tabs {
+  display: inline-flex;
+  gap: 2px;
+  padding: 3px;
+  background: var(--bg-sunken);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+}
+
+.tab {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 4px 12px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+.tab:hover {
+  color: var(--text-primary);
+}
+
+/* The selected segment is a card on the sunken track, like the page itself. */
+.tab.active {
+  color: var(--indigo);
+  background: var(--bg-card);
+  box-shadow: var(--shadow-xs);
+}
+
+.count {
+  padding: 0 6px;
+  border-radius: var(--radius-pill);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-muted);
+  background: var(--bg-tertiary);
+  font-variant-numeric: tabular-nums;
+}
+
+.tab.active .count {
+  color: var(--indigo);
+  background: var(--indigo-soft);
+}
+
+/* The `stacked` variant is the phone layout, where the tab strip is its own
+   full-width row above the action row instead of sitting in the page header. */
+@media (width < 760px) {
+  .tabs.stacked {
+    display: grid;
+    grid-auto-columns: minmax(0, 1fr);
+    grid-auto-flow: column;
+    justify-content: space-between;
+    box-sizing: border-box;
+    width: 100%;
+  }
+
+  .tabs.stacked .tab {
+    min-width: 0;
+    min-height: var(--tap-min);
+    padding-inline: 4px;
+    font-size: 13px;
+    line-height: 1.15;
+    text-align: center;
+  }
+
+  .tabs.stacked .count {
+    padding-inline: 5px;
+  }
+}

@@ -1,0 +1,35 @@
+/*
+ * Garden provider hues: Claude = peach, Codex = mint, Gemini = indigo.
+ * Each keeps >= 4.5:1 against its theme's page (--bg-surface); a single
+ * mid-gray for every provider is not the contract.
+ */
+
+:root {
+  --provider-claude: #a04e2a;
+  --provider-codex: #2f6e52;
+  --provider-gemini: #4f46b8;
+  --provider-grok: #1f2433;
+  --provider-opencode: #7a3fa8;
+  --provider-pi: #1f6f6a;
+}
+
+[data-theme="dark"],
+[data-theme="verydark"] {
+  --provider-claude: #f2a27e;
+  --provider-codex: #8edbb9;
+  --provider-gemini: #a59ff5;
+  --provider-grok: #e8e4da;
+  --provider-opencode: #cfa6f0;
+  --provider-pi: #7fd3cb;
+}
+
+@media (prefers-color-scheme: dark) {
+  [data-theme="auto"] {
+    --provider-claude: #f2a27e;
+    --provider-codex: #8edbb9;
+    --provider-gemini: #a59ff5;
+    --provider-grok: #e8e4da;
+    --provider-opencode: #cfa6f0;
+    --provider-pi: #7fd3cb;
+  }
+}

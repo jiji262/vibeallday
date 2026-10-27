@@ -1,0 +1,32 @@
+.menuTrigger {
+  position: absolute;
+  z-index: 3;
+  right: 6px;
+  display: grid;
+  width: 26px;
+  height: 20px;
+  place-items: center;
+  padding: 0;
+  color: var(--text-secondary);
+  line-height: 1;
+  background: color-mix(in srgb, var(--bg-surface) 92%, transparent);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+}
+
+/* The glyph button stays compact; the touch target grows around it. */
+.menuTrigger::after {
+  content: "";
+  position: absolute;
+  inset: -12px -9px;
+}
+
+.menuTrigger:hover,
+.menuTrigger:focus-visible {
+  color: var(--text-primary);
+  background: var(--bg-tertiary);
+  border-color: var(--indigo);
+  outline: none;
+}

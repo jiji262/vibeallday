@@ -1,0 +1,113 @@
+.bar {
+  position: relative;
+  z-index: var(--z-tabbar);
+  display: grid;
+  flex-shrink: 0;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  align-items: stretch;
+  height: calc(var(--tabbar-height) + env(safe-area-inset-bottom, 0px));
+  padding: 0 var(--space-1) env(safe-area-inset-bottom, 0px);
+  border-top: 1px solid var(--border-color);
+  background: var(--bg-card);
+  box-shadow: 0 -1px 8px color-mix(in srgb, var(--text-primary) 3%, transparent);
+}
+
+/* Full view owns the phone viewport. A retained, parked session must not
+   conceal navigation on the foreground route. */
+:global(.session-page):has(
+  :global(.navigation-route-layer.is-active) [data-app-full-view="true"]
+) + .bar {
+  display: none;
+}
+
+.tab {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  min-width: 0;
+  min-height: var(--tap-min);
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.iconWrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 54px;
+  height: 32px;
+  border-radius: var(--radius-md);
+  transition:
+    background-color 160ms ease,
+    transform 160ms ease;
+}
+
+.label {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.active {
+  color: var(--indigo);
+  font-weight: 600;
+}
+
+.active .iconWrap {
+  background: var(--indigo-soft-2);
+}
+
+.newTab {
+  color: var(--text-secondary);
+}
+
+.newTab .iconWrap {
+  width: 48px;
+  height: 32px;
+  border-radius: 12px;
+  background: var(--indigo);
+  color: var(--ink-on);
+  box-shadow: var(--shadow-xs);
+}
+
+.badge {
+  position: absolute;
+  top: 5px;
+  left: calc(50% + 6px);
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border: 2px solid var(--bg-sunken);
+  border-radius: var(--radius-md);
+  background: var(--rose-ink);
+  color: var(--ink-on);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 14px;
+  text-align: center;
+  box-sizing: border-box;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .iconWrap {
+    transition: none;
+  }
+
+  .tab:active .iconWrap {
+    transform: none;
+  }
+}
+
+/* After the state rules: the press scale composes with any of them. */
+.tab:active .iconWrap {
+  transform: scale(0.94);
+}
