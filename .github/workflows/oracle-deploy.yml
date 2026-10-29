@@ -39,10 +39,10 @@ jobs:
           pnpm lint
           pnpm format:check
           pnpm typecheck
-      - name: Run unit and integration tests
-        run: pnpm test
       - name: Install browser
         run: pnpm --filter @vibeallday/client exec playwright install --with-deps chromium
+      - name: Run unit and integration tests
+        run: pnpm test
       - name: Verify real relay login with the production client
         run: >-
           pnpm --filter @vibeallday/client exec playwright test
