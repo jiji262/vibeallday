@@ -90,14 +90,6 @@ export function getLocaleLabel(
       return t("localeNameEn");
     case "zh-CN":
       return t("localeNameZhCn");
-    case "es":
-      return t("localeNameEs");
-    case "fr":
-      return t("localeNameFr");
-    case "de":
-      return t("localeNameDe");
-    case "ja":
-      return t("localeNameJa");
   }
 }
 

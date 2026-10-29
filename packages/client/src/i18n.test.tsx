@@ -5,9 +5,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { I18nProvider, useI18n } from "./i18n";
 import { UI_KEYS } from "./lib/storageKeys";
 
-vi.mock("./i18n/es.json", () => ({
+vi.mock("./i18n/zh-CN.json", () => ({
   default: {
-    pageTitleProjects: "Proyectos parciales",
+    pageTitleProjects: "部分翻译的项目",
   },
 }));
 
@@ -45,7 +45,7 @@ describe("I18nProvider", () => {
   });
 
   it("falls back to English for missing non-English messages", async () => {
-    localStorage.setItem(UI_KEYS.locale, "es");
+    localStorage.setItem(UI_KEYS.locale, "zh-CN");
 
     render(
       <I18nProvider>
@@ -55,7 +55,7 @@ describe("I18nProvider", () => {
 
     await waitFor(() => {
       expect(screen.getByTestId("translated").textContent).toBe(
-        "Proyectos parciales",
+        "部分翻译的项目",
       );
     });
     expect(screen.getByTestId("fallback").textContent).toBe("Settings");

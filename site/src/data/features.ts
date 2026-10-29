@@ -152,9 +152,8 @@ export const features = [
   },
   {
     id: "localized-client",
-    title: "Six-language interface",
-    summary:
-      "Use the client in English, Chinese, Spanish, French, German, or Japanese.",
+    title: "Bilingual interface",
+    summary: "Use the client in English or Chinese.",
     category: "supervise",
     status: "stable",
     docsPath: "/docs/getting-started",
