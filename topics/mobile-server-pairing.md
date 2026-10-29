@@ -829,9 +829,9 @@ and pinned RustCrypto `srp 0.7.0-rc.3` after the crypto/native-build proof and
 Daybreak Blue engineering review. The
 [iOS implementation plan](../docs/tactical/138-ios-native-core-proof.md)
 records evidence, remaining production gates and the next checkpoint.
-`packages/mobile-core-proof` remains isolated fixture tooling; it is not the
-production connection core. The current Android core remains Kotlin until its
-later migration demonstrates parity.
+The isolated fixture crate that proved the direction has been removed; it was
+never the production connection core. The current Android core remains Kotlin
+until its later migration demonstrates parity.
 
 The selected ownership is:
 

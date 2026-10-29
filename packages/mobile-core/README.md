@@ -1,7 +1,6 @@
 # VIBEALLDAY native connection core
 
-This is the credential-bearing core for the iOS and Android apps. It is separate from
-`mobile-core-proof`, which remains a differential experiment. Shipping
+This is the credential-bearing core for the iOS and Android apps. Shipping
 arithmetic uses pinned RustCrypto SRP 0.7.0-rc.3 and crypto-bigint, not SRP 0.6
 or num-bigint. The accepted limits and ownership contract are in
 [mobile pairing](../../topics/mobile-server-pairing.md#ios-and-shared-rust-direction).

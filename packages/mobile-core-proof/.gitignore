@@ -1,6 +1,0 @@
-/target/
-/build/
-/ios/Generated/
-/ios/*.xcodeproj/
-/kotlin/.gradle/
-/kotlin/build/

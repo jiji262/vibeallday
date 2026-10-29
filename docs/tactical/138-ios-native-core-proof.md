@@ -153,7 +153,7 @@ circuit does not establish that parity. No server protocol migration is required
 
 ### Crypto and binding results — 2026-10-01
 
-The isolated [proof crate](../../packages/mobile-core-proof/README.md) has no
+The isolated proof crate (since removed) had no
 production app dependents. The original TypeScript/Kotlin fixture remains
 byte-for-byte unchanged and its production generator check passes. Two extra
 production-generated fixtures cover a Unicode password with minimal A/salt
@@ -205,7 +205,7 @@ libsodium 1.0.22-stable source; Xcode 26.6 (17F113), Swift 5.10 language mode;
 XcodeGen 2.45.3; Kotlin 2.0.21/JNA 5.17.0; Gradle 8.13; cargo-ndk 4.1.2;
 Android NDK 27.0.12077973; Node 24.19.0 for fixture/check commands.
 
-Reproduce from packages/mobile-core-proof with `node scripts/run.mjs all`.
+The proof crate has been removed; these results are a historical record.
 The final local xcresult is ignored build/ios-1790836988462.xcresult. The runner
 chooses an available runtime and creates/deletes its own simulator, so the
 result filename and runtime may differ on another host. Linux/Windows, Intel
