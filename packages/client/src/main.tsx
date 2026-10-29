@@ -143,11 +143,6 @@ const ProviderSignInPage = lazy(() =>
     default: m.ProviderSignInPage,
   })),
 );
-const WorkstreamsPage = lazy(() =>
-  import("./pages/WorkstreamsPage").then(({ WorkstreamsPage }) => ({
-    default: WorkstreamsPage,
-  })),
-);
 
 /**
  * Dev-only notice shown when the app is loaded directly from the Vite dev port
@@ -379,10 +374,6 @@ if (import.meta.env.DEV && window.location.port === String(__VITE_DEV_PORT__)) {
                     <Route
                       path="/projects/:projectId/app"
                       element={routeModule(<ProjectAppPage />)}
-                    />
-                    <Route
-                      path="/projects/:projectId/workstreams"
-                      element={routeModule(<WorkstreamsPage />)}
                     />
                     <Route
                       path="/projects/:projectId"

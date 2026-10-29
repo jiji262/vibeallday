@@ -26,8 +26,7 @@ export type RemoteRouteModuleKey =
   | "remoteApp"
   | "sessionCore"
   | "sessionPage"
-  | "settings"
-  | "workstreamsPage";
+  | "settings";
 
 function normalizeRouterPathname(pathname: string, baseUrl: string): string {
   const basePath = baseUrl.replace(/\/$/, "");
@@ -47,9 +46,6 @@ function selectedAppPageModules(pathname: string): RemoteRouteModuleKey[] {
   if (pathname === "/more") return [...modules, "morePage"];
   if (/^\/projects\/[^/]+\/sessions\/[^/]+(?:\/|$)/.test(pathname)) {
     return [...modules, "sessionPage", "sessionCore"];
-  }
-  if (/^\/projects\/[^/]+\/workstreams(?:\/|$)/.test(pathname)) {
-    return [...modules, "workstreamsPage"];
   }
   if (/^\/projects\/[^/]+\/file(?:\/|$)/.test(pathname)) {
     return [...modules, "filePage"];
