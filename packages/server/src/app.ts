@@ -190,7 +190,6 @@ import {
 } from "./routes/browser-debug.js";
 import { createClientLogsRoutes } from "./routes/client-logs.js";
 import { createConnectionsRoutes } from "./routes/connections.js";
-import { createDebugStreamingRoutes } from "./routes/debug-streaming.js";
 import { createDevRoutes } from "./routes/dev.js";
 import { createDesktopBootstrapRoutes } from "./routes/desktop-bootstrap.js";
 import { createDeviceRoutes } from "./routes/devices.js";
@@ -3930,11 +3929,6 @@ export function createApp(options: AppOptions): AppResult {
         }),
       );
     }
-  }
-
-  // Debug streaming routes (always mounted in dev, useful for debugging markdown rendering)
-  if (process.env.NODE_ENV !== "production") {
-    app.route("/api/debug", createDebugStreamingRoutes());
   }
 
   // Frontend proxy fallback: proxy all non-API requests to Vite dev server
