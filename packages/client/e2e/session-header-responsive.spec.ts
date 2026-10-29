@@ -12,9 +12,17 @@ test.use({
   launchOptions: { args: ["--disable-frame-rate-limit"] },
 });
 
-// Narrow headers are two lines (title, then a mono project · model · state
-// line), so the row is taller and the model is a text link, not a badge.
-const NARROW_ROW_HEIGHT = 56;
+// The session header is the shell's top bar: `--topbar-height`, 60px from
+// 768px up and 52px below. Narrow headers fit two lines (title, then a mono
+// project · model · state line) in that height; the model is a text link.
+const TOPBAR_HEIGHT = 60;
+const PHONE_TOPBAR_HEIGHT = 52;
+const PHONE_TOPBAR_MAX_WIDTH = 767;
+
+function topbarHeight(header: Locator): number {
+  const width = header.page().viewportSize()?.width ?? 0;
+  return width > PHONE_TOPBAR_MAX_WIDTH ? TOPBAR_HEIGHT : PHONE_TOPBAR_HEIGHT;
+}
 
 interface NavigationTypingSample {
   expected: string;
@@ -32,7 +40,7 @@ async function expectHeaderSizing(
 ) {
   await expect
     .poll(async () => (await header.boundingBox())?.height)
-    .toBe(narrow ? NARROW_ROW_HEIGHT : 44);
+    .toBe(topbarHeight(header));
   const controls = header.locator(
     narrow
       ? ".sidebar-toggle, .session-menu-trigger"
@@ -604,12 +612,10 @@ test("header preserves identity, overflow actions and rename typing during live 
     })
     .click();
   await expect(page).toHaveURL(/\/issues\?/);
-  const issuesHeader = page.locator("header.session-header");
-  await expect(issuesHeader.getByRole("heading", { level: 1 })).toHaveText(
-    "Issues & PRs",
-  );
-  // Management pages use Console titles; only the session header stays 44px.
-  expect((await issuesHeader.boundingBox())?.height).toBeGreaterThanOrEqual(76);
+  // Issues draws its own PageIntro, so the h1 scrolls with the page.
+  await expect(
+    page.locator("main").getByRole("heading", { level: 1 }),
+  ).toHaveText("Issues & PRs");
   await expect(
     page.getByRole("button", { name: "Rename...", exact: true }),
   ).toHaveCount(0);
@@ -631,12 +637,10 @@ test("header preserves identity, overflow actions and rename typing during live 
     await recordUiCapture(mousePage, "session-header-mouse-desktop");
     await mousePage.goto(`${baseURL}/projects`);
     const projectsHeader = mousePage.locator("header.session-header");
-    await expect(projectsHeader.getByRole("heading", { level: 1 })).toHaveText(
-      "Projects",
-    );
-    expect((await projectsHeader.boundingBox())?.height).toBeGreaterThanOrEqual(
-      112,
-    );
+    // Projects draws its own PageIntro, so the h1 scrolls with the page.
+    await expect(
+      mousePage.locator("main").getByRole("heading", { level: 1 }),
+    ).toHaveText("Projects");
     expect(
       (await projectsHeader.locator(".sidebar-toggle").boundingBox())?.height,
     ).toBe(36);

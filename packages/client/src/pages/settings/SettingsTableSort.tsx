@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Th } from "../../components/garden/DataTable";
 import styles from "./SettingsTableSort.module.css";
 
 type TableSort<Key extends string> = {
@@ -55,7 +56,7 @@ export function SettingsSortHeader<Key extends string>({
 }) {
   const direction = sort?.column === column ? sort.direction : "none";
   return (
-    <th className={styles.header} scope="col" aria-sort={direction}>
+    <Th className={styles.header} aria-sort={direction}>
       <button
         type="button"
         className={styles.button}
@@ -70,6 +71,6 @@ export function SettingsSortHeader<Key extends string>({
               : "↕"}
         </span>
       </button>
-    </th>
+    </Th>
   );
 }

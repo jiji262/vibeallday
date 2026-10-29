@@ -419,7 +419,7 @@
   --text-primary: #1f2433;
   --text-secondary: #3d4459;
   --text-muted: #5a6377;
-  --text-dimmed: #7f879a;
+  --text-dimmed: #8a92a4;
   --ink-on: #ffffff;
   --blame-author-color-lightness: 0.43;
   --blame-author-color-chroma: 0.12;
@@ -439,16 +439,16 @@
   --indigo-soft-2: rgba(79, 70, 184, 0.14);
   --rose: #e37a88;
   --rose-ink: #b85067;
-  --rose-soft: rgba(227, 122, 136, 0.14);
+  --rose-soft: rgba(227, 122, 136, 0.12);
   --mint: #84c5a8;
-  --mint-ink: #3a7d5f;
-  --mint-soft: rgba(132, 197, 168, 0.2);
+  --mint-ink: #3f8868;
+  --mint-soft: rgba(132, 197, 168, 0.18);
   --peach: #d97751;
   --peach-ink: #a04e2a;
-  --peach-soft: rgba(217, 119, 81, 0.13);
+  --peach-soft: rgba(217, 119, 81, 0.12);
   --sand: #d9a441;
   --sand-ink: #8e6c1f;
-  --sand-soft: rgba(217, 164, 65, 0.17);
+  --sand-soft: rgba(217, 164, 65, 0.16);
   --grey-soft: rgba(138, 146, 164, 0.16);
 
   /* Semantic colors (legacy names) */
@@ -539,10 +539,6 @@
   --timeline-line-color: #e3dccb;
 
   /* Status badges */
-  --status-badge-idle-bg: var(--grey-soft);
-  --status-badge-idle-text: var(--text-muted);
-  --status-badge-owned-bg: var(--mint-soft);
-  --status-badge-owned-text: #2f6e52;
   --status-badge-external-bg: var(--sand-soft);
   --status-badge-external-text: #7a5c17;
   --status-badge-running-bg: var(--peach-soft);
@@ -553,8 +549,8 @@
   /* Depth: paper edges rather than floating cards */
   --shadow-xs: 0 1px 0 #f0ebd9;
   --shadow-sm: 0 1px 2px rgba(31, 36, 51, 0.05), 0 1px 0 #f0ebd9;
-  --shadow-md: 0 4px 16px -8px rgba(31, 36, 51, 0.18);
-  --shadow-lg: 0 16px 40px -20px rgba(31, 36, 51, 0.28);
+  --shadow-md: 0 4px 16px -8px rgba(31, 36, 51, 0.16);
+  --shadow-lg: 0 16px 40px -20px rgba(31, 36, 51, 0.24);
 
   /* Syntax highlighting */
   --shiki-foreground: #24283a;
@@ -570,6 +566,37 @@
   --shiki-token-link: #4f46b8;
   --shiki-token-deleted: #a8435c;
   --shiki-token-inserted: #2f6e52;
+
+  /* Garden Console (license-hub) names over the semantic tokens above, so
+     every theme follows. Labels: mono UPPERCASE, tracked by role. */
+  --bg-2: var(--bg-sunken);
+  --bg-soft: var(--bg-tertiary);
+  --card: var(--bg-card);
+  --ink: var(--text-primary);
+  --ink-2: var(--text-secondary);
+  --ink-3: var(--text-muted);
+  --ink-4: var(--text-dimmed);
+  --line: var(--border-color);
+  --label-font: var(--font-mono);
+  --eyebrow-size: 11px;
+  --eyebrow-tracking: 0.08em;
+  --meta-tracking: 0.06em;
+  --badge-tracking: 0.02em;
+  --overlay-scrim: var(--bg-overlay);
+  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+  --duration-fast: 150ms;
+  --duration-sheet: 200ms;
+  --topbar-height: 60px;
+  --page-max-width: 1440px;
+  --page-gutter: 36px;
+  --z-topbar: 10;
+}
+
+@media (width < 768px) {
+  :root {
+    --topbar-height: 52px;
+    --page-gutter: 16px;
+  }
 }
 
 /* Night: warm ink surfaces, lifted indigo. Shared by dark, verydark and an
@@ -631,7 +658,6 @@
   --tooltip-border: #f1ede4;
   --timeline-dot-default: #6f6c7d;
   --timeline-line-color: #2e2c39;
-  --status-badge-owned-text: var(--mint-ink);
   --status-badge-external-text: var(--sand-ink);
   --status-badge-input-text: var(--rose-ink);
   --shadow-xs: inset 0 1px 0 rgba(255, 255, 255, 0.04);
@@ -729,7 +755,6 @@
     --tooltip-border: #f1ede4;
     --timeline-dot-default: #6f6c7d;
     --timeline-line-color: #2e2c39;
-    --status-badge-owned-text: var(--mint-ink);
     --status-badge-external-text: var(--sand-ink);
     --status-badge-input-text: var(--rose-ink);
     --shadow-xs: inset 0 1px 0 rgba(255, 255, 255, 0.04);

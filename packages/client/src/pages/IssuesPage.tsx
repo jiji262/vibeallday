@@ -1,6 +1,3 @@
-import { IssueTypeBadge } from "./IssueTypeBadge";
-import { TrackerStatusBadge } from "../components/TrackerStatusBadge";
-import { formatBriefAge } from "../lib/sessionAge";
 import type {
   IssueItem,
   IssueSort,
@@ -9,15 +6,28 @@ import type {
 } from "@vibeallday/shared";
 import { useEffect, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
+import { Button } from "../components/garden/Button";
+import { Card, CardFooter } from "../components/garden/Card";
+import { EmptyState } from "../components/garden/EmptyState";
+import { SearchField, selectClassName } from "../components/garden/Field";
+import { BugIcon, RefreshIcon, SettingsIcon } from "../components/garden/icons";
+import { ListToolbar } from "../components/garden/ListToolbar";
+import { Notice } from "../components/garden/Notice";
+import { PageHeader } from "../components/PageHeader";
+import { PageIntro } from "../components/shell/PageIntro";
+import { pageWidthClass } from "../components/shell/pageWidth";
+import { useSourceContextMenu } from "../components/SourceContextMenu";
 import { useCurrentSourceRuntime } from "../contexts/SourceRuntimeContext";
 import { useIssuesEnabled } from "../hooks/useIssuesEnabled";
 import { useRemoteBasePath } from "../hooks/useRemoteBasePath";
 import { useI18n } from "../i18n";
-import { PageHeader } from "../components/PageHeader";
 import { MainContent, useNavigationLayout } from "../layouts";
-import { useSourceContextMenu } from "../components/SourceContextMenu";
-import { IssueSessionRow } from "./IssueSessionRow";
+import { IssueDetailPane } from "./IssueDetailPane";
+import { type IssueEditKind, IssueListRow } from "./IssueListRow";
 import styles from "./IssuesPage.module.css";
+
+/** Page size the server uses for issue results. */
+const ISSUE_PAGE_SIZE = 50;
 
 export function IssuesPage() {
   const { t } = useI18n();
@@ -27,15 +37,52 @@ export function IssuesPage() {
   const [scopeParams] = useSearchParams();
   return (
     <MainContent isWideScreen={isWideScreen}>
-      <PageHeader title={t("issuesTitle")} onOpenSidebar={openSidebar} />
-      {enabled ? (
-        <IssueBrowser key={`${runtime.sourceKey}:${scopeParams.toString()}`} />
-      ) : (
-        <p className={styles.empty}>{t("issuesDisabled")}</p>
-      )}
+      <PageHeader
+        title={t("issuesTitle")}
+        intro="content"
+        onOpenSidebar={openSidebar}
+        isWideScreen={isWideScreen}
+      />
+      <main className="page-scroll-container">
+        <div className={`page-content-inner ${pageWidthClass("wide")}`}>
+          {enabled ? (
+            <IssueBrowser
+              key={`${runtime.sourceKey}:${scopeParams.toString()}`}
+            />
+          ) : (
+            <>
+              <IssuesIntro />
+              <EmptyState
+                title={t("issuesDisabledTitle")}
+                hint={t("issuesDisabled")}
+                icon={<BugIcon />}
+              />
+            </>
+          )}
+        </div>
+      </main>
     </MainContent>
   );
 }
+
+function IssuesIntro() {
+  const { t } = useI18n();
+  const base = useRemoteBasePath();
+  return (
+    <PageIntro
+      eyebrow={[t("sidebarGroupTools")]}
+      title={t("issuesTitle")}
+      lede={t("issuesLede")}
+      actions={
+        <Link className={styles.settingsLink} to={`${base}/settings/issues`}>
+          <SettingsIcon size={16} />
+          {t("issuesSettings")}
+        </Link>
+      }
+    />
+  );
+}
+
 function IssueBrowser() {
   const { t } = useI18n();
   const { transport } = useCurrentSourceRuntime();
@@ -60,7 +107,7 @@ function IssueBrowser() {
   const [busy, setBusy] = useState(false);
   const [editing, setEditing] = useState<{
     item: IssueItem;
-    kind: "title" | "url" | "delete";
+    kind: IssueEditKind;
   }>();
   const [value, setValue] = useState("");
   const alive = useRef(true);
@@ -176,7 +223,7 @@ function IssueBrowser() {
     // has already loaded.
     if (item.id !== selected?.id) setDetail(undefined);
   };
-  const edit = (item: IssueItem, kind: "title" | "url" | "delete") => {
+  const edit = (item: IssueItem, kind: IssueEditKind) => {
     if (kind === "url") select(item);
     setEditing({ item, kind });
     setValue(kind === "title" ? (item.title ?? "") : "");
@@ -227,30 +274,101 @@ function IssueBrowser() {
     }
     if (ok) setEditing(undefined);
   };
+  const editorFor = (item: IssueItem) =>
+    editing?.item.id === item.id
+      ? {
+          kind: editing.kind,
+          value,
+          onChange: setValue,
+          busy,
+          canResolve: Boolean(detail?.sessions.length),
+          onSave: () => void saveEdit(),
+          onCancel: () => setEditing(undefined),
+        }
+      : undefined;
+  const openMenu = (
+    event: Parameters<typeof menu.openFromButton>[0],
+    item: IssueItem,
+  ) =>
+    menu.openFromButton(event, [
+      {
+        label: t(item.unresolved ? "issuesResolve" : "issuesEditTitle"),
+        onSelect: () => edit(item, item.unresolved ? "url" : "title"),
+        disabled: busy,
+      },
+      {
+        label: t("issuesDelete"),
+        onSelect: () => edit(item, "delete"),
+        disabled: busy,
+      },
+    ]);
+  const sortControl = supportedIssueSort ? (
+    <select
+      className={selectClassName(styles.sortSelect)}
+      aria-label={t("issuesSortLabel")}
+      value={issueSort}
+      onChange={(e) => {
+        setIssueSort(e.target.value as IssueSort);
+        setOffset(0);
+      }}
+    >
+      {result?.supportedSorts?.map((value) => (
+        <option key={value} value={value}>
+          {t(`issuesSort_${value}`)}
+        </option>
+      ))}
+    </select>
+  ) : (
+    <span className={styles.keyOrder}>{t("issuesKeyOrder")}</span>
+  );
   return (
-    <main className={styles.page}>
-      <div className={styles.controls}>
-        <input
-          type="search"
-          aria-label={t("issuesSearch")}
-          placeholder={t("issuesSearch")}
-          value={query}
-          onChange={(e) => {
-            setQuery(e.target.value);
-            setOffset(0);
-          }}
-        />
-        <button
-          className={styles.button}
-          type="button"
-          onClick={() => setRevision((x) => x + 1)}
-        >
-          {t("issuesRefresh")}
-        </button>
-        <Link className={styles.settingsLink} to={`${base}/settings/issues`}>
-          {t("issuesSettings")}
-        </Link>
-      </div>
+    <>
+      <IssuesIntro />
+      <ListToolbar
+        label={t("issuesResults")}
+        search={
+          <SearchField
+            label={t("issuesSearch")}
+            placeholder={t("issuesSearch")}
+            value={query}
+            onChange={(e) => {
+              setQuery(e.target.value);
+              setOffset(0);
+            }}
+          />
+        }
+        filters={
+          <>
+            {sortControl}
+            <label className={styles.choice}>
+              <input
+                type="checkbox"
+                checked={dismissed}
+                onChange={(e) => {
+                  setDismissed(e.target.checked);
+                  setOffset(0);
+                  setSessionOffset(0);
+                }}
+              />
+              {t("issuesShowDismissed")}
+            </label>
+          </>
+        }
+        count={
+          result
+            ? t("issuesResultCount", { count: result.items.length })
+            : undefined
+        }
+        actions={
+          <Button
+            size="sm"
+            icon={<RefreshIcon size={14} />}
+            onClick={() => setRevision((x) => x + 1)}
+          >
+            {t("issuesRefresh")}
+          </Button>
+        }
+      />
       <details className={styles.coverage}>
         <summary>
           {result?.coverage.active
@@ -266,320 +384,97 @@ function IssueBrowser() {
                 })}
           </p>
         )}
-        <div className={styles.actions}>
+        <div className={styles.coverageCounts}>
           {result?.coverage.counts.map((row) => (
             <span key={row.state}>
               {t(`issuesState_${row.state}` as never)}: {row.count}
             </span>
           ))}
         </div>
-        <label className={styles.choice}>
-          <input
-            type="checkbox"
-            checked={dismissed}
-            onChange={(e) => {
-              setDismissed(e.target.checked);
-              setOffset(0);
-              setSessionOffset(0);
-            }}
-          />
-          {t("issuesShowDismissed")}
-        </label>
       </details>
       {sessionId && (
-        <p>
-          {t("issuesSessionFilter")}{" "}
-          <Link to={`${base}/issues`}>{t("issuesAll")}</Link>
-        </p>
+        <Notice
+          className={styles.notice}
+          actions={<Link to={`${base}/issues`}>{t("issuesAll")}</Link>}
+        >
+          {t("issuesSessionFilter")}
+        </Notice>
       )}
-      {error && <p role="alert">{error}</p>}
+      {error && (
+        <Notice tone="danger" role="alert" className={styles.notice}>
+          {error}
+        </Notice>
+      )}
       <div className={`${styles.columns} ${selected ? styles.withDetail : ""}`}>
-        <section
+        <Card
+          as="section"
+          flush
           className={`${styles.list} ${editing ? styles.editingList : ""}`}
           aria-label={t("issuesResults")}
         >
-          <div className={styles.listHeading}>
-            {supportedIssueSort ? (
-              <label className={styles.issueSort}>
-                {t("issuesSortLabel")}
-                <select
-                  aria-label={t("issuesSortLabel")}
-                  value={issueSort}
-                  onChange={(e) => {
-                    setIssueSort(e.target.value as IssueSort);
-                    setOffset(0);
-                  }}
-                >
-                  {result?.supportedSorts?.map((value) => (
-                    <option key={value} value={value}>
-                      {t(`issuesSort_${value}`)}
-                    </option>
-                  ))}
-                </select>
-              </label>
-            ) : (
-              t("issuesKeyOrder")
-            )}
+          <div className={styles.listHeader} aria-hidden="true">
+            <span>{t("issuesColumnReference")}</span>
+            <span>{t("issuesColumnSessions")}</span>
+            <span>{t("issuesColumnState")}</span>
           </div>
           {result?.items.length === 0 && (
-            <p className={styles.empty}>{t("issuesEmpty")}</p>
+            <EmptyState compact title={t("issuesEmpty")} />
           )}
-          {result?.items.map((item) => (
-            <div
-              key={item.id}
-              className={`${styles.item} ${selected?.id === item.id ? styles.selected : ""}`}
-            >
-              <div className={styles.itemRow}>
-                <button
-                  type="button"
-                  className={styles.itemSelect}
-                  aria-pressed={selected?.id === item.id}
-                  onClick={() => select(item)}
-                >
-                  <span className={styles.itemTitle}>
-                    <strong>{item.key}</strong>
-                    <IssueTypeBadge item={item} />
-                    <TrackerStatusBadge item={item} />
-                  </span>
-                  {item.title && item.title !== item.key && (
-                    <span className={styles.itemSummary}>{item.title}</span>
-                  )}
-                  <span className={styles.itemMeta}>
-                    {t(
-                      item.sessionCount === 1
-                        ? "issuesSingleSession"
-                        : "issuesSessionCount",
-                      { count: item.sessionCount },
-                    )}
-                    {result?.sort && result.sort !== "key" && (
-                      <>
-                        {" "}
-                        · <IssueActivity item={item} sort={result.sort} />
-                      </>
-                    )}
-                  </span>
-                  {item.unresolved && <small>{t("issuesUnresolved")}</small>}
-                </button>
-                <button
-                  type="button"
-                  className={styles.iconButton}
-                  aria-label={t("issuesItemMenu", { key: item.key })}
-                  onClick={(e) =>
-                    menu.openFromButton(e, [
-                      {
-                        label: t(
-                          item.unresolved ? "issuesResolve" : "issuesEditTitle",
-                        ),
-                        onSelect: () =>
-                          edit(item, item.unresolved ? "url" : "title"),
-                        disabled: busy,
-                      },
-                      {
-                        label: t("issuesDelete"),
-                        onSelect: () => edit(item, "delete"),
-                        disabled: busy,
-                      },
-                    ])
-                  }
-                >
-                  ⋯
-                </button>
-              </div>
-              {editing?.item.id === item.id && (
-                <form
-                  className={styles.editor}
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    void saveEdit();
-                  }}
-                >
-                  {editing.kind === "delete" ? (
-                    <p>{t("issuesDeleteHelp")}</p>
-                  ) : (
-                    <>
-                      <label htmlFor="issue-edit-value">
-                        {t(
-                          editing.kind === "title"
-                            ? "issuesTitleOverride"
-                            : "issuesResolveHelp",
-                        )}
-                      </label>
-                      <input
-                        id="issue-edit-value"
-                        aria-label={t(
-                          editing.kind === "title"
-                            ? "issuesTitleOverride"
-                            : "issuesResolveUrl",
-                        )}
-                        type={editing.kind === "title" ? "text" : "url"}
-                        maxLength={editing.kind === "title" ? 512 : 4096}
-                        required={editing.kind === "url"}
-                        value={value}
-                        onChange={(e) => setValue(e.target.value)}
-                      />
-                    </>
-                  )}
-                  <div className={styles.actions}>
-                    <button
-                      className={styles.button}
-                      disabled={
-                        busy ||
-                        (editing.kind === "url" && !detail?.sessions.length)
-                      }
-                      type="submit"
-                    >
-                      {t(
-                        editing.kind === "title"
-                          ? "issuesSaveTitle"
-                          : editing.kind === "url"
-                            ? "issuesResolve"
-                            : "issuesDeleteConfirm",
-                      )}
-                    </button>
-                    <button
-                      className={styles.button}
-                      type="button"
-                      onClick={() => setEditing(undefined)}
-                    >
-                      {t("issuesCancel")}
-                    </button>
-                  </div>
-                </form>
-              )}
-            </div>
-          ))}
-          <div className={styles.actions}>
-            {offset > 0 && (
-              <button
-                className={styles.button}
-                type="button"
-                onClick={() => setOffset(Math.max(0, offset - 50))}
-              >
-                {t("issuesPrevious")}
-              </button>
-            )}
-            {result?.nextOffset != null && (
-              <button
-                className={styles.button}
-                type="button"
-                onClick={() => setOffset(result.nextOffset!)}
-              >
-                {t("issuesNext")}
-              </button>
-            )}
-          </div>
-        </section>
-        {selected && (
-          <section
-            className={styles.detail}
-            aria-label={t("issuesAssociatedSessions")}
-          >
-            <div className={styles.actions}>
-              <h2>{selected.title ?? selected.key}</h2>
-              <button
-                type="button"
-                className={styles.iconButton}
-                aria-label={t("issuesClose")}
-                onClick={() => setSelected(undefined)}
-              >
-                ×
-              </button>
-            </div>
-            {selected.url && (
-              <a
-                className={styles.externalLink}
-                href={selected.url}
-                target="_blank"
-                rel="noreferrer"
-              >
-                {selected.key} ↗
-              </a>
-            )}
-            <div className={styles.sessionHeading}>
-              <h3>{t("issuesAssociatedSessions")}</h3>
-              <select
-                aria-label={t("issuesSessionSort")}
-                value={sort}
-                onChange={(e) => {
-                  setSort(e.target.value);
-                  setSessionOffset(0);
-                }}
-              >
-                <option value="activity">{t("issuesActivityNewest")}</option>
-                <option value="oldest">{t("issuesActivityOldest")}</option>
-              </select>
-            </div>
-            {!detail && (
-              <p className={styles.muted}>{t("issuesLoadingSessions")}</p>
-            )}
-            {detail?.sessions.length === 0 && (
-              <p className={styles.empty}>{t("issuesNoSessions")}</p>
-            )}
-            {detail?.sessions.map((session) => (
-              <IssueSessionRow
-                key={`${selected.id}:${session.sessionId}`}
-                issueId={selected.id}
-                session={session}
-                unresolved={selected.unresolved}
-                busy={busy}
-                includeDismissed={detailIncludesDismissed}
-                action={action}
+          <ul className={styles.items}>
+            {result?.items.map((item) => (
+              <IssueListRow
+                key={item.id}
+                item={item}
+                selected={selected?.id === item.id}
+                sort={result.sort}
+                onSelect={() => select(item)}
+                onMenu={(event) => openMenu(event, item)}
+                editor={editorFor(item)}
               />
             ))}
-            <div className={styles.actions}>
-              {sessionOffset > 0 && (
-                <button
-                  className={styles.button}
-                  type="button"
-                  onClick={() =>
-                    setSessionOffset(Math.max(0, sessionOffset - 50))
-                  }
-                >
-                  {t("issuesPreviousSessions")}
-                </button>
-              )}
-              {detail?.nextOffset != null && (
-                <button
-                  className={styles.button}
-                  type="button"
-                  onClick={() => setSessionOffset(detail.nextOffset!)}
-                >
-                  {t("issuesNextSessions")}
-                </button>
-              )}
-            </div>
-          </section>
+          </ul>
+          {(offset > 0 || result?.nextOffset != null) && (
+            <CardFooter band>
+              <span />
+              <span className={styles.actions}>
+                {offset > 0 && (
+                  <Button
+                    size="sm"
+                    onClick={() =>
+                      setOffset(Math.max(0, offset - ISSUE_PAGE_SIZE))
+                    }
+                  >
+                    {t("issuesPrevious")}
+                  </Button>
+                )}
+                {result?.nextOffset != null && (
+                  <Button
+                    size="sm"
+                    onClick={() => setOffset(result.nextOffset!)}
+                  >
+                    {t("issuesNext")}
+                  </Button>
+                )}
+              </span>
+            </CardFooter>
+          )}
+        </Card>
+        {selected && (
+          <IssueDetailPane
+            selected={selected}
+            detail={detail}
+            includeDismissed={detailIncludesDismissed}
+            busy={busy}
+            action={action}
+            sort={sort}
+            onSort={setSort}
+            sessionOffset={sessionOffset}
+            onSessionOffset={setSessionOffset}
+            onClose={() => setSelected(undefined)}
+          />
         )}
       </div>
       {menu.menu}
-    </main>
-  );
-}
-
-function IssueActivity({ item, sort }: { item: IssueItem; sort: IssueSort }) {
-  const { t } = useI18n();
-  const timestamp =
-    sort === "mentioned" ? item.lastMentionAt : item.lastSessionActivityAt;
-  const age = formatBriefAge(timestamp);
-  return age ? (
-    <time
-      dateTime={timestamp ?? undefined}
-      title={new Date(timestamp!).toLocaleString()}
-    >
-      {t(
-        sort === "mentioned"
-          ? "issuesRecentlyMentionedAge"
-          : "issuesSessionActiveAge",
-        { age },
-      )}
-    </time>
-  ) : (
-    <span>
-      {t(
-        sort === "mentioned"
-          ? "issuesMentionTimeUnknown"
-          : "issuesActivityUnknown",
-      )}
-    </span>
+    </>
   );
 }

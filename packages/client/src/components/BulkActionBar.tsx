@@ -1,6 +1,11 @@
-import { useI18n } from "../i18n";
-import { useOptionalNavigationLayout } from "../layouts/NavigationLayout";
+import type { ReactNode } from "react";
+import { type MessageKey, useI18n } from "../i18n";
+import { Button } from "./garden/Button";
+import { CardBand } from "./garden/Card";
+import { StarIcon } from "./garden/icons";
 import styles from "./BulkActionBar.module.css";
+
+const ICON_SIZE = 14;
 
 interface BulkActionBarProps {
   selectedCount: number;
@@ -30,260 +35,210 @@ interface BulkActionBarProps {
   filteredCount?: number;
 }
 
-/**
- * Fixed bottom bar for bulk session actions.
- * Slides up when sessions are selected, slides down when cleared.
- */
-export function BulkActionBar({
-  selectedCount,
-  onArchive,
-  onUnarchive,
-  onStar,
-  onUnstar,
-  onMarkRead,
-  onMarkUnread,
-  onClearSelection,
-  isPending = false,
-  canArchive = true,
-  canUnarchive = true,
-  canStar = true,
-  canUnstar = true,
-  canMarkRead = true,
-  canMarkUnread = true,
-  onSelectAllFiltered,
-  filteredCount = 0,
-}: BulkActionBarProps) {
-  const { t } = useI18n();
-  const tabBar = useOptionalNavigationLayout()?.tabBarNavigation;
-  const dock = `${styles.bar}${tabBar ? ` ${styles.aboveTabBar}` : ""}`;
-  // Show a filtered select-all shortcut when filters are active but no manual selection.
-  if (selectedCount === 0) {
-    if (!onSelectAllFiltered || filteredCount === 0) {
-      return null;
-    }
+function StrokeIcon({ children }: { children: ReactNode }) {
+  return (
+    <svg
+      width={ICON_SIZE}
+      height={ICON_SIZE}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.75"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      {children}
+    </svg>
+  );
+}
 
+const ARCHIVE_BOX = (
+  <>
+    <path d="M21 8v13H3V8" />
+    <rect x="1" y="3" width="22" height="5" />
+  </>
+);
+
+const ICONS = {
+  archive: (
+    <StrokeIcon>
+      {ARCHIVE_BOX}
+      <path d="M10 12h4" />
+    </StrokeIcon>
+  ),
+  unarchive: (
+    <StrokeIcon>
+      {ARCHIVE_BOX}
+      <path d="M12 17v-6m-3 3 3-3 3 3" />
+    </StrokeIcon>
+  ),
+  star: <StarIcon size={ICON_SIZE} />,
+  unstar: (
+    <StrokeIcon>
+      <path d="m12 2 3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z" />
+      <path d="M4 4l16 16" />
+    </StrokeIcon>
+  ),
+  read: (
+    <StrokeIcon>
+      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+      <path d="m22 4-10 10.01-3-3" />
+    </StrokeIcon>
+  ),
+  unread: (
+    <StrokeIcon>
+      <circle cx="12" cy="12" r="10" />
+      <circle cx="12" cy="12" r="4" fill="currentColor" />
+    </StrokeIcon>
+  ),
+} as const;
+
+interface BulkAction {
+  key: keyof typeof ICONS;
+  visible: boolean;
+  label: MessageKey;
+  title: MessageKey;
+  run: () => Promise<void>;
+}
+
+function bulkActions(props: BulkActionBarProps): BulkAction[] {
+  const {
+    canArchive = true,
+    canUnarchive = true,
+    canStar = true,
+    canUnstar = true,
+    canMarkRead = true,
+    canMarkUnread = true,
+  } = props;
+  return [
+    {
+      key: "archive",
+      visible: canArchive,
+      label: "bulkArchive",
+      title: "bulkArchiveSelected",
+      run: props.onArchive,
+    },
+    {
+      key: "unarchive",
+      visible: canUnarchive,
+      label: "bulkUnarchive",
+      title: "bulkUnarchiveSelected",
+      run: props.onUnarchive,
+    },
+    {
+      key: "star",
+      visible: canStar,
+      label: "bulkStar",
+      title: "bulkStarSelected",
+      run: props.onStar,
+    },
+    {
+      key: "unstar",
+      visible: canUnstar,
+      label: "bulkUnstar",
+      title: "bulkUnstarSelected",
+      run: props.onUnstar,
+    },
+    {
+      key: "read",
+      visible: canMarkRead,
+      label: "bulkMarkRead",
+      title: "bulkMarkReadTitle",
+      run: props.onMarkRead,
+    },
+    {
+      key: "unread",
+      visible: canMarkUnread,
+      label: "bulkMarkUnread",
+      title: "bulkMarkUnreadTitle",
+      run: props.onMarkUnread,
+    },
+  ];
+}
+
+/** The filtered select-all shortcut, shown before anything is selected. */
+function SelectAllFilteredBand({
+  count,
+  onSelect,
+  disabled,
+}: {
+  count: number;
+  onSelect: () => void;
+  disabled: boolean;
+}) {
+  const { t } = useI18n();
+  return (
+    <CardBand className={styles.band}>
+      <Button
+        size="sm"
+        onClick={onSelect}
+        disabled={disabled}
+        title={t("bulkSelectAllFilteredTitle", { count })}
+      >
+        {t("bulkSelectAllFiltered", { count })}
+      </Button>
+    </CardBand>
+  );
+}
+
+/**
+ * Bulk session actions as the indigo band at the top of the result card:
+ * mono selected count, one small button per applicable action, then cancel.
+ */
+export function BulkActionBar(props: BulkActionBarProps) {
+  const { t } = useI18n();
+  const {
+    selectedCount,
+    isPending = false,
+    onSelectAllFiltered,
+    filteredCount = 0,
+  } = props;
+  if (selectedCount === 0) {
+    if (!onSelectAllFiltered || filteredCount === 0) return null;
     return (
-      <div className={`${dock} ${styles.filtered}`}>
-        <div className={styles.actions}>
-          <button
-            type="button"
-            className={`${styles.actionButton} ${styles.actionButtonPrimary}`}
-            onClick={onSelectAllFiltered}
-            disabled={isPending}
-            title={t("bulkSelectAllFilteredTitle", {
-              count: filteredCount,
-            })}
-          >
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden="true"
-            >
-              <polyline points="9 11 12 14 22 4" />
-              <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
-            </svg>
-            <span>{t("bulkSelectAllFiltered", { count: filteredCount })}</span>
-          </button>
-        </div>
-      </div>
+      <SelectAllFilteredBand
+        count={filteredCount}
+        onSelect={onSelectAllFiltered}
+        disabled={isPending}
+      />
     );
   }
 
   return (
-    <div className={dock}>
-      <div className={styles.info}>
-        <span className={styles.count}>
-          {t("bulkSelectedCount", { count: selectedCount })}
-        </span>
-        <button
-          type="button"
-          className={styles.clear}
-          onClick={onClearSelection}
-          disabled={isPending}
-          aria-label={t("bulkClearSelection")}
-        >
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            aria-hidden="true"
-          >
-            <line x1="18" y1="6" x2="6" y2="18" />
-            <line x1="6" y1="6" x2="18" y2="18" />
-          </svg>
-        </button>
-      </div>
-
+    <CardBand
+      className={styles.band}
+      role="toolbar"
+      aria-label={t("bulkActionsLabel")}
+    >
+      <span className={styles.count}>
+        {t("bulkSelectedCount", { count: selectedCount })}
+      </span>
       <div className={styles.actions}>
-        {canArchive && (
-          <button
-            type="button"
-            className={styles.actionButton}
-            onClick={onArchive}
-            disabled={isPending}
-            title={t("bulkArchiveSelected")}
-          >
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden="true"
+        {bulkActions(props)
+          .filter((action) => action.visible)
+          .map((action) => (
+            <Button
+              key={action.key}
+              size="sm"
+              icon={ICONS[action.key]}
+              onClick={action.run}
+              disabled={isPending}
+              title={t(action.title)}
             >
-              <polyline points="21 8 21 21 3 21 3 8" />
-              <rect x="1" y="3" width="22" height="5" />
-              <line x1="10" y1="12" x2="14" y2="12" />
-            </svg>
-            <span>{t("bulkArchive")}</span>
-          </button>
-        )}
-
-        {canUnarchive && (
-          <button
-            type="button"
-            className={styles.actionButton}
-            onClick={onUnarchive}
-            disabled={isPending}
-            title={t("bulkUnarchiveSelected")}
-          >
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden="true"
-            >
-              <polyline points="21 8 21 21 3 21 3 8" />
-              <rect x="1" y="3" width="22" height="5" />
-              <polyline points="12 11 12 17" />
-              <polyline points="9 14 12 11 15 14" />
-            </svg>
-            <span>{t("bulkUnarchive")}</span>
-          </button>
-        )}
-
-        {canStar && (
-          <button
-            type="button"
-            className={styles.actionButton}
-            onClick={onStar}
-            disabled={isPending}
-            title={t("bulkStarSelected")}
-          >
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden="true"
-            >
-              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-            </svg>
-            <span>{t("bulkStar")}</span>
-          </button>
-        )}
-
-        {canUnstar && (
-          <button
-            type="button"
-            className={styles.actionButton}
-            onClick={onUnstar}
-            disabled={isPending}
-            title={t("bulkUnstarSelected")}
-          >
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden="true"
-            >
-              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-              <line x1="4" y1="4" x2="20" y2="20" />
-            </svg>
-            <span>{t("bulkUnstar")}</span>
-          </button>
-        )}
-
-        {canMarkRead && (
-          <button
-            type="button"
-            className={styles.actionButton}
-            onClick={onMarkRead}
-            disabled={isPending}
-            title={t("bulkMarkReadTitle")}
-          >
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden="true"
-            >
-              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-              <polyline points="22 4 12 14.01 9 11.01" />
-            </svg>
-            <span>{t("bulkMarkRead")}</span>
-          </button>
-        )}
-
-        {canMarkUnread && (
-          <button
-            type="button"
-            className={styles.actionButton}
-            onClick={onMarkUnread}
-            disabled={isPending}
-            title={t("bulkMarkUnreadTitle")}
-          >
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden="true"
-            >
-              <circle cx="12" cy="12" r="10" />
-              <circle cx="12" cy="12" r="4" fill="currentColor" />
-            </svg>
-            <span>{t("bulkMarkUnread")}</span>
-          </button>
-        )}
+              {t(action.label)}
+            </Button>
+          ))}
       </div>
-    </div>
+      <Button
+        size="sm"
+        variant="ghost"
+        className={styles.cancel}
+        onClick={props.onClearSelection}
+        disabled={isPending}
+      >
+        {t("bulkClearSelection")}
+      </Button>
+    </CardBand>
   );
 }

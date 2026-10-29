@@ -1,3 +1,4 @@
+/* Thin status line pinned to the top edge while the transport is down. */
 .root {
   position: fixed;
   top: 0;
@@ -6,16 +7,16 @@
   z-index: 9999;
   height: 2px;
   pointer-events: none;
-  transition: background-color 0.3s ease;
+  transition: background-color var(--duration-fast) var(--ease-standard);
 }
 
 .connecting {
-  background-color: var(--thinking-color);
+  background-color: var(--peach);
   animation: reconnectingPulse 1.5s ease-in-out infinite;
 }
 
 .disconnected {
-  background-color: var(--error-color);
+  background-color: var(--rose-ink);
 }
 
 @keyframes reconnectingPulse {
@@ -26,5 +27,11 @@
 
   50% {
     opacity: 0.4;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .connecting {
+    animation: none;
   }
 }

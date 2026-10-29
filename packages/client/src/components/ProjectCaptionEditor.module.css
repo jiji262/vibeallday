@@ -2,7 +2,7 @@
   display: grid;
   justify-items: start;
   min-width: 0;
-  margin-top: var(--space-1);
+  margin-top: 2px;
 }
 
 .caption {
@@ -11,9 +11,10 @@
   overflow: hidden;
   border: 0;
   background: transparent;
-  color: var(--text-secondary);
+  color: var(--ink-3);
   font: inherit;
-  font-size: 14px;
+  font-size: 13px;
+  font-weight: 400;
   line-height: 1.4;
   text-align: left;
   display: -webkit-box;
@@ -42,12 +43,12 @@
   justify-content: center;
   width: 1.25rem;
   /* One caption line tall, so the icon centers on the first line. */
-  height: calc(14px * 1.4);
+  height: calc(13px * 1.4);
   padding: 0;
   border: 1px solid transparent;
   border-radius: var(--radius-sm);
   background: transparent;
-  color: var(--text-muted);
+  color: var(--ink-3);
   cursor: pointer;
 }
 
@@ -55,9 +56,10 @@
 .addButton {
   width: auto;
   padding: 0;
-  color: var(--text-dimmed);
+  color: var(--ink-4);
   font: inherit;
-  font-size: 14px;
+  font-size: 13px;
+  font-weight: 400;
   white-space: nowrap;
 }
 
@@ -86,17 +88,24 @@
   flex: 1;
   min-width: 8ch;
   padding: 2px 4px;
-  border: 1px solid var(--border-input);
+  border: 1px solid var(--line-strong);
   border-radius: var(--radius-sm);
-  background: var(--bg-primary);
-  color: var(--text-primary);
+  background: var(--card);
+  color: var(--ink);
   font: inherit;
   font-size: 16px;
+  font-weight: 400;
   line-height: 1.35;
 }
 
+.input:focus-visible {
+  border-color: var(--indigo);
+  box-shadow: 0 0 0 3px var(--indigo-soft);
+  outline: none;
+}
+
 .input[aria-invalid="true"] {
-  border-color: var(--error-color);
+  border-color: var(--rose-ink);
 }
 
 .save,

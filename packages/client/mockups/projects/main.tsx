@@ -1,7 +1,10 @@
 import { useState } from "react";
 import { createRoot } from "react-dom/client";
 import { MemoryRouter, useLocation } from "react-router-dom";
+import { Card } from "../../src/components/garden/Card";
+import { DataList } from "../../src/components/garden/DataList";
 import { ProjectCard } from "../../src/components/ProjectCard";
+import { PROJECT_LIST_COLUMNS } from "../../src/pages/ProjectsList";
 import { I18nProvider } from "../../src/i18n";
 import { UI_KEYS } from "../../src/lib/storageKeys";
 import type { Project } from "../../src/types";
@@ -88,29 +91,35 @@ function Projects() {
               ? `Removal requested: ${removing}. Nothing is removed in this preview.`
               : "Choose a project to review. Changes stay in this preview."}
       </p>
-      <ul className={styles.grid} aria-label="Sample projects">
-        {items.map((project, index) => (
-          <ProjectCard
-            key={project.id}
-            project={project}
-            needsAttentionCount={index === 0 ? 2 : 0}
-            thinkingCount={0}
-            queueCount={index === 0 ? 3 : 0}
-            onOpenSettings={(item) => setSelected(item.name)}
-            onDeleteProject={(item) => setRemoving(item.name)}
-            onUpdateCodeName={async (item, codeName) => {
-              editProject(item.id, { codeName });
-            }}
-            onUpdateCaption={async (item, caption) => {
-              editProject(item.id, {
-                caption: caption
-                  ? { text: caption, source: "override" }
-                  : undefined,
-              });
-            }}
-          />
-        ))}
-      </ul>
+      <Card flush className={styles.list}>
+        <DataList
+          columns={PROJECT_LIST_COLUMNS}
+          className="project-list-cards"
+          aria-label="Sample projects"
+        >
+          {items.map((project, index) => (
+            <ProjectCard
+              key={project.id}
+              project={project}
+              needsAttentionCount={index === 0 ? 2 : 0}
+              thinkingCount={0}
+              queueCount={index === 0 ? 3 : 0}
+              onOpenSettings={(item) => setSelected(item.name)}
+              onDeleteProject={(item) => setRemoving(item.name)}
+              onUpdateCodeName={async (item, codeName) => {
+                editProject(item.id, { codeName });
+              }}
+              onUpdateCaption={async (item, caption) => {
+                editProject(item.id, {
+                  caption: caption
+                    ? { text: caption, source: "override" }
+                    : undefined,
+                });
+              }}
+            />
+          ))}
+        </DataList>
+      </Card>
       <footer className={styles.footer}>
         End of sample projects. No provider or project service is connected.
       </footer>

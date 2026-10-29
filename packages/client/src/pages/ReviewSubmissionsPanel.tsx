@@ -11,6 +11,9 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { api } from "../api/client";
 import { EmptyState } from "../components/garden/EmptyState";
+import { ErrorState } from "../components/garden/ErrorState";
+import { selectClassName } from "../components/garden/Field";
+import { LoadingState } from "../components/garden/LoadingState";
 import type { TranslationFn } from "../i18n";
 import { notifyReviewCommentsChanged } from "../lib/reviewCommentsBus";
 import styles from "./ReviewSubmissionsPanel.module.css";
@@ -154,7 +157,11 @@ export function ReviewSubmissionsPanel({
   }, [loadDetail, loadSubmissions, selectedId]);
 
   if (loading)
-    return <section className={styles.empty}>{t("loading")}</section>;
+    return (
+      <section>
+        <LoadingState label={t("loading")} variant="list" />
+      </section>
+    );
   if (submissions.length === 0) {
     return (
       <section>
@@ -207,6 +214,7 @@ export function ReviewSubmissionsPanel({
       <label className={styles.mobileSelector}>
         <span>{t("sourceReviewSelectSubmission")}</span>
         <select
+          className={selectClassName()}
           value={selected.id}
           onChange={(event) => setSelectedId(event.target.value)}
         >
@@ -219,7 +227,7 @@ export function ReviewSubmissionsPanel({
       </label>
 
       <article className={styles.detail}>
-        {error && <div className={styles.error}>{error}</div>}
+        {error && <ErrorState inline message={error} />}
         {detail?.submission.id === selected.id ? (
           <SubmissionDetail
             detail={detail}
@@ -229,7 +237,7 @@ export function ReviewSubmissionsPanel({
             t={t}
           />
         ) : (
-          <div className={styles.empty}>{t("loading")}</div>
+          <LoadingState label={t("loading")} variant="compact" />
         )}
       </article>
     </section>

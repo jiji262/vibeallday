@@ -12,13 +12,31 @@ import {
   type BangCommandOutput,
   BangCommandDisplayObject,
 } from "../components/BangCommandDisplayObject";
-import { PageHeader } from "../components/PageHeader";
+import { IconButton } from "../components/garden/Button";
+import { Card } from "../components/garden/Card";
 import { EmptyState } from "../components/garden/EmptyState";
+import { PlusIcon, TerminalIcon } from "../components/garden/icons";
+import { LoadingState } from "../components/garden/LoadingState";
+import { PageHeader } from "../components/PageHeader";
+import { PageIntro } from "../components/shell/PageIntro";
+import { pageWidthClass } from "../components/shell/pageWidth";
 import { useRemoteBasePath } from "../hooks/useRemoteBasePath";
 import { useI18n } from "../i18n";
 import { MainContent, useNavigationLayout } from "../layouts";
 import { createSessionNavigationState } from "../lib/sessionNavigationState";
 import styles from "./BangCommandsPage.module.css";
+
+/** Garden icon recipe for the two glyphs the shared set lacks. */
+const ICON_PROPS = {
+  width: 16,
+  height: 16,
+  viewBox: "0 0 24 24",
+  fill: "none",
+  stroke: "currentColor",
+  strokeWidth: 1.75,
+  strokeLinecap: "round",
+  strokeLinejoin: "round",
+} as const;
 
 interface BangHistoryEntry {
   sessionId: string;
@@ -50,87 +68,32 @@ function BangHistoryEntryActions({
   const { t } = useI18n();
   const navigate = useNavigate();
   const sessionPath = `${basePath}/projects/${projectId}/sessions/${sessionId}`;
+  const go = (state: Parameters<typeof createSessionNavigationState>[0]) =>
+    navigate(sessionPath, { state: createSessionNavigationState(state) });
   return (
     <span className={styles.entryActions}>
-      <button
-        type="button"
-        className={styles.entryAction}
-        aria-label={t("bangHistoryActionEdit")}
-        title={t("bangHistoryActionEdit")}
-        onClick={() =>
-          navigate(sessionPath, {
-            state: createSessionNavigationState({
-              composerPrefill: `!!${command}`,
-            }),
-          })
-        }
+      <IconButton
+        label={t("bangHistoryActionEdit")}
+        onClick={() => go({ composerPrefill: `!!${command}` })}
       >
-        <svg
-          width="16"
-          height="16"
-          viewBox="0 0 16 16"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.4"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          aria-hidden="true"
-        >
-          <path d="M11 2.5l2.5 2.5L6 12.5 3 13l.5-3z" />
+        <svg {...ICON_PROPS} aria-hidden="true">
+          <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" />
         </svg>
-      </button>
-      <button
-        type="button"
-        className={styles.entryAction}
-        aria-label={t("bangHistoryActionNew")}
-        title={t("bangHistoryActionNew")}
-        onClick={() =>
-          navigate(sessionPath, {
-            state: createSessionNavigationState({ focusComposer: true }),
-          })
-        }
+      </IconButton>
+      <IconButton
+        label={t("bangHistoryActionNew")}
+        onClick={() => go({ focusComposer: true })}
       >
-        <svg
-          width="16"
-          height="16"
-          viewBox="0 0 16 16"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.4"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          aria-hidden="true"
-        >
-          <path d="M8 3.5v9M3.5 8h9" />
-        </svg>
-      </button>
-      <button
-        type="button"
-        className={styles.entryAction}
-        aria-label={t("bangHistoryActionJump")}
-        title={t("bangHistoryActionJump")}
-        onClick={() =>
-          navigate(sessionPath, {
-            state: createSessionNavigationState({
-              scrollToRenderId: objectId,
-            }),
-          })
-        }
+        <PlusIcon />
+      </IconButton>
+      <IconButton
+        label={t("bangHistoryActionJump")}
+        onClick={() => go({ scrollToRenderId: objectId })}
       >
-        <svg
-          width="16"
-          height="16"
-          viewBox="0 0 16 16"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.4"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          aria-hidden="true"
-        >
-          <path d="M8 2.5v7M4.5 6l3.5 3.5L11.5 6M3 13h10" />
+        <svg {...ICON_PROPS} aria-hidden="true">
+          <path d="M12 4v11M7 10l5 5 5-5M5 20h14" />
         </svg>
-      </button>
+      </IconButton>
     </span>
   );
 }
@@ -165,70 +128,114 @@ export function BangCommandsPage() {
 
   return (
     <MainContent isWideScreen={isWideScreen}>
-      <PageHeader title={t("bangHistoryTitle")} onOpenSidebar={openSidebar} />
-      <div className={styles.page}>
-        {entries !== null && entries.length === 0 && (
-          <EmptyState title={t("bangHistoryEmpty")} />
-        )}
-        {entries?.map((entry) => {
-          const entryKey = `${entry.sessionId}-${entry.object.id}`;
-          return (
-            <div className={styles.entry} key={entryKey}>
-              <div className={styles.entryMeta}>
-                <div className={styles.entryWhen}>
-                  <span className="bang-history-entry-time">
-                    {new Date(entry.object.createdAt).toLocaleString()}
-                  </span>
-                  <span className={styles.entryWhere}>
-                    <span
-                      className="bang-history-entry-cwd"
-                      title={entry.object.cwd}
-                    >
-                      {entry.object.cwd.split("/").pop()}
-                    </span>
-                    {entry.projectId && (
-                      <Link
-                        to={`${basePath}/projects/${entry.projectId}/sessions/${entry.sessionId}`}
-                        className={styles.entrySession}
-                      >
-                        {t("bangHistoryOpenSession")}
-                      </Link>
-                    )}
-                  </span>
-                </div>
-                {entry.projectId && (
-                  <BangHistoryEntryActions
-                    projectId={entry.projectId}
-                    sessionId={entry.sessionId}
-                    command={entry.object.command}
-                    objectId={entry.object.id}
-                    basePath={basePath}
-                  />
-                )}
-              </div>
-              <BangCommandDisplayObject
-                object={entry.object}
-                outputExpanded={expandedEntryKey === entryKey}
-                onOutputExpandedChange={(expanded) => {
-                  setExpandedEntryKey(expanded ? entryKey : null);
-                }}
-                handlers={
-                  entry.projectId
-                    ? {
-                        fetchOutput: (objectId: string) =>
-                          api.fetchBangCommandOutput(
-                            entry.projectId as string,
-                            entry.sessionId,
-                            objectId,
-                          ) as Promise<BangCommandOutput>,
+      <PageHeader
+        title={t("bangHistoryTitle")}
+        intro="content"
+        onOpenSidebar={openSidebar}
+        isWideScreen={isWideScreen}
+      />
+      <main className="page-scroll-container">
+        <div className={`page-content-inner ${pageWidthClass("wide")}`}>
+          <PageIntro
+            eyebrow={[t("sidebarGroupTools")]}
+            title={t("bangHistoryTitle")}
+            lede={t("bangHistoryLede")}
+            meta={
+              entries && entries.length > 0
+                ? t("bangHistoryCount", { count: entries.length })
+                : undefined
+            }
+          />
+          {entries === null && <LoadingState label={t("bangHistoryLoading")} />}
+          {entries !== null && entries.length === 0 && (
+            <EmptyState title={t("bangHistoryEmpty")} icon={<TerminalIcon />} />
+          )}
+          {entries !== null && entries.length > 0 && (
+            <Card flush>
+              <ol className={styles.entries}>
+                {entries.map((entry) => {
+                  const entryKey = `${entry.sessionId}-${entry.object.id}`;
+                  return (
+                    <BangHistoryRow
+                      key={entryKey}
+                      entry={entry}
+                      basePath={basePath}
+                      expanded={expandedEntryKey === entryKey}
+                      onExpandedChange={(expanded) =>
+                        setExpandedEntryKey(expanded ? entryKey : null)
                       }
-                    : undefined
-                }
-              />
-            </div>
-          );
-        })}
-      </div>
+                    />
+                  );
+                })}
+              </ol>
+            </Card>
+          )}
+        </div>
+      </main>
     </MainContent>
+  );
+}
+
+/** Meta line (time, cwd, session link, actions) over the command block. */
+function BangHistoryRow({
+  entry,
+  basePath,
+  expanded,
+  onExpandedChange,
+}: {
+  entry: BangHistoryEntry;
+  basePath: string;
+  expanded: boolean;
+  onExpandedChange: (expanded: boolean) => void;
+}) {
+  const { t } = useI18n();
+  const { projectId, sessionId, object } = entry;
+  return (
+    <li className={styles.entry}>
+      <div className={styles.entryMeta}>
+        <div className={styles.entryWhen}>
+          <span className="bang-history-entry-time">
+            {new Date(object.createdAt).toLocaleString()}
+          </span>
+          <span className="bang-history-entry-cwd" title={object.cwd}>
+            {object.cwd.split("/").pop()}
+          </span>
+          {projectId && (
+            <Link
+              to={`${basePath}/projects/${projectId}/sessions/${sessionId}`}
+              className={styles.entrySession}
+            >
+              {t("bangHistoryOpenSession")}
+            </Link>
+          )}
+        </div>
+        {projectId && (
+          <BangHistoryEntryActions
+            projectId={projectId}
+            sessionId={sessionId}
+            command={object.command}
+            objectId={object.id}
+            basePath={basePath}
+          />
+        )}
+      </div>
+      <BangCommandDisplayObject
+        object={object}
+        outputExpanded={expanded}
+        onOutputExpandedChange={onExpandedChange}
+        handlers={
+          projectId
+            ? {
+                fetchOutput: (objectId: string) =>
+                  api.fetchBangCommandOutput(
+                    projectId,
+                    sessionId,
+                    objectId,
+                  ) as Promise<BangCommandOutput>,
+              }
+            : undefined
+        }
+      />
+    </li>
   );
 }

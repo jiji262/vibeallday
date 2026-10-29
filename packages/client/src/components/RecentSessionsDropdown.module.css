@@ -1,6 +1,6 @@
 .dropdown {
-  background: var(--bg-card);
-  border: 1px solid var(--border-color);
+  background: var(--card);
+  border: 1px solid var(--line);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-md);
   min-width: 280px;
@@ -12,7 +12,7 @@
 
 .current {
   padding: 0.5rem 0.75rem;
-  border-bottom: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--line);
 }
 
 .header {
@@ -20,13 +20,13 @@
   font-family: var(--font-mono);
   font-size: 12px;
   font-weight: 500;
-  color: var(--text-muted);
-  border-bottom: 1px solid var(--border-color);
+  color: var(--ink-3);
+  border-bottom: 1px solid var(--line);
 }
 
 .empty {
   padding: 1rem 0.75rem;
-  color: var(--text-muted);
+  color: var(--ink-3);
   font-size: var(--font-size-sm);
   text-align: center;
 }
@@ -38,8 +38,8 @@
   gap: 0.375rem;
   padding: 0.375rem 0.625rem;
   text-decoration: none;
-  color: var(--text-primary);
-  border-bottom: 1px solid var(--border-subtle);
+  color: var(--ink);
+  border-bottom: 1px solid var(--line);
   transition: background-color 0.1s ease;
 }
 
@@ -56,7 +56,7 @@
 }
 
 .item:hover {
-  background-color: var(--bg-hover);
+  background-color: var(--bg-soft);
 }
 
 .item:active {
@@ -78,7 +78,7 @@
   font-size: var(--font-size-sm);
   font-weight: 400;
   line-height: 1.2;
-  color: var(--text-secondary);
+  color: var(--ink-2);
   min-width: 0;
 }
 
@@ -101,11 +101,11 @@
  * letting stylesheet order decide which colour wins.
  */
 .item.unread:not(:global(.btw-aside-session)) .title {
-  color: var(--text-primary);
+  color: var(--ink);
 }
 
 .star {
-  color: var(--accent-star);
+  color: var(--sand);
   flex-shrink: 0;
 }
 
@@ -116,7 +116,7 @@
   gap: 0.375rem;
   font-size: var(--font-size-xs);
   line-height: 1.15;
-  color: var(--text-muted);
+  color: var(--ink-3);
   min-width: 0;
 }
 
@@ -126,7 +126,7 @@
 
 .project {
   flex: 1 1 auto;
-  color: var(--text-muted);
+  color: var(--ink-3);
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -135,7 +135,7 @@
 
 .time {
   font-size: var(--font-size-xs);
-  color: var(--text-muted);
+  color: var(--ink-3);
   white-space: nowrap;
 }
 

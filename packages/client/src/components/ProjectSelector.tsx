@@ -207,10 +207,9 @@ export function ProjectSelector({
 
   return (
     // `project-selector-container`, `project-selector-button`, and
-    // `project-selector-text` stay literal: the `.source-header-identity`
-    // rules in styles/index.css reach in by those names to constrain and
-    // truncate the identity row, and a focused style test asserts them.
-    <div className={`project-selector-container ${styles.container}`}>
+    // `project-selector-text` stay literal: a focused style test asserts
+    // them. A span, since the page head renders this inside its <h1>.
+    <span className={`project-selector-container ${styles.container}`}>
       <button
         ref={buttonRef}
         type="button"
@@ -240,6 +239,6 @@ export function ProjectSelector({
       </button>
       {desktopDropdown}
       {mobileSheet}
-    </div>
+    </span>
   );
 }

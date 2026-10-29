@@ -1,57 +1,107 @@
+/*
+ * Garden Console top bar: leading control, breadcrumb, actions and search on
+ * one row of `--topbar-height`, with the compact intro (eyebrow, serif title,
+ * description) on a second row for pages that keep their title here.
+ */
 .header:global(.session-header) {
-  border-bottom: 1px solid var(--border-color);
+  z-index: var(--z-topbar);
+  border-bottom: 1px solid var(--line);
+  background: var(--bg-surface);
 }
 
 .header::after {
   display: none;
 }
 
-.header .row:global(.session-header-inner) {
+.header .inner:global(.session-header-inner) {
+  display: grid;
+  grid-template-areas:
+    "lead tools"
+    "intro intro";
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-rows: minmax(var(--topbar-height), auto) auto;
+  align-items: center;
+  column-gap: var(--space-4);
   width: 100%;
-  max-width: var(--console-page-width);
-  min-height: 112px;
+  max-width: var(--page-max-width);
+  min-height: var(--topbar-height);
   margin-inline: auto;
-  padding: var(--space-6) var(--console-page-inset);
-  gap: var(--space-4);
+  padding: 0 var(--page-gutter);
 }
 
-.identity {
+.lead:global(.session-header-left) {
+  grid-area: lead;
+  gap: var(--space-2);
+}
+
+.tools:global(.session-header-actions) {
+  grid-area: tools;
+  gap: var(--space-2);
+}
+
+.control:global(.sidebar-toggle) {
+  width: 36px;
+  height: 36px;
+  margin-inline-start: calc(-1 * var(--space-2));
+}
+
+@media (pointer: coarse) {
+  .control:global(.sidebar-toggle) {
+    width: var(--tap-min);
+    height: var(--tap-min);
+  }
+}
+
+.crumbs {
+  flex: 1 1 auto;
+}
+
+.intro {
   display: grid;
+  grid-area: intro;
   gap: var(--space-2);
   min-width: 0;
+  padding: var(--space-2) 0 var(--space-5);
 }
 
 .title:global(.session-title) {
   display: block;
   margin: 0;
   padding: 0;
-  color: var(--text-primary);
+  color: var(--ink);
   font-family: var(--font-display);
-  font-size: 36px;
+  font-size: 26px;
   font-weight: 600;
-  line-height: 1.1;
-  letter-spacing: -0.025em;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
   font-optical-sizing: auto;
   text-align: start;
+}
+
+.title:global(.session-title):hover {
+  color: var(--ink);
 }
 
 .description {
   max-width: 65ch;
   margin: 0;
-  color: var(--text-muted);
+  color: var(--ink-3);
   font-size: 14px;
   line-height: 1.5;
 }
 
-@media (width < 600px) {
-  .header .row:global(.session-header-inner) {
-    min-height: 76px;
-    padding-block: var(--space-4);
-    gap: var(--space-2);
+@media (width < 768px) {
+  /* The intro title already names the page; a lone crumb would repeat it. */
+  .header[data-intro="header"][data-default-crumbs] .crumbs {
+    display: none;
+  }
+
+  .intro {
+    padding: 0 0 var(--space-4);
   }
 
   .title:global(.session-title) {
-    font-size: 27px;
+    font-size: 22px;
   }
 
   .description {

@@ -1,0 +1,78 @@
+/* Review outcome rows inside their Overview card. */
+
+.list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.row {
+  display: grid;
+  gap: var(--space-2);
+  padding: 14px var(--space-5);
+  border-bottom: 1px dashed var(--dash);
+}
+
+.row:last-child {
+  border-bottom: 0;
+}
+
+.head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.name {
+  min-width: 0;
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+
+.name:hover {
+  color: var(--indigo);
+  text-decoration: underline;
+}
+
+.text {
+  color: var(--ink-2);
+  font-size: 14px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-1) var(--space-3);
+  color: var(--ink-3);
+  font-family: var(--label-font);
+  font-size: 12px;
+}
+
+.meta a {
+  color: var(--indigo);
+  text-decoration: none;
+}
+
+.meta a:hover {
+  text-decoration: underline;
+}
+
+.path {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+@media (width < 768px) {
+  .row {
+    padding: var(--space-3) var(--space-4);
+  }
+}

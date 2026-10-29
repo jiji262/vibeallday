@@ -2,6 +2,8 @@ import {
   GIT_LIVE_WORKTREE_SETTING_CAPABILITY,
   serverHasCapability,
 } from "@vibeallday/shared";
+import { ErrorState } from "../../components/garden/ErrorState";
+import { LoadingState } from "../../components/garden/LoadingState";
 import { useCallback, useMemo } from "react";
 import type { ServerSettings } from "../../api/client";
 import { useServerSettings } from "../../hooks/useServerSettings";
@@ -71,7 +73,12 @@ export function SourceControlSettings() {
   useSettingsUndoBaseline(undoState, restoreUndoState);
 
   if (isLoading) {
-    return <SettingsSection description={t("sourceControlSettingsLoading")} />;
+    return (
+      <LoadingState
+        label={t("sourceControlSettingsLoading")}
+        variant="compact"
+      />
+    );
   }
 
   return (
@@ -152,7 +159,7 @@ export function SourceControlSettings() {
           </SettingsItem>
         )}
       </div>
-      {error && <p className="settings-error">{error}</p>}
+      {error && <ErrorState inline message={error} />}
     </SettingsSection>
   );
 }

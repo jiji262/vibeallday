@@ -1,0 +1,64 @@
+.grid {
+  display: grid;
+  gap: var(--space-4);
+  margin: 0;
+  font-size: 14px;
+}
+
+.two {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.field {
+  min-width: 0;
+}
+
+.label {
+  color: var(--ink-3);
+  font-family: var(--label-font);
+  font-size: var(--eyebrow-size);
+  letter-spacing: var(--eyebrow-tracking);
+  text-transform: uppercase;
+}
+
+.value {
+  margin: var(--space-1) 0 0;
+  color: var(--ink);
+  overflow-wrap: anywhere;
+}
+
+.mono {
+  font-family: var(--label-font);
+  font-size: 13px;
+}
+
+.divider {
+  grid-column: 1 / -1;
+  margin: var(--space-1) 0;
+  border-top: 1px dashed var(--dash);
+}
+
+.bigNumber {
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+}
+
+.mint {
+  color: var(--mint-ink);
+}
+
+.rose {
+  color: var(--rose-ink);
+}
+
+.indigo {
+  color: var(--indigo-ink);
+}
+
+.peach {
+  color: var(--peach-ink);
+}

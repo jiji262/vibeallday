@@ -1,6 +1,17 @@
 import { useEffect, useMemo, useSyncExternalStore } from "react";
 import { Link } from "react-router-dom";
-import { VibeAllDayLogo } from "../components/VibeAllDayLogo";
+import { Badge, type BadgeTone } from "../components/garden/Badge";
+import { Button } from "../components/garden/Button";
+import {
+  Card,
+  CardBody,
+  CardFooter,
+  CardHeader,
+} from "../components/garden/Card";
+import { EmptyState } from "../components/garden/EmptyState";
+import { Eyebrow } from "../components/garden/Eyebrow";
+import { BigNumber, MetaField, MetaGrid } from "../components/garden/Meta";
+import { VibeAllDayGlyph } from "../components/VibeAllDayLogo";
 import { type MessageKey, useI18n } from "../i18n";
 import { loadSavedHosts, type SavedHost } from "../lib/hostStorage";
 import { getRelayBasePath } from "../lib/remoteRoutePaths";
@@ -9,6 +20,16 @@ import {
   type MultiHostMonitorHostSnapshot,
   type MultiHostMonitorHostState,
 } from "../lib/multiHostMonitor";
+import styles from "./MultiHostMonitorPage.module.css";
+
+const LOGO_SIZE = 32;
+
+const STATUS_TONES: Record<MultiHostMonitorHostState, BadgeTone> = {
+  connecting: "sand",
+  connected: "mint",
+  offline: "rose",
+  "sign-in-required": "peach",
+};
 
 const STATUS_KEYS: Record<MultiHostMonitorHostState, MessageKey> = {
   connecting: "multiHostMonitorStateConnecting",
@@ -37,6 +58,63 @@ function sessionPath(
   return `${getRelayBasePath(host.relayUsername)}/projects/${encodeURIComponent(projectId)}/sessions/${encodeURIComponent(sessionId)}`;
 }
 
+function HostSessions({ host }: { host: MultiHostMonitorHostSnapshot }) {
+  const { t } = useI18n();
+  const sessions = host.summary?.sessions ?? [];
+  return (
+    <div className={styles.sessions}>
+      <h3 className={styles.sessionsTitle}>
+        {t("multiHostMonitorRecentSessions")}
+      </h3>
+      {sessions.length > 0 ? (
+        <ul className={styles.sessionList}>
+          {sessions.map((session) => {
+            const path = session.projectId
+              ? sessionPath(host, session.projectId, session.id)
+              : null;
+            return (
+              <li key={`${session.projectId ?? ""}:${session.id}`}>
+                {path ? (
+                  <Link to={path}>{session.title}</Link>
+                ) : (
+                  <span>{session.title}</span>
+                )}
+              </li>
+            );
+          })}
+        </ul>
+      ) : (
+        <p className={styles.quiet}>{t("multiHostMonitorNoSessions")}</p>
+      )}
+    </div>
+  );
+}
+
+function HostAction({
+  controller,
+  host,
+}: {
+  controller: MultiHostMonitorController;
+  host: MultiHostMonitorHostSnapshot;
+}) {
+  const { t } = useI18n();
+  if (host.state === "offline") {
+    return (
+      <Button size="sm" onClick={() => controller.retryHost(host.hostId)}>
+        {t("multiHostMonitorRetry")}
+      </Button>
+    );
+  }
+  if (host.state === "sign-in-required") {
+    return (
+      <Link className={styles.linkButton} to={signInPath(host)}>
+        {t("multiHostMonitorSignIn")}
+      </Link>
+    );
+  }
+  return null;
+}
+
 function HostMonitorCard({
   controller,
   host,
@@ -45,87 +123,71 @@ function HostMonitorCard({
   host: MultiHostMonitorHostSnapshot;
 }) {
   const { t } = useI18n();
-  const summary = host.summary;
-
+  const summary = host.state === "connected" ? host.summary : undefined;
   return (
-    <article
-      className={`multi-host-card multi-host-card--${host.state}`}
+    <Card
+      as="article"
+      // `multi-host-card` and the data attributes are e2e hooks.
+      className={`multi-host-card ${styles.card}`}
       data-host-name={host.displayName}
       data-host-state={host.state}
     >
-      <header className="multi-host-card-header">
-        <div className="multi-host-card-identity">
-          <span
-            className={`multi-host-status multi-host-status--${host.state}`}
-            aria-hidden="true"
-          />
-          <div>
-            <h2>{host.displayName}</h2>
-            {host.relayUsername && (
-              <p className="multi-host-card-endpoint">{host.relayUsername}</p>
-            )}
-          </div>
-        </div>
-        <span className="multi-host-state">{t(STATUS_KEYS[host.state])}</span>
-      </header>
-
-      {host.state === "connected" && summary ? (
-        <>
-          <dl className="multi-host-metrics">
-            <div>
-              <dt>{t("multiHostMonitorActiveAgents")}</dt>
-              <dd>{summary.activeAgentCount}</dd>
-            </div>
-            <div>
-              <dt>{t("multiHostMonitorNeedsAttention")}</dt>
-              <dd>{summary.needsAttentionCount}</dd>
-            </div>
-          </dl>
-          <div className="multi-host-sessions">
-            <h3>{t("multiHostMonitorRecentSessions")}</h3>
-            {summary.sessions.length > 0 ? (
-              <ul>
-                {summary.sessions.map((session) => {
-                  const path = session.projectId
-                    ? sessionPath(host, session.projectId, session.id)
-                    : null;
-                  return (
-                    <li key={`${session.projectId ?? ""}:${session.id}`}>
-                      {path ? (
-                        <Link to={path}>{session.title}</Link>
-                      ) : (
-                        <span>{session.title}</span>
-                      )}
-                    </li>
-                  );
-                })}
-              </ul>
-            ) : (
-              <p className="multi-host-empty-sessions">
-                {t("multiHostMonitorNoSessions")}
-              </p>
-            )}
-          </div>
-        </>
+      <CardHeader
+        title={host.displayName}
+        titleAs="h2"
+        description={host.relayUsername}
+        actions={
+          <Badge
+            tone={STATUS_TONES[host.state]}
+            dot={host.state === "connecting" ? "pulse" : true}
+          >
+            {t(STATUS_KEYS[host.state])}
+          </Badge>
+        }
+      />
+      {summary ? (
+        <CardBody className={styles.body}>
+          <MetaGrid columns={2}>
+            <MetaField
+              label={t("multiHostMonitorActiveAgents")}
+              value={
+                <BigNumber tone="mint">{summary.activeAgentCount}</BigNumber>
+              }
+            />
+            <MetaField
+              label={t("multiHostMonitorNeedsAttention")}
+              value={
+                <BigNumber tone="rose">{summary.needsAttentionCount}</BigNumber>
+              }
+            />
+          </MetaGrid>
+          <HostSessions host={host} />
+        </CardBody>
       ) : (
-        <div className="multi-host-card-action">
-          {host.state === "offline" && (
-            <button
-              type="button"
-              className="settings-button"
-              onClick={() => controller.retryHost(host.hostId)}
-            >
-              {t("multiHostMonitorRetry")}
-            </button>
-          )}
-          {host.state === "sign-in-required" && (
-            <Link className="settings-button" to={signInPath(host)}>
-              {t("multiHostMonitorSignIn")}
-            </Link>
-          )}
-        </div>
+        <CardFooter className={styles.action}>
+          <HostAction controller={controller} host={host} />
+        </CardFooter>
       )}
-    </article>
+    </Card>
+  );
+}
+
+function MonitorHeader() {
+  const { t } = useI18n();
+  return (
+    <header className={styles.header}>
+      <Link className={styles.brand} to="/login" aria-label="VibeAllDay">
+        <VibeAllDayGlyph size={LOGO_SIZE} />
+      </Link>
+      <div className={styles.heading}>
+        <Eyebrow parts={[t("multiHostMonitorExperimental")]} />
+        <h1 className={styles.title}>{t("multiHostMonitorTitle")}</h1>
+        <p className={styles.lede}>{t("multiHostMonitorDescription")}</p>
+      </div>
+      <Link className={styles.linkButton} to="/login">
+        {t("multiHostMonitorBack")}
+      </Link>
+    </header>
   );
 }
 
@@ -148,32 +210,13 @@ export function MultiHostMonitorPage() {
   }, [controller]);
 
   return (
-    <main className="multi-host-page" data-testid="multi-host-monitor">
-      <div className="multi-host-shell">
-        <header className="multi-host-page-header">
-          <Link
-            className="multi-host-brand"
-            to="/login"
-            aria-label="VibeAllDay"
-          >
-            <VibeAllDayLogo />
-          </Link>
-          <div className="multi-host-heading">
-            <div className="multi-host-title-row">
-              <h1>{t("multiHostMonitorTitle")}</h1>
-              <span>{t("multiHostMonitorExperimental")}</span>
-            </div>
-            <p>{t("multiHostMonitorDescription")}</p>
-          </div>
-          <Link className="settings-button" to="/login">
-            {t("multiHostMonitorBack")}
-          </Link>
-        </header>
-
+    <main className={styles.page} data-testid="multi-host-monitor">
+      <div className={styles.shell}>
+        <MonitorHeader />
         {snapshot.selectedCount > 0 ? (
           <>
             <p
-              className="multi-host-connection-count"
+              className={styles.count}
               data-testid="multi-host-connected-count"
             >
               {t("multiHostMonitorConnectedCount", {
@@ -182,7 +225,7 @@ export function MultiHostMonitorPage() {
               })}
             </p>
             <section
-              className="multi-host-grid"
+              className={styles.grid}
               aria-label={t("multiHostMonitorTitle")}
             >
               {snapshot.hosts.map((host) => (
@@ -195,13 +238,15 @@ export function MultiHostMonitorPage() {
             </section>
           </>
         ) : (
-          <section className="multi-host-empty">
-            <h2>{t("multiHostMonitorEmptyTitle")}</h2>
-            <p>{t("multiHostMonitorEmptyDescription")}</p>
-            <Link className="settings-button" to="/login">
-              {t("multiHostMonitorAddHost")}
-            </Link>
-          </section>
+          <EmptyState
+            title={t("multiHostMonitorEmptyTitle")}
+            hint={t("multiHostMonitorEmptyDescription")}
+            action={
+              <Link className={styles.linkButton} to="/login">
+                {t("multiHostMonitorAddHost")}
+              </Link>
+            }
+          />
         )}
       </div>
     </main>

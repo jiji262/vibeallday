@@ -21,8 +21,9 @@ interface SegmentedControlProps<T extends string> {
 }
 
 /**
- * Equal-width toggle buttons in one rounded track. Each segment is a 40px
- * button, 44px on touch; the chosen one carries `aria-pressed`.
+ * Equal-width toggle buttons in one soft track: a 40px control (each
+ * segment 44px on touch); the chosen segment is raised and carries
+ * `aria-pressed`.
  */
 export function SegmentedControl<T extends string>({
   label,

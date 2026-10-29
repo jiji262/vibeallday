@@ -20,6 +20,7 @@ import { Link } from "react-router-dom";
 import { type MessageKey, useI18n } from "../i18n";
 import type { Project } from "../types";
 import { ProjectQueueAttachmentEditor } from "./ProjectQueueAttachmentEditor";
+import { formatProjectAge as formatRelativeTime } from "./projectRelativeTime";
 import { ProviderBadge } from "./ProviderBadge";
 import styles from "./ProjectQueueSection.module.css";
 
@@ -75,21 +76,6 @@ interface ProjectQueueSectionProps {
     itemId: string,
     message: ProjectQueueMessage,
   ) => Promise<void> | void;
-}
-
-function formatRelativeTime(timestamp: string, t: Translate): string {
-  const then = new Date(timestamp).getTime();
-  if (!Number.isFinite(then)) return "";
-  const diffMs = Math.max(0, Date.now() - then);
-  const diffMins = Math.floor(diffMs / 60000);
-  const diffHours = Math.floor(diffMs / 3600000);
-  const diffDays = Math.floor(diffMs / 86400000);
-
-  if (diffMins < 1) return t("projectQueueAgeJustNow");
-  if (diffMins < 60) return t("projectQueueAgeMinutes", { count: diffMins });
-  if (diffHours < 24) return t("projectQueueAgeHours", { count: diffHours });
-  if (diffDays < 7) return t("projectQueueAgeDays", { count: diffDays });
-  return new Date(timestamp).toLocaleDateString();
 }
 
 function targetLabel(item: ProjectQueueItemSummary, t: Translate): string {

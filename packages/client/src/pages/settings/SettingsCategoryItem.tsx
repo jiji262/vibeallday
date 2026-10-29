@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { ChevronRightIcon } from "../../components/garden/icons";
 import { SettingsCategoryIcon } from "./SettingsCategoryIcons";
 import styles from "./SettingsCategoryItem.module.css";
 import { renderSettingsSearchHighlight } from "./SettingsSearchContext";
@@ -14,23 +15,10 @@ export interface SettingsCategoryItemProps {
   rail?: boolean;
 }
 
-const CHEVRON = (
-  <svg
-    width="16"
-    height="16"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    aria-hidden="true"
-  >
-    <polyline points="9 6 15 12 9 18" />
-  </svg>
-);
+const CHEVRON_SIZE = 16;
 
-/** One 56px settings row: icon tile, label, one-line hint, chevron. */
+/** One settings row: icon tile, label, one-line hint, chevron. The rail row
+ * is a sidebar nav item: bare icon and label, the hint moves to a tooltip. */
 export function SettingsCategoryItem({
   category,
   isActive,
@@ -58,24 +46,32 @@ export function SettingsCategoryItem({
       className={classes}
       onClick={onClick}
       aria-current={isActive ? "page" : undefined}
+      title={rail ? category.description : undefined}
     >
-      <SettingsCategoryIcon id={category.id} />
+      <SettingsCategoryIcon
+        id={category.id}
+        className={rail ? styles.railIcon : undefined}
+      />
       <span className={styles.text}>
         <span className={styles.label}>
           {highlightQuery
             ? renderSettingsSearchHighlight(category.label, highlightQuery)
             : category.label}
         </span>
-        <span className={styles.hint}>
-          {highlightQuery
-            ? renderSettingsSearchHighlight(
-                category.description,
-                highlightQuery,
-              )
-            : category.description}
-        </span>
+        {rail ? null : (
+          <span className={styles.hint}>
+            {highlightQuery
+              ? renderSettingsSearchHighlight(
+                  category.description,
+                  highlightQuery,
+                )
+              : category.description}
+          </span>
+        )}
       </span>
-      {rail ? null : <span className={styles.chevron}>{CHEVRON}</span>}
+      {rail ? null : (
+        <ChevronRightIcon size={CHEVRON_SIZE} className={styles.chevron} />
+      )}
     </button>
   );
 }

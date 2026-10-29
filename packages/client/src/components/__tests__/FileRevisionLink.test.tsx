@@ -1,6 +1,6 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
-import { FileRevisionLink, formatRevisionAge } from "../FileRevisionLink";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { FileRevisionLink } from "../FileRevisionLink";
 import { I18nProvider } from "../../i18n";
 
 const mocks = vi.hoisted(() => ({
@@ -28,6 +28,12 @@ describe("FileRevisionLink", () => {
     mocks.sourceKey = "local";
     mocks.version = { current: "0.7.2" };
     mocks.getGitFileRevision.mockReset();
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(Date.parse("2026-08-25T12:00:00.000Z"));
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
   });
 
   it("renders a regular commit diff link with age, dirtiness, and tooltip", async () => {
@@ -66,6 +72,7 @@ describe("FileRevisionLink", () => {
     expect(link.getAttribute("title")).toContain("Explain revision");
     expect(link.getAttribute("title")).toMatch(/\n\.\.\.$/);
     expect(screen.getByText("dirty")).not.toBeNull();
+    expect(screen.getByText("(2d ago)")).not.toBeNull();
     expect(mocks.getGitFileRevision).toHaveBeenCalledWith("project-1", {
       path: "src/file.ts",
       origPath: "src/old.ts",
@@ -143,7 +150,9 @@ describe("FileRevisionLink", () => {
       dirtyLabel: "dirty",
       uncommittedLabel: "uncommitted",
     };
-    const { rerender } = render(<FileRevisionLink {...props} />);
+    const { rerender } = render(<FileRevisionLink {...props} />, {
+      wrapper: I18nProvider,
+    });
 
     mocks.sourceKey = "remote:second";
     rerender(<FileRevisionLink {...props} />);
@@ -168,13 +177,34 @@ describe("FileRevisionLink", () => {
     expect(screen.queryByRole("link", { name: "aaaaaaa" })).toBeNull();
     expect(mocks.getGitFileRevision).toHaveBeenCalledTimes(2);
   });
-});
+  it("renders a minutes-old revision in the minutes unit", async () => {
+    mocks.getGitFileRevision.mockResolvedValue({
+      path: "src/file.ts",
+      isGitRepo: true,
+      dirty: false,
+      commit: {
+        hash: "1234567890abcdef",
+        shortHash: "1234567",
+        authorName: "Ada Lovelace",
+        authorDate: "2026-08-25T11:58:00.000Z",
+        subject: "Fresh revision",
+        message: "Fresh revision",
+        messageTruncated: false,
+      },
+    });
 
-describe("formatRevisionAge", () => {
-  const now = Date.parse("2026-08-25T12:00:00.000Z");
+    render(
+      <I18nProvider>
+        <FileRevisionLink
+          projectId="project-1"
+          path="src/file.ts"
+          dirtyLabel="dirty"
+          uncommittedLabel="uncommitted"
+        />
+      </I18nProvider>,
+    );
 
-  it("uses compact elapsed units", () => {
-    expect(formatRevisionAge("2026-08-25T11:58:00.000Z", now)).toBe("2m ago");
-    expect(formatRevisionAge("2026-08-23T12:00:00.000Z", now)).toBe("2d ago");
+    await screen.findByRole("link", { name: "1234567" });
+    expect(screen.getByText("(2m ago)")).not.toBeNull();
   });
 });

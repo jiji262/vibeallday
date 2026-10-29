@@ -6,21 +6,20 @@
   max-width: 900px;
 }
 
+/* One flush card; rows split by dashed rules (license-hub list). */
 .list {
   list-style: none;
   margin: 0;
   padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
 }
 
 .row {
-  padding: var(--space-3) var(--space-4);
-  background: var(--bg-card);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-xs);
+  padding: 14px 20px;
+  border-bottom: 1px dashed var(--dash);
+}
+
+.row:last-child {
+  border-bottom: 0;
 }
 
 .rowHead {
@@ -49,9 +48,9 @@
 }
 
 .revision {
-  font-family: var(--font-mono);
+  font-family: var(--label-font);
   font-size: 12px;
-  color: var(--text-muted);
+  color: var(--ink-3);
   white-space: nowrap;
 }
 
@@ -65,7 +64,7 @@
 .delete {
   min-height: var(--tap-min);
   padding: 0 var(--space-3);
-  color: var(--text-secondary);
+  color: var(--ink-3);
   font: inherit;
   font-size: 14px;
   font-weight: 500;
@@ -90,8 +89,8 @@
   margin-top: var(--space-1);
   white-space: pre-wrap;
   overflow-wrap: anywhere;
-  color: var(--text-primary);
-  font-size: 15px;
+  color: var(--ink);
+  font-size: 14px;
   line-height: 1.5;
 }
 
@@ -104,13 +103,19 @@
 .editor textarea {
   min-height: 6rem;
   padding: var(--space-3);
-  color: var(--text-primary);
+  color: var(--ink);
   font: inherit;
   font-size: 16px;
   resize: vertical;
-  background: var(--bg-input);
-  border: 1px solid var(--border-input);
+  background: var(--card);
+  border: 1px solid var(--line-strong);
   border-radius: var(--radius-md);
+}
+
+.editor textarea:focus-visible {
+  border-color: var(--indigo);
+  box-shadow: 0 0 0 3px var(--indigo-soft);
+  outline: none;
 }
 
 .editorActions {
@@ -119,37 +124,6 @@
   gap: var(--space-2);
 }
 
-.editorActions button,
-.actions button {
-  min-height: var(--tap-min);
-  padding: 0 var(--space-4);
-  color: var(--text-primary);
-  font: inherit;
-  font-size: 15px;
-  font-weight: 550;
-  background: var(--bg-card);
-  border: 1px solid var(--line-strong);
-  border-radius: var(--radius-md);
-  cursor: pointer;
-}
-
-.editorActions button:last-child,
-.actions button {
-  color: var(--ink-on);
-  background: var(--indigo);
-  border-color: transparent;
-}
-
-.editorActions button:disabled {
-  cursor: default;
-  opacity: 0.5;
-}
-
-.error {
-  color: var(--rose-ink);
-}
-
 .actions {
-  display: flex;
   justify-content: flex-end;
 }

@@ -15,7 +15,9 @@
 /* Searchable SettingsItem rows fill the panel grid as stacked cards. */
 .sessionDefaultsPanel > :global(.settings-item),
 .captionPair > :global(.settings-item) {
-  flex-direction: column;
+  /* A wrapping column sizes children at an intrinsic width first, so wrapped
+     chip rows reserved phantom height; stacked rows never need to wrap. */
+  flex-flow: column nowrap;
   align-items: stretch;
   justify-content: flex-start;
   gap: var(--space-2);
@@ -26,6 +28,20 @@
 .sessionDefaultsPanel > :global(.settings-item) > :global(.settings-item-info),
 .captionPair > :global(.settings-item) > :global(.settings-item-info) {
   flex: 0 0 auto;
+}
+
+/* Stacked label rows put their checkbox under the copy, start-aligned. */
+.sessionDefaultsPanel > :global(.settings-item) > input[type="checkbox"] {
+  align-self: flex-start;
+}
+
+/* The Claude auto-compact mirror carries a long caption; give it the same two
+   tracks as the compact row it sits beside instead of one narrow track. */
+@container (min-width: 36rem) {
+  .sessionDefaultsPanel
+    > [data-settings-item="session-default-claude-auto-compact"] {
+    grid-column: span 2;
+  }
 }
 
 .captionPair {
@@ -55,8 +71,10 @@
   grid-column: 1 / -1;
 }
 
+/* Free text in the panel lines up with the rows' own padding. */
 .intro {
   margin: 0;
+  padding: var(--space-4) var(--space-5) 0;
   color: var(--text-muted);
   font-size: var(--font-size-sm);
 }
@@ -65,8 +83,22 @@
   display: grid;
   gap: var(--space-1);
   margin-top: var(--space-2);
-  padding-top: var(--space-4);
-  border-top: 1px solid var(--border-color);
+  padding: var(--space-4) var(--space-5) 0;
+  border-top: 1px dashed var(--dash);
+}
+
+/* The model picker is a value select, not a filter: neutral field look with a
+   start-aligned label instead of the active-filter indigo tint. 0-2-1 beats
+   FilterDropdown's `.button.hasSelection`. */
+.sessionDefaultsPanel button.modelTrigger {
+  border-color: var(--line-strong);
+  background: var(--card);
+  color: var(--ink);
+  text-align: start;
+}
+
+.sessionDefaultsPanel button.modelTrigger:hover {
+  background: var(--bg-2);
 }
 
 .relatedDivider strong {

@@ -301,4 +301,38 @@ describe("IssuesPage associated sessions", () => {
     expect(screen.queryByText("mention 2")).toBeNull();
     answerSessions({ sessions: [], nextOffset: null });
   });
+
+  it("echoes every keystroke in the search and title fields", async () => {
+    renderPage();
+    const typeSequentially = (field: HTMLInputElement, text: string) => {
+      let value = "";
+      for (const char of text) {
+        value += char;
+        fireEvent.change(field, { target: { value } });
+        // Each keystroke is in the field before the debounced search runs.
+        expect(field.value).toBe(value);
+      }
+    };
+    const search = screen.getByRole("searchbox", {
+      name: "Search ticket keys, titles, or paste an issue/PR URL",
+    }) as HTMLInputElement;
+    typeSequentially(search, "AUTOTEST");
+    await vi.waitFor(() =>
+      expect(
+        state.fetch.mock.calls.some(([path]) =>
+          String(path).includes("q=AUTOTEST&"),
+        ),
+      ).toBe(true),
+    );
+
+    fireEvent.click(
+      await screen.findByRole("button", { name: "Actions for AUTOTEST-1" }),
+    );
+    fireEvent.click(await screen.findByText("Set display title…"));
+    const title = (await screen.findByRole("textbox", {
+      name: "Display title in VibeAllDay",
+    })) as HTMLInputElement;
+    fireEvent.change(title, { target: { value: "" } });
+    typeSequentially(title, "Renamed");
+  });
 });

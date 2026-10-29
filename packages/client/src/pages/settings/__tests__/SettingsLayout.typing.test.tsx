@@ -107,3 +107,24 @@ it("acknowledges query updates while deferred row work keeps the prior control m
   });
   expect(screen.getByRole("checkbox", { name: "Theme choice" })).toBe(control);
 });
+
+it("echoes every sequential keystroke in the settings search field", () => {
+  render(
+    <MemoryRouter initialEntries={["/settings"]}>
+      <Routes>
+        <Route path="/settings" element={<SettingsLayout />} />
+      </Routes>
+    </MemoryRouter>,
+  );
+  const input = screen.getByRole("searchbox") as HTMLInputElement;
+  let typed = "";
+  for (const char of "theme color") {
+    typed += char;
+    fireEvent.change(input, { target: { value: typed } });
+    // The controlled value lands synchronously; filtering is deferred.
+    expect(input.value).toBe(typed);
+    expect(screen.getByRole("searchbox")).toBe(input);
+  }
+  fireEvent.keyDown(input, { key: "Escape" });
+  expect(input.value).toBe("");
+});

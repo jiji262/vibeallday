@@ -3,6 +3,7 @@ import {
   APPROVAL_AUDIT_LOG_CAPABILITY,
   serverHasCapability,
 } from "@vibeallday/shared";
+import { LoadingState } from "../../components/garden/LoadingState";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   api,
@@ -816,7 +817,7 @@ export function LocalAccessSettings() {
       !formInitialized;
 
     if (isLoading) {
-      return <SettingsSection description={t("localAccessLoading")} />;
+      return <LoadingState label={t("localAccessLoading")} variant="compact" />;
     }
 
     const feedback = passwordFeedback(authPassword, authPasswordConfirm);

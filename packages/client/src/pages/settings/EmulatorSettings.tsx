@@ -1,4 +1,7 @@
 import { useCallback, useMemo, useState } from "react";
+import { ErrorState } from "../../components/garden/ErrorState";
+import { EmptyState } from "../../components/garden/EmptyState";
+import { LoadingState } from "../../components/garden/LoadingState";
 import {
   EMULATOR_FPS_OPTIONS,
   EMULATOR_WIDTH_OPTIONS,
@@ -271,14 +274,12 @@ export function EmulatorSettings() {
 
             <HideInSettingsSearch>
               {chromeOsHostError && (
-                <p className="settings-error">{chromeOsHostError}</p>
+                <ErrorState inline message={chromeOsHostError} />
               )}
-              {settingsError && (
-                <p className="settings-error">{settingsError}</p>
-              )}
+              {settingsError && <ErrorState inline message={settingsError} />}
 
               {chromeOsHosts.length === 0 ? (
-                <p className="settings-muted">{t("emulatorNoChromeOsHosts")}</p>
+                <EmptyState compact title={t("emulatorNoChromeOsHosts")} />
               ) : (
                 chromeOsHosts.map((host) => (
                   <div key={host} className="settings-item">
@@ -311,12 +312,12 @@ export function EmulatorSettings() {
               <h3>{t("emulatorDiscoveredDevicesTitle")}</h3>
 
               {loading && (
-                <p className="settings-muted">{t("projectsLoading")}</p>
+                <LoadingState label={t("projectsLoading")} variant="compact" />
               )}
-              {error && <p className="settings-error">{error}</p>}
+              {error && <ErrorState inline message={error} />}
 
               {!loading && emulators.length === 0 && (
-                <p className="settings-muted">{t("emulatorNoDevicesFound")}</p>
+                <EmptyState compact title={t("emulatorNoDevicesFound")} />
               )}
 
               {emulators.map((device) => (

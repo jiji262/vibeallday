@@ -19,6 +19,7 @@ import {
   parseDurationSeconds,
   serverHasCapability,
 } from "@vibeallday/shared";
+import { LoadingState } from "../../components/garden/LoadingState";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { CommittedRangeInput } from "../../components/ui/CommittedRangeInput";
 import {
@@ -637,7 +638,9 @@ export function MessageDeliverySettings() {
   useSettingsUndo(canUndo, undo);
 
   if (isLoading) {
-    return <SettingsSection description={t("messageDeliveryLoading")} />;
+    return (
+      <LoadingState label={t("messageDeliveryLoading")} variant="compact" />
+    );
   }
 
   return (

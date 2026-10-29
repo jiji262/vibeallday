@@ -1,3 +1,9 @@
+/*
+ * Project settings dialog: app and sharing on the left, heartbeat defaults
+ * on the right, then a right-aligned footer. The dialog variant of Modal
+ * pads itself, so the body adds no padding of its own.
+ */
+
 :global(.modal):has(.body) {
   width: min(44rem, calc(100dvw - 1.5rem));
   max-width: min(44rem, calc(100dvw - 1.5rem));
@@ -9,40 +15,50 @@
   display: grid;
   gap: var(--space-4);
   min-width: 0;
-  padding: var(--space-2);
 }
+
 .column {
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
   min-width: 0;
 }
+
 .sectionTitle {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
   gap: var(--space-2);
 }
+
 .section h3,
 .section p {
   margin: 0;
 }
 
+.section h3 {
+  color: var(--ink);
+  font-size: 15px;
+  font-weight: 500;
+}
+
 .intro,
-.headingRow p,
+.section p,
 .textMeta {
   margin: 0;
-  color: var(--text-secondary);
-  font-size: var(--font-size-sm);
+  color: var(--ink-3);
+  font-size: 13px;
+  line-height: 1.6;
 }
 
 .section {
   display: grid;
   gap: var(--space-3);
-  padding: var(--space-4);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
-  background: var(--bg-secondary);
+  padding: var(--space-4) var(--space-5);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--card);
+  box-shadow: var(--shadow-xs);
 }
 
 .headingRow {
@@ -55,7 +71,6 @@
 
 .headingRow h3 {
   margin: 0 0 var(--space-1);
-  font-size: var(--font-size-md);
 }
 
 .inheritToggle,
@@ -64,15 +79,19 @@
   display: flex;
   align-items: center;
   gap: var(--space-2);
-  font-size: var(--font-size-sm);
+  color: var(--ink-2);
+  font-size: 13px;
 }
 
 .inheritToggle {
   flex: 0 0 auto;
-  color: var(--text-secondary);
 }
 
-.numberField input {
+.inheritToggle input {
+  accent-color: var(--indigo);
+}
+
+.minutesInput {
   width: 6rem;
 }
 
@@ -81,25 +100,14 @@
   flex-direction: column;
 }
 
-.recentField select,
-.numberField input,
-.textarea {
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-sm);
-  background: var(--bg-primary);
-  color: var(--text-primary);
-  font: inherit;
-}
-
-.recentField select,
-.numberField input {
-  min-height: 2.25rem;
-  padding: var(--space-2);
-}
-
 .textarea {
   width: 100%;
   padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-md);
+  background: var(--card);
+  color: var(--ink);
+  font: inherit;
   line-height: 1.45;
 }
 
@@ -107,50 +115,26 @@
   display: flex;
   justify-content: space-between;
   gap: var(--space-3);
+  font-family: var(--label-font);
+  font-size: 12px;
 }
 
 .error {
   margin: 0;
-  color: var(--error-color);
-  font-size: var(--font-size-sm);
+  color: var(--rose-ink);
+  font-size: 13px;
 }
 
 .actions {
   grid-column: 1 / -1;
   position: sticky;
-  bottom: calc(-1 * var(--space-2));
-  padding-block: var(--space-3);
-  background: var(--bg-surface);
+  bottom: 0;
   display: flex;
   justify-content: flex-end;
   gap: var(--space-2);
-}
-
-.primary,
-.secondary {
-  min-height: 2.25rem;
-  padding: 0 var(--space-4);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-sm);
-  font: inherit;
-  cursor: pointer;
-}
-
-.primary {
-  border-color: var(--accent-color);
-  background: var(--accent-color);
-  color: var(--button-text, white);
-}
-
-.secondary {
-  background: var(--bg-primary);
-  color: var(--text-primary);
-}
-
-.primary:disabled,
-.secondary:disabled {
-  opacity: 0.55;
-  cursor: default;
+  padding-top: var(--space-4);
+  border-top: 1px dashed var(--dash);
+  background: var(--card);
 }
 
 @media (width <= 600px) {
@@ -160,20 +144,23 @@
     height: 100dvh;
   }
 
-  .body {
-    min-width: 0;
-  }
-
   .headingRow {
     flex-direction: column;
     gap: var(--space-2);
   }
+
+  .actions {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
 }
+
 @media (width >= 900px) {
   :global(.modal):has(.body) {
     width: min(64rem, calc(100dvw - 3rem));
     max-width: min(64rem, calc(100dvw - 3rem));
   }
+
   .body {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     align-items: start;
@@ -184,7 +171,6 @@
 .sharingList {
   display: flex;
   flex-direction: column;
-  gap: var(--space-2);
   margin: 0;
   padding: 0;
   list-style: none;
@@ -195,10 +181,22 @@
   grid-template-columns: minmax(0, 1fr) minmax(0, 12rem);
   gap: var(--space-1) var(--space-2);
   align-items: center;
+  padding: var(--space-2) 0;
+  border-bottom: 1px dashed var(--dash);
+  color: var(--ink);
+  font-size: 14px;
+}
+
+.sharingRow:last-child {
+  border-bottom: 0;
 }
 
 .sharingNote {
   grid-column: 1 / -1;
-  color: var(--text-muted);
-  font-size: var(--font-size-sm);
+  color: var(--ink-3);
+  font-size: 13px;
+}
+
+.section .sharingEmpty {
+  color: var(--ink-3);
 }

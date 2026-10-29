@@ -25,6 +25,11 @@ import { findTextMatch } from "../lib/searchMatch";
 import type { TranslationFn } from "../i18n";
 import { WORKING_TREE_KEY } from "./useCommitBrowserModel";
 import styles from "./CommitRevisionPane.module.css";
+import {
+  SourcePaneEmpty,
+  SourcePaneError,
+  SourcePaneLoading,
+} from "./SourcePaneStates";
 
 /**
  * Commit-history master pane. It owns revision-row presentation and row menus;
@@ -231,17 +236,17 @@ export function CommitRevisionPane({
           </div>
         )}
         {loadingList && !searchActive && noVisibleRevisions ? (
-          <div className="git-diff-loading">{t("gitStatusLoading")}</div>
+          <SourcePaneLoading label={t("gitStatusLoading")} />
         ) : listError && !searchActive && noVisibleRevisions ? (
-          <div className="git-diff-error">{listError}</div>
+          <SourcePaneError message={listError} />
         ) : searchActive && searchIndexing && noVisibleRevisions ? (
-          <div className="git-diff-loading">{t("sourceSearching")}</div>
+          <SourcePaneLoading label={t("sourceSearching")} />
         ) : searchActive && searchError && noVisibleRevisions ? (
-          <div className="git-diff-error">{searchError}</div>
+          <SourcePaneError message={searchError} />
         ) : noVisibleRevisions ? (
-          <div className="git-status-empty">
-            {searchActive ? t("sourceNoMatches") : t("sourceNoCommits")}
-          </div>
+          <SourcePaneEmpty
+            title={searchActive ? t("sourceNoMatches") : t("sourceNoCommits")}
+          />
         ) : (
           <>
             <ol
@@ -433,7 +438,7 @@ export function CommitRevisionPane({
                 );
               })}
             </ol>
-            {listError && <div className="git-diff-error">{listError}</div>}
+            {listError && <SourcePaneError message={listError} />}
             {hasMore && !searchActive && (
               <button
                 type="button"

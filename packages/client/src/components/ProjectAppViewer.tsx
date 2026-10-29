@@ -19,6 +19,8 @@ import { ComposerMicAction } from "./ComposerMicAction";
 import { AppViewerToolbar } from "./AppViewerToolbar";
 import { LastViewIcon } from "./LastViewIcon";
 import { ProjectAppIcon } from "./ProjectAppIcon";
+import { EmptyState } from "./garden";
+import { projectAppStatusText } from "./projectAppState";
 import actions from "./ViewerWindowActions.module.css";
 import styles from "./ProjectAppViewer.module.css";
 import { useI18n } from "../i18n";
@@ -271,6 +273,7 @@ export function ProjectAppViewer({
     shownStamp !== undefined;
   const stale =
     watching && info?.updatedAt !== undefined && info.updatedAt !== shownStamp;
+  const empty = info?.state === "none" && !info.latestArtifact;
   // Files change when something works on them, so readings follow that work:
   // while an agent in this project is mid-turn and briefly after, and when
   // the user returns to the page (perhaps from an editor). Otherwise the
@@ -587,11 +590,20 @@ export function ProjectAppViewer({
             {error && <p role="alert">{error}</p>}
             {(!view || settings) && (
               <>
-                <p>
-                  {info
-                    ? t("projectAppState", { state: info.state })
-                    : t("projectAppLoading")}
-                </p>
+                {empty ? (
+                  <EmptyState
+                    title={t("projectAppEmpty")}
+                    hint={t("projectAppEmptyHint")}
+                    icon={<ProjectAppIcon />}
+                    compact={presentation === "settings"}
+                  />
+                ) : (
+                  <p>
+                    {info
+                      ? projectAppStatusText(t, info.state)
+                      : t("projectAppLoading")}
+                  </p>
+                )}
                 {info?.error && <p>{info.error}</p>}
                 {info?.restartRequired && <p>{t("projectAppChanged")}</p>}
                 {livePreviewSupported &&
@@ -649,9 +661,6 @@ export function ProjectAppViewer({
                   >
                     {t("projectAppRestart")}
                   </button>
-                )}
-                {info?.state === "none" && !info.latestArtifact && (
-                  <p>{t("projectAppEmpty")}</p>
                 )}
                 {declaration && (
                   <dl>

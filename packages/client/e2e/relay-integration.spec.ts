@@ -254,10 +254,13 @@ test.describe("Full Relay Integration", () => {
     });
 
     // Verify navigation items are present (proves API requests work through relay)
-    // In relay mode, URLs are prefixed with the relay username
-    await expect(page.locator(`a[href="${relayAppPath()}"]`)).toBeVisible();
+    // In relay mode, URLs are prefixed with the relay username. Overview
+    // tiles link to the same pages, so match the sidebar nav items.
     await expect(
-      page.locator(`a[href="${relayAppPath("settings")}"]`),
+      page.locator(`.sidebar-nav-item[href="${relayAppPath()}"]`),
+    ).toBeVisible();
+    await expect(
+      page.locator(`.sidebar-nav-item[href="${relayAppPath("settings")}"]`),
     ).toBeVisible();
   });
 
@@ -912,7 +915,9 @@ test.describe("Full Relay Integration", () => {
         new RegExp(`${relayAppPath("bang-commands")}$`),
       );
       await expect(
-        page.getByText("!! Command History", { exact: true }),
+        page
+          .locator("main")
+          .getByRole("heading", { level: 1, name: "Shell history" }),
       ).toBeVisible({ timeout: 10_000 });
       // The tab bar resolves the relay prefix, so More stays selected here.
       await expect(moreTab(page)).toHaveAttribute("aria-current", "page");
@@ -945,7 +950,9 @@ test.describe("Full Relay Integration", () => {
       localStorage.setItem("vibeallday-saved-hosts", JSON.stringify(stored));
     }, relayWsURL);
 
-    const switchHost = page.getByRole("button", { name: "Switch Host" });
+    const switchHost = page.getByRole("button", {
+      name: /^Switch host, now /,
+    });
     const otherHost = page.getByRole("menuitem", { name: /Windows box/ });
     for (const viewport of [
       { width: 1000, height: 600 },
@@ -1074,7 +1081,9 @@ test.describe("Full Relay Integration", () => {
 
     // Verify projects are still accessible after refresh
     // In relay mode, URLs are prefixed with the relay username
-    await expect(page.locator(`a[href="${relayAppPath()}"]`)).toBeVisible();
+    await expect(
+      page.locator(`.sidebar-nav-item[href="${relayAppPath()}"]`),
+    ).toBeVisible();
   });
 
   test("recovers an exhausted relay connection on renewed activity without losing input", async ({

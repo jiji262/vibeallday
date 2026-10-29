@@ -28,6 +28,7 @@ import { markSwitchHostReload } from "../../lib/switchHostReload";
 import { SettingsItem } from "./SettingsItem";
 import { useSettingsPaneTitle } from "./SettingsPaneTitleContext";
 import { HideInSettingsSearch } from "./SettingsSearchContext";
+import styles from "./RemoteAccessSettings.module.css";
 import { SettingsSection } from "./SettingsSection";
 import { AppsSettingsLink } from "./AppsSettings";
 
@@ -554,7 +555,7 @@ export function RemoteAccessSettings() {
 
   const vibeAllDayClientInfo = (
     <HideInSettingsSearch>
-      <div className="form-hint">
+      <div className={`form-hint ${styles.clientInfo}`}>
         <p>
           <strong>{t("advancedVibeAllDayClientTitle")}</strong>.{" "}
           {t("advancedVibeAllDayClientDescription")}
@@ -683,11 +684,14 @@ export function RemoteAccessSettings() {
       {hostAwakeConfig}
       {publicShareConfig}
       <HideInSettingsSearch>
-        <RemoteAccessSetup
-          title={t("remoteAccessConnectedTitle")}
-          description={t("remoteAccessSetupDescription")}
-          vibeAllDayClientInfo={vibeAllDayClientInfo}
-        />
+        {/* Same card frame as the settings groups above it. */}
+        <div className={`settings-group ${styles.setupCard}`}>
+          <RemoteAccessSetup
+            title={t("remoteAccessConnectedTitle")}
+            description={t("remoteAccessSetupDescription")}
+            vibeAllDayClientInfo={vibeAllDayClientInfo}
+          />
+        </div>
       </HideInSettingsSearch>
       {persistSessionsToggle}
     </SettingsSection>

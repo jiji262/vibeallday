@@ -3,6 +3,12 @@ import { Link, useLocation } from "react-router-dom";
 import { useRemoteBasePath } from "../hooks/useRemoteBasePath";
 import { type MessageKey, useI18n } from "../i18n";
 import { useInboxCounts } from "../lib/clientSummaryStore";
+import {
+  FolderIcon,
+  InboxIcon,
+  MoreHorizontalIcon,
+  PlusIcon,
+} from "./garden/icons";
 import styles from "./MobileTabBar.module.css";
 
 type TabKey = "sessions" | "new" | "projects" | "more";
@@ -16,16 +22,8 @@ interface TabSpec {
   icon: ReactNode;
 }
 
-const ICON_PROPS = {
-  width: 22,
-  height: 22,
-  viewBox: "0 0 24 24",
-  fill: "none",
-  stroke: "currentColor",
-  strokeWidth: 1.8,
-  strokeLinecap: "round",
-  strokeLinejoin: "round",
-} as const;
+const TAB_ICON_SIZE = 22;
+const BADGE_CAP = 99;
 
 const TABS: readonly TabSpec[] = [
   {
@@ -33,34 +31,21 @@ const TABS: readonly TabSpec[] = [
     to: "/inbox",
     labelKey: "tabSessions",
     prefixes: ["/inbox", "/sessions"],
-    icon: (
-      <svg {...ICON_PROPS} aria-hidden="true">
-        <path d="M4 6.5A2.5 2.5 0 0 1 6.5 4h11A2.5 2.5 0 0 1 20 6.5v7a2.5 2.5 0 0 1-2.5 2.5H10l-4.5 3.5V16A2.5 2.5 0 0 1 4 13.5z" />
-        <path d="M8.5 8.5h7M8.5 11.5h4.5" />
-      </svg>
-    ),
+    icon: <InboxIcon size={TAB_ICON_SIZE} />,
   },
   {
     key: "new",
     to: "/new-session",
     labelKey: "tabNew",
     prefixes: ["/new-session"],
-    icon: (
-      <svg {...ICON_PROPS} strokeWidth={2.2} aria-hidden="true">
-        <path d="M12 5v14M5 12h14" />
-      </svg>
-    ),
+    icon: <PlusIcon size={TAB_ICON_SIZE} strokeWidth="2.2" />,
   },
   {
     key: "projects",
     to: "/projects",
     labelKey: "tabProjects",
     prefixes: ["/projects"],
-    icon: (
-      <svg {...ICON_PROPS} aria-hidden="true">
-        <path d="M3.5 7.5A2 2 0 0 1 5.5 5.5h4l2 2h7a2 2 0 0 1 2 2v7.5a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2z" />
-      </svg>
-    ),
+    icon: <FolderIcon size={TAB_ICON_SIZE} />,
   },
   {
     key: "more",
@@ -75,16 +60,11 @@ const TABS: readonly TabSpec[] = [
       "/devices",
       "/git-status",
     ],
-    icon: (
-      <svg {...ICON_PROPS} aria-hidden="true">
-        <rect x="4" y="4" width="6.5" height="6.5" rx="1.6" />
-        <rect x="13.5" y="4" width="6.5" height="6.5" rx="1.6" />
-        <rect x="4" y="13.5" width="6.5" height="6.5" rx="1.6" />
-        <rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.6" />
-      </svg>
-    ),
+    icon: <MoreHorizontalIcon size={TAB_ICON_SIZE} />,
   },
 ];
+
+const SESSION_ROUTE = /^\/projects\/[^/]+\/sessions\/[^/]+(?:\/|$)/;
 
 function matchesPrefix(path: string, prefix: string): boolean {
   return path === prefix || path.startsWith(`${prefix}/`);
@@ -98,19 +78,30 @@ function stripBasePath(pathname: string, basePath: string): string {
   return pathname;
 }
 
+/**
+ * Session URLs live under Projects but belong to Sessions, and Source
+ * control opened from a session (`?from=session`) keeps that context.
+ */
+function activeTabFor(path: string, search: string): TabKey | undefined {
+  if (SESSION_ROUTE.test(path)) return "sessions";
+  if (
+    matchesPrefix(path, "/git-status") &&
+    new URLSearchParams(search).get("from") === "session"
+  ) {
+    return "sessions";
+  }
+  return TABS.find((tab) =>
+    tab.prefixes.some((prefix) => matchesPrefix(path, prefix)),
+  )?.key;
+}
+
 /** Phone navigation shares one Sessions destination for Overview and All. */
 export function MobileTabBar() {
   const { t } = useI18n();
   const basePath = useRemoteBasePath();
-  const { pathname } = useLocation();
+  const { pathname, search } = useLocation();
   const { needsAttention } = useInboxCounts();
-  const path = stripBasePath(pathname, basePath);
-  // Session URLs live under Projects, but belong to the Sessions destination.
-  const activeTab = /^\/projects\/[^/]+\/sessions\/[^/]+(?:\/|$)/.test(path)
-    ? "sessions"
-    : TABS.find((tab) =>
-        tab.prefixes.some((prefix) => matchesPrefix(path, prefix)),
-      )?.key;
+  const activeTab = activeTabFor(stripBasePath(pathname, basePath), search);
 
   return (
     <nav className={styles.bar} aria-label={t("tabBarLabel")}>
@@ -142,7 +133,7 @@ export function MobileTabBar() {
             <span className={styles.label}>{label}</span>
             {badge > 0 ? (
               <span className={styles.badge} aria-hidden="true">
-                {badge > 99 ? "99+" : badge}
+                {badge > BADGE_CAP ? `${BADGE_CAP}+` : badge}
               </span>
             ) : null}
           </Link>

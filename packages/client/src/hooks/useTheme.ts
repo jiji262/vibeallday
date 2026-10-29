@@ -3,18 +3,7 @@ import { UI_KEYS } from "../lib/storageKeys";
 
 export type Theme = "auto" | "light" | "dark" | "verydark";
 
-const themeLabels: Record<Theme, string> = {
-  auto: "Auto",
-  light: "Light",
-  dark: "Dark",
-  verydark: "Very Dark",
-};
-
 export const THEMES: Theme[] = ["auto", "light", "dark", "verydark"];
-
-export function getThemeLabel(theme: Theme): string {
-  return themeLabels[theme];
-}
 
 /** Browser chrome (status bar, PWA title bar) matches the page surface. */
 const THEME_CHROME_COLORS = {

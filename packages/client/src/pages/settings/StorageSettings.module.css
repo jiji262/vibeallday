@@ -1,7 +1,13 @@
+/* Stacked rows: the shared info block's 11rem flex-basis is a row width; in a
+   column it became an 11rem minimum height and left a gap above the choices. */
 .setting:global(.settings-item) {
-  flex-direction: column;
+  flex-flow: column nowrap;
   align-items: stretch;
   gap: var(--space-3);
+}
+
+.setting > :global(.settings-item-info) {
+  flex: none;
 }
 
 .choices {
@@ -83,14 +89,17 @@
   align-items: center;
   gap: var(--space-2);
   flex-wrap: wrap;
-  font-weight: 600;
+  /* Option titles follow the row-label recipe (14px/500), not the inherited
+     root size. */
+  font-size: var(--font-size-lg);
+  font-weight: 500;
 }
 
 .choiceDescription {
   max-width: 72ch;
-  color: var(--text-muted);
-  font-size: var(--font-size-sm);
-  line-height: 1.4;
+  color: var(--ink-3);
+  font-size: var(--font-size-base);
+  line-height: 1.5;
 }
 
 .defaultBadge {

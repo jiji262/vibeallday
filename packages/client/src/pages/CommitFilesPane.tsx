@@ -42,6 +42,11 @@ import { reflowCommitMessage } from "../lib/reflowCommitMessage";
 import type { TranslationFn } from "../i18n";
 import { CommitHistoryParentLink } from "./CommitHistoryParentLink";
 import styles from "./CommitFilesPane.module.css";
+import {
+  SourcePaneEmpty,
+  SourcePaneError,
+  SourcePaneLoading,
+} from "./SourcePaneStates";
 
 const EMPTY_REVIEW_STATES = new Map<string, ReviewSiteStateSummary[]>();
 
@@ -293,9 +298,9 @@ export function CommitFilesPane({
           />
         </div>
         {loading ? (
-          <div className="git-diff-loading">{t("gitStatusLoading")}</div>
+          <SourcePaneLoading label={t("gitStatusLoading")} />
         ) : detailError ? (
-          <div className="git-diff-error">{detailError}</div>
+          <SourcePaneError message={detailError} />
         ) : detail ? (
           <>
             {detail.body && (
@@ -421,14 +426,16 @@ export function CommitFilesPane({
               t={t}
             />
             {selectedFiles.length === 0 && (
-              <div className="git-status-empty">
-                {compareToHead
-                  ? t("sourceNoChangesToHead")
-                  : t("sourceNoFiles")}
-              </div>
+              <SourcePaneEmpty
+                title={
+                  compareToHead
+                    ? t("sourceNoChangesToHead")
+                    : t("sourceNoFiles")
+                }
+              />
             )}
             {selectedFiles.length > 0 && filteredFiles.length === 0 && (
-              <div className="git-status-empty">{t("sourceNoMatches")}</div>
+              <SourcePaneEmpty title={t("sourceNoMatches")} />
             )}
           </>
         ) : null}

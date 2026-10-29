@@ -1,15 +1,18 @@
 import type { MouseEvent } from "react";
+import { Badge, type BadgeTone } from "../components/garden/Badge";
+import { ChevronRightIcon, XIcon } from "../components/garden/icons";
+import { Spinner } from "../components/garden/Spinner";
 import { useI18n } from "../i18n";
 import type { SavedHost } from "../lib/hostStorage";
 import styles from "./HostPickerPage.module.css";
 
 export type HostStatus = "online" | "offline" | "checking" | "unknown";
 
-const STATUS_CLASS: Record<HostStatus, string | undefined> = {
-  online: styles.online,
-  offline: styles.offline,
-  checking: styles.checking,
-  unknown: styles.unknown,
+const STATUS_TONE: Record<HostStatus, BadgeTone> = {
+  online: "mint",
+  offline: "rose",
+  checking: "sand",
+  unknown: "grey",
 };
 
 const STATUS_LABEL_KEY = {
@@ -19,37 +22,7 @@ const STATUS_LABEL_KEY = {
   unknown: "hostPickerStatusUnknown",
 } as const satisfies Record<HostStatus, string>;
 
-const CHEVRON = (
-  <svg
-    width="16"
-    height="16"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    aria-hidden="true"
-  >
-    <polyline points="9 6 15 12 9 18" />
-  </svg>
-);
-
-const REMOVE_ICON = (
-  <svg
-    width="18"
-    height="18"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    aria-hidden="true"
-  >
-    <path d="M18 6L6 18M6 6l12 12" />
-  </svg>
-);
+const ICON_SIZE = 16;
 
 interface HostRowProps {
   host: SavedHost;
@@ -71,7 +44,7 @@ export function HostRow({
 }: HostRowProps) {
   const { t } = useI18n();
   const statusLabel = t(STATUS_LABEL_KEY[status]);
-  const meta = [host.mode, statusLabel, lastConnected].filter(Boolean);
+  const meta = [host.mode, lastConnected].filter(Boolean);
   return (
     <li className={`host-picker-item ${styles.host}`}>
       <button
@@ -82,18 +55,20 @@ export function HostRow({
         aria-busy={connecting}
         data-testid={`host-item-${host.id}`}
       >
-        <span
-          className={`${styles.dot} ${STATUS_CLASS[status]}`}
-          title={statusLabel}
-          aria-hidden="true"
-        />
         <span className={styles.hostText}>
           <span className={styles.hostName}>{host.displayName}</span>
           <span className={styles.hostMeta}>{meta.join(" · ")}</span>
         </span>
         {connecting ? (
-          <span className={styles.spinner} aria-hidden="true" />
-        ) : null}
+          <Spinner size={16} />
+        ) : (
+          <Badge
+            tone={STATUS_TONE[status]}
+            dot={status === "checking" ? "pulse" : true}
+          >
+            {statusLabel}
+          </Badge>
+        )}
       </button>
       <button
         type="button"
@@ -103,7 +78,7 @@ export function HostRow({
         aria-label={t("hostPickerRemoveHost")}
         data-testid={`delete-host-${host.id}`}
       >
-        {REMOVE_ICON}
+        <XIcon size={ICON_SIZE} />
       </button>
     </li>
   );
@@ -134,7 +109,7 @@ export function ModeOption({
         <span className={styles.optionTitle}>{title}</span>
         <span className={styles.optionDesc}>{description}</span>
       </span>
-      <span className={styles.chevron}>{CHEVRON}</span>
+      <ChevronRightIcon size={ICON_SIZE} className={styles.chevron} />
     </button>
   );
 }

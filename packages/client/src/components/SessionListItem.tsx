@@ -1,6 +1,5 @@
 import type { SessionClearloopBadge } from "@vibeallday/shared";
 import {
-  type CSSProperties,
   type ReactNode,
   useCallback,
   useEffect,
@@ -47,8 +46,9 @@ import type {
   SessionStatus,
 } from "../types";
 import { ProviderChildNavTarget } from "./ProviderChildNavTarget";
-import { getProviderColor, ProviderBadge } from "./ProviderBadge";
+import { ProviderBadge } from "./ProviderBadge";
 import { SessionHoverCard } from "./SessionHoverCard";
+import { SessionListTime } from "./SessionListTime";
 import { PublicShareManagerModal } from "./PublicShareManagerModal";
 import { SessionMenu } from "./SessionMenu";
 import { LegacySessionShareModal } from "./SessionShareModal";
@@ -504,22 +504,6 @@ export function SessionListItem({
       </>
     ) : null;
 
-  // Format relative time for card mode
-  const formatRelativeTime = (timestamp: string): string => {
-    const now = Date.now();
-    const then = new Date(timestamp).getTime();
-    const diffMs = now - then;
-    const diffMins = Math.floor(diffMs / 60000);
-    const diffHours = Math.floor(diffMs / 3600000);
-    const diffDays = Math.floor(diffMs / 86400000);
-
-    if (diffMins < 1) return "just now";
-    if (diffMins < 60) return `${diffMins}m ago`;
-    if (diffHours < 24) return `${diffHours}h ago`;
-    if (diffDays < 7) return `${diffDays}d ago`;
-    return new Date(timestamp).toLocaleDateString();
-  };
-
   // Hover tooltip age shows both: time since last activity (primary) with the
   // creation time as an "established" aside — "5m ago (est. 2d)". Either half
   // drops out when its timestamp is unknown/default.
@@ -801,13 +785,6 @@ export function SessionListItem({
     <li
       ref={liRef}
       className={liClasses}
-      style={
-        mode === "card" && provider
-          ? ({
-              "--row-accent": getProviderColor(provider),
-            } as CSSProperties)
-          : undefined
-      }
       onKeyDown={(event) => {
         const unread = sessionReadShortcut(event.nativeEvent);
         if (unread === null) return;
@@ -942,32 +919,44 @@ export function SessionListItem({
                 </strong>
                 <span className="session-list-item__meta">
                   {provider && (
-                    <ProviderBadge
-                      provider={provider}
-                      model={model}
-                      className="session-list-item__provider-badge"
-                    />
+                    <span data-session-cell="provider">
+                      <ProviderBadge
+                        provider={provider}
+                        model={model}
+                        condensed
+                        className="session-list-item__provider-badge"
+                      />
+                    </span>
                   )}
                   {showProjectName && projectName && (
-                    <span className="session-list-item__project">
+                    <span
+                      className="session-list-item__project"
+                      data-session-cell="project"
+                    >
                       {projectName}
                     </span>
                   )}
-                  {showTimestamp && updatedAt && formatRelativeTime(updatedAt)}
-                  {customBadge && (
-                    <span
-                      className={`inbox-item-badge ${customBadge.className}`}
-                    >
-                      {customBadge.label}
-                    </span>
+                  {showTimestamp && updatedAt && (
+                    <SessionListTime timestamp={updatedAt} />
                   )}
-                  {showStatusBadge && status && (
-                    <SessionStatusBadge
-                      status={status}
-                      pendingInputType={pendingInputType}
-                      hasUnread={hasUnread}
-                      activity={activity}
-                    />
+                  {(customBadge || (showStatusBadge && status)) && (
+                    <span className={styles.state} data-session-cell="state">
+                      {customBadge && (
+                        <span
+                          className={`inbox-item-badge ${customBadge.className}`}
+                        >
+                          {customBadge.label}
+                        </span>
+                      )}
+                      {showStatusBadge && status && (
+                        <SessionStatusBadge
+                          status={status}
+                          pendingInputType={pendingInputType}
+                          hasUnread={hasUnread}
+                          activity={activity}
+                        />
+                      )}
+                    </span>
                   )}
                 </span>
                 {providerChildren.length > 0 && (
@@ -1122,7 +1111,7 @@ export function SessionListItem({
           {compactTrailing}
         </Link>
       )}
-      <span className={styles.questions}>
+      <span className={styles.questions} data-session-accessory="">
         {nonHumanUserTurn && (
           <Link
             to={nonHumanTurnHref}

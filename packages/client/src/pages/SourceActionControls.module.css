@@ -1,0 +1,61 @@
+/* Repository operations in the Source Control intro. They are garden
+   secondary sm buttons; the leading indicator keeps a fixed slot so a glyph,
+   the running spinner, and the outcome mark swap without moving the label. */
+.actionGroup {
+  display: inline-flex;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.action {
+  white-space: nowrap;
+}
+
+.indicator {
+  display: inline-flex;
+  width: 0.75rem;
+  height: 0.75rem;
+  flex: 0 0 0.75rem;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink-3);
+  font-family: var(--label-font);
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.indicator .glyph {
+  display: block;
+  width: 0.75rem;
+  height: 0.75rem;
+}
+
+.success .indicator {
+  color: var(--mint-ink);
+}
+
+.warning .indicator {
+  color: var(--peach-ink);
+}
+
+@media (width < 768px) {
+  .actionGroup {
+    width: 100%;
+  }
+
+  /* Repository operations are thumb targets on phones. */
+  .action {
+    min-height: var(--tap-min);
+    font-size: 14px;
+  }
+
+  .checkRemote,
+  .checkRemote .actionLabel {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}

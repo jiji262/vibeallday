@@ -4,6 +4,8 @@ import { useCodexUpdateStatus } from "../hooks/useCodexUpdateStatus";
 import { useProviders } from "../hooks/useProviders";
 import { useServerSettings } from "../hooks/useServerSettings";
 import { useI18n } from "../i18n";
+import { Button } from "./garden/Button";
+import { Notice } from "./garden/Notice";
 import { Modal } from "./ui/Modal";
 
 const STORAGE_KEY = "codex-update-seen-tag";
@@ -110,9 +112,7 @@ export function CodexUpdatePrompt() {
       try {
         await updateSetting("codexUpdatePolicy", "auto");
       } catch {
-        setPolicyError(
-          "The auto-update preference could not be saved; future releases may still need manual confirmation.",
-        );
+        setPolicyError(t("codexUpdatePolicySaveFailed"));
       }
     }
     const ok = await install();
@@ -135,14 +135,14 @@ export function CodexUpdatePrompt() {
   const rawOutput =
     installOutput?.trim() ||
     (isInstalling
-      ? "Running the Codex CLI update. Raw output will appear here when the command finishes."
+      ? t("codexUpdateRunningOutput")
       : installAttempted
-        ? "(The update command did not produce stdout or stderr.)"
+        ? t("codexUpdateNoOutput")
         : null);
 
   return (
     <Modal
-      title="Codex CLI update available"
+      title={t("codexUpdateTitle")}
       onClose={handleModalClose}
       variant="dialog"
     >
@@ -153,7 +153,7 @@ export function CodexUpdatePrompt() {
                 version: status.installed ?? activeTag,
               })
             : t("codexUpdateReadySummary", {
-                current: status.installed ?? "unknown",
+                current: status.installed ?? t("codexUpdateUnknownVersion"),
                 latest: latestTag,
               })}
         </p>
@@ -165,7 +165,7 @@ export function CodexUpdatePrompt() {
             rel="noopener noreferrer"
             className="settings-link codex-update-prompt__release-link"
           >
-            Release notes
+            {t("codexUpdateReleaseNotes")}
           </a>
         )}
 
@@ -206,23 +206,26 @@ export function CodexUpdatePrompt() {
         )}
 
         {installAttempted && installSucceeded === true && (
-          <p className="form-success">
-            Codex updated successfully. Review the raw output below, then close
-            this dialog.
-          </p>
+          <Notice tone="success">{t("codexUpdateSucceeded")}</Notice>
         )}
 
         {installAttempted && installSucceeded === false && error && (
-          <p className="settings-warning">{error}</p>
+          <Notice tone="danger" role="alert">
+            {error}
+          </Notice>
         )}
 
-        {policyError && <p className="settings-warning">{policyError}</p>}
+        {policyError && (
+          <Notice tone="warning" role="alert">
+            {policyError}
+          </Notice>
+        )}
 
         {(isInstalling || installAttempted) && rawOutput && (
           <div className="codex-update-prompt__output-block">
             <div className="codex-update-prompt__output-header">
               <strong className="codex-update-prompt__output-title">
-                Raw output
+                {t("codexUpdateRawOutput")}
               </strong>
               {installCommand && (
                 <code className="codex-update-prompt__output-command">
@@ -236,35 +239,34 @@ export function CodexUpdatePrompt() {
 
         <div className="codex-update-prompt__actions">
           {installSucceeded === true || !canInstall ? (
-            <button
-              type="button"
-              className="settings-button settings-button-primary"
-              onClick={() => close({ markSeen: true })}
-            >
+            <Button variant="primary" onClick={() => close({ markSeen: true })}>
               {t("codexUpdateDone")}
-            </button>
+            </Button>
           ) : (
             <>
-              <button
-                type="button"
-                className="settings-button settings-button-secondary"
+              <Button
+                variant="secondary"
                 onClick={installAttempted ? () => close() : handleNotNow}
                 disabled={isInstalling}
               >
-                {installAttempted ? "Dismiss" : "Not now"}
-              </button>
-              <button
-                type="button"
-                className="settings-button settings-button-primary"
+                {t(
+                  installAttempted ? "codexUpdateDismiss" : "codexUpdateNotNow",
+                )}
+              </Button>
+              <Button
+                variant="primary"
                 onClick={() => void handleUpdate()}
                 disabled={isInstalling}
+                loading={isInstalling}
               >
-                {isInstalling
-                  ? "Installing…"
-                  : installAttempted
-                    ? "Retry update"
-                    : "Update now"}
-              </button>
+                {t(
+                  isInstalling
+                    ? "codexUpdateInstalling"
+                    : installAttempted
+                      ? "codexUpdateRetry"
+                      : "codexUpdateNow",
+                )}
+              </Button>
             </>
           )}
         </div>

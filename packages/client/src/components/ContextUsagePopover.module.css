@@ -1,18 +1,20 @@
 /* Token-accounting section of the context-usage popover. The popover shell
-   and the subscription-quota rows remain global (`.context-subscription-*`). */
+   and the subscription-quota rows remain global (`.context-subscription-*`).
+   Garden meta grid: mono uppercase labels, tabular mono values, and a dashed
+   rule above, since the section sits inside the popover's surface. */
 
 .tokenUsage {
   display: flex;
   flex-direction: column;
-  gap: var(--space-1);
+  gap: var(--space-2);
   padding-top: var(--space-2);
-  border-top: 1px solid var(--border-color);
+  border-top: 1px dashed var(--dash);
 }
 
 .rows {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: var(--space-1);
   margin: 0;
 }
 
@@ -20,9 +22,7 @@
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  gap: var(--space-2);
-  color: var(--text-secondary);
-  font-size: var(--font-size-xs);
+  gap: var(--space-3);
 }
 
 .row dt,
@@ -30,12 +30,27 @@
   margin: 0;
 }
 
+.row dt {
+  color: var(--ink-3);
+  font-family: var(--label-font);
+  font-size: var(--eyebrow-size);
+  letter-spacing: var(--meta-tracking);
+  text-transform: uppercase;
+}
+
 .row dd {
-  color: var(--text-primary);
+  color: var(--ink);
+  font-family: var(--label-font);
+  font-size: 13px;
   font-variant-numeric: tabular-nums;
 }
 
 .hint {
-  color: var(--text-muted);
+  color: var(--ink-3);
   font-size: var(--font-size-xs);
+  line-height: 1.5;
+}
+
+.refreshIcon {
+  display: block;
 }

@@ -1,10 +1,17 @@
+/*
+ * Public share inventory: one flush card of share rows with dashed
+ * dividers, mono meta, a mode tile and ghost icon actions.
+ */
+
 .list {
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
   display: grid;
   max-height: min(72vh, 720px);
-  overscroll-behavior: contain;
   overflow-y: auto;
+  overscroll-behavior: contain;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--card);
+  box-shadow: var(--shadow-xs);
   touch-action: pan-y;
 }
 
@@ -13,20 +20,26 @@
 }
 
 .row {
-  align-items: center;
   display: flex;
-  gap: 12px;
+  align-items: center;
   justify-content: space-between;
-  padding: 12px;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  transition: background-color var(--duration-fast) var(--ease-standard);
 }
 
 .row + .row {
-  border-top: 1px solid var(--border-color);
+  border-top: 1px dashed var(--dash);
 }
 
-.rowHighlighted {
-  background: color-mix(in srgb, var(--accent-color) 13%, transparent);
-  box-shadow: inset 3px 0 var(--accent-color);
+.row:hover {
+  background: var(--bg-2);
+}
+
+.rowHighlighted,
+.rowHighlighted:hover {
+  background: var(--indigo-soft);
+  box-shadow: inset 3px 0 var(--indigo);
 }
 
 .rowMain {
@@ -42,122 +55,160 @@
   white-space: nowrap;
 }
 
-.rowMeta,
-.count {
-  color: var(--text-secondary);
-  font-size: 0.78rem;
+.rowMain strong {
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.rowMeta {
+  color: var(--ink-3);
+  font-family: var(--label-font);
+  font-size: 12px;
 }
 
 .warning {
-  color: var(--warning-color);
-  font-size: 0.78rem;
+  color: var(--peach-ink);
+  font-size: 12px;
 }
 
 .notice {
-  color: var(--text-secondary);
-  font-size: 0.82rem;
+  color: var(--ink-3);
+  font-size: 13px;
 }
 
 .rowActions {
-  align-items: center;
   display: flex;
   flex: 0 0 auto;
-  gap: 6px;
+  align-items: center;
+  gap: var(--space-1);
 }
 
 .rowTypeIcon {
-  align-items: center;
-  background: #475569;
-  border-radius: 6px;
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.24);
-  color: #fff;
   display: inline-flex;
-  flex: 0 0 26px;
-  height: 26px;
+  flex: 0 0 28px;
+  align-items: center;
   justify-content: center;
+  height: 28px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--bg-soft);
+  color: var(--ink-3);
 }
 
 .rowTypeIcon svg {
-  height: 16px;
   width: 16px;
+  height: 16px;
 }
 
 .rowTypeIconLive {
-  background: color-mix(in srgb, var(--app-accent) 62%, #111827);
+  border-color: transparent;
+  background: var(--mint-soft);
+  color: var(--mint-ink);
 }
 
 .iconButton {
-  align-items: center;
-  background: transparent;
-  border: 1px solid var(--border-color);
-  border-radius: 6px;
-  color: var(--text-primary);
-  cursor: pointer;
   display: inline-flex;
+  align-items: center;
   justify-content: center;
-  min-height: 30px;
-  min-width: 30px;
+  min-width: 32px;
+  min-height: 32px;
   padding: 4px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--ink-3);
+  cursor: pointer;
+  transition:
+    background-color var(--duration-fast) var(--ease-standard),
+    color var(--duration-fast) var(--ease-standard);
 }
 
 .iconButton:hover:not(:disabled) {
-  background: var(--bg-hover);
+  background: var(--bg-soft);
+  color: var(--ink);
 }
 
-.iconButtonDanger {
-  background: color-mix(in srgb, var(--error-color) 72%, #320d12);
-  border-color: color-mix(in srgb, var(--error-color) 74%, #fff);
-  box-shadow: inset 0 1px rgba(255, 255, 255, 0.16);
-  color: #fff;
+.iconButton:focus-visible {
+  border-color: var(--indigo);
+  box-shadow: 0 0 0 3px var(--indigo-soft);
 }
 
 .iconButtonFreeze {
-  background: color-mix(in srgb, var(--attention-color) 62%, #1e293b);
-  border-color: color-mix(in srgb, var(--attention-color) 66%, #fff);
-  box-shadow: inset 0 1px rgba(255, 255, 255, 0.16);
-  color: #fff;
+  color: var(--peach-ink);
 }
 
 .iconButtonFreeze svg {
-  height: 14px;
   width: 14px;
+  height: 14px;
 }
 
 .iconButtonFreeze:hover:not(:disabled) {
-  background: color-mix(in srgb, var(--attention-color) 76%, #1e293b);
+  background: var(--peach-soft);
+  color: var(--peach-ink);
+}
+
+.iconButtonDanger {
+  color: var(--rose-ink);
 }
 
 .iconButtonDanger svg {
-  height: 13px;
   width: 13px;
+  height: 13px;
 }
 
 .iconButtonDanger:hover:not(:disabled) {
-  background: color-mix(in srgb, var(--error-color) 84%, #320d12);
+  background: var(--rose-soft);
+  color: var(--rose-ink);
 }
 
 .iconButton:disabled {
+  color: var(--ink-4);
   cursor: not-allowed;
-  opacity: 0.5;
 }
 
 .error {
-  color: var(--error-color);
+  color: var(--rose-ink);
+  font-size: 13px;
 }
 
 .empty {
-  color: var(--text-secondary);
-  padding: 24px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: 40px var(--space-4);
+  color: var(--ink-3);
+  font-size: 14px;
   text-align: center;
 }
 
 .count {
+  color: var(--ink-3);
+  font-family: var(--label-font);
+  font-size: var(--eyebrow-size);
+  letter-spacing: var(--meta-tracking);
   text-align: right;
+  text-transform: uppercase;
+}
+
+@media (pointer: coarse) {
+  .iconButton {
+    min-width: var(--tap-min);
+    min-height: var(--tap-min);
+  }
 }
 
 @media (width <= 600px) {
   .row {
-    align-items: stretch;
     flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .row,
+  .iconButton {
+    transition: none;
   }
 }

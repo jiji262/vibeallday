@@ -13,8 +13,8 @@ const blameViewStylesheetUrl = new URL(
   "../../pages/BlameView.module.css",
   import.meta.url,
 );
-const gitStatusPageStylesheetUrl = new URL(
-  "../../pages/GitStatusPage.module.css",
+const sourceActionControlsStylesheetUrl = new URL(
+  "../../pages/SourceActionControls.module.css",
   import.meta.url,
 );
 const gitStatusDiffPreviewStylesheetUrl = new URL(
@@ -169,84 +169,22 @@ describe("Source Control workbench layout CSS contract", () => {
   });
 
   it("keeps frequent repository actions left-anchored and width-stable", async () => {
-    const [indexCss, pageCss] = await Promise.all([
-      readFile(indexStylesheetUrl, "utf8"),
-      readFile(gitStatusPageStylesheetUrl, "utf8"),
-    ]);
+    const css = await readFile(sourceActionControlsStylesheetUrl, "utf8");
     const actionGroup = getRuleDeclarationsContaining(
-      pageCss,
+      css,
       ".actionGroup",
       "display: inline-flex",
     );
-    const fallback = getRuleDeclarationsContaining(
-      pageCss,
-      ".compatibilityActions .actionGroup,\n.headerControls.fallbackRow .actionGroup",
-      "width",
-    );
-    const indicator = getRuleDeclarationsContaining(
-      indexCss,
-      ".git-status-action-indicator",
-      "width",
-    );
-    const projectSelector = getRuleDeclarationsContaining(
-      indexCss,
-      ".source-header-identity .project-selector-container",
-      "flex",
-    );
-    const projectSelectorButton = getRuleDeclarationsContaining(
-      indexCss,
-      ".source-header-identity .project-selector-button",
-      "max-width",
-    );
+    const phoneActionGroup = getLastRuleDeclarations(css, ".actionGroup");
+    const indicator = getRuleDeclarationsContaining(css, ".indicator", "width");
 
     expect(actionGroup).toMatch(/display:\s*inline-flex\s*;/);
     expect(actionGroup).toMatch(/flex-shrink:\s*0\s*;/);
-    expect(fallback).toMatch(/width:\s*100%\s*;/);
+    expect(phoneActionGroup).toMatch(/width:\s*100%\s*;/);
+    // A fixed indicator slot lets glyph, spinner, and outcome mark swap
+    // without moving the label.
     expect(indicator).toMatch(/width:\s*0\.75rem\s*;/);
     expect(indicator).toMatch(/flex:\s*0\s+0\s+0\.75rem\s*;/);
-    expect(projectSelector).toMatch(/flex:\s*0\s+0\s+auto\s*;/);
-    expect(projectSelectorButton).toMatch(
-      /max-width:\s*calc\(100%\s*\+\s*2\s*\*\s*var\(--space-2\)\)\s*;/,
-    );
-  });
-
-  it("places repository actions by measured demand with a full-row fallback", async () => {
-    const css = await readFile(gitStatusPageStylesheetUrl, "utf8");
-    const header = getLastRuleDeclarations(
-      css,
-      ".sourceHeader :global(.session-header-inner)",
-    );
-    const identity = getLastRuleDeclarations(
-      css,
-      ".sourceHeader :global(.session-header-left)",
-    );
-    const actions = getLastRuleDeclarations(
-      css,
-      ".sourceHeader :global(.session-header-actions)",
-    );
-    const titleActions = getLastRuleDeclarations(
-      css,
-      ".headerControls.titleRow",
-    );
-    const tabs = getRuleDeclarationsContaining(css, ".headerTabs", "order: 2");
-    const fallbackActions = getLastRuleDeclarations(
-      css,
-      ".headerControls.fallbackRow",
-    );
-    const fallbackTabs = getLastRuleDeclarations(
-      css,
-      ".headerControls.fallbackRow + .headerTabs",
-    );
-
-    expect(header).toMatch(/flex-wrap:\s*wrap\s*;/);
-    expect(identity).toMatch(/flex:\s*0\s+1\s+auto\s*;/);
-    expect(actions).toMatch(/display:\s*contents\s*;/);
-    expect(titleActions).toMatch(/order:\s*1\s*;/);
-    expect(tabs).toMatch(/order:\s*2\s*;/);
-    expect(tabs).toMatch(/margin-left:\s*auto\s*;/);
-    expect(fallbackActions).toMatch(/flex:\s*1\s+0\s+100%\s*;/);
-    expect(fallbackActions).toMatch(/order:\s*2\s*;/);
-    expect(fallbackTabs).toMatch(/order:\s*1\s*;/);
   });
 
   it("keeps the unified Changes revision control usable at phone width", async () => {
@@ -254,12 +192,12 @@ describe("Source Control workbench layout CSS contract", () => {
       indexCss,
       sourceModeTabsCss,
       commitHistoryParentLinkCss,
-      gitStatusPageCss,
+      sourceActionsCss,
     ] = await Promise.all([
       readFile(indexStylesheetUrl, "utf8"),
       readFile(sourceModeTabsStylesheetUrl, "utf8"),
       readFile(commitHistoryParentLinkStylesheetUrl, "utf8"),
-      readFile(gitStatusPageStylesheetUrl, "utf8"),
+      readFile(sourceActionControlsStylesheetUrl, "utf8"),
     ]);
     // `SourceModeTabs` owns the stacked phone layout as a module variant; the
     // page only chooses it with `variant="stacked"`.
@@ -276,12 +214,12 @@ describe("Source Control workbench layout CSS contract", () => {
       ".working-tree-clean-landing",
     );
     const actionGroup = getLastRuleDeclarations(
-      gitStatusPageCss,
+      sourceActionsCss,
       ".actionGroup",
     );
     const checkRemote = getRuleDeclarationsContaining(
-      gitStatusPageCss,
-      ".headerControls.fallbackRow .checkRemote .actionLabel",
+      sourceActionsCss,
+      ".checkRemote .actionLabel",
       "text-overflow",
     );
 

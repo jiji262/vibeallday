@@ -1,27 +1,30 @@
+/* Garden Console buttons: 8px radius, 500 weight, colour-only transitions. */
 .button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: var(--space-2);
+  gap: 6px;
   border: 1px solid transparent;
   border-radius: var(--radius-md);
   font: inherit;
   font-weight: 500;
-  line-height: 1.2;
+  line-height: 1.5;
   white-space: nowrap;
   cursor: pointer;
   transition:
-    background-color 120ms ease,
-    border-color 120ms ease,
-    color 120ms ease;
+    background-color var(--duration-fast) var(--ease-standard),
+    border-color var(--duration-fast) var(--ease-standard),
+    color var(--duration-fast) var(--ease-standard);
 }
 
-.button:disabled {
-  cursor: not-allowed;
-  opacity: 0.5;
+.button:focus-visible {
+  border-color: var(--indigo);
+  box-shadow: 0 0 0 3px var(--indigo-soft);
 }
 
 .sm {
+  --button-icon-size: 14px;
+
   min-height: 32px;
   padding: 0 var(--space-3);
   font-size: 13px;
@@ -36,7 +39,7 @@
 .lg {
   min-height: 48px;
   padding: 0 var(--space-5);
-  font-size: 16px;
+  font-size: 15px;
 }
 
 .block {
@@ -50,49 +53,79 @@
 }
 
 .icon svg {
-  width: 1.15em;
-  height: 1.15em;
+  width: var(--button-icon-size, 16px);
+  height: var(--button-icon-size, 16px);
 }
 
 .primary {
   background: var(--indigo);
   color: var(--ink-on);
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-xs);
 }
 
-.primary:hover:not(:disabled) {
+.primary:hover {
   background: var(--indigo-ink);
 }
 
 .secondary {
-  background: var(--bg-card);
   border-color: var(--line-strong);
-  color: var(--text-primary);
+  background: var(--card);
+  color: var(--ink);
   box-shadow: var(--shadow-xs);
 }
 
-.secondary:hover:not(:disabled) {
-  background: var(--bg-tertiary);
+.secondary:hover {
+  background: var(--bg-2);
 }
 
 .ghost {
   background: transparent;
-  color: var(--text-secondary);
+  color: var(--ink);
 }
 
-.ghost:hover:not(:disabled) {
-  background: var(--bg-tertiary);
-  color: var(--text-primary);
+.ghost:hover {
+  background: var(--bg-soft);
 }
 
 .danger {
-  background: var(--rose-soft);
+  background: var(--rose-ink);
+  color: var(--ink-on);
+}
+
+.danger:hover {
+  filter: brightness(0.95);
+}
+
+.dangerSoft {
   border-color: color-mix(in srgb, var(--rose) 40%, transparent);
+  background: var(--rose-soft);
   color: var(--rose-ink);
 }
 
-.danger:hover:not(:disabled) {
+.dangerSoft:hover {
   background: color-mix(in srgb, var(--rose) 22%, transparent);
+}
+
+.link {
+  padding-inline: var(--space-1);
+  background: transparent;
+  color: var(--indigo);
+}
+
+.link:hover {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+/* Muted fill rather than opacity: white-on-colour text stays readable. */
+.button:disabled {
+  border-color: var(--line);
+  background: var(--bg-soft);
+  color: var(--ink-3);
+  box-shadow: none;
+  filter: none;
+  text-decoration: none;
+  cursor: not-allowed;
 }
 
 .iconButton {
@@ -100,39 +133,64 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  width: var(--tap-min);
-  height: var(--tap-min);
+  width: 36px;
+  height: 36px;
   padding: 0;
   border: 0;
   border-radius: var(--radius-md);
   background: transparent;
-  color: var(--text-secondary);
+  color: var(--ink-3);
   cursor: pointer;
+  transition:
+    background-color var(--duration-fast) var(--ease-standard),
+    color var(--duration-fast) var(--ease-standard);
 }
 
 .iconButton svg {
-  width: 20px;
-  height: 20px;
+  width: var(--icon-button-glyph, 18px);
+  height: var(--icon-button-glyph, 18px);
 }
 
-.iconButton:hover:not(:disabled) {
-  background: var(--bg-tertiary);
-  color: var(--text-primary);
+.iconButton:hover {
+  background: var(--bg-soft);
+  color: var(--ink);
+}
+
+.iconButton:focus-visible {
+  box-shadow: 0 0 0 3px var(--indigo-soft);
+}
+
+.iconButton:disabled {
+  background: transparent;
+  color: var(--ink-4);
+  cursor: not-allowed;
+}
+
+.iconButtonSm {
+  --icon-button-glyph: 16px;
+
+  width: 28px;
+  height: 28px;
 }
 
 .iconButtonPrimary {
-  border-radius: var(--radius-pill);
   background: var(--indigo);
   color: var(--ink-on);
 }
 
-.iconButtonPrimary:hover:not(:disabled) {
+.iconButtonPrimary:hover {
   background: var(--indigo-ink);
   color: var(--ink-on);
 }
 
+.iconButtonPrimary:disabled {
+  background: var(--bg-soft);
+  color: var(--ink-3);
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .button {
+  .button,
+  .iconButton {
     transition: none;
   }
 }
@@ -141,5 +199,10 @@
   .sm,
   .md {
     min-height: var(--tap-min);
+  }
+
+  .iconButton {
+    width: var(--tap-min);
+    height: var(--tap-min);
   }
 }

@@ -10,6 +10,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useParams, useSearchParams } from "react-router-dom";
 import { BrandWordmark } from "../components/BrandWordmark";
 import { ConversationViewIcon } from "../components/ConversationViewIcon";
+import { Spinner } from "../components/garden/Spinner";
 import { MessageList } from "../components/MessageList";
 import { ViewerCountIndicator } from "../components/ViewerCountIndicator";
 import {
@@ -30,6 +31,8 @@ import {
 } from "../lib/publicShareRelay";
 import type { Message } from "../types";
 import styles from "./PublicSharePage.module.css";
+
+const SPINNER_SIZE = 14;
 
 const LIVE_POLL_MS = 2000;
 const RETRY_POLL_MS = 2000;
@@ -613,15 +616,13 @@ function PublicSharePageGeneration({ locationHash }: { locationHash: string }) {
                     {initialPromptPreview}
                   </div>
                   <div className="public-share-fetch-status" role="status">
-                    <span className="public-share-spinner" aria-hidden="true" />
+                    <Spinner size={SPINNER_SIZE} tone="muted" />
                     {loadStatusLabel}
                   </div>
                 </div>
               ) : (
                 <div className="public-share-empty">
-                  {isFetching && (
-                    <span className="public-share-spinner" aria-hidden="true" />
-                  )}
+                  {isFetching && <Spinner size={SPINNER_SIZE} tone="muted" />}
                   {loadStatusLabel}
                 </div>
               )}

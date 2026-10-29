@@ -4,13 +4,14 @@ import {
   act,
   cleanup,
   fireEvent,
-  render,
+  render as rtlRender,
   screen,
   waitFor,
 } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { VersionInfo } from "../../api/client";
-import type { TranslationFn } from "../../i18n";
+import type { ReactElement } from "react";
+import { I18nProvider, type TranslationFn } from "../../i18n";
 import messages from "../../i18n/en.json";
 import {
   REMOTE_COMPATIBILITY_REMINDER_SNOOZE_MS,
@@ -20,11 +21,14 @@ import {
   type RemoteCompatibilityNotice,
   getRemoteCompatibilityNotices,
 } from "../../lib/remoteCompatibilityNotices";
+import { UI_KEYS } from "../../lib/storageKeys";
 import styles from "../RemoteCompatibilityNotices.module.css";
 import {
   RemoteCompatibilityNoticeCard,
   RemoteCompatibilityNotices,
 } from "../RemoteCompatibilityNotices";
+
+const render = (ui: ReactElement) => rtlRender(ui, { wrapper: I18nProvider });
 
 const t: TranslationFn = (key, vars) =>
   Object.entries(vars ?? {}).reduce(
@@ -287,7 +291,12 @@ describe("RemoteCompatibilityNotices", () => {
     fireEvent.click(screen.getByRole("button", { name: "Dismiss" }));
 
     expect(screen.queryByTestId("remote-compatibility-notice")).toBeNull();
-    expect(window.localStorage.length).toBe(0);
+    // I18nProvider persists the locale; nothing about the notice is stored.
+    const stored = Array.from(
+      { length: window.localStorage.length },
+      (_, index) => window.localStorage.key(index),
+    ).filter((key) => key !== UI_KEYS.locale);
+    expect(stored).toEqual([]);
   });
 
   it("renders the pre-v2 relay resume cutoff notice", () => {

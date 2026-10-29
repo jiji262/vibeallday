@@ -7,6 +7,7 @@ import {
   type RemoteNoticeSeverity,
   getRemoteCompatibilityNotices,
 } from "../lib/remoteCompatibilityNotices";
+import { useI18n } from "../i18n";
 import { CopyTextButton } from "./ui/CopyTextButton";
 import styles from "./RemoteCompatibilityNotices.module.css";
 
@@ -87,6 +88,7 @@ export function RemoteCompatibilityNoticeCard({
   onRestore,
   onSnooze,
 }: RemoteCompatibilityNoticeCardProps) {
+  const { t } = useI18n();
   const action = notice.action;
   const commandField = action?.command
     ? {
@@ -122,7 +124,9 @@ export function RemoteCompatibilityNoticeCard({
             <span className={styles.meta!}>{notice.versionSummary}</span>
           )}
           {noticeCount > 1 && (
-            <span className={styles.count!}>{noticeCount} notices</span>
+            <span className={styles.count!}>
+              {t("remoteNoticeCount", { count: noticeCount })}
+            </span>
           )}
         </div>
         <span className={styles.body!}>{notice.body}</span>
@@ -137,7 +141,9 @@ export function RemoteCompatibilityNoticeCard({
                 value={commandField.command}
                 readOnly
                 rows={Math.min(commandField.lines, 4)}
-                aria-label={`${commandField.label} text`}
+                aria-label={t("remoteNoticeCommandText", {
+                  label: commandField.label,
+                })}
                 onFocus={(event) => event.currentTarget.select()}
               />
             ) : (
@@ -145,14 +151,16 @@ export function RemoteCompatibilityNoticeCard({
                 className={styles.commandInput!}
                 value={commandField.command}
                 readOnly
-                aria-label={`${commandField.label} text`}
+                aria-label={t("remoteNoticeCommandText", {
+                  label: commandField.label,
+                })}
                 onFocus={(event) => event.currentTarget.select()}
               />
             )}
             <CopyTextButton
               text={commandField.command}
               label={commandField.label}
-              copiedLabel="Copied"
+              copiedLabel={t("copied")}
               className={styles.copyButton!}
               copiedClassName={styles.copied!}
             />
@@ -174,17 +182,17 @@ export function RemoteCompatibilityNoticeCard({
             className={`${styles.button!} ${styles.buttonPrimary!}`}
             onClick={onRestore}
           >
-            Show reminder
+            {t("remoteNoticeShowReminder")}
           </button>
         )}
         {onDismiss && notice.dismissal === "dismiss" && (
           <button type="button" className={styles.button!} onClick={onDismiss}>
-            Dismiss
+            {t("remoteNoticeDismiss")}
           </button>
         )}
         {onSnooze && notice.severity !== "info" && (
           <button type="button" className={styles.button!} onClick={onSnooze}>
-            Remind me later
+            {t("remoteNoticeRemindLater")}
           </button>
         )}
       </div>

@@ -1,12 +1,6 @@
 import type { GitStatusInfo } from "@vibeallday/shared";
 import { type ReactNode, useContext } from "react";
-import {
-  act,
-  fireEvent,
-  render,
-  screen,
-  waitFor,
-} from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import {
   MemoryRouter,
   Route,
@@ -302,6 +296,7 @@ function renderPage(
           }
         />
         <Route path="/previous" element={<div>previous-page</div>} />
+        <Route path="/sessions" element={<div>sessions-page</div>} />
       </Routes>
     </MemoryRouter>,
   );
@@ -415,25 +410,29 @@ beforeEach(() => {
 });
 
 describe("GitStatusPage source header", () => {
-  it("keeps identity, tabs, and fallback repository actions in the header", async () => {
+  it("puts identity, tabs, and repository actions in the page intro", async () => {
     renderPage();
     await screen.findByTestId("working-tree-browser");
     await waitFor(() =>
       expect(mocks.listReviewComments).toHaveBeenCalledWith("project-a"),
     );
 
+    // The top bar carries only the breadcrumb; the intro scrolls with the
+    // page and owns the project title, repository state, and mode tabs.
     const header = document.querySelector(".session-header") as HTMLElement;
+    expect(header.querySelector('[role="tablist"]')).toBeNull();
+    expect(header.querySelector("h1")).toBeNull();
+    const main = document.querySelector("main") as HTMLElement;
+    expect(main.querySelector("h1.session-title")).not.toBeNull();
     expect(
-      header.querySelectorAll('[data-testid="repo-status-bar"]'),
+      main.querySelectorAll('[data-testid="repo-status-bar"]'),
     ).toHaveLength(1);
-    expect(header.querySelector('[role="tablist"]')).not.toBeNull();
-    expect(header.querySelectorAll('[role="tab"]')).toHaveLength(3);
+    expect(main.querySelectorAll('[role="tab"]')).toHaveLength(3);
+    expect(
+      main.querySelector('[role="tab"][data-tab="changes"]'),
+    ).not.toBeNull();
     expect(screen.getByRole("button", { name: "→ origin/main" })).toBeDefined();
-
-    const actions = header.querySelector(
-      '[data-source-actions-placement="fallback"]',
-    ) as HTMLElement;
-    expect(actions).not.toBeNull();
+    expect(main.querySelector("[data-source-action-group]")).not.toBeNull();
     expect(
       screen.queryByRole("button", { name: "sourceCommentsAction" }),
     ).toBeNull();
@@ -441,100 +440,23 @@ describe("GitStatusPage source header", () => {
       screen.getByRole("tab", { name: /sourceTabComments/ }),
     ).toBeDefined();
     expect(document.querySelector(".source-control-action-row")).toBeNull();
-    expect(
-      document.querySelector('.git-status > [data-testid="repo-status-bar"]'),
-    ).toBeNull();
+    expect(screen.queryByRole("button", { name: "actionBack" })).toBeNull();
   });
 
-  it("uses the title row only while the rendered repository actions fit", async () => {
-    mocks.useVersion.mockReturnValue({
-      version: {
-        capabilities: [
-          GIT_SOURCE_REVIEW_CAPABILITY,
-          GIT_SOURCE_REVIEW_PROJECTIONS_CAPABILITY,
-          GIT_DIRTY_FILE_EDITOR_CAPABILITY,
-          GIT_STATUS_ENHANCED_CAPABILITY,
-          GIT_STATUS_PULL_CAPABILITY,
-          GIT_STATUS_PUSH_CAPABILITY,
-          GIT_STATUS_REMOTE_CHECK_CAPABILITY,
-        ],
-      },
-      loading: false,
-      error: null,
-    });
+  it("returns to the originating session when opened from one", async () => {
+    renderPage("/git-status?projectId=project-a&from=session", "/previous");
+    await screen.findByTestId("working-tree-browser");
 
-    let headerWidth = 900;
-    let notifyResize: (() => void) | undefined;
-    vi.stubGlobal(
-      "ResizeObserver",
-      class {
-        constructor(callback: ResizeObserverCallback) {
-          notifyResize = () => callback([], this as unknown as ResizeObserver);
-        }
+    fireEvent.click(screen.getByRole("button", { name: "actionBack" }));
+    expect(await screen.findByText("previous-page")).toBeDefined();
+  });
 
-        observe() {}
-        disconnect() {}
-        unobserve() {}
-      },
-    );
+  it("falls back to the session list when there is no history to return to", async () => {
+    renderPage("/git-status?projectId=project-a&from=session");
+    await screen.findByTestId("working-tree-browser");
 
-    const widthOf = (element: HTMLElement) => {
-      const parent = element.parentElement;
-      if (parent?.matches("[data-source-action-group]")) return 80;
-      if (parent?.getAttribute("role") === "tablist") return 72;
-      if (parent?.classList.contains("session-header-left")) return 96;
-      return 0;
-    };
-    vi.spyOn(HTMLElement.prototype, "clientWidth", "get").mockImplementation(
-      function (this: HTMLElement) {
-        return this.classList.contains("session-header-inner")
-          ? headerWidth
-          : widthOf(this);
-      },
-    );
-    vi.spyOn(HTMLElement.prototype, "scrollWidth", "get").mockImplementation(
-      function (this: HTMLElement) {
-        return widthOf(this);
-      },
-    );
-    vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockImplementation(
-      function (this: HTMLElement) {
-        const width = widthOf(this);
-        return {
-          bottom: 20,
-          height: 20,
-          left: 0,
-          right: width,
-          top: 0,
-          width,
-          x: 0,
-          y: 0,
-          toJSON: () => ({}),
-        };
-      },
-    );
-
-    try {
-      renderPage();
-      await screen.findByTestId("working-tree-browser");
-      const header = document.querySelector(".session-header") as HTMLElement;
-      expect(
-        header.querySelector('[data-source-actions-placement="title"]'),
-      ).not.toBeNull();
-      expect(
-        header.querySelectorAll("[data-source-action-group] > button"),
-      ).toHaveLength(3);
-
-      headerWidth = 360;
-      act(() => notifyResize?.());
-
-      expect(
-        header.querySelector('[data-source-actions-placement="fallback"]'),
-      ).not.toBeNull();
-    } finally {
-      vi.restoreAllMocks();
-      vi.unstubAllGlobals();
-    }
+    fireEvent.click(screen.getByRole("button", { name: "actionBack" }));
+    expect(await screen.findByText("sessions-page")).toBeDefined();
   });
 
   it("opens Pending Comments even with pending drafts and preserves mode history", async () => {
@@ -1180,7 +1102,7 @@ describe("GitStatusPage source header", () => {
     );
   });
 
-  it("keeps one tab selector in the header at mobile width", async () => {
+  it("keeps one tab selector in the page intro at mobile width", async () => {
     mocks.useMediaQuery.mockReturnValue(false);
     mocks.useNavigationLayout.mockReturnValue({
       openSidebar: vi.fn(),
@@ -1193,18 +1115,16 @@ describe("GitStatusPage source header", () => {
       expect(mocks.listReviewComments).toHaveBeenCalledWith("project-a"),
     );
 
-    // Placement is the wrapping header row's decision, so a narrow viewport
-    // keeps the same single selector rather than growing a second one.
-    const header = document.querySelector(".session-header") as HTMLElement;
+    // The intro wraps on narrow viewports, so a phone keeps the same single
+    // selector rather than growing a second one.
+    const main = document.querySelector("main") as HTMLElement;
     expect(
-      header.querySelector('[data-testid="repo-status-bar"]'),
+      main.querySelector('[data-testid="repo-status-bar"]'),
     ).not.toBeNull();
-    expect(header.querySelector('[role="tablist"]')).not.toBeNull();
+    expect(main.querySelector('[role="tablist"]')).not.toBeNull();
     expect(document.querySelectorAll('[role="tablist"]')).toHaveLength(1);
     expect(document.querySelector(".source-control-mobile-tabs")).toBeNull();
-    expect(
-      header.querySelector('[data-source-actions-placement="fallback"]'),
-    ).not.toBeNull();
+    expect(main.querySelector("[data-source-action-group]")).not.toBeNull();
     expect(document.querySelector(".source-control-action-row")).toBeNull();
   });
 
@@ -1224,8 +1144,7 @@ describe("GitStatusPage source header", () => {
     const trigger = container.querySelector("button") as HTMLElement;
     const text = trigger.querySelector("span") as HTMLElement;
 
-    // The `.source-header-identity` rules in styles/index.css still reach
-    // in by these literals, so each element carries both vocabularies.
+    // The selector keeps its interop literals beside its module classes.
     expect(container.className).toContain(selectorStyles.container);
     expect(trigger.className).toContain("project-selector-button");
     expect(trigger.className).toContain(selectorStyles.button);

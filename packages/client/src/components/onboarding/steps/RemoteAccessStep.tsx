@@ -1,6 +1,8 @@
 import { useNavigate } from "react-router-dom";
 import { useRemoteBasePath } from "../../../hooks/useRemoteBasePath";
 import { useI18n } from "../../../i18n";
+import { Button } from "../../garden/Button";
+import styles from "../Onboarding.module.css";
 import type { OnboardingStepProps } from "../types";
 
 /**
@@ -22,33 +24,29 @@ export function RemoteAccessStep({
   };
 
   return (
-    <div className="onboarding-step-content">
-      <p className="onboarding-step-description">
-        {t("onboardingRemoteDescription")}
-      </p>
+    <div className={styles.stepContent}>
+      <p className={styles.description}>{t("onboardingRemoteDescription")}</p>
 
-      <div className="onboarding-info-box">
-        <h4>{t("onboardingRemoteRequirementsTitle")}</h4>
-        <ul>
+      <div className={styles.infoBox}>
+        <h4 className={styles.infoTitle}>
+          {t("onboardingRemoteRequirementsTitle")}
+        </h4>
+        <ul className={styles.infoList}>
           <li>{t("onboardingRemoteRequirementRelayUrl")}</li>
           <li>{t("onboardingRemoteRequirementUsername")}</li>
           <li>{t("onboardingRemoteRequirementPassword")}</li>
         </ul>
       </div>
 
-      <p className="onboarding-step-hint">{t("onboardingRemoteHint")}</p>
+      <p className={styles.hint}>{t("onboardingRemoteHint")}</p>
 
-      <div className="onboarding-step-actions">
-        <button type="button" className="btn-secondary" onClick={onSkip}>
-          {isLastStep ? "Skip & Finish" : "Skip"}
-        </button>
-        <button
-          type="button"
-          className="btn-primary"
-          onClick={handleGoToSettings}
-        >
-          Set Up Remote Access
-        </button>
+      <div className={styles.actions}>
+        <Button variant="ghost" onClick={onSkip}>
+          {t(isLastStep ? "onboardingSkipFinish" : "onboardingSkip")}
+        </Button>
+        <Button variant="primary" onClick={handleGoToSettings}>
+          {t("onboardingRemoteSetUp")}
+        </Button>
       </div>
     </div>
   );

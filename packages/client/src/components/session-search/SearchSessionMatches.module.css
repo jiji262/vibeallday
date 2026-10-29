@@ -14,7 +14,7 @@
   display: flex;
   flex-wrap: wrap;
   gap: 6px 16px;
-  color: var(--text-secondary);
+  color: var(--ink-2);
   font-size: 12px;
   margin-bottom: 16px;
   overflow-wrap: anywhere;
@@ -24,10 +24,10 @@
 }
 .back,
 .more {
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--line);
   border-radius: 4px;
-  background: var(--bg-secondary);
-  color: var(--text-primary);
+  background: var(--bg-2);
+  color: var(--ink);
   min-height: 30px;
   padding: 4px 8px;
   cursor: pointer;

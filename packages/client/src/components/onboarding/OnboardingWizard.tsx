@@ -1,5 +1,7 @@
 import { useState } from "react";
+import { useI18n } from "../../i18n";
 import { Modal } from "../ui/Modal";
+import styles from "./Onboarding.module.css";
 import { RemoteAccessStep, ThemeStep } from "./steps";
 import type { OnboardingStepConfig } from "./types";
 
@@ -10,12 +12,12 @@ import type { OnboardingStepConfig } from "./types";
 const ONBOARDING_STEPS: OnboardingStepConfig[] = [
   {
     id: "theme",
-    title: "Choose Your Theme",
+    titleKey: "onboardingThemeTitle",
     component: ThemeStep,
   },
   {
     id: "remote-access",
-    title: "Remote Access",
+    titleKey: "onboardingRemoteTitle",
     component: RemoteAccessStep,
   },
 ];
@@ -30,6 +32,7 @@ interface OnboardingWizardProps {
  * Guides users through initial setup: theme selection and remote access info.
  */
 export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
+  const { t } = useI18n();
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
 
   const currentStep = ONBOARDING_STEPS[currentStepIndex];
@@ -72,18 +75,22 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
   const isFirstStep = currentStepIndex === 0;
 
   const modalTitle = (
-    <div className="onboarding-modal-title">
-      <span>Welcome to VibeAllDay</span>
-      <span className="onboarding-step-indicator">
-        Step {currentStepIndex + 1} of {ONBOARDING_STEPS.length}
+    <div className={styles.modalTitle}>
+      <span>{t("onboardingWelcomeTitle")}</span>
+      <span className={styles.stepIndicator}>
+        {t("onboardingStepCount", {
+          step: currentStepIndex + 1,
+          total: ONBOARDING_STEPS.length,
+        })}
       </span>
     </div>
   );
 
   return (
-    <Modal title={modalTitle} onClose={handleSkipAll}>
-      <div className="onboarding-wizard">
-        <h2 className="onboarding-step-title">{currentStep.title}</h2>
+    <Modal title={modalTitle} onClose={handleSkipAll} variant="dialog">
+      {/* `onboarding-wizard` sizes the modal from styles/index.css. */}
+      <div className={`onboarding-wizard ${styles.wizard}`}>
+        <h2 className={styles.stepTitle}>{t(currentStep.titleKey)}</h2>
 
         <StepComponent
           onNext={handleNext}
@@ -91,31 +98,33 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
           isLastStep={isLastStep}
         />
 
-        <div className="onboarding-footer">
+        <div className={styles.footer}>
           <button
             type="button"
-            className="onboarding-skip-all"
+            className={`onboarding-skip-all ${styles.quietButton}`}
             onClick={handleSkipAll}
           >
-            Skip all
+            {t("onboardingSkipAll")}
           </button>
-          <div className="onboarding-footer-right">
+          <div className={styles.footerRight}>
             {!isFirstStep && (
               <button
                 type="button"
-                className="onboarding-back"
+                className={styles.quietButton}
                 onClick={handleBack}
               >
-                Back
+                {t("onboardingBack")}
               </button>
             )}
-            <div className="onboarding-progress">
+            <div className={styles.progress} aria-hidden="true">
               {ONBOARDING_STEPS.map((step, index) => (
                 <span
                   key={step.id}
-                  className={`onboarding-progress-dot ${
-                    index === currentStepIndex ? "active" : ""
-                  } ${index < currentStepIndex ? "completed" : ""}`}
+                  className={
+                    index <= currentStepIndex
+                      ? `${styles.dot} ${styles.dotDone}`
+                      : styles.dot
+                  }
                 />
               ))}
             </div>

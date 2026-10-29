@@ -41,7 +41,8 @@
 
 .secondaryOptions.secondaryOptions :is(h3) {
   margin: 0 0 var(--space-1);
-  color: var(--text-muted);
+  color: var(--ink-3);
+  font-family: var(--font-ui);
   font-size: 13px;
   font-weight: 600;
   letter-spacing: 0;
@@ -59,8 +60,8 @@
 .advancedSummary {
   flex: 1 1 8rem;
   min-width: 0;
-  color: var(--text-muted);
-  font-family: var(--font-mono);
+  color: var(--ink-3);
+  font-family: var(--label-font);
   font-size: 12px;
   line-height: 1.4;
 }
@@ -74,16 +75,21 @@
   border: 1px dashed var(--line-strong);
   border-radius: var(--radius-pill);
   background: transparent;
-  color: var(--text-secondary);
+  color: var(--ink-2);
   font: inherit;
   font-size: 14px;
-  font-weight: 550;
+  font-weight: 500;
   cursor: pointer;
 }
 
 .advancedToggle:hover {
-  background: var(--bg-tertiary);
-  color: var(--text-primary);
+  background: var(--bg-soft);
+  color: var(--ink);
+}
+
+.advancedToggle:focus-visible,
+.captionToggle:focus-visible {
+  box-shadow: 0 0 0 3px var(--indigo-soft);
 }
 
 .advancedCount {
@@ -96,9 +102,9 @@
   border-radius: var(--radius-pill);
   background: var(--indigo);
   color: var(--ink-on);
-  font-family: var(--font-mono);
-  font-size: 11.5px;
-  font-weight: 600;
+  font-family: var(--label-font);
+  font-size: 11px;
+  font-weight: 500;
   line-height: 1;
 }
 
@@ -223,10 +229,10 @@
 .templateProjectSlot {
   grid-area: template;
   min-width: 0;
-  padding: 16px;
-  border: 1px solid var(--border-input);
-  border-radius: 8px;
-  background: var(--bg-secondary);
+  padding: var(--space-4);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--bg-2);
 }
 .templateProjectSlot[hidden] {
   display: none;
@@ -240,10 +246,10 @@
   display: grid;
   gap: 10px;
   min-width: 0;
-  padding: 16px;
-  border: 1px solid var(--border-input);
-  border-radius: 8px;
-  background: var(--bg-secondary);
+  padding: var(--space-4);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--bg-2);
 }
 /* The row spans the page; a path field that wide would be hard to scan. */
 .newProjectField,
@@ -363,10 +369,10 @@
   height: var(--tap-min);
   padding: 0;
   margin-inline-start: auto;
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--line);
   border-radius: 50%;
   background: transparent;
-  color: var(--text-muted);
+  color: var(--ink-3);
   font: inherit;
   font-size: 14px;
   font-weight: 700;
@@ -382,8 +388,8 @@
 
 .optionCaption {
   margin: var(--space-2) 0 0;
-  color: var(--text-muted);
-  font-size: var(--font-size-sm);
+  color: var(--ink-3);
+  font-size: 13px;
   line-height: 1.35;
   overflow-wrap: anywhere;
 }
@@ -391,7 +397,7 @@
 /* A risk the selected option carries; shown whether or not captions are. */
 .optionWarning {
   composes: optionCaption;
-  color: var(--warning-color);
+  color: var(--peach-ink);
 }
 
 .captionedRecapDuration {
@@ -546,6 +552,13 @@
 
 .optionLayout > :not(:global(.new-session-main-stack)) {
   margin-top: var(--space-4);
+}
+
+/* Dashed rules split the card's sections: agent and model, then options. */
+.optionLayout > :global(.new-session-provider-slot),
+.optionLayout > .advancedSection {
+  padding-top: var(--space-4);
+  border-top: 1px dashed var(--dash);
 }
 
 @media (width >= 900px) {

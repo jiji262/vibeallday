@@ -1,0 +1,34 @@
+/* The one spinner: an indigo ring with an open top. */
+.spinner {
+  display: inline-block;
+  flex-shrink: 0;
+  width: var(--spinner-size, 16px);
+  height: var(--spinner-size, 16px);
+  border: 2px solid var(--indigo);
+  border-top-color: transparent;
+  border-radius: 50%;
+  vertical-align: middle;
+  animation: garden-spin 0.9s linear infinite;
+}
+
+.current {
+  border-color: currentcolor;
+  border-top-color: transparent;
+}
+
+.muted {
+  border-color: var(--ink-4);
+  border-top-color: transparent;
+}
+
+@keyframes garden-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spinner {
+    animation-duration: 2.4s;
+  }
+}

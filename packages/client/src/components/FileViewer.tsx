@@ -130,6 +130,7 @@ import {
   FileViewerEmbeddedMedia,
   getEmbeddedMediaKind,
 } from "./FileViewerEmbeddedMedia";
+import { FileViewerLoading } from "./FileViewerLoading";
 
 export interface FileViewerSource {
   loadFile: (
@@ -1671,9 +1672,9 @@ export const FileViewer = memo(function FileViewer({
   ) {
     return (
       <div className="file-viewer">
-        <div className="file-viewer-loading">
-          {t("fileViewerLoading" as never, { name: fileName })}
-        </div>
+        <FileViewerLoading
+          label={t("fileViewerLoading" as never, { name: fileName })}
+        />
       </div>
     );
   }
@@ -1743,9 +1744,9 @@ export const FileViewer = memo(function FileViewer({
           />
         </div>
       ) : (
-        <div className="file-viewer-loading">
-          {t("fileViewerLoading" as never, { name: fileName })}
-        </div>
+        <FileViewerLoading
+          label={t("fileViewerLoading" as never, { name: fileName })}
+        />
       );
     }
     if (error || !fileData || !metadata) {
@@ -1776,9 +1777,9 @@ export const FileViewer = memo(function FileViewer({
               <img src={imageUrl} alt={fileName} />
             </a>
           ) : (
-            <div className="file-viewer-loading">
-              {t("fileViewerLoading" as never, { name: fileName })}
-            </div>
+            <FileViewerLoading
+              label={t("fileViewerLoading" as never, { name: fileName })}
+            />
           )}
         </div>
       );
@@ -1799,9 +1800,9 @@ export const FileViewer = memo(function FileViewer({
           pdfjsAvailable={sameOriginUrls}
         />
       ) : (
-        <div className="file-viewer-loading">
-          {t("fileViewerLoading" as never, { name: fileName })}
-        </div>
+        <FileViewerLoading
+          label={t("fileViewerLoading" as never, { name: fileName })}
+        />
       );
     }
 

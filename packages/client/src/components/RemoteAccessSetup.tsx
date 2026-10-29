@@ -16,6 +16,7 @@ import { useServerSettings } from "../hooks/useServerSettings";
 import { type RelayStatus, useRemoteAccess } from "../hooks/useRemoteAccess";
 import { useI18n } from "../i18n";
 import { parseUserAgent } from "../lib/deviceDetection";
+import { selectClassName } from "./garden/Field";
 import { QRCode } from "./QRCode";
 
 export interface RemoteAccessSetupProps {
@@ -585,7 +586,7 @@ export function RemoteAccessSetup({
             value={relayOption}
             onChange={(e) => setRelayOption(e.target.value as RelayOption)}
             disabled={isSaving}
-            className="form-select"
+            className={selectClassName()}
           >
             <option value="default">
               {t("remoteSetupRelayDefault" as never)}
@@ -625,7 +626,7 @@ export function RemoteAccessSetup({
               )
             }
             disabled={isSaving}
-            className="form-select"
+            className={selectClassName()}
           >
             <option value="default">
               {t("remoteSetupVibeAllDayClientDefault" as never)}

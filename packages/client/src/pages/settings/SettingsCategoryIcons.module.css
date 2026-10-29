@@ -16,8 +16,10 @@
   height: 20px;
 }
 
+/* Same tile as the More page rows: sunken fill, hairline, indigo glyph. */
 .flat {
-  background: var(--indigo-soft);
+  border: 1px solid var(--line);
+  background: var(--bg-2);
   color: var(--indigo);
 }
 
@@ -51,7 +53,7 @@
 
 /* In the Appearance icon-style picker the chosen option is indigo-filled. */
 :global(.settings-icon-style-option.active) .flat {
-  background: rgb(255 255 255 / 0.2);
+  background: color-mix(in srgb, var(--ink-on) 20%, transparent);
   color: var(--ink-on);
 }
 

@@ -7,6 +7,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ThinkingText } from "../../components/ThinkingText";
 import tooltipStyles from "../../components/ui/TooltipLayer.module.css";
+import styles from "./AppearanceSettings.module.css";
 import { renderFixedFontMath } from "../../components/ui/FixedFontMathToggle";
 import {
   DEFAULT_CONTENT_MAX_WIDTH_PX,
@@ -673,7 +674,7 @@ export function AppearanceSettings() {
           className="settings-item--wide-control"
         >
           <div
-            className="font-size-selector settings-icon-style-selector"
+            className={`font-size-selector settings-icon-style-selector ${styles.iconStyleSelector}`}
             role="group"
             aria-label={t("appearanceSettingsIconStyleTitle")}
           >

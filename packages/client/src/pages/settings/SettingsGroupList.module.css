@@ -4,41 +4,65 @@
   gap: var(--space-6);
 }
 
-/* Desktop rail: only the list scrolls; search and host stay above it. */
+/* Desktop rail: only the list scrolls; search and host stay above it. Its
+   edges fade so a row cut by the scroll edge reads as "more", and the padding
+   and scroll-padding match the fades so the first/last rows and the active
+   row (scrolled into view) always rest on solid ground. */
 .rail {
+  --rail-fade: var(--space-5);
+
   flex: 1;
+  gap: var(--space-4);
   min-height: 0;
   overflow-y: auto;
-  padding-bottom: var(--space-2);
+  padding-block: var(--rail-fade);
+  scroll-padding-block: var(--rail-fade);
+  mask-image: linear-gradient(
+    to bottom,
+    transparent,
+    var(--ink) var(--rail-fade),
+    var(--ink) calc(100% - var(--rail-fade)),
+    transparent
+  );
 }
 
 .group {
   min-width: 0;
 }
 
+/* Mono group label, the same recipe as the More page and the sidebar. */
 .title {
-  margin: 0 0 var(--space-3);
-  font-family: var(--font-display);
-  font-size: 20px;
-  font-weight: 600;
-  color: var(--text-secondary);
+  margin: 0 0 var(--space-2);
+  padding-inline: var(--space-1);
+  color: var(--ink-4);
+  font-family: var(--label-font);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: var(--eyebrow-tracking);
+  text-transform: uppercase;
 }
 
 .card {
   overflow: hidden;
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--line);
   border-radius: var(--radius-lg);
-  background: var(--bg-card);
+  background: var(--card);
   box-shadow: var(--shadow-xs);
 }
 
 .rail .title {
-  margin-inline: var(--space-2);
-  font-family: var(--font-ui);
-  font-size: 12px;
+  margin-bottom: var(--space-1);
+  padding: var(--space-1) var(--space-3);
+  font-size: 10px;
 }
+
 .rail .card {
-  border-color: transparent;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  overflow: visible;
+  border: 0;
+  border-radius: 0;
   background: transparent;
   box-shadow: none;
 }

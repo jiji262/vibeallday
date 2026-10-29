@@ -9,6 +9,8 @@ import { projectAccessApi } from "../api/projectAccess";
 import { useActingPrincipal } from "../hooks/useActingPrincipal";
 import { useVersion } from "../hooks/useVersion";
 import { useI18n } from "../i18n";
+import { selectClassName } from "./garden/Field";
+import { LoadingState } from "./garden/LoadingState";
 import styles from "./ProjectSessionDefaultsModal.module.css";
 
 /**
@@ -73,14 +75,19 @@ export function ProjectSharingSection({
     <section className={styles.section} aria-label={t("projectSharingTitle")}>
       <h3>{t("projectSharingTitle")}</h3>
       <p>{t("projectSharingDescription")}</p>
-      {users === null && !error && <p>{t("loading")}</p>}
-      {users?.length === 0 && <p>{t("projectSharingNoUsers")}</p>}
+      {users === null && !error && (
+        <LoadingState variant="compact" label={t("loading")} />
+      )}
+      {users?.length === 0 && (
+        <p className={styles.sharingEmpty}>{t("projectSharingNoUsers")}</p>
+      )}
       {users && users.length > 0 && (
         <ul className={styles.sharingList}>
           {users.map((entry) => (
             <li key={entry.username} className={styles.sharingRow}>
               <span>{entry.username}</span>
               <select
+                className={selectClassName()}
                 value={entry.level}
                 aria-label={entry.username}
                 disabled={saving === entry.username}

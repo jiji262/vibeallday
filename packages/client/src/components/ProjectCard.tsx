@@ -4,12 +4,15 @@ import { Link, useNavigate } from "react-router-dom";
 import { useI18n } from "../i18n";
 import { shortenPath } from "../lib/text";
 import type { Project } from "../types";
+import { Badge } from "./garden/Badge";
 import { Button, IconButton } from "./garden/Button";
-import { Pill } from "./garden/Pill";
+import { DataListCell, dataListRowClassName } from "./garden/DataList";
+import { MoreHorizontalIcon, PlusIcon } from "./garden/icons";
 import { ActionSheet, type ActionSheetItem } from "./garden/Sheet";
 import styles from "./ProjectCard.module.css";
 import { ProjectCaptionEditor } from "./ProjectCaptionEditor";
 import { ProjectCodeNameEditor } from "./ProjectCodeNameEditor";
+import { formatProjectAge } from "./projectRelativeTime";
 import type { ModalAnchorRect } from "./ui/Modal";
 
 interface ProjectCardProps {
@@ -40,125 +43,181 @@ interface ProjectCardProps {
   isDeleting?: boolean;
 }
 
-const MINUTE_MS = 60_000;
-const HOUR_MS = 60 * MINUTE_MS;
-const DAY_MS = 24 * HOUR_MS;
-const WEEK_DAYS = 7;
-
-/**
- * Format relative time for display
- */
-function formatRelativeTime(timestamp: string): string {
-  const diffMs = Date.now() - new Date(timestamp).getTime();
-  const diffMins = Math.floor(diffMs / MINUTE_MS);
-  const diffHours = Math.floor(diffMs / HOUR_MS);
-  const diffDays = Math.floor(diffMs / DAY_MS);
-
-  if (diffMins < 1) return "just now";
-  if (diffMins < 60) return `${diffMins}m ago`;
-  if (diffHours < 24) return `${diffHours}h ago`;
-  if (diffDays < WEEK_DAYS) return `${diffDays}d ago`;
-  return new Date(timestamp).toLocaleDateString();
-}
+const ACTION_ICON_SIZE = 14;
 
 function stop(event: MouseEvent) {
   event.preventDefault();
   event.stopPropagation();
 }
 
-function MoreIcon() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="currentColor"
-      aria-hidden="true"
-      focusable="false"
-    >
-      <circle cx="5" cy="12" r="1.8" />
-      <circle cx="12" cy="12" r="1.8" />
-      <circle cx="19" cy="12" r="1.8" />
-    </svg>
-  );
-}
+type Translate = ReturnType<typeof useI18n>["t"];
 
-function PlusIcon() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2.2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-      focusable="false"
-    >
-      <line x1="12" y1="5" x2="12" y2="19" />
-      <line x1="5" y1="12" x2="19" y2="12" />
-    </svg>
-  );
-}
-
-/**
- * Card component for displaying a project in the projects list: Fraunces
- * name with its quiet code-name chip, a one-line caption, the mono path, and
- * a footer of status pills with the last-activity time. App, Copy, Settings
- * and Remove live in one overflow sheet; New session stays a 44px button.
- */
-export function ProjectCard({
-  appEnabled = false,
-  project,
-  needsAttentionCount,
-  thinkingCount,
-  queueCount = 0,
-  hasQueueWarning = false,
-  basePath = "",
-  onDeleteProject,
-  deleteLabel,
-  onOpenSettings,
-  onCopy,
-  onUpdateCodeName,
-  onUpdateCaption,
-  isDeleting = false,
-}: ProjectCardProps) {
-  const { t } = useI18n();
-  const navigate = useNavigate();
-  const [codeNameError, setCodeNameError] = useState<string | null>(null);
-  const [menuAnchor, setMenuAnchor] = useState<ModalAnchorRect | null>(null);
-  const [menuOpen, setMenuOpen] = useState(false);
-  const codeNameErrorId = useId();
-
+/** App, Copy and Settings under one label; Remove gets its own group. */
+function projectMenuItems(
+  props: ProjectCardProps,
+  t: Translate,
+  openApp: () => void,
+): ActionSheetItem[] {
+  const { project, onCopy, onOpenSettings, onDeleteProject } = props;
+  const manage = t("projectCardSectionManage");
   const candidates: (ActionSheetItem | false | undefined)[] = [
-    appEnabled && {
+    props.appEnabled && {
       key: "app",
       label: t("projectAppOpen"),
-      // Replaces the open sheet's back-gesture history entry, so Back from
-      // the app returns to Projects in one step.
-      onSelect: () =>
-        navigate(`${basePath}/projects/${project.id}/app`, { replace: true }),
+      section: manage,
+      onSelect: openApp,
     },
     onCopy && {
       key: "copy",
       label: t("projectCopyLabel"),
       hint: t("projectCopyTitle"),
+      section: manage,
       onSelect: () => onCopy(project),
     },
     onOpenSettings && {
       key: "settings",
       label: t("projectCardOpenSettings"),
+      section: manage,
       onSelect: () => onOpenSettings(project),
     },
     onDeleteProject && {
       key: "remove",
-      label: deleteLabel ?? t("projectsDelete"),
+      label: props.deleteLabel ?? t("projectsDelete"),
       tone: "danger",
-      disabled: isDeleting,
+      disabled: props.isDeleting,
       onSelect: () => onDeleteProject(project),
     },
   ];
-  const menuItems = candidates.filter((item): item is ActionSheetItem =>
-    Boolean(item),
+  return candidates.filter((item): item is ActionSheetItem => Boolean(item));
+}
+
+/** Name, code-name chip, caption and mono path tail: the row's first cell. */
+function ProjectIdentity({
+  project,
+  onUpdateCodeName,
+  onUpdateCaption,
+}: Pick<ProjectCardProps, "project" | "onUpdateCodeName" | "onUpdateCaption">) {
+  const [codeNameError, setCodeNameError] = useState<string | null>(null);
+  const codeNameErrorId = useId();
+  return (
+    <DataListCell primary className={styles.identity}>
+      <strong className={styles.name}>
+        <span className={styles.nameText}>{projectDisplayName(project)}</span>
+        {onUpdateCodeName && (
+          <ProjectCodeNameEditor
+            project={project}
+            onUpdateCodeName={onUpdateCodeName}
+            error={codeNameError}
+            onErrorChange={setCodeNameError}
+            errorId={codeNameErrorId}
+          />
+        )}
+      </strong>
+      {onUpdateCodeName && codeNameError && (
+        <span
+          id={codeNameErrorId}
+          className={styles.codeNameError}
+          role="alert"
+        >
+          {codeNameError}
+        </span>
+      )}
+      <ProjectCaptionEditor
+        project={project}
+        onUpdateCaption={onUpdateCaption}
+      />
+      <span className={styles.path} title={project.path}>
+        <bdi>{shortenPath(project.path)}</bdi>
+      </span>
+    </DataListCell>
   );
+}
+
+/** Session count plus the needs-you and running badges. */
+function SessionCell({
+  project,
+  needsAttentionCount,
+  thinkingCount,
+}: Pick<
+  ProjectCardProps,
+  "project" | "needsAttentionCount" | "thinkingCount"
+>) {
+  const { t } = useI18n();
+  return (
+    <DataListCell className={styles.stack}>
+      <span className={styles.count}>
+        {t(
+          project.sessionCount === 1
+            ? "projectCardSessionOne"
+            : "projectCardSessions",
+          { count: project.sessionCount },
+        )}
+      </span>
+      {needsAttentionCount > 0 && (
+        <Badge tone="rose" dot>
+          {t("projectCardNeedsYou", { count: needsAttentionCount })}
+        </Badge>
+      )}
+      {thinkingCount > 0 && (
+        <Badge tone="mint" dot="pulse">
+          {t("projectCardRunning", { count: thinkingCount })}
+        </Badge>
+      )}
+    </DataListCell>
+  );
+}
+
+function QueueCell({
+  queueCount = 0,
+  hasQueueWarning = false,
+}: Pick<ProjectCardProps, "queueCount" | "hasQueueWarning">) {
+  const { t } = useI18n();
+  const empty = queueCount === 0 && !hasQueueWarning;
+  return (
+    <DataListCell className={styles.stack} hideOnPhone={empty}>
+      {queueCount > 0 && (
+        <Badge
+          tone="sand"
+          title={t("projectCardQueueCount", { count: queueCount })}
+        >
+          {t("projectCardQueued", { count: queueCount })}
+        </Badge>
+      )}
+      {hasQueueWarning && (
+        <span
+          className={styles.queueWarning}
+          role="img"
+          title={t("projectCardQueueWarning")}
+          aria-label={t("projectCardQueueWarning")}
+        >
+          !
+        </span>
+      )}
+      {empty && (
+        <span className={styles.none} aria-hidden="true">
+          —
+        </span>
+      )}
+    </DataListCell>
+  );
+}
+
+/**
+ * One row of the projects list: identity, sessions, queue, last activity and
+ * the row actions (New session plus an overflow sheet for App, Copy,
+ * Settings and Remove). The row itself links to the project's sessions.
+ */
+export function ProjectCard(props: ProjectCardProps) {
+  const { project, basePath = "" } = props;
+  const { t } = useI18n();
+  const navigate = useNavigate();
+  const [menuAnchor, setMenuAnchor] = useState<ModalAnchorRect | null>(null);
+  const [menuOpen, setMenuOpen] = useState(false);
+  // Replaces the open sheet's back-gesture history entry, so Back from the
+  // app returns to Projects in one step.
+  const openApp = () =>
+    navigate(`${basePath}/projects/${project.id}/app`, { replace: true });
+  const menuItems = projectMenuItems(props, t, openApp);
 
   const openMenu = (event: MouseEvent<HTMLButtonElement>) => {
     stop(event);
@@ -170,98 +229,23 @@ export function ProjectCard({
     <li className={styles.card}>
       <Link
         to={`${basePath}/sessions?project=${project.id}&source=projects`}
-        className={styles.link}
+        className={dataListRowClassName({ interactive: true }, styles.link)}
         data-project-card-link=""
       >
-        <div className={styles.header}>
-          <div className={styles.identity}>
-            <strong className={styles.name}>
-              <span className={styles.nameText}>
-                {projectDisplayName(project)}
-              </span>
-              {onUpdateCodeName && (
-                <ProjectCodeNameEditor
-                  project={project}
-                  onUpdateCodeName={onUpdateCodeName}
-                  error={codeNameError}
-                  onErrorChange={setCodeNameError}
-                  errorId={codeNameErrorId}
-                />
-              )}
-            </strong>
-            {onUpdateCodeName && codeNameError && (
-              <span
-                id={codeNameErrorId}
-                className={styles.codeNameError}
-                role="alert"
-              >
-                {codeNameError}
-              </span>
-            )}
-            <ProjectCaptionEditor
-              project={project}
-              onUpdateCaption={onUpdateCaption}
-            />
-          </div>
-          {menuItems.length > 0 && (
-            <IconButton
-              label={t("projectCardActions")}
-              className={styles.more}
-              aria-haspopup="menu"
-              onClick={openMenu}
-            >
-              <MoreIcon />
-            </IconButton>
-          )}
-        </div>
-        <span className={styles.path} title={project.path}>
-          <bdi>{shortenPath(project.path)}</bdi>
-        </span>
-        <div className={styles.footer}>
-          <div className={styles.status}>
-            {needsAttentionCount > 0 && (
-              <Pill tone="rose">
-                {t("projectCardNeedsYou", { count: needsAttentionCount })}
-              </Pill>
-            )}
-            {thinkingCount > 0 && (
-              <Pill tone="mint" dot="pulse">
-                {t("projectCardRunning", { count: thinkingCount })}
-              </Pill>
-            )}
-            {queueCount > 0 && (
-              <Pill
-                tone="sand"
-                title={t("projectCardQueueCount", { count: queueCount })}
-              >
-                {t("projectCardQueued", { count: queueCount })}
-              </Pill>
-            )}
-            {hasQueueWarning && (
-              <span
-                className={styles.queueWarning}
-                role="img"
-                title={t("projectCardQueueWarning")}
-                aria-label={t("projectCardQueueWarning")}
-              >
-                !
-              </span>
-            )}
-            <span className={styles.meta}>
-              {t(
-                project.sessionCount === 1
-                  ? "projectCardSessionOne"
-                  : "projectCardSessions",
-                { count: project.sessionCount },
-              )}
-              {project.lastActivity &&
-                ` · ${formatRelativeTime(project.lastActivity)}`}
-            </span>
-          </div>
+        <ProjectIdentity {...props} />
+        <SessionCell {...props} />
+        <QueueCell {...props} />
+        <DataListCell mono muted num className={styles.activity}>
+          {project.lastActivity
+            ? formatProjectAge(project.lastActivity, t)
+            : null}
+        </DataListCell>
+        <DataListCell right className={styles.actions}>
           <Button
             variant="secondary"
+            size="sm"
             className={styles.newSession}
-            icon={<PlusIcon />}
+            icon={<PlusIcon size={ACTION_ICON_SIZE} />}
             title={t("projectCardNewSession")}
             aria-label={t("projectCardNewSession")}
             onClick={(event) => {
@@ -273,7 +257,17 @@ export function ProjectCard({
               {t("projectCardNewSession")}
             </span>
           </Button>
-        </div>
+          {menuItems.length > 0 && (
+            <IconButton
+              label={t("projectCardActions")}
+              className={styles.more}
+              aria-haspopup="menu"
+              onClick={openMenu}
+            >
+              <MoreHorizontalIcon />
+            </IconButton>
+          )}
+        </DataListCell>
       </Link>
       {menuOpen && (
         <ActionSheet

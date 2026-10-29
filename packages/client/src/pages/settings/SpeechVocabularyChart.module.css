@@ -19,17 +19,33 @@
 .controls input,
 .controls select,
 .unknown button {
-  min-height: 44px;
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  padding: 8px;
-  background: var(--bg-primary);
-  color: var(--text-primary);
+  min-height: 40px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-md);
+  padding: 0 var(--space-3);
+  background: var(--card);
+  color: var(--ink);
   font: inherit;
+}
+
+.controls input:focus-visible,
+.controls select:focus-visible {
+  outline: none;
+  border-color: var(--indigo);
+  box-shadow: 0 0 0 3px var(--indigo-soft);
 }
 
 .controls input {
   width: 100px;
+}
+
+/* Flush garden card around the table: sunken mono header, dashed rows. */
+.tableCard {
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--card);
+  box-shadow: var(--shadow-xs);
 }
 
 .table {
@@ -42,11 +58,15 @@
 
 .table th,
 .table td {
-  padding: 0 6px;
+  padding: 0 var(--space-4);
   height: 44px;
-  border-bottom: 1px solid var(--border-color);
+  border-bottom: 1px dashed var(--dash);
   text-align: right;
   font-weight: normal;
+}
+
+.table tbody tr:last-child > * {
+  border-bottom: 0;
 }
 
 .table th:first-child {
@@ -55,8 +75,14 @@
 }
 
 .table thead th {
-  color: var(--text-secondary);
-  font-size: 12px;
+  border-bottom: 1px solid var(--line);
+  background: var(--bg-2);
+  color: var(--ink-3);
+  font-family: var(--label-font);
+  font-size: var(--eyebrow-size);
+  font-weight: 500;
+  letter-spacing: var(--eyebrow-tracking);
+  text-transform: uppercase;
 }
 
 .word {
@@ -65,7 +91,7 @@
   padding: 0;
   border: 0;
   background: transparent;
-  color: var(--text-primary);
+  color: var(--ink);
   font: inherit;
   text-align: left;
   overflow: hidden;
@@ -88,11 +114,11 @@
 }
 
 .userBar {
-  background: #3889d8;
+  background: var(--indigo);
 }
 
 .agentBar {
-  background: #a571d9;
+  background: var(--rose);
 }
 
 .ratioBar {
@@ -100,19 +126,18 @@
   right: 0;
   bottom: 2px;
   height: 3px;
-  background: #398579;
+  background: var(--mint);
 }
 
 .table tr[data-selected="true"],
 .table tbody tr:hover,
 .unknown button[aria-pressed="true"] {
-  background: var(--bg-primary);
+  background: var(--bg-2);
 }
 
 .word:focus-visible,
 .unknown button:focus-visible {
-  outline: 2px solid var(--text-primary);
-  outline-offset: 4px;
+  box-shadow: 0 0 0 3px var(--indigo-soft);
 }
 
 .unknown {

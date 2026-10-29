@@ -67,7 +67,7 @@ describe("MorePage", () => {
   it("keeps superuser destinations from a limited user", () => {
     state.principal = { username: "guest", switched: false };
     renderMore();
-    expect(screen.queryByText("Agents")).toBeNull();
+    expect(screen.queryByText("Processes")).toBeNull();
     expect(screen.queryByText(/Issues/)).toBeNull();
     expect(screen.getByText("Settings")).toBeTruthy();
     expect(screen.queryByText(/Stop acting as/)).toBeNull();

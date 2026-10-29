@@ -7,6 +7,7 @@ import {
   useState,
 } from "react";
 import { useI18n } from "../../i18n";
+import { SearchField as SearchInput } from "../garden/Field";
 import type { SearchField } from "./model";
 import styles from "./SearchToolbar.module.css";
 
@@ -15,26 +16,6 @@ const MAX_NEEDLE_LENGTH = 512;
 /** Desktop-like layouts focus the search field and capture typing for it. */
 const DESKTOP_QUERY = "(min-width: 701px)";
 const OPEN_DIALOG = '[role="dialog"],dialog[open]';
-
-function SearchIcon() {
-  return (
-    <svg
-      className={styles.searchIcon}
-      width="18"
-      height="18"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <circle cx="11" cy="11" r="7" />
-      <path d="m20 20-3.5-3.5" />
-    </svg>
-  );
-}
 
 /**
  * The needle field. It owns keyboard echo (the draft never waits on router
@@ -173,21 +154,21 @@ export function SearchHeader({
     // no content search to turn on, so it is discarded rather than queued.
     if (supported) onFields([field]);
   }, [onFields, supported, supportKnown]);
+  const field = (
+    <SearchInput
+      ref={input}
+      className={styles.field}
+      label={t("globalSessionsSearchPlaceholder")}
+      placeholder={t("globalSessionsSearchPlaceholder")}
+      value={draft}
+      maxLength={MAX_NEEDLE_LENGTH}
+      onChange={(e) => editQuery(e.target.value)}
+    />
+  );
+  if (!trailing) return field;
   return (
     <div className={styles.searchRow}>
-      <div className={styles.field}>
-        <SearchIcon />
-        <input
-          ref={input}
-          className={styles.input}
-          type="search"
-          value={draft}
-          maxLength={MAX_NEEDLE_LENGTH}
-          onChange={(e) => editQuery(e.target.value)}
-          placeholder={t("globalSessionsSearchPlaceholder")}
-          aria-label={t("globalSessionsSearchPlaceholder")}
-        />
-      </div>
+      {field}
       {trailing}
     </div>
   );

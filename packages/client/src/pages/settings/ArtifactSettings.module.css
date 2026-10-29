@@ -259,11 +259,11 @@
   }
 }
 .table .oauthBlocked > td {
-  background: color-mix(in srgb, var(--error-color, #c44343) 12%, transparent);
+  background: color-mix(in srgb, var(--rose-ink) 12%, transparent);
 }
 .table .oauthBlocked button,
 .table .oauthBlocked small {
-  color: var(--error-color, #c44343);
+  color: var(--rose-ink);
 }
 .table .oauthBlocked small {
   display: block;

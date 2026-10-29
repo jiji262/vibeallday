@@ -17,6 +17,8 @@ import { type SessionOptions, api } from "../api/client";
 import { useI18n } from "../i18n";
 import type { PermissionMode, Project } from "../types";
 import { NewSessionForm } from "./NewSessionForm";
+import { Button } from "./garden/Button";
+import styles from "./RestartSessionModal.module.css";
 import { Modal } from "./ui/Modal";
 
 interface RestartSessionModalProps {
@@ -211,7 +213,7 @@ export function RestartSessionModal({
 
   return (
     <Modal variant="dialog" title={t("sessionRestartTitle")} onClose={onClose}>
-      <div className="model-switch-content">
+      <div className={`model-switch-content ${styles.content}`}>
         {error && <div className="model-switch-error">{error}</div>}
         {draftError && !isFork && (
           <div className="model-switch-error">{draftError}</div>
@@ -308,13 +310,7 @@ export function RestartSessionModal({
         </label>
 
         <div className="model-switch-actions">
-          <button
-            type="button"
-            className="settings-button settings-button-secondary"
-            onClick={onClose}
-          >
-            {t("modalCancel")}
-          </button>
+          <Button onClick={onClose}>{t("modalCancel")}</Button>
         </div>
       </div>
     </Modal>

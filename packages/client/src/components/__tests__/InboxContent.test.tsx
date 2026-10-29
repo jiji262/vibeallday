@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { PROJECT_QUEUE_CAPABILITY } from "@vibeallday/shared";
 import type { ReactElement } from "react";
 import { MemoryRouter } from "react-router-dom";
@@ -139,10 +139,6 @@ vi.mock("../../hooks/usePublicShareStatus", () => ({
   usePublicShareStatus: () => ({
     status: { canCreate: false },
   }),
-}));
-
-vi.mock("../FilterDropdown", () => ({
-  FilterDropdown: () => <div data-testid="filter-dropdown" />,
 }));
 
 vi.mock("../SessionListItem", () => ({
@@ -323,6 +319,24 @@ describe("InboxContent", () => {
     expect(
       screen.getByTestId("session-renamed-session").textContent,
     ).not.toContain("Generated title");
+  });
+
+  it("scopes the overview through the project select", () => {
+    const onProjectChange = vi.fn();
+    renderInbox(
+      <InboxContent
+        projects={[makeProject("project-1")]}
+        onProjectChange={onProjectChange}
+      />,
+    );
+
+    const select = screen.getByRole("combobox", {
+      name: "inboxFilterProject",
+    });
+    fireEvent.change(select, { target: { value: "project-1" } });
+    expect(onProjectChange).toHaveBeenLastCalledWith("project-1");
+    fireEvent.change(select, { target: { value: "" } });
+    expect(onProjectChange).toHaveBeenLastCalledWith(undefined);
   });
 
   it("names the icon-only refresh control", () => {

@@ -40,6 +40,7 @@ import {
   startsWithSlashCommand,
   thinkingOptionToConfig,
   SERVER_CAPABILITIES,
+  GIT_STATUS_ENHANCED_CAPABILITY,
   isTurnEffort,
   isRewindSlashCommand,
   REWIND_SLASH_COMMANDS,
@@ -72,8 +73,14 @@ import dockStateStyles from "../components/SessionDockStates.module.css";
 import transcriptStyles from "../components/SessionTranscript.module.css";
 import {
   SessionHeaderModel,
+  SessionHeaderStateBadge,
   getSessionHeaderState,
 } from "../components/SessionHeaderMeta";
+import {
+  SessionChangesButton,
+  sessionChangesHref,
+} from "../components/SessionChangesButton";
+import { Skeleton } from "../components/garden/Skeleton";
 import { ProjectAppIcon } from "../components/ProjectAppIcon";
 import { LastSessionFile } from "../components/LastSessionFile";
 import styles from "./SessionPage.module.css";
@@ -530,6 +537,8 @@ function getSessionLoadingProgressText(
 }
 
 const SESSION_LOADING_PROGRESS_DETAILS_DELAY_MS = 1500;
+const SESSION_TITLE_SKELETON_WIDTH = 160;
+const SESSION_TITLE_SKELETON_HEIGHT = 16;
 
 function SessionPageContent({
   projectId,
@@ -551,7 +560,11 @@ function SessionPageContent({
   const startNewSessionWithPrefill = useStartNewSessionWithPrefillAction();
   const { project } = useProject(projectId);
   const { projects } = useProjects();
-  const { headerRef, layout: headerLayout } = useSessionHeaderLayout();
+  const {
+    headerRef,
+    layout: headerLayout,
+    roomy: roomyHeader,
+  } = useSessionHeaderLayout();
   const { projectCodeNamesEnabled } = useProjectCodeNamePreferences();
   const hideHeaderSecondary = headerLayout !== "full";
   const condensedHeader = headerLayout === "narrow";
@@ -5941,6 +5954,16 @@ function SessionPageContent({
       }
     : thinkingOptionToConfig(getThinkingSetting());
 
+  const headerState = getSessionHeaderState(
+    status.owner,
+    canStopOwnedProcess ? "in-turn" : processState,
+    pendingInputRequest !== null,
+  );
+  const sourceControlAvailable = serverHasCapability(
+    versionInfo,
+    GIT_STATUS_ENHANCED_CAPABILITY,
+  );
+
   const content = (
     <MainContent
       isWideScreen={isWideScreen}
@@ -6064,11 +6087,7 @@ function SessionPageContent({
                     thinking={effectiveModelConfig?.thinking}
                     effort={effectiveModelConfig?.effort}
                     isThinking={canStopOwnedProcess}
-                    state={getSessionHeaderState(
-                      status.owner,
-                      canStopOwnedProcess ? "in-turn" : processState,
-                      pendingInputRequest !== null,
-                    )}
+                    state={headerState}
                     title={
                       status.owner === "self" && status.processId
                         ? t("sessionConfigureModel")
@@ -6106,7 +6125,10 @@ function SessionPageContent({
                   </svg>
                 )}
                 {loading ? (
-                  <span className="session-title-skeleton" />
+                  <Skeleton
+                    width={SESSION_TITLE_SKELETON_WIDTH}
+                    height={SESSION_TITLE_SKELETON_HEIGHT}
+                  />
                 ) : isEditingTitle &&
                   !isDomLingerParked &&
                   titleEditMode === "manual" ? (
@@ -6418,6 +6440,12 @@ function SessionPageContent({
                   </span>
                 )}
               </div>
+              {!loading && roomyHeader && (
+                <SessionHeaderStateBadge
+                  state={headerState}
+                  className={sessionHeaderStyles.stateBadge}
+                />
+              )}
             </div>
             <div
               className={`session-header-right ${sessionHeaderStyles.actions}`}
@@ -6460,6 +6488,13 @@ function SessionPageContent({
                   sessionId={actualSessionId}
                   projectId={projectId}
                   messageCount={messages.length}
+                />
+              )}
+              {roomyHeader && !loading && sourceControlAvailable && (
+                <SessionChangesButton
+                  basePath={basePath}
+                  projectId={projectId}
+                  className={sessionHeaderStyles.changesButton}
                 />
               )}
               {!loading && effectiveProvider && !condensedHeader && (
@@ -6507,6 +6542,11 @@ function SessionPageContent({
                   onToggleRead={handleToggleRead}
                   onRename={handleStartEditingTitle}
                   onShowInfo={openSessionInfo}
+                  onReviewChanges={
+                    sourceControlAvailable
+                      ? () => navigate(sessionChangesHref(basePath, projectId))
+                      : undefined
+                  }
                   onGenerateTitle={
                     supportsTitleGeneration
                       ? handleGenerateAndApplyTitle
@@ -6807,9 +6847,9 @@ function SessionPageContent({
             )}
             {loading ? (
               <div className={styles.loading}>
-                <LoadingState label={t("sessionLoading")} />
+                <LoadingState label={t("sessionLoading")} variant="compact" />
                 {sessionLoadingProgressText && (
-                  <div className="loading-detail">
+                  <div className={`loading-detail ${styles.loadingDetail}`}>
                     {sessionLoadingProgressText}
                   </div>
                 )}

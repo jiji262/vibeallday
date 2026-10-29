@@ -655,6 +655,78 @@ describe("ProjectsPage", () => {
     expect(state.refetch).toHaveBeenCalledOnce();
   });
 
+  it("echoes every search keystroke and filters by name, path, code and caption", async () => {
+    const cachedProjects = state.projects;
+    state.projects = [
+      ...cachedProjects,
+      {
+        id: "project-2",
+        name: "Beta",
+        codeName: "bet",
+        path: "/work/beta-service",
+        caption: { text: "Payments gateway", source: "readme" },
+        sessionCount: 1,
+        activeOwnedCount: 0,
+        activeExternalCount: 0,
+        lastActivity: null,
+      },
+    ] as typeof state.projects;
+    try {
+      renderProjectsPage();
+      const search = screen.getByRole("searchbox", {
+        name: "Search projects",
+      }) as HTMLInputElement;
+      let typed = "";
+      for (const char of "payments") {
+        typed += char;
+        fireEvent.change(search, { target: { value: typed } });
+        // The field shows each keystroke before the list catches up.
+        expect(search.value).toBe(typed);
+      }
+      await waitFor(() => {
+        expect(screen.queryByRole("link", { name: /Alpha/ })).toBeNull();
+      });
+      expect(screen.getByRole("link", { name: /Beta/ })).toBeTruthy();
+      expect(screen.getByText("1 of 2 projects")).toBeTruthy();
+
+      fireEvent.change(search, { target: { value: "alpha" } });
+      await waitFor(() => {
+        expect(screen.getByRole("link", { name: /Alpha/ })).toBeTruthy();
+      });
+      expect(screen.queryByRole("link", { name: /Beta/ })).toBeNull();
+
+      fireEvent.change(search, { target: { value: "nothing-matches" } });
+      expect(
+        await screen.findByText("No projects match these filters."),
+      ).toBeTruthy();
+    } finally {
+      state.projects = cachedProjects;
+    }
+  });
+
+  it("opens Add project from the switcher's router state, then clears it", () => {
+    render(
+      <I18nProvider>
+        <MemoryRouter
+          initialEntries={[
+            {
+              pathname: "/projects",
+              search: "?x=1",
+              state: { addProject: true },
+            },
+          ]}
+        >
+          <ProjectsPage />
+        </MemoryRouter>
+      </I18nProvider>,
+    );
+    expect(screen.getByRole("textbox", { name: "Project path" })).toBeTruthy();
+    expect(state.navigate).toHaveBeenCalledWith("/projects?x=1", {
+      replace: true,
+      state: null,
+    });
+  });
+
   it("hides project queue UI for hosted remote servers below the compatible level", () => {
     state.isRemoteClient = true;
     state.version = {

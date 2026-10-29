@@ -1,9 +1,7 @@
 /*
- * A full-width sticky bar rather than a tinted card: the server has already
- * refused to open its database, so this has to be seen once on any route.
- * The accent bar carries the warning color, which is a light tan in the dark
- * themes and a dark amber in the light one and so cannot be a background
- * behind a single fixed text color.
+ * A full-width sticky warning notice rather than a card: the server has
+ * already refused to open its database, so this has to be seen once on any
+ * route. It is opaque because it sits over scrolling content.
  */
 .root {
   position: sticky;
@@ -11,69 +9,80 @@
   z-index: 10000;
   display: flex;
   align-items: flex-start;
-  gap: 1rem;
-  padding: 0.75rem 1rem;
-  border-left: 4px solid var(--warning-color);
-  color: var(--text-primary);
-  background: var(--bg-tertiary);
-  box-shadow: 0 4px 16px rgb(0 0 0 / 35%);
+  gap: var(--space-4);
+  padding: var(--space-3) var(--page-gutter);
+  border-bottom: 1px solid color-mix(in srgb, var(--peach) 28%, transparent);
+  color: var(--peach-ink);
+  background: color-mix(in srgb, var(--peach) 12%, var(--card));
+  box-shadow: var(--shadow-sm);
 }
 
 .content {
   display: flex;
   flex: 1;
   flex-direction: column;
-  gap: 0.35rem;
+  gap: var(--space-1);
   min-width: 0;
 }
 
 .title {
   margin: 0;
-  color: var(--warning-color);
-  font-size: 1rem;
-  font-weight: 700;
-  letter-spacing: 0.01em;
+  font-family: var(--label-font);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: var(--eyebrow-tracking);
+  text-transform: uppercase;
 }
 
 .body {
-  margin: 0;
   max-width: 52rem;
-  font-size: 0.9rem;
-  line-height: 1.35;
+  margin: 0;
+  color: var(--ink-2);
+  font-size: 13px;
+  line-height: 1.5;
 }
 
 .command {
   align-self: flex-start;
-  overflow-x: auto;
   max-width: 100%;
-  padding: 0.2rem 0.4rem;
-  border-radius: 0.25rem;
-  background: var(--bg-code);
-  font-family: var(--font-mono);
-  font-size: 0.85rem;
+  overflow-x: auto;
+  padding: 2px var(--space-2);
+  border: 1px dashed var(--dash);
+  border-radius: var(--radius-xs);
+  background: var(--card);
+  color: var(--ink-2);
+  font-family: var(--label-font);
+  font-size: 12px;
   white-space: pre;
 }
 
-/*
- * The label sits just below the banner's top padding rather than flush with
- * it: the button's border gives it more visual weight than the title beside
- * it, and a flush top reads as raised.
- */
 .dismiss {
   flex: none;
-  margin-top: 0.05rem;
-  padding: 0.3rem 0.75rem;
-  min-height: 2.25rem;
-  border: 1px solid var(--border-color);
-  border-radius: 0.25rem;
-  color: inherit;
-  background: var(--bg-secondary);
+  min-height: 32px;
+  padding: 0 var(--space-3);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-md);
+  background: var(--card);
+  box-shadow: var(--shadow-xs);
+  color: var(--ink);
   font: inherit;
-  font-size: 0.85rem;
-  line-height: 1.2;
+  font-size: 13px;
+  font-weight: 500;
   cursor: pointer;
+  transition: background-color var(--duration-fast) var(--ease-standard);
 }
 
 .dismiss:hover {
-  background: var(--bg-hover);
+  background: var(--bg-2);
+}
+
+.dismiss:focus-visible {
+  border-color: var(--indigo);
+  box-shadow: 0 0 0 3px var(--indigo-soft);
+}
+
+@media (pointer: coarse) {
+  .dismiss {
+    min-height: var(--tap-min);
+  }
 }

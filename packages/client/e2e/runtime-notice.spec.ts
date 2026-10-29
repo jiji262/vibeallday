@@ -23,8 +23,12 @@ for (const viewport of [
       });
     });
     await page.goto(baseURL!);
+    // The Overview's project filter lists the name in a hidden <option> too.
     await expect(
-      page.getByText("mockproject", { exact: true }).first(),
+      page
+        .getByText("mockproject", { exact: true })
+        .filter({ visible: true })
+        .first(),
     ).toBeVisible();
     const notice = page.getByTestId("remote-compatibility-notice");
     await expect(notice).toContainText(

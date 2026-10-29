@@ -1,8 +1,12 @@
 import { useCallback, useState } from "react";
 import { useTextTooltipAttributes } from "../../hooks/useTooltipAppearance";
+import { SearchField } from "../../components/garden/Field";
+import { XIcon } from "../../components/garden/icons";
 import { useI18n } from "../../i18n";
 import { UI_KEYS } from "../../lib/storageKeys";
 import styles from "./SettingsSearchBar.module.css";
+
+const CLEAR_ICON_SIZE = 14;
 
 /**
  * Browser-local, default-off preference: settings search also matches each
@@ -51,13 +55,12 @@ export function SettingsSearchBar({
       onSubmit={(event) => event.preventDefault()}
     >
       <div className={styles.inputWrap}>
-        <input
-          type="search"
+        <SearchField
           name="settings-search"
           autoComplete="off"
-          className={`settings-input ${styles.input}`}
+          label={t("settingsSearchPlaceholder")}
+          inputClassName={styles.input}
           placeholder={t("settingsSearchPlaceholder")}
-          aria-label={t("settingsSearchPlaceholder")}
           value={query}
           onChange={(event) => onQueryChange(event.target.value)}
           onKeyDown={(event) => {
@@ -74,7 +77,7 @@ export function SettingsSearchBar({
             aria-label={t("settingsSearchClear")}
             onClick={() => onQueryChange("")}
           >
-            ×
+            <XIcon size={CLEAR_ICON_SIZE} />
           </button>
         )}
       </div>

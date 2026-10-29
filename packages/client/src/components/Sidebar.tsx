@@ -1,9 +1,5 @@
-import { useIssuesEnabled } from "../hooks/useIssuesEnabled";
 import {
   projectDisplayName,
-  DEVICE_BRIDGE_CAPABILITY,
-  DEVICE_BRIDGE_DOWNLOAD_CAPABILITY,
-  GIT_STATUS_ENHANCED_CAPABILITY,
   PROJECT_CODE_NAMES_CAPABILITY,
   PUBLIC_SHARE_MANAGEMENT_CAPABILITY,
   type ProjectQueueItemSummary,
@@ -11,8 +7,7 @@ import {
 } from "@vibeallday/shared";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { api, type GlobalSessionItem } from "../api/client";
-import { useOptionalRemoteConnection } from "../contexts/RemoteConnectionContext";
+import type { GlobalSessionItem } from "../api/client";
 import { useNewSessionDraft } from "../hooks/useDrafts";
 import { useProjectCodeNamePreferences } from "../hooks/useProjectCodeNamePreferences";
 import { useProjectQueues } from "../hooks/useProjectQueues";
@@ -39,25 +34,14 @@ import {
 } from "../lib/sessionOverview";
 import { SIDEBAR_MAX_WIDTH, SIDEBAR_MIN_WIDTH } from "../hooks/useSidebarWidth";
 import { useVersion } from "../hooks/useVersion";
-import { SessionAsyncQuestionsButton } from "./SessionAsyncQuestionsButton";
 import { useI18n } from "../i18n";
 import { useToastContext } from "../contexts/ToastContext";
-import { bangHistoryViewEnabled } from "../lib/bangCommandAvailability";
-import { buildFrontendReloadUrl } from "../lib/frontendReload";
-import { getRelayBasePath } from "../lib/remoteRoutePaths";
-import { markSwitchHostReload } from "../lib/switchHostReload";
-import {
-  recentRelayHosts,
-  type SwitchableRelayHost,
-  SwitchHostMenu,
-} from "./SwitchHostMenu";
 import { isNearScrollEnd } from "../lib/predictiveScroll";
 import { serverSupportsProjectQueue } from "../lib/projectQueueVisibility";
 import { sessionCollectionRecordToGlobalSessionItem } from "../lib/sessionCollectionRecords";
 import type { SessionCollectionRecord } from "../lib/clientSummaryCollections";
 import {
   useDraftSessionIds,
-  useInboxCounts,
   useKnownProjectQueueItems,
   useProjectQueuedSessionIds,
   useProjectQueueSidebarCount,
@@ -67,7 +51,6 @@ import {
 } from "../lib/clientSummaryStore";
 import { UI_KEYS } from "../lib/storageKeys";
 import { getSessionDisplayTitle } from "../utils";
-import { AgentsNavItem } from "./AgentsNavItem";
 import { useActingPrincipal } from "../hooks/useActingPrincipal";
 import { useClientSummarySourceKey } from "../lib/clientSummarySourceKey";
 import { writeNewSessionProjectSnapshot } from "../lib/newSessionProjectSnapshot";
@@ -75,14 +58,11 @@ import { CompactResumeButton } from "./CompactResumeButton";
 import { SessionListItem } from "./SessionListItem";
 import type { SessionNavigationIntent } from "./SessionListItem";
 import sidebarStyles from "./Sidebar.module.css";
-import { SidebarLauncher } from "./SidebarLauncher";
-import {
-  SidebarIcons,
-  SidebarNavButton,
-  SidebarNavItem,
-  SidebarNavSection,
-} from "./SidebarNavItem";
-import { VibeAllDayLogo } from "./VibeAllDayLogo";
+import { SidebarIcons, SidebarNavItem } from "./SidebarNavItem";
+import { ProjectSwitcher } from "./sidebar/ProjectSwitcher";
+import { SidebarBrand } from "./sidebar/SidebarBrand";
+import { SidebarHostFooter } from "./sidebar/SidebarHostFooter";
+import { SidebarNavGroups } from "./sidebar/SidebarNavGroups";
 
 export { SidebarToggleIcon } from "./SidebarLauncher";
 
@@ -412,9 +392,7 @@ export function Sidebar({
   const { sidebarDuplicateHidingEnabled } = useSidebarDuplicateHiding();
   const navigate = useNavigate();
   const location = useLocation();
-  const remoteConnection = useOptionalRemoteConnection();
   const { settings: serverSettings } = useServerSettings();
-  const issuesEnabled = useIssuesEnabled();
   // Limited users (topics/limited-users.md § Delivery v1): the acting
   // principal decides which nav entries are worth showing. Hiding is
   // cosmetic; the server refuses the same operations either way.
@@ -478,30 +456,16 @@ export function Sidebar({
 
   // Server capabilities for feature gating
   const { version: versionInfo } = useVersion();
-  const bangHistoryVisible = bangHistoryViewEnabled(
-    versionInfo,
-    serverSettings?.clientDefaults,
-  );
   const supportsProjectQueue = serverSupportsProjectQueue(versionInfo);
   const supportsProjectCodeNames = serverHasCapability(
     versionInfo,
     PROJECT_CODE_NAMES_CAPABILITY,
   );
   const { projectCodeNamesEnabled } = useProjectCodeNamePreferences();
-  const supportsSourceControl = serverHasCapability(
-    versionInfo,
-    GIT_STATUS_ENHANCED_CAPABILITY,
-  );
   const publicShareManagementAvailable = serverHasCapability(
     versionInfo,
     PUBLIC_SHARE_MANAGEMENT_CAPABILITY,
   );
-  const supportsDeviceBridgeNav =
-    serverHasCapability(versionInfo, DEVICE_BRIDGE_CAPABILITY) ||
-    serverHasCapability(versionInfo, DEVICE_BRIDGE_DOWNLOAD_CAPABILITY);
-
-  // Global inbox count. Title badge updates are owned by the app shell.
-  const { needsAttention: inboxCount } = useInboxCounts();
   const {
     projects,
     complete: projectsComplete,
@@ -538,7 +502,6 @@ export function Sidebar({
     supportsProjectQueue ? projects : EMPTY_PROJECT_QUEUE_PROJECTS,
   );
   const newSessionPath = "/new-session";
-  const newSessionHref = `${basePath}${newSessionPath}`;
 
   const sidebarRef = useRef<HTMLElement>(null);
   const sidebarSessionsRef = useRef<HTMLDivElement | null>(null);
@@ -751,47 +714,6 @@ export function Sidebar({
       document.removeEventListener("mouseup", handleMouseUp);
     };
   }, [isResizing, onResize, onResizeEnd]);
-
-  // Disconnect, cache-bust this document, then open the host picker after
-  // reload. Reloading /login can leave a session-pinned installed window.
-  const handleReturnToSuperuser = async () => {
-    await api.logoutUser();
-    // Acting as a different principal changes every list in the app.
-    window.location.reload();
-  };
-
-  const handleSwitchHost = () => {
-    if (remoteConnection?.switchHost) {
-      remoteConnection.switchHost();
-      return;
-    }
-    remoteConnection?.disconnect();
-    markSwitchHostReload();
-    window.location.replace(
-      buildFrontendReloadUrl(window.location.href, String(Date.now())),
-    );
-  };
-
-  // Browser relay connections list recent hosts on right-click/hold; the
-  // native shell owns its own host list behind switchHost.
-  const [switchHostMenu, setSwitchHostMenu] = useState<{
-    anchor: DOMRect;
-    hosts: SwitchableRelayHost[];
-  } | null>(null);
-  const currentRelayUsername = remoteConnection?.currentRelayUsername ?? null;
-  const handleOpenSwitchHostMenu =
-    currentRelayUsername && !remoteConnection?.switchHost
-      ? (anchor: DOMRect) =>
-          setSwitchHostMenu({
-            anchor,
-            hosts: recentRelayHosts(currentRelayUsername),
-          })
-      : undefined;
-  const closeSwitchHostMenu = useCallback(() => setSwitchHostMenu(null), []);
-  const handlePickRecentHost = (host: SwitchableRelayHost) => {
-    onNavigate();
-    navigate(`${getRelayBasePath(host.relayUsername)}/projects`);
-  };
 
   const filteredStarredSessions = useMemo(
     () =>
@@ -1087,7 +1009,7 @@ export function Sidebar({
     const expanded = !sectionExpansion.collapsedGroups?.includes(key);
     const listId = `sidebar-group-${encodeURIComponent(key)}`;
     return (
-      <div className="sidebar-section" key={key}>
+      <div className={`sidebar-section ${sidebarStyles.section}`} key={key}>
         <SidebarSectionHeader
           title={name}
           expanded={expanded}
@@ -1102,7 +1024,10 @@ export function Sidebar({
           isPerson={isPerson}
         />
         {expanded && (
-          <ul id={listId} className="sidebar-session-list">
+          <ul
+            id={listId}
+            className={`sidebar-session-list ${sidebarStyles.sessionList}`}
+          >
             {rows.map(renderCompactSession)}
           </ul>
         )}
@@ -1202,95 +1127,23 @@ export function Sidebar({
             : undefined
         }
       >
-        <div className="sidebar-header">
-          {isDesktop && isCollapsed ? (
-            /* Desktop collapsed mode: expand from the main icon or minimize the rail. */
-            <>
-              {onToggleExpanded && (
-                <SidebarLauncher
-                  label={t("actionExpandSidebar")}
-                  newSessionLabel={t("sidebarNewSession")}
-                  onActivate={onToggleExpanded}
-                />
-              )}
-              {onMinimize && (
-                <button
-                  type="button"
-                  className="sidebar-minimize"
-                  onClick={onMinimize}
-                  title={t("actionMinimizeSidebar")}
-                  aria-label={t("actionMinimizeSidebar")}
-                >
-                  <svg
-                    width="12"
-                    height="12"
-                    viewBox="0 0 12 12"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                    aria-hidden="true"
-                  >
-                    <line x1="2" y1="10" x2="10" y2="10" />
-                  </svg>
-                </button>
-              )}
-            </>
-          ) : isDesktop ? (
-            /* Desktop expanded mode: brand at the left edge, collapse toggle
-               at the right edge so the control stays inside the sidebar. */
-            <>
-              <Link
-                to={newSessionHref}
-                className={`sidebar-brand sidebar-brand-link ${sidebarStyles.brandLink}`}
-                title={t("sidebarNewSession")}
-              >
-                <VibeAllDayLogo />
-              </Link>
-              {onToggleExpanded && (
-                <SidebarLauncher
-                  className={sidebarStyles.headerToggle}
-                  label={t("actionToggleSidebar")}
-                  newSessionLabel={t("sidebarNewSession")}
-                  onActivate={onToggleExpanded}
-                />
-              )}
-            </>
-          ) : (
-            /* Mobile mode: brand text + close button */
-            <>
-              <Link
-                to={newSessionHref}
-                className={`sidebar-brand sidebar-brand-link ${sidebarStyles.brandLink}`}
-                title={t("sidebarNewSession")}
-                onClick={onNavigate}
-              >
-                <VibeAllDayLogo />
-              </Link>
-              <button
-                type="button"
-                className="sidebar-close"
-                onClick={onClose}
-                aria-label={t("actionCloseSidebar")}
-              >
-                <svg
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  aria-hidden="true"
-                >
-                  <line x1="18" y1="6" x2="6" y2="18" />
-                  <line x1="6" y1="6" x2="18" y2="18" />
-                </svg>
-              </button>
-            </>
-          )}
-        </div>
+        <SidebarBrand
+          basePath={basePath}
+          isDesktop={isDesktop}
+          isCollapsed={isCollapsed}
+          onToggleExpanded={onToggleExpanded}
+          onMinimize={onMinimize}
+          onClose={onClose}
+          onNavigate={onNavigate}
+        />
 
-        <div className="sidebar-actions">
+        <ProjectSwitcher
+          basePath={basePath}
+          onNavigate={onNavigate}
+          isRail={isDesktop && isCollapsed}
+        />
+
+        <div className={`sidebar-actions ${sidebarStyles.actions}`}>
           {/* New Session: link to most recent project's new session page */}
           <SidebarNavItem
             to={newSessionPath}
@@ -1299,162 +1152,26 @@ export function Sidebar({
             onClick={onNavigate}
             basePath={basePath}
             hasDraft={hasNewSessionDraft && !isCollapsed}
+            className={sidebarStyles.newSession}
           />
         </div>
 
         <div
           ref={sidebarSessionsRef}
-          className="sidebar-sessions"
+          className={`sidebar-sessions ${sidebarStyles.sessions}`}
           onScroll={maybeLoadMoreSidebarSessions}
         >
-          {/* Navigation items that scroll with content */}
-          <SidebarNavSection>
-            <SidebarNavItem
-              to="/inbox"
-              icon={SidebarIcons.allSessions}
-              label={t("tabSessions")}
-              activePaths={["/sessions"]}
-              badge={inboxCount}
-              accessory={
-                <SessionAsyncQuestionsButton
-                  basePath={basePath}
-                  onNavigate={onNavigate}
-                />
-              }
-              onClick={onNavigate}
-              basePath={basePath}
-            />
-            {issuesEnabled && !isLimitedUser && (
-              <SidebarNavItem
-                to="/issues"
-                icon={SidebarIcons.issues}
-                label={t("issuesTitle")}
-                onClick={onNavigate}
-                basePath={basePath}
-              />
-            )}
-            {bangHistoryVisible && !isLimitedUser && (
-              <SidebarNavItem
-                to="/bang-commands"
-                icon={SidebarIcons.bang}
-                label={t("sidebarBangCommands")}
-                onClick={onNavigate}
-                basePath={basePath}
-              />
-            )}
-            <SidebarNavItem
-              to="/projects"
-              icon={SidebarIcons.projects}
-              label={t("sidebarProjects")}
-              badge={supportsProjectQueue ? projectQueueSidebarCount : 0}
-              badgeVariant="projectQueue"
-              badgeTitle={t("projectCardQueueCount", {
-                count: projectQueueSidebarCount,
-              })}
-              onClick={onNavigate}
-              basePath={basePath}
-            />
-            {supportsSourceControl && (
-              <SidebarNavItem
-                to={sourceControlPath}
-                icon={SidebarIcons.sourceControl}
-                label={t("sidebarSourceControl")}
-                onClick={onNavigate}
-                basePath={basePath}
-              />
-            )}
-            {supportsDeviceBridgeNav && !isLimitedUser && (
-              <SidebarNavItem
-                to="/devices"
-                icon={SidebarIcons.emulator}
-                label={t("sidebarDevices")}
-                onClick={onNavigate}
-                basePath={basePath}
-              />
-            )}
-            {!isLimitedUser && (
-              <AgentsNavItem onClick={onNavigate} basePath={basePath} />
-            )}
-            <SidebarNavItem
-              to="/settings"
-              icon={SidebarIcons.settings}
-              label={t("sidebarSettings")}
-              onClick={onNavigate}
-              basePath={basePath}
-            />
-            {/* A switched superuser sees the limited user's app; this is the way
-                back that does not require finding Settings > Users. */}
-            {actingPrincipal.switched && actingPrincipal.username && (
-              <SidebarNavButton
-                className="sidebar-return-to-superuser"
-                onClick={() => void handleReturnToSuperuser()}
-                label={t("sidebarReturnToSuperuser", {
-                  username: actingPrincipal.username,
-                })}
-                icon={
-                  <svg
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    aria-hidden="true"
-                  >
-                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-                    <polyline points="16 17 21 12 16 7" />
-                    <line x1="21" y1="12" x2="9" y2="12" />
-                  </svg>
-                }
-              />
-            )}
-            {/* Relay-connected Switch Host uses nav-item markup so the mini rail stays icon-only. */}
-            {remoteConnection && (
-              <SidebarNavButton
-                className="sidebar-switch-host"
-                onClick={handleSwitchHost}
-                onLongPress={handleOpenSwitchHostMenu}
-                label={t("sidebarSwitchHost")}
-                title={
-                  handleOpenSwitchHostMenu
-                    ? t("sidebarSwitchHostTitle")
-                    : undefined
-                }
-                icon={
-                  <svg
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    aria-hidden="true"
-                  >
-                    <polyline points="17 1 21 5 17 9" />
-                    <path d="M3 11V9a4 4 0 0 1 4-4h14" />
-                    <polyline points="7 23 3 19 7 15" />
-                    <path d="M21 13v2a4 4 0 0 1-4 4H3" />
-                  </svg>
-                }
-              />
-            )}
-            {switchHostMenu && (
-              <SwitchHostMenu
-                anchor={switchHostMenu.anchor}
-                hosts={switchHostMenu.hosts}
-                onPick={handlePickRecentHost}
-                onShowAll={handleSwitchHost}
-                onClose={closeSwitchHostMenu}
-              />
-            )}
-          </SidebarNavSection>
+          <SidebarNavGroups
+            basePath={basePath}
+            onNavigate={onNavigate}
+            sourceControlPath={sourceControlPath}
+            projectQueueCount={
+              supportsProjectQueue ? projectQueueSidebarCount : 0
+            }
+          />
 
           {supportsProjectQueue && pendingProjectQueueItems.length > 0 && (
-            <div className="sidebar-section">
+            <div className={`sidebar-section ${sidebarStyles.section}`}>
               <SidebarSectionHeader
                 title={t("sidebarSectionPendingSessions")}
                 expanded={projectQueueExpanded}
@@ -1528,7 +1245,7 @@ export function Sidebar({
 
           {/* Global sessions list */}
           {displayed.starred.length > 0 && (
-            <div className="sidebar-section">
+            <div className={`sidebar-section ${sidebarStyles.section}`}>
               <SidebarSectionHeader
                 title={t("sidebarSectionStarred")}
                 expanded={starredExpanded}
@@ -1542,7 +1259,10 @@ export function Sidebar({
                 countIsPartial={hasMoreStarredSessions}
               />
               {starredExpanded && (
-                <ul id="sidebar-starred-list" className="sidebar-session-list">
+                <ul
+                  id="sidebar-starred-list"
+                  className={`sidebar-session-list ${sidebarStyles.sessionList}`}
+                >
                   {displayed.starred.map(renderCompactSession)}
                 </ul>
               )}
@@ -1558,7 +1278,7 @@ export function Sidebar({
           )}
 
           {displayed.recent.length > 0 && (
-            <div className="sidebar-section">
+            <div className={`sidebar-section ${sidebarStyles.section}`}>
               <SidebarSectionHeader
                 title={t("sessionRecentSessions")}
                 expanded={recentDayExpanded}
@@ -1577,14 +1297,14 @@ export function Sidebar({
               {recentDayExpanded && (
                 <ul
                   id="sidebar-last-24-hours-list"
-                  className="sidebar-session-list"
+                  className={`sidebar-session-list ${sidebarStyles.sessionList}`}
                 >
                   {displayed.recent.map(renderCompactSession)}
                   {displayed.hiddenRecent.length > 0 && (
                     <li className="sidebar-hidden-dups">
                       <button
                         type="button"
-                        className="sidebar-hidden-dups-toggle"
+                        className={`sidebar-hidden-dups-toggle ${sidebarStyles.hiddenDupsToggle}`}
                         onClick={() => setShowHiddenRecent((v) => !v)}
                         aria-expanded={showHiddenRecent}
                       >
@@ -1594,7 +1314,9 @@ export function Sidebar({
                         })}
                       </button>
                       {showHiddenRecent && (
-                        <ul className="sidebar-session-list sidebar-hidden-sublist">
+                        <ul
+                          className={`sidebar-session-list sidebar-hidden-sublist ${sidebarStyles.sessionList}`}
+                        >
                           {displayed.hiddenRecent.map(renderCompactSession)}
                         </ul>
                       )}
@@ -1626,13 +1348,15 @@ export function Sidebar({
             displayed.recent.length === 0 &&
             displayedGroupKeys(CATEGORY_SECTION_PREFIX).length === 0 &&
             displayedGroupKeys(CREATOR_SECTION_PREFIX).length === 0 && (
-              <p className="sidebar-empty">
+              <p className={`sidebar-empty ${sidebarStyles.empty}`}>
                 {sessionsLoading
                   ? t("sidebarLoadingSessions")
                   : t("sidebarNoSessions")}
               </p>
             )}
         </div>
+
+        <SidebarHostFooter basePath={basePath} onNavigate={onNavigate} />
 
         {/* Resize handle - desktop only, when expanded */}
         {isDesktop && !isCollapsed && (

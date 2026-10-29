@@ -10,14 +10,14 @@
   padding: 0;
   border: 0;
   background: none;
-  color: var(--text-secondary);
+  color: var(--ink-2);
   font: inherit;
   cursor: pointer;
 }
 
 .chip:disabled {
+  color: var(--ink-4);
   cursor: not-allowed;
-  opacity: 0.5;
 }
 
 .checkChip {
@@ -25,7 +25,7 @@
   display: inline-flex;
   align-items: center;
   min-height: var(--tap-min);
-  color: var(--text-secondary);
+  color: var(--ink-2);
   cursor: pointer;
 }
 
@@ -49,12 +49,13 @@
 }
 
 .hint {
-  padding: 1px 4px;
-  border: 1px solid var(--border-color);
+  padding: 1px 6px;
+  border: 1px solid var(--line);
   border-radius: var(--radius-xs);
-  font-family: var(--font-mono);
-  font-size: 10.5px;
-  color: var(--text-muted);
+  background: var(--card);
+  color: var(--ink-3);
+  font-family: var(--label-font);
+  font-size: 10px;
 }
 
 @media (hover: none) {
@@ -67,37 +68,40 @@
 .face {
   display: inline-flex;
   align-items: center;
-  gap: var(--space-2);
+  gap: 6px;
   min-height: 32px;
   padding: 0 var(--space-3);
   border: 1px solid var(--line-strong);
   border-radius: var(--radius-pill);
-  background: var(--bg-card);
-  font-size: 14px;
+  background: var(--card);
+  box-shadow: var(--shadow-xs);
+  font-size: 13px;
   font-weight: 500;
   line-height: 1;
   white-space: nowrap;
   transition:
-    background-color 120ms ease,
-    border-color 120ms ease,
-    color 120ms ease;
+    background-color var(--duration-fast) var(--ease-standard),
+    border-color var(--duration-fast) var(--ease-standard),
+    color var(--duration-fast) var(--ease-standard);
 }
 
 .chip:focus-visible .face,
 .checkInput:focus-visible + .face {
-  outline: 2px solid var(--focus-border);
-  outline-offset: 2px;
+  border-color: var(--indigo);
+  box-shadow: 0 0 0 3px var(--indigo-soft);
 }
 
 .chip[aria-pressed="true"] .face,
 .checkInput:checked + .face {
   border-color: var(--indigo);
-  background: var(--indigo-soft-2);
+  background: var(--indigo-soft);
   color: var(--indigo-ink);
 }
 
 .checkInput:disabled + .face {
-  opacity: 0.5;
+  border-color: var(--line);
+  background: var(--bg-soft);
+  color: var(--ink-4);
 }
 
 .checkInput:checked + .face .tick {
@@ -105,7 +109,8 @@
 }
 
 .chip:hover:not(:disabled):not([aria-pressed="true"]) .face {
-  background: var(--bg-tertiary);
+  border-color: var(--line-strong);
+  background: var(--bg-2);
 }
 
 @media (prefers-reduced-motion: reduce) {

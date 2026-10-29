@@ -22,10 +22,10 @@
   width: 21px;
   height: 24px;
   padding: 0;
-  border: 1px solid var(--border-color);
-  border-radius: 3px;
-  color: var(--text-secondary);
-  background: var(--bg-secondary);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-xs);
+  color: var(--ink-2);
+  background: var(--card);
   font-size: 15px;
   cursor: pointer;
 }
@@ -63,6 +63,8 @@
   width: 40px;
   padding-inline: 0;
   justify-content: flex-end;
+  color: var(--ink-3);
+  font-family: var(--label-font);
   font-size: 9px;
   font-weight: 400;
   white-space: nowrap;
@@ -72,8 +74,9 @@
 .snippet {
   flex: 1;
   min-width: 0;
-  border-left: 2px solid var(--accent-primary);
+  border-left: 2px solid var(--line-strong);
   padding: 4px 0 4px 6px;
+  color: var(--ink-2);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -93,7 +96,7 @@
   place-items: center;
   border: 0;
   background: none;
-  color: var(--text-secondary);
+  color: var(--ink-3);
   min-width: var(--match-menu-button-width);
   height: 26px;
   padding: 0;
@@ -106,10 +109,11 @@
   right: var(--match-menu-button-width);
   top: 100%;
   z-index: 5;
-  background: var(--bg-secondary);
-  border: 1px solid var(--border-color);
-  border-radius: 4px;
-  box-shadow: 0 4px 12px #0005;
+  padding: var(--space-1);
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
 }
 .menu button,
 .menu a {
@@ -117,12 +121,18 @@
   text-decoration: none;
   border: 0;
   background: none;
-  color: var(--text-primary);
-  padding: 8px 14px;
+  color: var(--ink-2);
+  padding: 7px 10px;
+  border-radius: var(--radius-sm);
   font: inherit;
-  font-size: var(--font-size-sm);
+  font-size: 14px;
   cursor: pointer;
   white-space: nowrap;
+}
+.menu button:hover,
+.menu a:hover {
+  background: var(--bg-soft);
+  color: var(--ink);
 }
 .zoom {
   max-width: 680px;
@@ -134,11 +144,12 @@
 }
 .zoom mark {
   color: inherit;
-  background: color-mix(in srgb, var(--accent-primary) 22%, transparent);
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--sand) 45%, transparent);
 }
 .zoom hr {
   border: 0;
-  border-top: 1px solid var(--border-color);
+  border-top: 1px dashed var(--dash);
   margin: 16px 0;
 }
 .neighbor {

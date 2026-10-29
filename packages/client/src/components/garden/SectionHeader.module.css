@@ -1,13 +1,14 @@
+/* A card-header row for a section of rows: serif title, mono count. */
 .header {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: var(--space-3);
+  gap: var(--space-1) var(--space-3);
   min-height: 56px;
   margin: 0;
   padding: var(--space-3) var(--space-5);
   border-bottom: 1px dashed var(--dash);
-  background: var(--bg-sunken);
 }
 
 .title {
@@ -15,28 +16,31 @@
   align-items: center;
   gap: var(--space-2);
   margin: 0;
+  color: var(--ink);
   font-family: var(--font-display);
   font-size: 20px;
-  font-weight: 600;
-  color: var(--text-primary);
+  font-weight: 500;
+  letter-spacing: -0.005em;
 }
 
 .count {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 20px;
-  height: 20px;
-  padding: 0 6px;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 var(--space-2);
   border-radius: var(--radius-pill);
-  font-family: var(--font-mono);
-  font-size: 11px;
-  font-weight: 600;
+  font-family: var(--label-font);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: var(--badge-tracking);
+  font-variant-numeric: tabular-nums;
 }
 
 .default {
-  background: var(--bg-tertiary);
-  color: var(--text-muted);
+  background: var(--bg-soft);
+  color: var(--ink-3);
 }
 
 .rose {
@@ -57,4 +61,11 @@
 .action {
   display: flex;
   flex-shrink: 0;
+  margin-left: auto;
+}
+
+@media (width >= 768px) {
+  .header {
+    padding-inline: 28px;
+  }
 }

@@ -1,7 +1,10 @@
 import type { ReviewComment } from "@vibeallday/shared";
 import { useState } from "react";
 import { api } from "../api/client";
+import { Button } from "../components/garden/Button";
+import { Card, CardFooter, CardHeader } from "../components/garden/Card";
 import { EmptyState } from "../components/garden/EmptyState";
+import { ErrorState } from "../components/garden/ErrorState";
 import { notifyReviewCommentsChanged } from "../lib/reviewCommentsBus";
 import type { TranslationFn } from "../i18n";
 import styles from "./ReviewCommentsPanel.module.css";
@@ -88,85 +91,96 @@ export function ReviewCommentsPanel({
 
   return (
     <section className={styles.panel}>
-      {error && <div className={styles.error}>{error}</div>}
-      <ul className={styles.list}>
-        {pending.map((comment) => (
-          <li key={comment.id} className={styles.row}>
-            <div className={styles.rowHead}>
-              <button
-                type="button"
-                className={styles.location}
-                title={t("sourceReviewOpenInFiles")}
-                onClick={() => onOpenFile(comment.anchor.path)}
-              >
-                {commentLocation(comment)}
-              </button>
-              <span className={styles.revision}>
-                {revisionLabel(comment, t)}
-              </span>
-              <div className={styles.rowActions}>
+      {error && <ErrorState inline message={error} />}
+      <Card flush>
+        <CardHeader
+          title={t("sourceTabComments")}
+          meta={String(pending.length)}
+        />
+        <ul className={styles.list}>
+          {pending.map((comment) => (
+            <li key={comment.id} className={styles.row}>
+              <div className={styles.rowHead}>
                 <button
                   type="button"
-                  className={styles.edit}
-                  disabled={busyId === comment.id}
-                  onClick={() => {
-                    setEditId(comment.id);
-                    setEditText(comment.text);
-                    setConfirmId(null);
-                  }}
+                  className={styles.location}
+                  title={t("sourceReviewOpenInFiles")}
+                  onClick={() => onOpenFile(comment.anchor.path)}
                 >
-                  {t("sourceReviewEdit")}
+                  {commentLocation(comment)}
                 </button>
-                <button
-                  type="button"
-                  className={styles.delete}
-                  disabled={busyId === comment.id}
-                  onClick={() => void handleDelete(comment.id)}
-                >
-                  {confirmId === comment.id
-                    ? t("sourceReviewDeleteConfirm")
-                    : t("sourceReviewDelete")}
-                </button>
-              </div>
-            </div>
-            {editId === comment.id ? (
-              <div className={styles.editor}>
-                <textarea
-                  aria-label={t("sourceReviewEditComment")}
-                  value={editText}
-                  maxLength={20_000}
-                  onChange={(event) => setEditText(event.target.value)}
-                />
-                <div className={styles.editorActions}>
+                <span className={styles.revision}>
+                  {revisionLabel(comment, t)}
+                </span>
+                <div className={styles.rowActions}>
                   <button
                     type="button"
+                    className={styles.edit}
+                    disabled={busyId === comment.id}
                     onClick={() => {
-                      setEditId(null);
-                      setEditText("");
+                      setEditId(comment.id);
+                      setEditText(comment.text);
+                      setConfirmId(null);
                     }}
                   >
-                    {t("cancel")}
+                    {t("sourceReviewEdit")}
                   </button>
                   <button
                     type="button"
-                    disabled={busyId === comment.id || !editText.trim()}
-                    onClick={() => void handleSave(comment.id)}
+                    className={styles.delete}
+                    disabled={busyId === comment.id}
+                    onClick={() => void handleDelete(comment.id)}
                   >
-                    {t("sourceReviewSaveEdit")}
+                    {confirmId === comment.id
+                      ? t("sourceReviewDeleteConfirm")
+                      : t("sourceReviewDelete")}
                   </button>
                 </div>
               </div>
-            ) : (
-              <div className={styles.text}>{comment.text}</div>
-            )}
-          </li>
-        ))}
-      </ul>
-      <div className={styles.actions}>
-        <button type="button" className="review-submit-go" onClick={onSubmit}>
-          {t("sourceReviewOpenSubmit")}
-        </button>
-      </div>
+              {editId === comment.id ? (
+                <div className={styles.editor}>
+                  <textarea
+                    aria-label={t("sourceReviewEditComment")}
+                    value={editText}
+                    maxLength={20_000}
+                    onChange={(event) => setEditText(event.target.value)}
+                  />
+                  <div className={styles.editorActions}>
+                    <Button
+                      size="sm"
+                      onClick={() => {
+                        setEditId(null);
+                        setEditText("");
+                      }}
+                    >
+                      {t("cancel")}
+                    </Button>
+                    <Button
+                      variant="primary"
+                      size="sm"
+                      disabled={busyId === comment.id || !editText.trim()}
+                      onClick={() => void handleSave(comment.id)}
+                    >
+                      {t("sourceReviewSaveEdit")}
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <div className={styles.text}>{comment.text}</div>
+              )}
+            </li>
+          ))}
+        </ul>
+        <CardFooter className={styles.actions}>
+          <Button
+            variant="primary"
+            className="review-submit-go"
+            onClick={onSubmit}
+          >
+            {t("sourceReviewOpenSubmit")}
+          </Button>
+        </CardFooter>
+      </Card>
     </section>
   );
 }

@@ -38,7 +38,7 @@ test.describe("Settings category the server does not serve", () => {
         page.getByText("This server does not support device streaming."),
       ).toBeVisible();
       await expect(
-        page.getByRole("button", { name: /^Device bridge/ }),
+        page.getByRole("button", { name: /^Test devices/ }),
       ).toHaveCount(0);
       // Positive control: the list itself rendered.
       if (viewport.name === "desktop") {

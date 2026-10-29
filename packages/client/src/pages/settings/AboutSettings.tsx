@@ -20,6 +20,7 @@ import { SettingsSection } from "./SettingsSection";
 import {
   formatRemoteServerVersion,
   getRemoteCompatibilityNotices,
+  parseSemver,
 } from "../../lib/remoteCompatibilityNotices";
 import {
   formatDesktopBuildVersion,
@@ -32,6 +33,25 @@ function formatRevisionTime(iso: string): string {
     dateStyle: "medium",
     timeStyle: "short",
   });
+}
+
+type Translate = ReturnType<typeof useI18n>["t"];
+
+/** Server version for display, with the "unknown" fallbacks localized. */
+function serverVersionLabel(info: VersionInfo, t: Translate): string {
+  if (parseSemver(info.current)) {
+    return formatRemoteServerVersion(info.current, info.installSource);
+  }
+  return t(
+    info.installSource === "source"
+      ? "aboutServerVersionSourceUnknown"
+      : "aboutServerVersionUnknown",
+  );
+}
+
+/** Release builds read "v1.2.3"; a source build's version is a commit id. */
+function clientVersionLabel(version: string): string {
+  return parseSemver(version) ? `v${version.replace(/^v/, "")}` : version;
 }
 
 export function AboutSettings() {
@@ -190,10 +210,7 @@ export function AboutSettings() {
                     <p>
                       {t("aboutServerVersion")}{" "}
                       {versionInfo
-                        ? formatRemoteServerVersion(
-                            versionInfo.current,
-                            versionInfo.installSource,
-                          )
+                        ? serverVersionLabel(versionInfo, t)
                         : t("loginLoading")}
                     </p>
                     {versionInfo?.sourceRevision && (
@@ -220,7 +237,8 @@ export function AboutSettings() {
                       </p>
                     )}
                     <p>
-                      {t("aboutClientVersion")} v{__APP_VERSION__}
+                      {t("aboutClientVersion")}{" "}
+                      {clientVersionLabel(__APP_VERSION__)}
                     </p>
                   </>
                 )}

@@ -43,6 +43,9 @@ vi.mock("../../i18n", () => ({
       ({
         codexUpdateAutoFutureVersions: "Update next versions too",
         codexUpdateDone: "Done",
+        codexUpdateDismiss: "Dismiss",
+        codexUpdateNow: "Update now",
+        codexUpdateRawOutput: "Raw output",
         codexUpdateManualInstallHint:
           "This Codex install was not installed with npm.",
         codexUpdateWillRunCommand: "VibeAllDay will run:",

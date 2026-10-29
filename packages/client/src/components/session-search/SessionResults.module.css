@@ -1,0 +1,165 @@
+/*
+ * Sessions result card. Rows are SessionListItem cards; from 768px the row
+ * link becomes a grid on the header's tracks (--session-columns) and its meta
+ * cells take named areas (--session-areas) through `data-session-cell`.
+ */
+
+/* Clip to the radius without `overflow: hidden`, so the bulk band can stick. */
+.card {
+  overflow: clip;
+}
+
+.results {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.results:empty {
+  display: none;
+}
+
+/* A card's link is a flex item: without this a one-line title match (which
+   cannot wrap) stretches the card past the screen instead of truncating. */
+.results :global(.session-list-item__link) {
+  min-width: 0;
+}
+
+/* Card rows show their select box only while selecting. The native input
+   stays the control; it is drawn as a 22px box inside a 44px touch target. */
+.results :global(.session-list-item__checkbox) {
+  display: none;
+}
+
+.selecting :global(.session-list-item__checkbox) {
+  display: inline-block;
+  position: relative;
+  align-self: center;
+  width: var(--tap-min);
+  height: var(--tap-min);
+  margin: 0 -6px 0 0;
+  border: 0;
+  background: transparent;
+  appearance: none;
+}
+
+.selecting :global(.session-list-item__checkbox)::before {
+  content: "";
+  position: absolute;
+  inset: 11px;
+  border: 1.5px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  background: var(--card);
+}
+
+.selecting :global(.session-list-item__checkbox):checked::before {
+  border-color: var(--indigo);
+  background: var(--indigo);
+}
+
+.selecting :global(.session-list-item__checkbox):checked::after {
+  content: "";
+  position: absolute;
+  top: 14px;
+  left: 17px;
+  width: 6px;
+  height: 11px;
+  border: solid var(--ink-on);
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+.selecting :global(.session-list-item__checkbox):focus-visible::before {
+  border-color: var(--indigo);
+  box-shadow: 0 0 0 3px var(--indigo-soft);
+}
+
+/* The header starts where the row link does: past the select box. */
+.headerSelecting {
+  padding-left: calc(var(--tap-min) - 6px + var(--space-2) + var(--space-5));
+}
+
+.headerEnd {
+  display: block;
+  text-align: end;
+}
+
+.sentinel {
+  width: 1px;
+  height: 1px;
+  margin-left: auto;
+}
+
+@media (width >= 768px) {
+  .columns :global(.session-list-item--card) :global(.session-list-item__link) {
+    display: grid;
+    grid-template-columns: var(--session-columns);
+    grid-template-areas: var(--session-areas);
+    align-items: center;
+    column-gap: var(--space-4);
+    /* With the item's --space-2 flex gap this makes the header's --space-4
+       column gap before the flag slot. */
+    padding-inline-end: calc(var(--space-4) - var(--space-2));
+  }
+
+  .columns
+    :global(.session-list-item--card)
+    :global(.session-list-item__title) {
+    grid-area: title;
+    min-width: 0;
+  }
+
+  .columns :global(.session-list-item--card) :global(.session-list-item__meta) {
+    display: contents;
+  }
+
+  .columns :global(.session-list-item__meta) > [data-session-cell="project"] {
+    grid-area: project;
+    max-width: none;
+    color: var(--ink-2);
+    font-size: 13px;
+  }
+
+  .columns
+    :global(.session-list-item__meta)
+    > [data-session-cell="project"]::after {
+    content: none;
+  }
+
+  .columns :global(.session-list-item__meta) > [data-session-cell="provider"] {
+    grid-area: provider;
+    min-width: 0;
+  }
+
+  .columns :global(.session-list-item__meta) > [data-session-cell="state"] {
+    grid-area: state;
+    min-width: 0;
+  }
+
+  .columns :global(.session-list-item__meta) > [data-session-cell="time"] {
+    grid-area: time;
+    justify-self: end;
+    color: var(--ink-3);
+    font-size: 13px;
+  }
+
+  /* Every row keeps the flag slot so its tracks line up with the header; the
+     slot carries the header's inline-end padding so the flag stays inside. */
+  .columns :global(.session-list-item--card) > [data-session-accessory] {
+    display: flex;
+    box-sizing: content-box;
+    flex: 0 0 var(--session-accessory);
+    justify-content: flex-end;
+    margin-inline-end: 0;
+    padding-inline-end: var(--space-5);
+  }
+
+  .columns
+    :global(.session-list-item--card)
+    :global(.session-list-item__provider-children) {
+    grid-column: 1 / -1;
+  }
+}

@@ -1,6 +1,10 @@
-import { cleanup, render } from "@testing-library/react";
+import { cleanup, render as renderRaw } from "@testing-library/react";
+import type { ReactElement } from "react";
 import { afterEach, describe, expect, it } from "vitest";
+import { I18nProvider } from "../../i18n";
 import { ActiveCountBadge, SessionStatusBadge } from "../StatusBadge";
+
+const render = (ui: ReactElement) => renderRaw(ui, { wrapper: I18nProvider });
 
 describe("SessionStatusBadge", () => {
   afterEach(() => {
@@ -69,7 +73,7 @@ describe("SessionStatusBadge", () => {
       ".status-badge.notification-needs-input",
     );
     expect(badge).not.toBeNull();
-    expect(badge?.textContent).toBe("Approval Needed");
+    expect(badge?.textContent).toBe("Approval needed");
 
     expect(container.textContent).not.toContain("Thinking");
   });

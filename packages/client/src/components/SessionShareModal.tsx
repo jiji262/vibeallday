@@ -13,6 +13,7 @@ import {
   PublicShareManagerModal,
   type PublicShareCreationIdentity,
 } from "./PublicShareManagerModal";
+import { Button } from "./garden/Button";
 import { Modal, type ModalAnchorRect } from "./ui/Modal";
 import { ViewerCountIndicator } from "./ViewerCountIndicator";
 
@@ -342,13 +343,9 @@ export function LegacySessionShareModal({
           </div>
         )}
         {onManage && (
-          <button
-            type="button"
-            className="session-share-small-button"
-            onClick={onManage}
-          >
+          <Button size="sm" onClick={onManage}>
             {t("publicShareManagementManageSession")}
-          </button>
+          </Button>
         )}
 
         {hasActiveShares && (
@@ -360,9 +357,8 @@ export function LegacySessionShareModal({
                 label={viewerSummary}
               />
               <div className="session-share-global-controls">
-                <button
-                  type="button"
-                  className="session-share-small-button"
+                <Button
+                  size="sm"
                   onClick={() => void freezeAllLive()}
                   disabled={
                     isWorking !== null || (status?.liveCount ?? 0) === 0
@@ -372,10 +368,10 @@ export function LegacySessionShareModal({
                   {isWorking === "freeze-all"
                     ? t("sessionShareFreezing")
                     : t("sessionShareFreezeLive")}
-                </button>
-                <button
-                  type="button"
-                  className="session-share-revoke-button"
+                </Button>
+                <Button
+                  size="sm"
+                  variant="danger"
                   onClick={() => void revokeAll()}
                   disabled={isWorking !== null}
                   title={t("sessionShareRevokeAllTitle")}
@@ -383,7 +379,7 @@ export function LegacySessionShareModal({
                   {isWorking === "revoke"
                     ? t("sessionShareRevoking")
                     : t("sessionShareRevokeAll")}
-                </button>
+                </Button>
               </div>
             </div>
             {viewers.length > 0 && (

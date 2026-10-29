@@ -1,0 +1,127 @@
+/* Floating garden notice shown in the desktop app when neither provider
+   application is installed. Peach rail, opaque card mix, quiet buttons. */
+.root {
+  position: fixed;
+  top: max(var(--space-3), env(safe-area-inset-top, 0px));
+  left: 50%;
+  z-index: 240;
+  display: flex;
+  box-sizing: border-box;
+  width: min(780px, calc(100dvw - var(--space-5)));
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--peach);
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--peach) 12%, var(--card));
+  box-shadow: var(--shadow-md);
+  color: var(--ink);
+  font-size: 13px;
+  transform: translateX(-50%);
+}
+
+.copy {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.title {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.description {
+  color: var(--ink-2);
+  line-height: 1.5;
+}
+
+.actions {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.action {
+  display: inline-flex;
+  min-height: 32px;
+  align-items: center;
+  justify-content: center;
+  padding: 0 var(--space-3);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  background: var(--card);
+  color: var(--ink);
+  font: inherit;
+  font-weight: 500;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color var(--duration-fast) var(--ease-standard);
+}
+
+.action:hover {
+  background: var(--bg-soft);
+}
+
+.action:focus-visible {
+  outline: 2px solid var(--indigo);
+  outline-offset: 2px;
+}
+
+.dismiss {
+  width: 32px;
+  padding: 0;
+  color: var(--ink-3);
+}
+
+@media (pointer: coarse) {
+  .action {
+    min-height: var(--tap-min);
+  }
+
+  .dismiss {
+    width: var(--tap-min);
+  }
+}
+
+@media (width <= 700px) {
+  .root {
+    position: relative;
+    top: auto;
+    left: auto;
+    width: calc(100dvw - var(--space-4));
+    margin: max(var(--space-2), env(safe-area-inset-top, 0px)) auto 0;
+    align-items: stretch;
+    flex-direction: column;
+    gap: var(--space-2);
+    transform: none;
+  }
+
+  .actions {
+    flex-wrap: wrap;
+  }
+
+  .action {
+    flex: 1 1 auto;
+  }
+
+  .dismiss {
+    flex: 0 0 var(--tap-min);
+  }
+
+  .root ~ :global(.session-page) {
+    box-sizing: border-box;
+    padding-top: calc(162px + env(safe-area-inset-top, 0px));
+  }
+}
+
+@media (width <= 340px) {
+  .root ~ :global(.session-page) {
+    padding-top: calc(205px + env(safe-area-inset-top, 0px));
+  }
+}

@@ -10,8 +10,8 @@
   margin-inline: auto;
   padding: var(--space-6);
   border: 1px solid var(--border-color);
-  border-radius: var(--radius-xl);
-  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  background: var(--card);
   box-shadow: var(--shadow-xs);
 }
 
@@ -31,7 +31,7 @@
 
 .root :global(.new-session-form-textarea):focus {
   border-color: var(--indigo);
-  box-shadow: 0 0 0 3px var(--indigo-soft-2);
+  box-shadow: 0 0 0 3px var(--indigo-soft);
 }
 
 .root :global(.new-session-form-toolbar) {
@@ -58,18 +58,23 @@
   background: var(--indigo);
   color: var(--ink-on);
   font-size: 15px;
-  font-weight: 600;
-  box-shadow: var(--shadow-sm);
+  font-weight: 500;
+  box-shadow: var(--shadow-xs);
 }
 
 .startButton.startButton:hover:not(:disabled) {
-  background: var(--indigo-2);
+  background: var(--indigo-ink);
 }
 
+.startButton.startButton:focus-visible {
+  box-shadow: 0 0 0 3px var(--indigo-soft);
+}
+
+/* Garden disabled: soft fill, ink-3 text, hairline, no opacity. */
 .startButton.startButton:disabled {
-  background: var(--grey-soft);
-  color: var(--text-dimmed);
-  box-shadow: none;
+  background: var(--bg-soft);
+  color: var(--ink-3);
+  box-shadow: inset 0 0 0 1px var(--line);
 }
 
 .startLabel {
@@ -96,11 +101,12 @@
 .root :global(.new-session-project-summary-title) {
   font-family: var(--font-ui);
   font-size: 15px;
-  font-weight: 600;
+  font-weight: 500;
 }
 
 .root :global(.new-session-project-summary-path) {
-  font-family: var(--font-mono);
+  color: var(--ink-3);
+  font-family: var(--label-font);
   font-size: 12px;
 }
 
@@ -114,7 +120,7 @@
 
 .root :global(.new-session-project-input):focus {
   border-color: var(--indigo);
-  box-shadow: 0 0 0 3px var(--indigo-soft-2);
+  box-shadow: 0 0 0 3px var(--indigo-soft);
 }
 
 .root :global(.new-session-project-panel) {
@@ -132,7 +138,7 @@
 }
 
 .root :global(.new-session-project-option):hover {
-  background: var(--bg-tertiary);
+  background: var(--bg-soft);
 }
 
 .root :global(.new-session-project-option.selected),
@@ -142,7 +148,8 @@
 }
 
 .root :global(.new-session-project-option-path) {
-  font-family: var(--font-mono);
+  color: var(--ink-3);
+  font-family: var(--label-font);
 }
 
 .newProjectRow.newProjectRow {
@@ -156,20 +163,20 @@
   border: 1px dashed var(--line-strong);
   border-radius: var(--radius-lg);
   background: transparent;
-  color: var(--text-secondary);
-  font-weight: 550;
+  color: var(--ink-2);
+  font-weight: 500;
 }
 
 .newProjectButton.newProjectButton:hover:not(:disabled) {
-  background: var(--bg-tertiary);
-  color: var(--text-primary);
+  background: var(--bg-soft);
+  color: var(--ink);
 }
 
 /* Model list provenance reads as quiet metadata under the chips. */
 .catalogStatusMuted,
 .catalogStatus {
   padding: 0 var(--space-1);
-  font-family: var(--font-mono);
+  font-family: var(--label-font);
   font-size: 12px;
 }
 
@@ -195,19 +202,17 @@
   gap: var(--space-2);
   font-size: var(--font-size-sm);
   line-height: 1.35;
-  color: var(--text-muted);
+  color: var(--ink-3);
   padding: 0.55rem 0.65rem;
   border: 1px solid transparent;
   border-radius: var(--radius-md);
 }
 
+/* Garden warning Notice: peach hairline over peach-soft, peach-ink text. */
 .catalogStatus {
-  border-color: color-mix(
-    in srgb,
-    var(--warning-color) 38%,
-    var(--border-color)
-  );
-  background: color-mix(in srgb, var(--warning-color) 8%, var(--bg-code));
+  border-color: color-mix(in srgb, var(--peach) 28%, transparent);
+  background: var(--peach-soft);
+  color: var(--peach-ink);
 }
 
 /* Refresh sits on the quiet line instead of centring in the reserved warning
@@ -215,7 +220,7 @@
 .catalogStatusMuted {
   align-items: flex-start;
   justify-content: flex-start;
-  color: var(--text-dimmed);
+  color: var(--ink-4);
 }
 
 /* Reserve the notice's wrapping height before its catalog arrives, in the

@@ -8,7 +8,8 @@ import { useRemoteBasePath } from "../../../hooks/useRemoteBasePath";
 import { useI18n } from "../../../i18n";
 import { providerChildSessionHref } from "../../../lib/providerChildSessions";
 import type { ToolCallItem } from "@vibeallday/shared/transcript/items";
-import { Spinner, TaskNestedContent } from "./TaskNestedContent";
+import { Spinner } from "../../garden/Spinner";
+import { TaskNestedContent } from "./TaskNestedContent";
 import styles from "./TaskRenderer.module.css";
 
 type SpawnAgentInput = import("zod").z.output<
@@ -18,6 +19,8 @@ type SpawnAgentResult = Exclude<
   import("zod").z.output<typeof toolDisplayContracts.spawn_agent.result>,
   string
 >;
+const TASK_SPINNER_SIZE = 12;
+
 function normalizeSpawnAgentResult(
   result: SpawnAgentResult | string | undefined,
 ): SpawnAgentResult | null {
@@ -199,8 +202,12 @@ function SpawnAgentInline({
               <span className="badge task-model">{input.model}</span>
             )}
             {badge.isRunning ? (
-              <span className="task-spinner" role="status" aria-label="Running">
-                <Spinner />
+              <span
+                className="task-spinner"
+                role="status"
+                aria-label={t("toolStatusRunning")}
+              >
+                <Spinner size={TASK_SPINNER_SIZE} tone="muted" />
               </span>
             ) : (
               <span className={`badge ${badge.className}`}>{badge.text}</span>
@@ -232,7 +239,8 @@ function SpawnAgentInline({
 
       {isLoadingContent && (
         <div className="task-loading">
-          <Spinner /> Loading agent content...
+          <Spinner size={TASK_SPINNER_SIZE} tone="muted" />
+          {t("providerChildLoadingContent")}
         </div>
       )}
 

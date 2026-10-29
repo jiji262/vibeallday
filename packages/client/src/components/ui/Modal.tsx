@@ -11,9 +11,11 @@ import { createPortal } from "react-dom";
 import { useI18n } from "../../i18n";
 import { QUOTE_SELECTION_ROOT_ATTRIBUTES } from "../../lib/markdownSelectionCopy";
 import { programmaticFocus } from "../../lib/programmaticFocus";
+import { XIcon } from "../garden/icons";
 import styles from "./Modal.module.css";
 
 const ANCHORED_MODAL_MARGIN_PX = 8;
+const MODAL_CLOSE_ICON_SIZE = 16;
 const ANCHORED_MODAL_MIN_VIEWPORT_WIDTH_PX = 600;
 /** The `history.state` field that names the entry a modal pushed. */
 export const MODAL_HISTORY_STATE_KEY = "vibeAllDayModal";
@@ -411,7 +413,7 @@ export function ModalChrome({
             }}
             aria-label={t("modalClose")}
           >
-            ×
+            <XIcon size={MODAL_CLOSE_ICON_SIZE} />
           </button>
         </span>
       </div>
@@ -544,9 +546,9 @@ export function Modal({
 
   const modalContent = (
     <div
-      className={`modal-overlay${isAnchored ? " modal-overlay--anchored" : ""}${
-        variant ? ` modal-overlay--${variant}` : ""
-      }${sheetOverlayClass}`}
+      className={`modal-overlay ${styles.overlay}${
+        isAnchored ? ` modal-overlay--anchored ${styles.anchoredOverlay}` : ""
+      }${variant ? ` modal-overlay--${variant}` : ""}${sheetOverlayClass}`}
       aria-hidden={minimized || undefined}
       style={minimized ? { display: "none" } : undefined}
       onClick={handleOverlayClick}
@@ -559,7 +561,7 @@ export function Modal({
       {/* biome-ignore lint/a11y/useKeyWithClickEvents: click only stops propagation, keyboard handled globally */}
       <div
         ref={modalRef}
-        className={`modal${isAnchored ? " modal--anchored" : ""}${
+        className={`modal ${styles.surface}${isAnchored ? " modal--anchored" : ""}${
           variant ? ` modal--${variant}` : ""
         }${sheetClass}`}
         {...QUOTE_SELECTION_ROOT_ATTRIBUTES}

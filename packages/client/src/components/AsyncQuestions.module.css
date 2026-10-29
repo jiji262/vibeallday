@@ -15,9 +15,9 @@
   cursor: pointer;
 }
 .recent {
-  color: light-dark(#79551b, #d8b477);
-  background: light-dark(#faf3e5, #28241e);
-  border-color: light-dark(#bca477, #77613f);
+  color: var(--sand-ink);
+  background: var(--sand-soft);
+  border-color: color-mix(in srgb, var(--sand) 45%, transparent);
 }
 .overflowEntry {
   position: absolute;
@@ -33,11 +33,11 @@
   flex-direction: column;
   padding: 8px;
   box-sizing: border-box;
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  background: var(--bg-secondary);
-  color: var(--text-primary);
-  box-shadow: 0 6px 24px #0005;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--card);
+  color: var(--ink);
+  box-shadow: var(--shadow-md);
 }
 .menuHeading {
   display: flex;
@@ -101,7 +101,7 @@
   flex: 0 0 5px;
   block-size: 5px;
   border-radius: 50%;
-  background: light-dark(#79551b, #d8b477);
+  background: var(--sand-ink);
 }
 .dismiss {
   flex: 0 0 32px;
@@ -149,7 +149,7 @@
   scroll-margin-block: 12px;
 }
 .activeQuestion {
-  border-color: light-dark(#bca477, #77613f);
+  border-color: color-mix(in srgb, var(--sand) 45%, transparent);
 }
 .questionTitle {
   white-space: pre-wrap;
@@ -233,7 +233,7 @@
   overflow-wrap: anywhere;
 }
 .error {
-  color: var(--error-color, #d55);
+  color: var(--rose-ink);
 }
 .indicator:focus-visible,
 .preview:focus-visible,

@@ -550,11 +550,18 @@ test.describe("Encrypted Data Flow", () => {
     );
 
     // The sidebar should show navigation items (loaded via encrypted WS)
-    // Check for navigation links which proves API requests work
+    // Check for navigation links which proves API requests work; the brand
+    // link also opens /inbox, so match the nav items themselves.
     const sidebar = page.locator(".sidebar");
-    await expect(sidebar.locator('a[href="/projects"]')).toBeVisible();
-    await expect(sidebar.locator('a[href="/settings"]')).toBeVisible();
-    await expect(sidebar.locator('a[href="/inbox"]')).toBeVisible();
+    await expect(
+      sidebar.locator('.sidebar-nav-item[href="/projects"]'),
+    ).toBeVisible();
+    await expect(
+      sidebar.locator('.sidebar-nav-item[href="/settings"]'),
+    ).toBeVisible();
+    await expect(
+      sidebar.locator('.sidebar-nav-item[href="/inbox"]'),
+    ).toBeVisible();
   });
 
   test("!! Commands sidebar category stays on its remote route", async ({
@@ -580,7 +587,9 @@ test.describe("Encrypted Data Flow", () => {
       await expect(page).toHaveURL(/\/bang-commands$/);
       await expect(bangHistoryLink).toHaveClass(/\bactive\b/);
       await expect(
-        page.getByText("!! Command History", { exact: true }),
+        page
+          .locator("main")
+          .getByRole("heading", { level: 1, name: "Shell history" }),
       ).toBeVisible({ timeout: 10_000 });
     } finally {
       await setBangHistoryVisibility(baseURL, false);

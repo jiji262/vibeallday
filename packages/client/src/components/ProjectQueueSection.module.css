@@ -1,11 +1,14 @@
+/* A garden card: hairline border, white fill, dashed header rule. */
 .section {
   display: flex;
   flex-direction: column;
-  gap: var(--space-2);
-  margin: 0 0 var(--space-3);
-  padding: var(--space-3) 0;
-  border-top: 1px solid var(--border-subtle);
-  border-bottom: 1px solid var(--border-subtle);
+  gap: var(--space-3);
+  margin: 0 0 var(--space-5);
+  padding: var(--space-4) var(--space-5);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--card);
+  box-shadow: var(--shadow-xs);
 }
 
 .header {
@@ -13,20 +16,25 @@
   align-items: flex-start;
   justify-content: space-between;
   gap: var(--space-3);
+  padding-bottom: var(--space-3);
+  border-bottom: 1px dashed var(--dash);
 }
 
 .header h2 {
   margin: 0;
-  color: var(--text-primary);
-  font-size: var(--font-size-lg);
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 500;
+  letter-spacing: -0.005em;
   line-height: 1.25;
 }
 
 .header p {
   margin: 0.2rem 0 0;
-  color: var(--text-muted);
-  font-size: var(--font-size-sm);
-  line-height: 1.35;
+  color: var(--ink-3);
+  font-size: 13px;
+  line-height: 1.5;
 }
 
 .headerActions {
@@ -49,8 +57,10 @@
     transparent
   );
   color: var(--project-queue-action-bg);
-  font-size: var(--font-size-xs);
-  font-weight: 600;
+  font-family: var(--label-font);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: var(--badge-tracking);
 }
 
 .dispatchButton {
@@ -492,6 +502,10 @@
 }
 
 @media (width <= 640px) {
+  .section {
+    padding: var(--space-3) var(--space-4);
+  }
+
   .header {
     flex-direction: column;
     gap: var(--space-2);

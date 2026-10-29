@@ -1,4 +1,5 @@
 import type { ComponentType } from "react";
+import type { MessageKey } from "../../i18n";
 
 /**
  * Props passed to each onboarding step component.
@@ -20,7 +21,7 @@ export interface OnboardingStepConfig {
   /** Unique identifier for the step */
   id: string;
   /** Title displayed at the top of the step */
-  title: string;
+  titleKey: MessageKey;
   /** The step component to render */
   component: ComponentType<OnboardingStepProps>;
 }

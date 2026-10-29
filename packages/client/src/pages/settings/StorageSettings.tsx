@@ -3,6 +3,7 @@ import {
   TOOL_RESULT_MEDIA_PRESERVATION_POLICY_CAPABILITY,
   serverHasCapability,
 } from "@vibeallday/shared";
+import { LoadingState } from "../../components/garden/LoadingState";
 import { useCallback, useMemo } from "react";
 import { useServerSettings } from "../../hooks/useServerSettings";
 import { useVersion } from "../../hooks/useVersion";
@@ -116,7 +117,9 @@ export function StorageSettings() {
   useSettingsUndoBaseline(undoState, restoreUndoState);
 
   if (isLoading) {
-    return <SettingsSection description={t("storageSettingsLoading")} />;
+    return (
+      <LoadingState label={t("storageSettingsLoading")} variant="compact" />
+    );
   }
 
   return (

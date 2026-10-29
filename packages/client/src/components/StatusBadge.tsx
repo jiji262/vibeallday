@@ -1,5 +1,7 @@
 import type { AgentActivity } from "../hooks/useFileActivity";
+import { useI18n } from "../i18n";
 import type { SessionStatus } from "../types";
+import { Badge, type BadgeTone } from "./garden/Badge";
 import { ThinkingIndicator } from "./ThinkingIndicator";
 
 type BadgeVariant = "self" | "external" | "none";
@@ -39,18 +41,38 @@ function getCountBadgeStatusClass(
   return "idle";
 }
 
+/** Garden semantic map: owned = mint, external = sand, idle = grey. */
+const COUNT_BADGE_TONE: Record<BadgeVariant, BadgeTone> = {
+  self: "mint",
+  external: "sand",
+  none: "grey",
+};
+
+/** Needs you = rose with a live dot; unread = sand. */
+const NOTIFICATION_TONE: Record<NotificationVariant, BadgeTone> = {
+  "needs-input": "rose",
+  unread: "sand",
+};
+
 /**
  * Notification badge indicating action needed or unread content.
- * - "needs-input" (blue): Tool approval or user question pending
- * - "unread" (orange): New content since last viewed
+ * - "needs-input" (rose, live dot): Tool approval or user question pending
+ * - "unread" (sand): New content since last viewed
  */
 export function NotificationBadge({ variant, label }: NotificationBadgeProps) {
-  const defaultLabel = variant === "needs-input" ? "Input Needed" : "New";
+  const { t } = useI18n();
+  const defaultLabel = t(
+    variant === "needs-input" ? "statusBadgeInputNeeded" : "statusBadgeUnread",
+  );
 
   return (
-    <span className={`status-badge notification-${variant}`}>
+    <Badge
+      tone={NOTIFICATION_TONE[variant]}
+      dot={variant === "needs-input" ? "pulse" : false}
+      className={`status-badge notification-${variant}`}
+    >
       {label ?? defaultLabel}
-    </span>
+    </Badge>
   );
 }
 
@@ -64,16 +86,24 @@ export function SessionStatusBadge({
   pendingInputType,
   activity,
 }: SessionStatusBadgeProps) {
+  const { t } = useI18n();
   // External sessions always show the external badge
   // We can't track fine-grained state (in-turn, needs input) for external sessions
   if (status.owner === "external") {
-    return <span className="status-badge status-external">External</span>;
+    return (
+      <Badge tone="sand" className="status-badge status-external">
+        {t("sessionHeaderStateExternal")}
+      </Badge>
+    );
   }
 
   // Priority 1: Needs input (tool approval or user question)
   if (pendingInputType) {
-    const label =
-      pendingInputType === "tool-approval" ? "Approval Needed" : "Question";
+    const label = t(
+      pendingInputType === "tool-approval"
+        ? "statusBadgeApprovalNeeded"
+        : "statusBadgeQuestion",
+    );
     return <NotificationBadge variant="needs-input" label={label} />;
   }
 
@@ -107,10 +137,11 @@ export function ActiveCountBadge({ variant, count }: CountBadgeProps) {
   if (!label) return null;
 
   return (
-    <span
+    <Badge
+      tone={COUNT_BADGE_TONE[variant]}
       className={`status-badge status-${getCountBadgeStatusClass(variant)}`}
     >
       {label}
-    </span>
+    </Badge>
   );
 }

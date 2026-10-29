@@ -6,6 +6,7 @@ import type {
 import { type ReactNode, useLayoutEffect, useRef } from "react";
 import { useI18n } from "../i18n";
 import { querySessionRouteLayerElement } from "../lib/sessionRouteLayer";
+import { XIcon } from "./garden/icons";
 import styles from "./ReloadBanner.module.css";
 
 const RELOAD_BANNER_CONTROL_GAP = 4;
@@ -407,7 +408,7 @@ export function ReloadBanner({
           aria-label={t("reloadBannerDismiss")}
           title={t("reloadBannerDismiss")}
         >
-          <span aria-hidden="true">×</span>
+          <XIcon size={16} />
         </button>
       </span>
     </div>

@@ -1,0 +1,17 @@
+.eyebrow {
+  margin: 0;
+  color: var(--ink-3);
+  font-family: var(--label-font);
+  font-size: var(--eyebrow-size);
+  line-height: 1.5;
+  letter-spacing: var(--eyebrow-tracking);
+  text-transform: uppercase;
+}
+
+.eyebrow:lang(zh) {
+  letter-spacing: var(--badge-tracking);
+}
+
+.rose {
+  color: var(--rose-ink);
+}

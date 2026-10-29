@@ -72,11 +72,11 @@
   gap: 8px;
 }
 .settings input.redundant {
-  border-color: var(--error-color, #c44343);
-  color: var(--error-color, #c44343);
+  border-color: var(--rose-ink);
+  color: var(--rose-ink);
 }
 .redundantHint {
-  color: var(--error-color, #c44343);
+  color: var(--rose-ink);
 }
 .logEntries {
   display: grid;

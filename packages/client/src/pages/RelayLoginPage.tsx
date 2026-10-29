@@ -20,6 +20,7 @@ import {
   AuthStatus,
 } from "../components/auth/AuthShell";
 import { Button } from "../components/garden/Button";
+import { inputClassName } from "../components/garden/Field";
 import { useRemoteConnection } from "../contexts/RemoteConnectionContext";
 import { useSignInRequiredNotice } from "../hooks/useSignInRequiredNotice";
 import { useI18n } from "../i18n";
@@ -295,6 +296,7 @@ export function RelayLoginPage() {
           hint={t("relayLoginServerNameHint")}
         >
           <input
+            className={inputClassName()}
             id="relayUsername"
             name="username"
             type="text"
@@ -311,6 +313,7 @@ export function RelayLoginPage() {
 
         <AuthField id="srpPassword" label={t("relayLoginPassword")}>
           <input
+            className={inputClassName()}
             id="srpPassword"
             name="password"
             type="password"
@@ -348,6 +351,7 @@ export function RelayLoginPage() {
             hint={t("relayLoginLimitedUsernameHint")}
           >
             <input
+              className={inputClassName()}
               id="limitedUsername"
               name="limited-user"
               type="text"
@@ -370,6 +374,7 @@ export function RelayLoginPage() {
             hint={t("relayLoginCustomRelayUrlHint")}
           >
             <input
+              className={inputClassName()}
               id="customRelayUrl"
               type="text"
               value={customRelayUrl}
@@ -400,9 +405,8 @@ export function RelayLoginPage() {
         <Button
           type="submit"
           variant="primary"
-          size="lg"
           block
-          disabled={isConnecting}
+          loading={isConnecting}
           data-testid="login-button"
         >
           {isConnecting ? t("relayLoginConnecting") : t("relayLoginConnect")}

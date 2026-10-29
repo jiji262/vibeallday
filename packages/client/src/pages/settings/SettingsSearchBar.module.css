@@ -8,6 +8,8 @@
   flex-wrap: wrap;
   align-items: center;
   gap: var(--space-2);
+  width: 100%;
+  min-width: 0;
 }
 
 .inputWrap {
@@ -16,16 +18,9 @@
   min-width: 0;
 }
 
-/* Reserves room for the absolutely positioned clear button. The shared
-   `settings-input` primitive sets `padding` as a shorthand, so this override
-   used to win only by sitting later in the same file. Across two files that
-   would silently become emit order, so the global class is compounded. */
-.input:global(.settings-input) {
-  width: 100%;
-  min-height: var(--tap-min);
-  margin-top: 0;
-  padding-right: calc(var(--space-4) + var(--space-2));
-  box-sizing: border-box;
+/* Room for the clear button; compounded so it beats the field's padding. */
+.inputWrap .input {
+  padding-right: var(--space-8);
 }
 
 .input::-webkit-search-cancel-button {
@@ -36,26 +31,42 @@
   position: absolute;
   top: 50%;
   right: var(--space-1);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
   transform: translateY(-50%);
   border: none;
+  border-radius: var(--radius-sm);
   background: transparent;
-  color: var(--text-muted);
-  font-size: var(--font-size-lg);
-  line-height: 1;
-  padding: var(--space-1);
+  color: var(--ink-3);
   cursor: pointer;
 }
 
 .clear:hover {
-  color: var(--text-primary);
+  background: var(--bg-soft);
+  color: var(--ink);
+}
+
+.clear:focus-visible {
+  box-shadow: 0 0 0 3px var(--indigo-soft);
 }
 
 .valuesToggle {
   display: flex;
   align-items: center;
   gap: var(--space-1);
-  font-size: var(--font-size-sm);
-  color: var(--text-muted);
+  color: var(--ink-3);
+  font-family: var(--label-font);
+  font-size: 11px;
+  letter-spacing: var(--meta-tracking);
+  text-transform: uppercase;
   white-space: nowrap;
   cursor: pointer;
+}
+
+.valuesToggle input {
+  accent-color: var(--indigo);
 }

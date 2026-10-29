@@ -106,7 +106,7 @@ test.describe("iPad Home Screen", () => {
     await expect(tabBar(page)).toBeVisible({ timeout: 15_000 });
     await openMore(page);
     await expect(page.getByRole("link", { name: /^Settings/ })).toBeVisible();
-    await expect(page.getByRole("link", { name: /^Agents/ })).toHaveCount(0);
+    await expect(page.getByRole("link", { name: /^Processes/ })).toHaveCount(0);
 
     const stored = JSON.parse(
       (await page.evaluate(() =>

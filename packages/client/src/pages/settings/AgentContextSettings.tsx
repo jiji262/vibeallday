@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { LoadingState } from "../../components/garden/LoadingState";
 import {
   DEFAULT_HEARTBEAT_TURN_TEXT,
   DEFAULT_HEARTBEAT_TURNS_AFTER_MINUTES,
@@ -187,7 +188,7 @@ export function AgentContextSettings() {
   ]);
 
   if (isLoading) {
-    return <SettingsSection description={t("agentContextLoading")} />;
+    return <LoadingState label={t("agentContextLoading")} variant="compact" />;
   }
 
   return (

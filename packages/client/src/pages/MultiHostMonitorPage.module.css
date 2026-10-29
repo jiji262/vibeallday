@@ -1,0 +1,176 @@
+/* Experimental all-hosts monitor: a paper page with a serif header and a
+   grid of host Cards (status Badge, big numbers, recent sessions). */
+.page {
+  min-height: 100dvh;
+  padding: var(--space-7) var(--page-gutter);
+  background: var(--bg);
+  color: var(--ink);
+}
+
+.shell {
+  width: min(100%, 960px);
+  margin: 0 auto;
+}
+
+.header {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-4);
+  padding-bottom: var(--space-5);
+  border-bottom: 1px solid var(--line);
+}
+
+.brand {
+  display: flex;
+  border-radius: var(--radius-md);
+}
+
+.heading {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: -0.015em;
+}
+
+.lede {
+  margin: 0;
+  color: var(--ink-3);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.linkButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 32px;
+  padding: 0 var(--space-3);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-md);
+  background: var(--card);
+  box-shadow: var(--shadow-xs);
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: background-color var(--duration-fast) var(--ease-standard);
+}
+
+.linkButton:hover {
+  background: var(--bg-2);
+}
+
+.brand:focus-visible,
+.linkButton:focus-visible,
+.sessionList a:focus-visible {
+  outline: 2px solid var(--indigo);
+  outline-offset: 2px;
+}
+
+.count {
+  margin: var(--space-5) 0 var(--space-3);
+  color: var(--ink-3);
+  font-family: var(--label-font);
+  font-size: 11px;
+  letter-spacing: var(--meta-tracking);
+  text-transform: uppercase;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-4);
+}
+
+.card {
+  min-width: 0;
+}
+
+.body {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.sessionsTitle {
+  margin: 0;
+  color: var(--ink-3);
+  font-family: var(--label-font);
+  font-size: var(--eyebrow-size);
+  font-weight: 500;
+  letter-spacing: var(--eyebrow-tracking);
+  text-transform: uppercase;
+}
+
+.sessionList {
+  margin: var(--space-2) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sessionList li {
+  overflow: hidden;
+  padding: 10px 0;
+  border-top: 1px dashed var(--dash);
+  font-size: 14px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sessionList a {
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.sessionList a:hover {
+  color: var(--indigo);
+}
+
+.quiet {
+  margin: var(--space-2) 0 0;
+  color: var(--ink-3);
+  font-size: 13px;
+}
+
+.action {
+  justify-content: flex-end;
+}
+
+.action:empty {
+  display: none;
+}
+
+.sessions {
+  min-width: 0;
+}
+
+@media (width < 768px) {
+  .page {
+    padding-block: var(--space-5);
+  }
+
+  .header {
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: var(--space-3);
+  }
+
+  .header > .linkButton {
+    grid-column: 1 / -1;
+  }
+
+  .lede {
+    display: none;
+  }
+
+  .grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

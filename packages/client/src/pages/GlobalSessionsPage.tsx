@@ -20,25 +20,28 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { createSessionApi } from "../api/sessionClient";
 import { useCurrentSourceRuntime } from "../contexts/SourceRuntimeContext";
 import { BulkActionBar } from "../components/BulkActionBar";
-import { Button } from "../components/garden/Button";
-import { EmptyState } from "../components/garden/EmptyState";
+import { ErrorState } from "../components/garden/ErrorState";
 import { PageHeader } from "../components/PageHeader";
 import { LoadingState } from "../components/garden/LoadingState";
+import { PageIntro } from "../components/shell/PageIntro";
+import { pageWidthClass } from "../components/shell/pageWidth";
 import { SessionViews } from "../components/SessionViews";
 import { useCompleteSessionCatalog } from "../hooks/useCompleteSessionCatalog";
 import { SessionListItem } from "../components/SessionListItem";
-import { SearchHeader } from "../components/session-search/SearchControls";
 import { SearchFilterSheet } from "../components/session-search/SearchFilterSheet";
 import { SearchScopeFilters } from "../components/session-search/SearchScopeFilters";
 import {
   SearchSelection,
   SelectionManager,
 } from "../components/session-search/SearchSelection";
-import { SearchStatusLine } from "../components/session-search/SearchStatusLine";
+import { ProjectSessionCta } from "../components/session-search/ProjectSessionCta";
+import { SessionsEmpty } from "../components/session-search/SessionsEmpty";
 import {
-  FiltersButton,
-  SearchChips,
-} from "../components/session-search/SearchToolbar";
+  SessionsToolbar,
+  searchStatusText,
+} from "../components/session-search/SessionsToolbar";
+import { SessionResults } from "../components/session-search/SessionResults";
+import { useStickyHeight } from "../components/session-search/useStickyHeight";
 import {
   SearchPreviews,
   SearchZoomPreview,
@@ -101,6 +104,8 @@ const EMPTY_PROJECTS: readonly string[] = [];
 /** URL parameters the scope dropdowns own. */
 const SCOPE_PARAMS = ["project", "provider", "source", "executor", "created"];
 const EMPTY_IDS: ReadonlySet<string> = new Set();
+/** Lets the bulk band stick just under the sticky search toolbar. */
+const TOOLBAR_HEIGHT_PROPERTY = "--sessions-toolbar-height";
 
 interface SearchHistoryControls {
   sourceKey: string;
@@ -126,7 +131,7 @@ function SessionSearchPage() {
     () => createSessionApi(runtime.transport.fetch.bind(runtime.transport)),
     [runtime],
   );
-  const { openSidebar, isWideScreen, setRightPaneExpanded } =
+  const { openSidebar, isWideScreen, setRightPaneExpanded, tabBarNavigation } =
     useNavigationLayout();
   const { sessionRightPaneEnabled } = useSessionRightPaneSetting();
   const [detailHost, setDetailHost] = useState<HTMLDivElement | null>(null);
@@ -445,6 +450,8 @@ function SessionSearchPage() {
     [candidates, turnSearchProviders],
   );
   const resultList = useRef<HTMLUListElement>(null);
+  const toolbar = useRef<HTMLDivElement>(null);
+  useStickyHeight(toolbar, TOOLBAR_HEIGHT_PROPERTY);
   const acquisition = useContentSearch(
     contentCandidates,
     firstNeedle,
@@ -729,7 +736,7 @@ function SessionSearchPage() {
   }, [scan.running, layoutKey, compactedSearch, hasTurnFields]);
   const [renderWindow, setRenderWindow] = useState({ query, count: 40 });
   const renderedCount = renderWindow.query === query ? renderWindow.count : 40;
-  const more = useRef<HTMLButtonElement>(null);
+  const more = useRef<HTMLSpanElement>(null);
   useEffect(() => {
     if (!results.length) return;
     const list = resultList.current;
@@ -811,71 +818,78 @@ function SessionSearchPage() {
                   ? "sessionSearchNotFoundYet"
                   : "sessionSearchNoTextMatch",
               )));
+  const projectName = activeProject?.name;
+  const pageTitle = projectName
+    ? t("sessionsTitleWithProject", { project: projectName })
+    : t("tabSessions");
+  // The phone top bar already names the Sessions tab; the heading names the
+  // active All view instead of repeating it.
+  const introTitle =
+    tabBarNavigation && !projectName ? t("sessionViewAllTitle") : pageTitle;
+  const shownCount = Math.min(renderedCount, results.length);
   return (
     <MainContent
       isWideScreen={isWideScreen}
       innerClassName={paneOpen ? styles.withDetail : undefined}
     >
       <PageHeader
-        title={t("tabSessions")}
-        description={t("consoleSessionsDescription")}
+        title={pageTitle}
+        intro="content"
+        breadcrumbs={
+          projectName
+            ? [
+                { label: t("tabSessions"), to: `${basePath}/sessions` },
+                { label: projectName },
+              ]
+            : undefined
+        }
         onOpenSidebar={openSidebar}
         isWideScreen={isWideScreen}
       />
       <SessionViews />
       <main className="page-scroll-container">
         <div
-          className={`page-content-inner ${styles.page}${
-            selected.size ? ` ${styles.withBulkBar}` : ""
-          }`}
+          className={`page-content-inner ${pageWidthClass("wide")} ${styles.page}`}
         >
-          <div className={styles.sticky}>
-            <SearchHeader
+          <PageIntro
+            title={introTitle}
+            lede={t("consoleSessionsDescription")}
+          />
+          <div ref={toolbar} className={styles.sticky}>
+            <SessionsToolbar
               query={query}
               onQuery={onQuery}
               onFields={updateFields}
               supported={supported}
               supportKnown={version !== null && version !== undefined}
-              trailing={
-                <FiltersButton
-                  count={activeFilterCount}
-                  onClick={() => setFiltersOpen(true)}
-                />
+              statuses={filters}
+              onStatuses={setStatuses}
+              sessionCount={
+                effectiveFields.includes("title")
+                  ? candidates.length
+                  : effectiveFields.length
+                    ? contentCandidates.length
+                    : 0
               }
-            />
-            <SearchChips
-              filters={filters}
-              onFilters={setStatuses}
+              scanning={scan.running}
+              acquiring={scan.acquiring || feed.loading || feed.hasMore}
+              status={searchStatusText(
+                {
+                  running: scan.running,
+                  scanned: scan.scanned,
+                  limited: scan.limited,
+                  total: contentCandidates.length,
+                  catalogLoading: feed.loading || feed.hasMore,
+                },
+                t,
+              )}
+              activeFilterCount={activeFilterCount}
+              onOpenFilters={() => setFiltersOpen(true)}
               selecting={selectionMode}
               onSelecting={setSelectionMode}
             />
           </div>
           <div className={styles.stack}>
-            <div className={styles.meta}>
-              <SearchStatusLine
-                sessionCount={
-                  effectiveFields.includes("title")
-                    ? candidates.length
-                    : effectiveFields.length
-                      ? contentCandidates.length
-                      : 0
-                }
-                scanning={scan.running}
-                acquiring={scan.acquiring || feed.loading || feed.hasMore}
-                status={
-                  scan.running
-                    ? t("sessionSearchProgress", {
-                        count: scan.scanned,
-                        total: contentCandidates.length,
-                      })
-                    : scan.limited
-                      ? t("sessionSearchCapped", { count: scan.limited })
-                      : feed.loading || feed.hasMore
-                        ? t("sessionSearchLoadingCatalog")
-                        : t("sessionSearchWatching")
-                }
-              />
-            </div>
             {selectionMode && (
               <SearchSelection
                 count={selected.size}
@@ -894,34 +908,14 @@ function SessionSearchPage() {
               />
             )}
             {activeProject && (
-              <div
-                className={`global-sessions-project-cta ${styles.projectCta}`}
-              >
-                <div className={styles.projectCtaCopy}>
-                  <strong>
-                    {t("sidebarNewSession")}{" "}
-                    <code className="global-sessions-project-cta__token">
-                      {activeProject.name}
-                    </code>
-                  </strong>
-                  <span>
-                    {query.trim()
-                      ? t("globalSessionsProjectCtaPromptLabel")
-                      : t("globalSessionsProjectCtaHint")}{" "}
-                    <code className="global-sessions-project-cta__token">
-                      {query.trim() || activeProject.name}
-                    </code>
-                  </span>
-                </div>
-                <Button variant="primary" onClick={startSession}>
-                  {t("sidebarNewSession")}
-                </Button>
-              </div>
+              <ProjectSessionCta
+                projectName={activeProject.name}
+                query={query}
+                onStart={startSession}
+              />
             )}
             {invalidRange && (
-              <p role="alert" className={styles.error}>
-                {t("sessionSearchInvalidRange")}
-              </p>
+              <ErrorState inline message={t("sessionSearchInvalidRange")} />
             )}
             {!effectiveFields.length && query.trim() && (
               <p role="status" className={styles.progress}>
@@ -929,49 +923,64 @@ function SessionSearchPage() {
               </p>
             )}
             {invalidLimit && (
-              <p role="alert" className={styles.error}>
-                {t("sessionSearchInvalidLimit")}
-              </p>
+              <ErrorState inline message={t("sessionSearchInvalidLimit")} />
             )}
-            {(feed.error || scan.error || actionError) && (
-              <p role="alert" className={styles.error}>
-                {feed.error?.message ?? scan.error ?? actionError}
-              </p>
+            {feed.error ? (
+              <ErrorState
+                inline
+                tag={t("errorTag")}
+                message={feed.error.message}
+                onRetry={() => void feed.refetch()}
+                retryLabel={t("retry")}
+              />
+            ) : (
+              (scan.error || actionError) && (
+                <ErrorState
+                  inline
+                  tag={t("errorTag")}
+                  message={scan.error ?? actionError}
+                />
+              )
             )}
             {progress && !sessions.length && !feed.error && (
               <LoadingState label={t("sessionSearchLoadingCatalog")} />
             )}
             {!progress && !feed.error && !scan.error && !results.length && (
-              <EmptyState
-                title={t("globalSessionsNoResultsTitle")}
-                hint={
-                  narrowed
-                    ? t("globalSessionsNoResultsFiltered")
-                    : t("globalSessionsNoResultsEmpty")
-                }
-                action={
-                  narrowed ? (
-                    <Button
-                      variant="secondary"
-                      onClick={() => clearFilters(true)}
-                    >
-                      {t("globalSessionsClearFilters")}
-                    </Button>
-                  ) : (
-                    <Button
-                      variant="primary"
-                      onClick={() => navigate(`${basePath}/new-session`)}
-                    >
-                      {t("nowStartSession")}
-                    </Button>
-                  )
-                }
+              <SessionsEmpty
+                narrowed={narrowed}
+                onClear={() => clearFilters(true)}
+                onStart={() => navigate(`${basePath}/new-session`)}
               />
             )}
           </div>
-          <ul
-            ref={resultList}
-            className={`${styles.results}${selectionMode ? ` ${styles.selecting}` : ""}`}
+          <SessionResults
+            listRef={resultList}
+            selecting={selectionMode}
+            searchRows={contentSearch}
+            showProject={!project}
+            shown={shownCount}
+            total={results.length}
+            moreRef={more}
+            onMore={showMore}
+            band={
+              <BulkActionBar
+                selectedCount={selected.size}
+                onArchive={() => apply("archived")}
+                onUnarchive={() => apply("unarchived")}
+                onStar={() => apply("starred")}
+                onUnstar={() => apply("unstarred")}
+                onMarkRead={() => apply("read")}
+                onMarkUnread={() => apply("unread")}
+                onClearSelection={() => setSelected(new Set())}
+                isPending={pending}
+                canArchive={selectedSessions.some((s) => !s.isArchived)}
+                canUnarchive={selectedSessions.some((s) => s.isArchived)}
+                canStar={selectedSessions.some((s) => !s.isStarred)}
+                canUnstar={selectedSessions.some((s) => s.isStarred)}
+                canMarkRead={selectedSessions.some((s) => s.hasUnread)}
+                canMarkUnread={selectedSessions.some((s) => !s.hasUnread)}
+              />
+            }
           >
             {results.slice(0, renderedCount).map(({ session, matches }) => (
               <SessionListItem
@@ -1052,18 +1061,14 @@ function SessionSearchPage() {
                 }
               />
             ))}
-          </ul>
-          {results.length > renderedCount && (
-            <button
-              ref={more}
-              className={styles.more}
-              type="button"
-              onClick={showMore}
-            >
-              {t("sessionSearchMore")}
-            </button>
-          )}
+          </SessionResults>
           <div className={styles.footer}>
+            {sessions.length > 0 && feed.hasMore && (
+              <LoadingState
+                variant="compact"
+                label={t("sessionSearchLoadingCatalog")}
+              />
+            )}
             <SearchDiagnostics
               sessions={sessions}
               partial={scan.partial}
@@ -1075,23 +1080,6 @@ function SessionSearchPage() {
             <p className={styles.note}>{t("sessionSearchUpgrade")}</p>
           )}
         </div>
-        <BulkActionBar
-          selectedCount={selected.size}
-          onArchive={() => apply("archived")}
-          onUnarchive={() => apply("unarchived")}
-          onStar={() => apply("starred")}
-          onUnstar={() => apply("unstarred")}
-          onMarkRead={() => apply("read")}
-          onMarkUnread={() => apply("unread")}
-          onClearSelection={() => setSelected(new Set())}
-          isPending={pending}
-          canArchive={selectedSessions.some((s) => !s.isArchived)}
-          canUnarchive={selectedSessions.some((s) => s.isArchived)}
-          canStar={selectedSessions.some((s) => !s.isStarred)}
-          canUnstar={selectedSessions.some((s) => s.isStarred)}
-          canMarkRead={selectedSessions.some((s) => s.hasUnread)}
-          canMarkUnread={selectedSessions.some((s) => !s.hasUnread)}
-        />
       </main>
       {filtersOpen && (
         <SearchFilterSheet

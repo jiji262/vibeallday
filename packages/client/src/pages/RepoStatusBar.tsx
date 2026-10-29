@@ -5,10 +5,17 @@ import type {
 import { useEffect, useState } from "react";
 import { api } from "../api/client";
 import { CopyButton } from "../components/CopyButton";
+import { Badge } from "../components/garden/Badge";
+import { EmptyState } from "../components/garden/EmptyState";
+import { ErrorState } from "../components/garden/ErrorState";
+import { GitBranchIcon } from "../components/garden/icons";
+import { LoadingState } from "../components/garden/LoadingState";
 import { Modal } from "../components/ui/Modal";
 import type { TranslationFn } from "../i18n";
 import { formatCommitDateTime } from "./CommitFilesPane";
 import styles from "./RepoStatusBar.module.css";
+
+const BRANCH_ICON_SIZE = 13;
 
 /**
  * Persistent branch status in the Source Control identity header. Project,
@@ -69,22 +76,7 @@ export function RepoStatusBar({
           .join(" ")}
       >
         <span className={styles.branch}>
-          <svg
-            width="13"
-            height="13"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            aria-hidden="true"
-          >
-            <line x1="6" y1="3" x2="6" y2="15" />
-            <circle cx="18" cy="6" r="3" />
-            <circle cx="6" cy="18" r="3" />
-            <path d="M18 9a9 9 0 0 1-9 9" />
-          </svg>
+          <GitBranchIcon size={BRANCH_ICON_SIZE} />
           {opensHeadCommit ? (
             <a
               className={`${styles.branchName} ${styles.branchLink}`}
@@ -156,13 +148,12 @@ export function RepoStatusBar({
             {t("gitStatusDirty")}
           </button>
         ) : (
-          <span
-            className={`${styles.badge} ${
-              status.isClean ? styles.clean : styles.dirty
-            }`}
+          <Badge
+            tone={status.isClean ? "mint" : "sand"}
+            className={styles.stateBadge}
           >
             {status.isClean ? t("gitStatusClean") : t("gitStatusDirty")}
-          </span>
+          </Badge>
         )}
       </div>
       {incomingOpen && projectId && (
@@ -216,17 +207,19 @@ function IncomingCommitsDialog({
           {t("sourceIncomingCommitsDescription")}
         </p>
         {error ? (
-          <p className={styles.incomingState} role="alert">
-            {t("sourceIncomingCommitsError")}
-          </p>
+          <ErrorState inline message={t("sourceIncomingCommitsError")} />
         ) : result === null ? (
-          <p className={styles.incomingState}>
-            {t("sourceIncomingCommitsLoading")}
-          </p>
+          <LoadingState
+            variant="compact"
+            label={t("sourceIncomingCommitsLoading")}
+          />
         ) : result.commits.length === 0 ? (
-          <p className={styles.incomingState}>
-            {t("sourceIncomingCommitsEmpty", { upstream: result.upstream })}
-          </p>
+          <EmptyState
+            compact
+            title={t("sourceIncomingCommitsEmpty", {
+              upstream: result.upstream,
+            })}
+          />
         ) : (
           <>
             <ul className={styles.incomingList}>

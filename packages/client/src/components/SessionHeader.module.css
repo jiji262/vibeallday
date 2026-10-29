@@ -1,16 +1,17 @@
 /*
- * Shared by every composer of the global `.session-header` row: `PageHeader`
- * and `SessionPage`'s own header.
+ * SessionPage's own `.session-header`: the detail-page top bar. It matches
+ * PageHeader's bar (`--topbar-height`, surface fill, hairline bottom, page
+ * gutter) so moving between a list page and a session keeps the frame still.
  *
- * The shared `.session-header-inner` keeps a tight 0.25rem left inset because
- * the sidebar toggle or back button that normally leads the row supplies the
- * rest through its own padding. With no such control — the desktop case, where
- * the sidebar carries its own toggle — the title would otherwise sit 4px from
- * the content column's edge.
+ * The leading back button or sidebar toggle brings its own padding, so the
+ * row's start inset is the gutter minus that padding; with no leading control
+ * (the desktop case, where the sidebar carries its own toggle) the title
+ * starts on the gutter itself.
  */
 .row {
   --header-control-size: 36px;
-  --header-row-size: 44px;
+  --header-row-size: var(--topbar-height);
+  --header-control-inset: var(--space-2);
 }
 
 .row:global(.session-header-inner) {
@@ -19,6 +20,8 @@
     (var(--header-row-size) - var(--header-control-size)) /
     2
   );
+  padding-inline: calc(var(--page-gutter) - var(--header-control-inset))
+    var(--page-gutter);
 }
 
 .row :global(.sidebar-toggle) {
@@ -26,8 +29,8 @@
   min-height: var(--header-control-size);
 }
 
-:global(.session-header-inner).noLeadingControl {
-  padding-left: 0.75rem;
+.row:global(.session-header-inner).noLeadingControl {
+  padding-inline-start: var(--page-gutter);
 }
 
 /* A badge after the title (clearloop remaining count) must stay visible when
@@ -58,19 +61,30 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font: inherit;
-  font-size: 0.6875rem;
-  line-height: 1.25rem;
-  color: var(--text-secondary);
-  background: none;
-  border: 1px solid var(--border-color);
-  border-radius: 999px;
+  font-family: var(--label-font);
+  font-size: var(--eyebrow-size);
+  line-height: 20px;
+  letter-spacing: var(--badge-tracking);
+  color: var(--ink-3);
+  background: var(--bg-soft);
+  border: 1px dashed var(--dash);
+  border-radius: var(--radius-pill);
   cursor: pointer;
 }
 
 .routerAccount:hover,
 .routerAccount:focus-visible {
-  color: var(--text-primary);
+  color: var(--ink);
+}
+
+/* The state pill follows the title and never shrinks below its word. */
+.stateBadge {
+  flex-shrink: 0;
+  margin-inline-start: var(--space-2);
+}
+
+.changesButton {
+  flex-shrink: 0;
 }
 
 .header .left {
@@ -109,10 +123,23 @@
   min-width: 0;
   flex-shrink: 1;
   overflow: hidden;
+  color: var(--ink-3);
   font-family: var(--font-mono);
   font-size: 12px;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.header .project > :global(.project-breadcrumb):hover {
+  color: var(--ink);
+}
+
+/* Wide headers read as a breadcrumb: project / session title. */
+.header:not([data-header-layout="narrow"]) .project::after {
+  flex-shrink: 0;
+  margin-inline: 6px 2px;
+  color: var(--ink-4);
+  content: "/";
 }
 
 .header[data-header-layout="compact"] .project {
@@ -169,8 +196,10 @@
    and a mono meta line. The wrappers vanish on wide headers so the children
    keep flowing in one row; narrow headers lay them out as two lines. */
 .header:global(.session-header) {
+  z-index: var(--z-topbar);
+  background: var(--bg-surface);
   /* A hairline that adds no height to the row. */
-  box-shadow: 0 1px 0 var(--border-color);
+  box-shadow: 0 1px 0 var(--line);
 }
 
 .header:global(.session-header)::after {
@@ -178,6 +207,7 @@
 }
 
 .header :global(.session-title) {
+  color: var(--ink);
   font-family: var(--font-display);
   font-size: 17px;
   font-weight: 600;
@@ -187,7 +217,7 @@
 }
 
 .header :global(.sidebar-toggle) {
-  color: var(--text-muted);
+  color: var(--ink-3);
 }
 
 .leadingTools,
@@ -196,10 +226,6 @@
 }
 
 @media (width < 600px) {
-  .header[data-header-layout="narrow"]:not([data-inline-rename="true"]) .row {
-    --header-row-size: 56px;
-  }
-
   .header[data-header-layout="narrow"]:not([data-inline-rename="true"])
     .row:global(.session-header-inner) {
     padding-block: 0;
@@ -224,7 +250,7 @@
   .header[data-header-layout="narrow"]:not([data-inline-rename="true"])
     .titleRow {
     grid-area: title;
-    min-height: 36px;
+    min-height: 32px;
     padding-inline-start: 6px;
   }
 

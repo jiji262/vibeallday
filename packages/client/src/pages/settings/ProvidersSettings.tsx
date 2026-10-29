@@ -1829,7 +1829,11 @@ export function ProvidersSettings() {
       {serverHasCapability(
         version,
         SERVER_CAPABILITIES.agentAuthRouter.name,
-      ) && <AgentAuthRouterSettings />}
+      ) && (
+        <div className={styles.authRouter}>
+          <AgentAuthRouterSettings />
+        </div>
+      )}
       {SHOW_HELPER_TARGETS_SETTINGS && (
         <div className="settings-group">
           <HelperTargetsSettings

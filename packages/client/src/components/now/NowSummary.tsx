@@ -1,8 +1,13 @@
-import type { ReactNode } from "react";
-import type { SessionOverviewData } from "../../hooks/useSessionOverview";
-import { useI18n } from "../../i18n";
-import { SessionOverviewSummary } from "../SessionOverviewSummary";
-import { Pill, type PillTone } from "../garden/Pill";
+import { LAUNCH_SOURCES } from "@vibeallday/shared";
+import { Link } from "react-router-dom";
+import { useRemoteBasePath } from "../../hooks/useRemoteBasePath";
+import { type MessageKey, useI18n } from "../../i18n";
+import {
+  StatCardContent,
+  StatGrid,
+  type StatTone,
+  statCardClassName,
+} from "../garden/StatCard";
 import styles from "./NowSummary.module.css";
 
 /** Tiers the summary can jump to; each renders a heading with a known id. */
@@ -12,131 +17,142 @@ export interface NowCounts {
   needsYou: number;
   running: number;
   unread: number;
+  /** Project Queue items; omitted where the server has no queue. */
+  queued?: number;
 }
 
 interface NowSummaryProps {
-  overview?: SessionOverviewData;
-  projectId?: string;
   counts: NowCounts;
-  /** False while loading, on error, or when the empty state speaks instead;
-   *  the controls then sit alone on one row. */
-  showGlance: boolean;
+  /** The catalog is still loading or incomplete, so counts are lower bounds. */
+  partial: boolean;
+  projectId?: string;
+  /** The page lists unread rows itself, so Unread jumps instead of linking. */
+  unreadOnPage: boolean;
   onJump: (target: NowJumpTarget) => void;
-  /** Trailing control on the headline row, e.g. refresh. */
-  action?: ReactNode;
-  /** Filters on the glance row, e.g. project and async questions. */
-  filters?: ReactNode;
 }
 
-interface GlanceChip {
-  target: NowJumpTarget;
-  tone: PillTone;
-  label: string;
-  pulse: boolean;
+interface TileSpec {
+  key: string;
+  tone: StatTone;
+  value: number;
+  label: MessageKey;
+  announcement: MessageKey;
+  jump?: NowJumpTarget;
+  href?: string;
 }
 
-type Translate = ReturnType<typeof useI18n>["t"];
+function unreadHref(basePath: string, projectId?: string): string {
+  const params = new URLSearchParams({
+    status: "unarchived,unread",
+    source: LAUNCH_SOURCES.join(","),
+  });
+  if (projectId) params.set("project", projectId);
+  return `${basePath}/sessions?${params}`;
+}
 
-function glanceChips(counts: NowCounts, t: Translate): GlanceChip[] {
-  const chips: GlanceChip[] = [];
-  if (counts.running > 0) {
-    const label = t("nowGlanceRunning", { count: counts.running });
-    chips.push({ target: "active", tone: "mint", label, pulse: true });
+function tileSpecs(
+  props: NowSummaryProps,
+  basePath: string,
+): readonly TileSpec[] {
+  const { counts, unreadOnPage, projectId } = props;
+  const tiles: TileSpec[] = [
+    {
+      key: "needs-you",
+      tone: "rose",
+      value: counts.needsYou,
+      label: "consoleNeedsYou",
+      announcement: "sessionOverviewNeedsYou",
+      jump: "needsAttention",
+    },
+    {
+      key: "running",
+      tone: "mint",
+      value: counts.running,
+      label: "consoleRunning",
+      announcement: "nowGlanceRunning",
+      jump: "active",
+    },
+    {
+      key: "unread",
+      tone: "sand",
+      value: counts.unread,
+      label: "consoleUnread",
+      announcement: "nowGlanceUnread",
+      ...(unreadOnPage
+        ? { jump: "unread" as const }
+        : { href: unreadHref(basePath, projectId) }),
+    },
+  ];
+  if (counts.queued !== undefined) {
+    tiles.push({
+      key: "queued",
+      tone: "indigo",
+      value: counts.queued,
+      label: "consoleQueued",
+      announcement: "nowGlanceQueued",
+      href: `${basePath}/projects`,
+    });
   }
-  if (counts.unread > 0) {
-    const label = t("nowGlanceUnread", { count: counts.unread });
-    chips.push({ target: "unread", tone: "sand", label, pulse: false });
-  }
-  return chips;
+  return tiles;
 }
 
-function GlanceChips({
-  chips,
+function SummaryTile({
+  tile,
+  partial,
   onJump,
 }: {
-  chips: GlanceChip[];
-  onJump: (target: NowJumpTarget) => void;
+  tile: TileSpec;
+  partial: boolean;
+  onJump: NowSummaryProps["onJump"];
 }) {
-  if (chips.length === 0) return null;
+  const { t } = useI18n();
+  const count = partial
+    ? t("sessionOverviewPartialCount", { count: tile.value })
+    : tile.value;
+  const content = <StatCardContent label={t(tile.label)} value={count} />;
+  const shared = {
+    className: statCardClassName(tile.tone, styles.tile),
+    "aria-label": t(tile.announcement, { count }),
+    "data-summary-tile": tile.key,
+  };
+  if (tile.href) {
+    return (
+      <Link {...shared} to={tile.href}>
+        {content}
+      </Link>
+    );
+  }
+  const target = tile.jump;
   return (
-    <div className={styles.chips}>
-      {chips.map((chip) => (
-        <button
-          key={chip.target}
-          type="button"
-          className={styles.chip}
-          onClick={() => onJump(chip.target)}
-        >
-          <Pill
-            tone={chip.tone}
-            dot={chip.pulse ? "pulse" : true}
-            className={styles.chipPill}
-          >
-            {chip.label}
-          </Pill>
-        </button>
-      ))}
-    </div>
+    <button
+      {...shared}
+      type="button"
+      disabled={!tile.value || !target}
+      onClick={() => target && onJump(target)}
+    >
+      {content}
+    </button>
   );
 }
 
 /**
- * The top of "Now": one sentence saying how many sessions wait on the user,
- * then chips for the running and unread tiers. Each part jumps to its tier.
+ * The top of the Overview: one tile per state that can wait on the user.
+ * Tiles jump to their section on this page, or open the list that holds
+ * them elsewhere (unread sessions, the Project Queue).
  */
-export function NowSummary({
-  counts,
-  showGlance,
-  onJump,
-  action,
-  filters,
-  overview,
-  projectId,
-}: NowSummaryProps) {
+export function NowSummary(props: NowSummaryProps) {
   const { t } = useI18n();
-  if (overview) {
-    return (
-      <SessionOverviewSummary
-        overview={{ ...overview, counts }}
-        projectId={projectId}
-        action={action}
-        filters={filters}
-        onJump={onJump}
-      />
-    );
-  }
-  if (!showGlance) {
-    return (
-      <header className={styles.summary}>
-        <div className={styles.filters}>
-          {filters}
-          {action}
-        </div>
-      </header>
-    );
-  }
-
-  const waiting = counts.needsYou > 0;
+  const basePath = useRemoteBasePath();
   return (
-    <header className={styles.summary}>
-      <div className={styles.headlineRow}>
-        <button
-          type="button"
-          className={`${styles.headline} ${waiting ? styles.waiting : styles.clear}`}
-          onClick={() => onJump("needsAttention")}
-          disabled={!waiting}
-        >
-          <span className={styles.signal} aria-hidden="true" />
-          {waiting
-            ? t("nowWaitingOnYou", { count: counts.needsYou })
-            : t("nowNothingWaiting")}
-        </button>
-        {action}
-      </div>
-      <div className={styles.glanceRow}>
-        <GlanceChips chips={glanceChips(counts, t)} onJump={onJump} />
-        {filters ? <div className={styles.filters}>{filters}</div> : null}
-      </div>
-    </header>
+    <StatGrid label={t("nowSummaryLabel")} className={styles.grid}>
+      {tileSpecs(props, basePath).map((tile) => (
+        <SummaryTile
+          key={tile.key}
+          tile={tile}
+          partial={props.partial}
+          onJump={props.onJump}
+        />
+      ))}
+    </StatGrid>
   );
 }

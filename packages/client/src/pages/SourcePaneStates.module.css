@@ -1,0 +1,14 @@
+/* Inset for compact states inside Source Control panes. */
+.pane {
+  padding: var(--space-3) var(--space-4);
+}
+
+.diff {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-4);
+}
+
+.lines {
+  max-width: 52rem;
+}

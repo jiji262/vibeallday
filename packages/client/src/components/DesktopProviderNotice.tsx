@@ -3,9 +3,12 @@ import { useEffect, useState } from "react";
 import { useProviders } from "../hooks/useProviders";
 import { useVersion } from "../hooks/useVersion";
 import { useI18n } from "../i18n";
+import styles from "./DesktopProviderNotice.module.css";
+import { XIcon } from "./garden/icons";
 
 const CLAUDE_DOWNLOAD_URL = "https://claude.com/download";
 const CODEX_DOWNLOAD_URL = "https://openai.com/codex/get-started/";
+const DISMISS_ICON_SIZE = 16;
 const DISMISSED_STORAGE_KEY = "desktop-provider-notice-dismissed";
 
 export function readDesktopProviderNoticeDismissed(
@@ -62,31 +65,49 @@ export function DesktopProviderNotice() {
   }
 
   return (
-    <aside className="desktop-provider-notice" aria-live="polite">
-      <div className="desktop-provider-notice__copy">
-        <strong>{t("desktopProviderNoticeTitle")}</strong>
-        <span>{t("desktopProviderNoticeDescription")}</span>
+    <aside className={styles.root} aria-live="polite">
+      <div className={styles.copy}>
+        <strong className={styles.title}>
+          {t("desktopProviderNoticeTitle")}
+        </strong>
+        <span className={styles.description}>
+          {t("desktopProviderNoticeDescription")}
+        </span>
       </div>
-      <div className="desktop-provider-notice__actions">
-        <a href={CLAUDE_DOWNLOAD_URL} target="_blank" rel="noreferrer">
+      <div className={styles.actions}>
+        <a
+          className={styles.action}
+          href={CLAUDE_DOWNLOAD_URL}
+          target="_blank"
+          rel="noreferrer"
+        >
           {t("desktopProviderNoticeGetClaude")}
         </a>
-        <a href={CODEX_DOWNLOAD_URL} target="_blank" rel="noreferrer">
+        <a
+          className={styles.action}
+          href={CODEX_DOWNLOAD_URL}
+          target="_blank"
+          rel="noreferrer"
+        >
           {t("desktopProviderNoticeGetCodex")}
         </a>
-        <button type="button" onClick={() => void refetch()}>
+        <button
+          type="button"
+          className={styles.action}
+          onClick={() => void refetch()}
+        >
           {t("desktopProviderNoticeRetry")}
         </button>
         <button
           type="button"
-          className="desktop-provider-notice__dismiss"
+          className={`${styles.action} ${styles.dismiss}`}
           aria-label={t("desktopProviderNoticeDismiss")}
           onClick={() => {
             writeDesktopProviderNoticeDismissed();
             setDismissed(true);
           }}
         >
-          ×
+          <XIcon size={DISMISS_ICON_SIZE} />
         </button>
       </div>
     </aside>

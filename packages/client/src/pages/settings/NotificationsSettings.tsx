@@ -1,4 +1,7 @@
 import { useCallback, useMemo, useState } from "react";
+import { EmptyState } from "../../components/garden/EmptyState";
+import { LoadingState } from "../../components/garden/LoadingState";
+import { Notice } from "../../components/garden/Notice";
 import { NativeNotificationStatus } from "../../components/NativeNotificationStatus";
 import { PushNotificationToggle } from "../../components/PushNotificationToggle";
 import { useConnectedDevices } from "../../hooks/useConnectedDevices";
@@ -494,9 +497,9 @@ export function NotificationsSettings() {
       >
         <HideInSettingsSearch>
           {serverTogglesGated && !devicesLoading && (
-            <div className="settings-info-box settings-subsection-hint">
-              <p>{t("notificationsNoSubscribedDevices")}</p>
-            </div>
+            <Notice className={styles.gatedNotice}>
+              {t("notificationsNoSubscribedDevices")}
+            </Notice>
           )}
         </HideInSettingsSearch>
         <div className="settings-group">
@@ -529,11 +532,12 @@ export function NotificationsSettings() {
         <HideInSettingsSearch>
           <div className="settings-group">
             {isLoading ? (
-              <p className="settings-hint">
-                {t("notificationsLoadingDevices")}
-              </p>
+              <LoadingState
+                label={t("notificationsLoadingDevices")}
+                variant="compact"
+              />
             ) : unifiedDevices.length === 0 ? (
-              <p className="settings-hint">{t("notificationsNoDevices")}</p>
+              <EmptyState compact title={t("notificationsNoDevices")} />
             ) : (
               <div className="device-list">
                 {unifiedDevices.map((device) => (

@@ -7,6 +7,7 @@ import {
   ADAPTIVE_RECOVERY_SECONDS,
   type EmulatorFps,
 } from "../hooks/useEmulatorSettings";
+import { useI18n } from "../i18n";
 
 interface EmulatorStreamProps {
   /** Remote MediaStream from WebRTC */
@@ -245,6 +246,7 @@ export function EmulatorStream({
   adaptiveFps = false,
   configuredFps = 30,
 }: EmulatorStreamProps) {
+  const { t } = useI18n();
   const videoRef = useRef<HTMLVideoElement>(null);
 
   // Attach stream to video element and monitor health
@@ -610,7 +612,7 @@ export function EmulatorStream({
       playsInline
       muted
       tabIndex={0}
-      aria-label="Device stream"
+      aria-label={t("emulatorStreamLabel")}
       onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}

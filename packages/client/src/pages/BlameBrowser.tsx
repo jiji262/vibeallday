@@ -45,6 +45,11 @@ import { writeClipboardText } from "../lib/clipboard";
 import { FileSearchIndex } from "../lib/fileSearchIndex";
 import styles from "./BlameBrowser.module.css";
 import { BlameView } from "./BlameView";
+import {
+  SourcePaneEmpty,
+  SourcePaneError,
+  SourcePaneLoading,
+} from "./SourcePaneStates";
 
 // The ignored dimension carries only this clone's `.git/info/exclude` paths —
 // authored material the user keeps out of commits (private notes, reviews,
@@ -509,9 +514,9 @@ export function BlameBrowser({
             <kbd className="source-search-shortcut">/</kbd>
           </div>
           {effectiveLoading ? (
-            <div className="git-diff-loading">{t("gitStatusLoading")}</div>
+            <SourcePaneLoading label={t("gitStatusLoading")} />
           ) : effectiveError ? (
-            <div className="git-diff-error">{effectiveError}</div>
+            <SourcePaneError message={effectiveError} />
           ) : supportsWorkingTreeFiles ? (
             <WorkingTreeFileList
               trackedFiles={plainInventory ? filtered : trackedFiles}
@@ -544,7 +549,7 @@ export function BlameBrowser({
               t={t}
             />
           ) : filtered.length === 0 ? (
-            <div className="git-status-empty">{t("sourceNoFiles")}</div>
+            <SourcePaneEmpty title={t("sourceNoFiles")} />
           ) : (
             <ul className="blame-file-list" onKeyDown={handleSourceListKeyDown}>
               {filtered.map((file) => renderFileRow(file))}

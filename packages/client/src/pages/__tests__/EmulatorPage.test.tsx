@@ -48,7 +48,7 @@ describe("BridgeRuntimePrompt", () => {
     expect(
       screen.getByText(/Installed: v0.1.0. Latest: v0.2.0./i),
     ).toBeDefined();
-    expect(screen.getByRole("button", { name: "Update Bridge" })).toBeDefined();
+    expect(screen.getByRole("button", { name: "Update bridge" })).toBeDefined();
   });
 
   it("calls the shared download endpoint for updates", async () => {
@@ -60,7 +60,7 @@ describe("BridgeRuntimePrompt", () => {
       </I18nProvider>,
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "Update Bridge" }));
+    fireEvent.click(screen.getByRole("button", { name: "Update bridge" }));
 
     await waitFor(() => {
       expect(mockDownloadDeviceBridge).toHaveBeenCalledTimes(1);

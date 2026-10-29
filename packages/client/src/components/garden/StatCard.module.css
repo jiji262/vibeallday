@@ -1,0 +1,128 @@
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+.card {
+  display: grid;
+  align-content: start;
+  gap: var(--space-2);
+  min-width: 0;
+  padding: 18px var(--space-5);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--card);
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.label {
+  color: var(--ink-3);
+  font-family: var(--label-font);
+  font-size: var(--eyebrow-size);
+  font-weight: 500;
+  letter-spacing: var(--meta-tracking);
+  text-transform: uppercase;
+}
+
+.value {
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 600;
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+  font-variant-numeric: tabular-nums;
+}
+
+.foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: var(--space-2);
+  color: var(--ink-3);
+  font-size: 13px;
+}
+
+.indigo {
+  border-color: color-mix(in srgb, var(--indigo) 12%, transparent);
+  background: var(--indigo-soft);
+}
+
+.indigo .value {
+  color: var(--indigo-ink);
+}
+
+.rose {
+  border-color: color-mix(in srgb, var(--rose) 20%, transparent);
+  background: var(--rose-soft);
+}
+
+.rose .value {
+  color: var(--rose-ink);
+}
+
+.mint {
+  border-color: color-mix(in srgb, var(--mint) 24%, transparent);
+  background: var(--mint-soft);
+}
+
+.mint .value {
+  color: var(--mint-ink);
+}
+
+.peach {
+  border-color: color-mix(in srgb, var(--peach) 20%, transparent);
+  background: var(--peach-soft);
+}
+
+.peach .value {
+  color: var(--peach-ink);
+}
+
+.sand {
+  border-color: color-mix(in srgb, var(--sand) 22%, transparent);
+  background: var(--sand-soft);
+}
+
+.sand .value {
+  color: var(--sand-ink);
+}
+
+@media (width >= 640px) {
+  .grid {
+    gap: var(--space-4);
+  }
+}
+
+@media (width >= 768px) {
+  .card {
+    padding: 22px var(--space-6);
+  }
+
+  .value {
+    font-size: 32px;
+  }
+}
+
+@media (width >= 1024px) {
+  .grid {
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  }
+}
+
+a.card,
+button.card {
+  cursor: pointer;
+  transition: border-color var(--duration-fast) var(--ease-standard);
+}
+
+a.card:hover,
+button.card:hover {
+  border-color: var(--line-strong);
+}
+
+a.card:focus-visible,
+button.card:focus-visible {
+  box-shadow: 0 0 0 3px var(--indigo-soft);
+}

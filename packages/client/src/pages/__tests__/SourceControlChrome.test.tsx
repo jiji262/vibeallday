@@ -251,6 +251,21 @@ describe("SourceModeTabs", () => {
     expect(onSelect).toHaveBeenCalledWith("changes");
   });
 
+  it("moves between modes with arrow keys and names each tab by mode", () => {
+    const onSelect = vi.fn();
+    render(
+      <SourceModeTabs tab="changes" tabs={TABS} onSelect={onSelect} t={t} />,
+    );
+
+    const tabs = screen.getAllByRole("tab");
+    expect(tabs.map((tab) => tab.getAttribute("data-tab"))).toEqual(TABS);
+    expect(tabs.map((tab) => tab.tabIndex)).toEqual([0, -1, -1]);
+    fireEvent.keyDown(tabs[0] as HTMLElement, { key: "ArrowLeft" });
+    expect(onSelect).toHaveBeenLastCalledWith("comments");
+    fireEvent.keyDown(tabs[0] as HTMLElement, { key: "End" });
+    expect(document.activeElement).toBe(tabs[2]);
+  });
+
   it("renders a count chip only for a positive count", () => {
     render(
       <SourceModeTabs

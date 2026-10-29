@@ -1,5 +1,8 @@
-import { getThemeLabel, THEMES, useTheme } from "../../../hooks/useTheme";
+import { THEMES, useTheme } from "../../../hooks/useTheme";
 import { useI18n } from "../../../i18n";
+import { getThemeLabel } from "../../../i18n-settings";
+import { Button } from "../../garden/Button";
+import styles from "../Onboarding.module.css";
 import type { OnboardingStepProps } from "../types";
 
 /**
@@ -11,36 +14,40 @@ export function ThemeStep({ onNext, onSkip, isLastStep }: OnboardingStepProps) {
   const { theme, setTheme } = useTheme();
 
   return (
-    <div className="onboarding-step-content">
-      <p className="onboarding-step-description">
-        {t("onboardingThemeDescription")}
-      </p>
+    <div className={styles.stepContent}>
+      <p className={styles.description}>{t("onboardingThemeDescription")}</p>
 
-      <div className="onboarding-theme-grid">
+      <div className={styles.themeGrid}>
         {THEMES.map((themeName) => (
           <button
             key={themeName}
             type="button"
-            className={`onboarding-theme-option ${theme === themeName ? "selected" : ""}`}
+            className={
+              theme === themeName
+                ? `${styles.themeOption} ${styles.selected}`
+                : styles.themeOption
+            }
+            aria-pressed={theme === themeName}
             onClick={() => setTheme(themeName)}
           >
+            {/* Fixed preview swatches live in styles/index.css. */}
             <div
-              className={`onboarding-theme-preview theme-preview-${themeName}`}
+              className={`${styles.themePreview} theme-preview-${themeName}`}
             />
-            <span className="onboarding-theme-label">
-              {getThemeLabel(themeName)}
+            <span className={styles.themeLabel}>
+              {getThemeLabel(themeName, t)}
             </span>
           </button>
         ))}
       </div>
 
-      <div className="onboarding-step-actions">
-        <button type="button" className="btn-secondary" onClick={onSkip}>
-          Skip
-        </button>
-        <button type="button" className="btn-primary" onClick={onNext}>
-          {isLastStep ? "Finish" : "Next"}
-        </button>
+      <div className={styles.actions}>
+        <Button variant="ghost" onClick={onSkip}>
+          {t("onboardingSkip")}
+        </Button>
+        <Button variant="primary" onClick={onNext}>
+          {t(isLastStep ? "onboardingFinish" : "onboardingNext")}
+        </Button>
       </div>
     </div>
   );

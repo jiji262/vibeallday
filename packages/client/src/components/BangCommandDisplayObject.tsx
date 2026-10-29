@@ -8,6 +8,8 @@ import type { BangCommandTranscriptDisplayObject } from "@vibeallday/shared";
 import { useEffect, useRef, useState } from "react";
 import { useI18n } from "../i18n";
 import { MarkdownPreview } from "./MarkdownPreview";
+import { Badge } from "./garden/Badge";
+import { Spinner } from "./garden/Spinner";
 import styles from "./BangCommandDisplayObject.module.css";
 
 export interface BangCommandOutput {
@@ -148,16 +150,14 @@ export function BangCommandDisplayObject({
         <span className={styles.meta}>
           {object.status === "running" && (
             <span className={styles.running}>
-              <span className={styles.spinner} aria-hidden="true" />
+              <Spinner size={12} />
               {t("bangRunning")}
             </span>
           )}
           {exitLabel && (
-            <span
-              className={object.exitCode === 0 ? undefined : styles.exitNonzero}
-            >
+            <Badge tone={object.exitCode === 0 ? "mint" : "rose"}>
               {exitLabel}
-            </span>
+            </Badge>
           )}
           {object.durationMs !== undefined && (
             <span>{formatDuration(object.durationMs)}</span>

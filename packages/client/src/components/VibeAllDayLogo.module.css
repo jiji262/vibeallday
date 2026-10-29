@@ -1,0 +1,28 @@
+.logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.icon {
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  border-radius: var(--radius-md);
+}
+
+.text {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.version {
+  color: var(--ink-3);
+  font-family: var(--label-font);
+  font-size: 10px;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}

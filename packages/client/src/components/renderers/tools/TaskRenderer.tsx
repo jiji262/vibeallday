@@ -18,11 +18,13 @@ import { validateToolResult } from "../../../lib/validateToolResult";
 import type { ToolCallItem } from "@vibeallday/shared/transcript/items";
 import { SchemaWarning } from "../../SchemaWarning";
 import { ContentBlockRenderer } from "../ContentBlockRenderer";
-import { Spinner, TaskNestedContent } from "./TaskNestedContent";
+import { Spinner } from "../../garden/Spinner";
+import { TaskNestedContent } from "./TaskNestedContent";
 import type { TaskInput, TaskResult } from "./types";
 
 const MAX_PROMPT_LENGTH = 200;
 const MAX_ERROR_SUMMARY_LENGTH = 80;
+const TASK_SPINNER_SIZE = 12;
 
 /**
  * Extract error message from tool result.
@@ -358,8 +360,12 @@ function TaskInline({
           )}
           {isRunning && (
             <>
-              <span className="task-spinner" role="status" aria-label="Running">
-                <Spinner />
+              <span
+                className="task-spinner"
+                role="status"
+                aria-label={t("toolStatusRunning")}
+              >
+                <Spinner size={TASK_SPINNER_SIZE} tone="muted" />
               </span>
               {liveContent?.contextUsage && (
                 <span className="task-context-usage">
@@ -407,7 +413,8 @@ function TaskInline({
       {/* Loading indicator */}
       {isLoadingContent && (
         <div className="task-loading">
-          <Spinner /> Loading agent content...
+          <Spinner size={TASK_SPINNER_SIZE} tone="muted" />
+          {t("providerChildLoadingContent")}
         </div>
       )}
 

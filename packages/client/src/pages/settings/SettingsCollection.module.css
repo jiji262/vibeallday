@@ -12,13 +12,16 @@
 .open {
   grid-template-columns: minmax(0, 1fr) minmax(17rem, 1fr);
 }
+/* The list is a flush garden card holding a garden-recipe table: sunken
+   mono uppercase header, dashed row rules, bg-2 row hover. */
 .list {
   min-width: 0;
   max-height: 65vh;
   overflow: auto;
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--line);
   border-radius: var(--radius-lg);
-  background: var(--bg-card);
+  background: var(--card);
+  box-shadow: var(--shadow-xs);
 }
 .list table {
   width: 100%;
@@ -28,23 +31,28 @@
 }
 .list th,
 .list td {
-  padding: 12px 16px;
+  padding: 14px var(--space-4);
   text-align: left;
   border-bottom: 1px dashed var(--dash);
   overflow-wrap: anywhere;
+  vertical-align: middle;
+}
+.list tbody tr:last-child > td {
+  border-bottom: 0;
 }
 .list th {
   position: sticky;
   top: 0;
   z-index: 1;
-  background: var(--bg-sunken);
-  font-family: var(--font-mono);
-  font-size: 11px;
-  color: var(--text-secondary);
+  padding-block: var(--space-3);
+  border-bottom: 1px solid var(--line);
+  background: var(--bg-2);
+  color: var(--ink-3);
+  font-family: var(--label-font);
+  font-size: var(--eyebrow-size);
   font-weight: 500;
-}
-.list td:first-child {
-  padding-left: 16px;
+  letter-spacing: var(--eyebrow-tracking);
+  text-transform: uppercase;
 }
 .list th:first-child {
   width: var(--settings-first-column-width, 50%);
@@ -52,23 +60,33 @@
 .list button[aria-expanded] {
   display: block;
   width: 100%;
-  padding: 12px 16px;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-weight: 500;
   text-align: left;
   overflow-wrap: anywhere;
-  border-color: transparent;
-  background: transparent;
+  cursor: pointer;
 }
 .list button[aria-expanded="true"] {
-  color: var(--accent-color);
-  background: var(--bg-hover);
-  border-color: var(--border-color);
+  color: var(--indigo);
+  background: var(--card);
+  border-color: var(--line);
+  box-shadow: var(--shadow-xs);
+}
+.list button[aria-expanded]:focus-visible {
+  border-color: var(--indigo);
+  box-shadow: 0 0 0 3px var(--indigo-soft);
 }
 /* The whole row expands, so the whole row shows it is one target. */
 .list tr[data-expandable] {
   cursor: pointer;
 }
 .list tr[data-expandable]:hover > td {
-  background: var(--bg-hover);
+  background: var(--bg-2);
 }
 .detail {
   display: grid;
@@ -77,9 +95,10 @@
   max-height: 65vh;
   overflow: auto;
   padding: var(--space-5);
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--line);
   border-radius: var(--radius-lg);
-  background: var(--bg-card);
+  background: var(--card);
+  box-shadow: var(--shadow-xs);
 }
 .heading {
   display: flex;
@@ -91,6 +110,9 @@
   flex: 1 1 10rem;
   min-width: 0;
   margin: 0;
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 500;
   overflow-wrap: anywhere;
 }
 @container settings-collection (max-width: 560px) {

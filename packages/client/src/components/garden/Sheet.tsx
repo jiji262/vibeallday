@@ -44,6 +44,8 @@ export interface ActionSheetItem {
   hint?: ReactNode;
   tone?: "default" | "danger";
   disabled?: boolean;
+  /** Group label; items sharing it render together, in first-seen order. */
+  section?: string;
   onSelect: () => void;
 }
 
@@ -75,6 +77,24 @@ export function ActionSheet({
   );
 }
 
+interface ActionGroup {
+  section?: string;
+  items: ActionSheetItem[];
+}
+
+/** Groups items by section, keeping the order each section first appears. */
+export function groupActionItems(items: readonly ActionSheetItem[]) {
+  const groups: ActionGroup[] = [];
+  for (const item of items) {
+    const group = groups.find(
+      (candidate) => candidate.section === item.section,
+    );
+    if (group) group.items.push(item);
+    else groups.push({ section: item.section, items: [item] });
+  }
+  return groups;
+}
+
 function ActionList({
   items,
   onClose,
@@ -84,31 +104,54 @@ function ActionList({
 }) {
   return (
     <div className={styles.list} role="menu">
-      {items.map((item) => (
-        <button
-          key={item.key}
-          type="button"
-          role="menuitem"
-          className={`${styles.item}${item.tone === "danger" ? ` ${styles.danger}` : ""}`}
-          disabled={item.disabled}
-          onClick={() => {
-            onClose();
-            item.onSelect();
-          }}
+      {groupActionItems(items).map((group) => (
+        <div
+          key={group.section ?? ""}
+          className={styles.group}
+          role="group"
+          aria-label={group.section}
         >
-          {item.icon ? (
-            <span className={styles.icon} aria-hidden="true">
-              {item.icon}
-            </span>
+          {group.section ? (
+            <div className={styles.groupLabel} aria-hidden="true">
+              {group.section}
+            </div>
           ) : null}
-          <span className={styles.text}>
-            <span className={styles.label}>{item.label}</span>
-            {item.hint ? (
-              <span className={styles.hint}>{item.hint}</span>
-            ) : null}
-          </span>
-        </button>
+          {group.items.map((item) => (
+            <ActionRow key={item.key} item={item} onClose={onClose} />
+          ))}
+        </div>
       ))}
     </div>
+  );
+}
+
+function ActionRow({
+  item,
+  onClose,
+}: {
+  item: ActionSheetItem;
+  onClose: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      role="menuitem"
+      className={`${styles.item}${item.tone === "danger" ? ` ${styles.danger}` : ""}`}
+      disabled={item.disabled}
+      onClick={() => {
+        onClose();
+        item.onSelect();
+      }}
+    >
+      {item.icon ? (
+        <span className={styles.icon} aria-hidden="true">
+          {item.icon}
+        </span>
+      ) : null}
+      <span className={styles.text}>
+        <span className={styles.label}>{item.label}</span>
+        {item.hint ? <span className={styles.hint}>{item.hint}</span> : null}
+      </span>
+    </button>
   );
 }

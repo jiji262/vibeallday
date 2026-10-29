@@ -1,13 +1,19 @@
+/* Provider identity as a Garden badge: mono pill tinted by the provider. */
 .badge {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  padding: 2px 8px 1px;
-  font-size: var(--font-size-xs);
-  font-weight: 500;
+  gap: var(--space-1);
+  min-height: 22px;
+  padding: 0 var(--space-2);
   border: 1px solid;
-  border-radius: var(--radius-sm);
-  background: transparent;
+  border-radius: var(--radius-pill);
+  background: color-mix(in srgb, currentcolor 8%, transparent);
+  font-family: var(--label-font);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: var(--badge-tracking);
+  white-space: nowrap;
 }
 
 .dot {
@@ -52,28 +58,28 @@
 }
 
 .effortDot.low {
-  background: #2f9e44;
+  background: var(--mint-ink);
 }
 
 .effortDot.medium {
-  background: #d97706;
+  background: var(--sand);
 }
 
 .effortDot.high {
-  background: #ea580c;
+  background: var(--peach);
 }
 
 .effortDot.xhigh {
-  background: #dc2626;
+  background: var(--rose);
 }
 
 .effortDot.max {
-  background: #991b1b;
+  background: var(--rose-ink);
 }
 
 .effortLabel {
   font-size: 10px;
-  font-weight: 700;
+  font-weight: 500;
   line-height: 1.2;
   opacity: 0.82;
 }
@@ -101,7 +107,7 @@
   min-width: 0;
   max-width: 100%;
   gap: 3px;
-  padding: 2px 5px;
+  padding: 0 6px;
   white-space: nowrap;
 }
 
@@ -131,13 +137,15 @@
    with its provider dot instead of a bordered badge. */
 .flat {
   gap: 6px;
+  min-height: 0;
   padding: 0;
   border: 0;
-  color: var(--text-muted);
-  font-family: var(--font-mono);
+  background: transparent;
+  color: var(--ink-3);
   font-size: 12px;
   font-weight: 400;
   line-height: 20px;
+  letter-spacing: 0;
 }
 
 .flat .dot {

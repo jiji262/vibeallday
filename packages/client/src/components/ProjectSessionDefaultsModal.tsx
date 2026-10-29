@@ -9,6 +9,8 @@ import { useEffect, useMemo, useState } from "react";
 import { api } from "../api/client";
 import { useServerSettings } from "../hooks/useServerSettings";
 import { useI18n } from "../i18n";
+import { Button } from "./garden/Button";
+import { inputClassName, selectClassName } from "./garden/Field";
 import { HeartbeatTextArea } from "./HeartbeatTextArea";
 import { ProjectSharingSection } from "./ProjectSharingSection";
 import styles from "./ProjectSessionDefaultsModal.module.css";
@@ -172,6 +174,7 @@ export function ProjectSessionDefaultsModal({
               <span>{t("projectSettingsMinutes")}</span>
               <input
                 type="number"
+                className={inputClassName(styles.minutesInput)}
                 min={1}
                 max={1440}
                 value={minutes}
@@ -205,6 +208,7 @@ export function ProjectSessionDefaultsModal({
               <label className={styles.recentField}>
                 <span>{t("projectSettingsRecentMessages")}</span>
                 <select
+                  className={selectClassName()}
                   value=""
                   disabled={loading}
                   onChange={(event) => {
@@ -250,17 +254,16 @@ export function ProjectSessionDefaultsModal({
         </div>
 
         <div className={styles.actions}>
-          <button type="button" className={styles.secondary} onClick={onClose}>
+          <Button variant="secondary" onClick={onClose}>
             {t("cancel")}
-          </button>
-          <button
-            type="button"
-            className={styles.primary}
+          </Button>
+          <Button
+            variant="primary"
             disabled={!canSave}
             onClick={() => void handleSave()}
           >
             {saving ? t("providersSaving") : t("providersSave")}
-          </button>
+          </Button>
         </div>
       </div>
     </Modal>

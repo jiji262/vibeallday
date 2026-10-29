@@ -86,7 +86,11 @@ for (const viewport of [
       `csv-${viewport.name}-beta`,
       `csv-${viewport.name}-alpha`,
     ]);
-    await search.press("End");
+    // macOS binds End to "scroll to end of document", which scrolls the
+    // overflowing page instead of moving the caret; Cmd+→ is its line end.
+    await search.press(
+      process.platform === "darwin" ? "Meta+ArrowRight" : "End",
+    );
     await search.pressSequentially(", alpha", { delay: 10 });
     await expect(search).toHaveValue("quasarneedle, alpha");
     await expect(rows).toHaveCount(1);

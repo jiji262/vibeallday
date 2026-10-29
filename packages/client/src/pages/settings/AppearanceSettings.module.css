@@ -1,0 +1,18 @@
+/* Settings icon style picker, stacked under its label on narrow cards: three
+   equal columns with the tile above the name, so the options never wrap into
+   a staggered second row. 0-3-0 beats the shared stacked wide-control rule. */
+@container (max-width: 36rem) {
+  :global(.settings-item--wide-control)
+    > .iconStyleSelector:global(.font-size-selector) {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .iconStyleSelector > :global(.settings-icon-style-option) {
+    flex-direction: column;
+    justify-content: center;
+    gap: var(--space-1);
+  }
+}

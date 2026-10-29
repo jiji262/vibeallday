@@ -1,21 +1,41 @@
-.breadcrumb:global(.settings-breadcrumb) {
+/* Desktop settings: the category rail beside a 960px content column, the
+   pair centred in the main column (license-hub settings archetype). */
+.twoColumn {
+  --settings-rail-width: 256px;
+  --settings-pane-width: 960px;
+  --page-content-max-width: calc(
+    var(--settings-rail-width) +
+    var(--space-7) +
+    var(--settings-pane-width)
+  );
+
+  display: grid;
+  grid-template-columns: var(--settings-rail-width) minmax(0, 1fr);
+  gap: var(--space-7);
+  align-items: start;
+  min-height: 0;
+}
+
+/* The rail looks like the app sidebar: a sunken panel, mono group labels.
+   Fixed px width so the text-size setting cannot stretch it, and sticky so
+   the open category stays in reach while a pane scrolls. */
+.nav {
+  position: sticky;
+  top: var(--space-5);
+  display: flex;
+  flex-direction: column;
   gap: var(--space-3);
+  width: var(--settings-rail-width);
+  max-height: calc(100dvh - var(--topbar-height) - var(--space-8) * 2);
+  overflow: hidden;
+  padding: var(--space-3) var(--space-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--bg-2);
+  box-sizing: border-box;
 }
 
-.breadcrumb :global(.settings-breadcrumb-current) {
-  font-family: var(--font-display);
-  font-size: 36px;
-  font-weight: 600;
-  letter-spacing: -0.025em;
-  line-height: 1.1;
-}
-
-.breadcrumb :global(.settings-breadcrumb-description) {
-  font-size: 13px;
-}
-
-@media (width < 600px) {
-  .breadcrumb :global(.settings-breadcrumb-current) {
-    font-size: 27px;
-  }
+.panel {
+  min-width: 0;
+  max-width: var(--settings-pane-width);
 }

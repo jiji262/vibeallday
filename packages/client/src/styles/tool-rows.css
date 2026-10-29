@@ -207,20 +207,6 @@
   text-align: center;
 }
 
-.tool-spinner .spinner {
-  color: var(--app-spinner-foreground);
-  animation: spin 1s linear infinite var(--activity-play, paused);
-}
-
-@keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
 /* Tool name */
 .tool-name {
   flex-shrink: 0;

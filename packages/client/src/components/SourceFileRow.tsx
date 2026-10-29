@@ -71,6 +71,19 @@ export function SourceFilePath({
   );
 }
 
+/** Garden tone per git status letter: peach modified, mint added, rose
+ *  deleted/unmerged, indigo renamed/copied/type change, grey untracked. */
+const STATUS_TONE_CLASS: Record<string, string | undefined> = {
+  M: styles.toneModified,
+  A: styles.toneAdded,
+  D: styles.toneDeleted,
+  U: styles.toneDeleted,
+  R: styles.toneMoved,
+  C: styles.toneMoved,
+  T: styles.toneMoved,
+  "?": styles.toneUntracked,
+};
+
 const STATUS_LABEL_KEYS: Record<string, MessageKey> = {
   M: "sourceFileStatusModified",
   A: "sourceFileStatusAdded",
@@ -95,7 +108,12 @@ export function SourceFileStatusBadge({
 
   return (
     <span
-      className={`git-status-badge git-status-${status.toLowerCase()}`}
+      className={[
+        "git-status-badge",
+        `git-status-${status.toLowerCase()}`,
+        styles.statusBadge,
+        STATUS_TONE_CLASS[status] ?? styles.toneUntracked,
+      ].join(" ")}
       role="img"
       aria-label={label}
       {...tooltipAttributes}

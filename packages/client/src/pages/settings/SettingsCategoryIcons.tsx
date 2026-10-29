@@ -339,10 +339,12 @@ export function SettingsIconTile({
   id,
   iconStyle,
   compact = false,
+  className: extraClassName,
 }: {
   id: string;
   iconStyle: SettingsIconStyle;
   compact?: boolean;
+  className?: string;
 }) {
   const icon =
     iconStyle === "emoji"
@@ -353,6 +355,7 @@ export function SettingsIconTile({
     styles.tile,
     TILE_STYLE_CLASS[iconStyle],
     compact ? styles.compact : "",
+    extraClassName,
   ]
     .filter(Boolean)
     .join(" ");
@@ -363,7 +366,19 @@ export function SettingsIconTile({
   );
 }
 
-export function SettingsCategoryIcon({ id }: { id: string }) {
+export function SettingsCategoryIcon({
+  id,
+  className,
+}: {
+  id: string;
+  className?: string;
+}) {
   const { settingsIconStyle } = useSettingsIconStyle();
-  return <SettingsIconTile id={id} iconStyle={settingsIconStyle} />;
+  return (
+    <SettingsIconTile
+      id={id}
+      iconStyle={settingsIconStyle}
+      className={className}
+    />
+  );
 }

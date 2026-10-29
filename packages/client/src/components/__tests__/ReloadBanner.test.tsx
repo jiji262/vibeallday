@@ -182,7 +182,9 @@ describe("ReloadBanner", () => {
 
     expect(screen.getByText("Server changed")).toBeTruthy();
     const dismiss = screen.getByRole("button", { name: "Dismiss" });
-    expect(dismiss.textContent).toBe("×");
+    // Icon-only control: the glyph is an SVG, the name comes from aria-label.
+    expect(dismiss.querySelector("svg")).not.toBeNull();
+    expect(dismiss.textContent).toBe("");
 
     fireEvent.click(dismiss);
 

@@ -24,7 +24,7 @@
 
 .managerSidebar {
   align-content: start;
-  border-right: 1px solid var(--border-color);
+  border-right: 1px dashed var(--dash);
   padding-right: 14px;
 }
 
@@ -38,16 +38,20 @@
 }
 
 .filterGroup > span {
-  color: var(--text-secondary);
-  font-weight: 600;
+  color: var(--ink-3);
+  font-family: var(--label-font);
+  font-size: var(--eyebrow-size);
+  font-weight: 500;
+  letter-spacing: var(--eyebrow-tracking);
+  text-transform: uppercase;
 }
 
 .filterButton {
   align-items: center;
-  background: var(--bg-code);
+  background: transparent;
   border: 1px solid transparent;
-  border-radius: 6px;
-  color: var(--text-primary);
+  border-radius: var(--radius-sm);
+  color: var(--ink);
   cursor: pointer;
   display: flex;
   gap: 7px;
@@ -89,32 +93,33 @@
 .revokeTypeButton {
   align-items: center;
   align-self: stretch;
-  border-radius: 7px;
-  box-shadow:
-    inset 0 1px rgba(255, 255, 255, 0.2),
-    0 1px 3px rgba(0, 0, 0, 0.28);
-  color: #fff;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-xs);
+  color: var(--ink-on);
   cursor: pointer;
   display: inline-flex;
   justify-content: center;
   min-height: 30px;
   min-width: 30px;
   padding: 5px;
+  transition: filter var(--duration-fast);
 }
 
+/* Garden: indigo is the one action colour; freeze is attention (peach) and
+   revoke is danger (rose), both filled with their ink tone for contrast. */
 .addButton {
-  background: color-mix(in srgb, var(--app-accent) 78%, #12251d);
-  border: 1px solid color-mix(in srgb, var(--app-accent) 78%, #fff);
+  background: var(--indigo);
+  border: 1px solid var(--indigo);
 }
 
 .freezeTypeButton {
-  background: color-mix(in srgb, var(--attention-color) 68%, #1e293b);
-  border: 1px solid color-mix(in srgb, var(--attention-color) 68%, #fff);
+  background: var(--peach-ink);
+  border: 1px solid var(--peach-ink);
 }
 
 .revokeTypeButton {
-  background: color-mix(in srgb, var(--error-color) 78%, #320d12);
-  border: 1px solid color-mix(in srgb, var(--error-color) 78%, #fff);
+  background: var(--rose-ink);
+  border: 1px solid var(--rose-ink);
 }
 
 .addButton svg,
@@ -126,87 +131,68 @@
 }
 
 .addButton:hover:not(:disabled) {
-  background: color-mix(in srgb, var(--app-accent) 88%, #12251d);
-  box-shadow:
-    inset 0 1px rgba(255, 255, 255, 0.26),
-    0 2px 5px rgba(0, 0, 0, 0.32);
-  transform: translateY(-1px);
+  background: var(--indigo-ink);
+  border-color: var(--indigo-ink);
 }
 
-.freezeTypeButton:hover:not(:disabled) {
-  background: color-mix(in srgb, var(--attention-color) 78%, #1e293b);
-  box-shadow:
-    inset 0 1px rgba(255, 255, 255, 0.26),
-    0 2px 5px rgba(0, 0, 0, 0.32);
-  transform: translateY(-1px);
-}
-
+.freezeTypeButton:hover:not(:disabled),
 .revokeTypeButton:hover:not(:disabled) {
-  background: color-mix(in srgb, var(--error-color) 88%, #320d12);
-  box-shadow:
-    inset 0 1px rgba(255, 255, 255, 0.26),
-    0 2px 5px rgba(0, 0, 0, 0.32);
-  transform: translateY(-1px);
+  filter: brightness(0.95);
 }
 
 .freezeConfirmationBanner,
 .revokeConfirmationBanner {
   align-items: center;
-  border-radius: 7px;
-  box-shadow:
-    inset 0 1px rgba(255, 255, 255, 0.2),
-    0 1px 3px rgba(0, 0, 0, 0.28);
-  color: #fff;
+  border-radius: var(--radius-md);
   display: flex;
-  font-size: 0.72rem;
-  line-height: 1.25;
-  padding: 7px;
+  font-size: 13px;
+  line-height: 1.4;
+  padding: 8px 10px;
   text-align: left;
   width: 100%;
 }
 
 .revokeConfirmationBanner {
-  background: color-mix(in srgb, var(--error-color) 82%, #320d12);
-  border: 1px solid color-mix(in srgb, var(--error-color) 78%, #fff);
+  background: var(--rose-soft);
+  border: 1px solid color-mix(in srgb, var(--rose) 28%, transparent);
+  color: var(--rose-ink);
 }
 
 .freezeConfirmationBanner {
-  background: color-mix(in srgb, var(--attention-color) 72%, #1e293b);
-  border: 1px solid color-mix(in srgb, var(--attention-color) 70%, #fff);
+  background: var(--peach-soft);
+  border: 1px solid color-mix(in srgb, var(--peach) 28%, transparent);
+  color: var(--peach-ink);
 }
 
-.addButton:active:not(:disabled),
-.freezeTypeButton:active:not(:disabled),
-.revokeTypeButton:active:not(:disabled) {
-  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.28);
-  transform: translateY(0);
+.addButton:focus-visible,
+.freezeTypeButton:focus-visible,
+.revokeTypeButton:focus-visible {
+  box-shadow: 0 0 0 3px var(--indigo-soft);
 }
 
 .filterButton:hover:not(:disabled) {
-  background: var(--bg-hover);
+  background: var(--bg-soft);
 }
 
 .filterButtonActive {
-  background: color-mix(in srgb, var(--app-accent) 14%, var(--bg-code));
-  border-color: var(--app-accent);
-  font-weight: 600;
+  background: var(--indigo-soft);
+  border-color: var(--indigo);
+  font-weight: 500;
 }
 
 .filterIcon {
   align-items: center;
-  background: #273449;
-  border-radius: 7px;
-  box-shadow:
-    inset 0 0 0 1px rgba(255, 255, 255, 0.28),
-    0 1px 3px rgba(0, 0, 0, 0.26);
-  color: #fff;
+  background: var(--bg-soft);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  color: var(--ink-3);
   display: inline-flex;
   flex: 0 0 26px;
   height: 26px;
   justify-content: center;
   transition:
-    background 0.15s,
-    box-shadow 0.15s;
+    background var(--duration-fast),
+    color var(--duration-fast);
 }
 
 .filterIcon svg {
@@ -215,20 +201,9 @@
 }
 
 .filterButtonActive .filterIcon {
-  background: color-mix(in srgb, var(--app-accent) 68%, #111827);
-  box-shadow:
-    inset 0 0 0 1px color-mix(in srgb, #fff 28%, var(--app-accent)),
-    0 1px 3px rgba(0, 0, 0, 0.26);
-}
-
-:global([data-theme="light"]) .filterIcon {
-  background: #475569;
-}
-
-@media (prefers-color-scheme: light) {
-  :global([data-theme="auto"]) .filterIcon {
-    background: #475569;
-  }
+  background: var(--indigo);
+  border-color: var(--indigo);
+  color: var(--ink-on);
 }
 
 .addButton:disabled,

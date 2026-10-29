@@ -277,6 +277,7 @@ import { AttachmentChip } from "./AttachmentChip";
 import { DeliveryGlyph } from "./DeliveryGlyph";
 import { SegmentedControl } from "./controls/SegmentedControl";
 import { FilterDropdown, type FilterOption } from "./FilterDropdown";
+import { LoadingState } from "./garden/LoadingState";
 import { Sheet } from "./garden/Sheet";
 import { FullPaneComposerToggle } from "./FullPaneComposerToggle";
 import { NewSessionFixedLaunch } from "./NewSessionFixedLaunch";
@@ -1892,9 +1893,11 @@ export function NewSessionForm({
 
     if (projectsLoading) {
       rows.push(
-        <div key="loading" className="new-session-project-empty">
-          {t("newSessionLoading")}
-        </div>,
+        <LoadingState
+          key="loading"
+          label={t("newSessionLoading")}
+          variant="compact"
+        />,
       );
       return rows;
     }

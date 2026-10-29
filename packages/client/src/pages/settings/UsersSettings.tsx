@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { LoadingState } from "../../components/garden/LoadingState";
 import type {
   LimitedUserSummary,
   PathGrant,
@@ -324,7 +325,7 @@ export function UsersSettings() {
   // Rendering the directory before the identity lands would flash the
   // superuser's pane at a limited user on every load.
   if (!principalResolved) {
-    return <SettingsSection description={t("loading")} />;
+    return <LoadingState label={t("loading")} variant="compact" />;
   }
 
   if (!canManage) {

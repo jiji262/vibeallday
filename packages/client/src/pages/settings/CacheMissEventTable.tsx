@@ -1,4 +1,5 @@
 import type { CacheMissBillingRecord } from "@vibeallday/shared";
+import { EmptyState } from "../../components/garden/EmptyState";
 import {
   type CSSProperties,
   useEffect,
@@ -307,13 +308,16 @@ export function CacheMissEventTable({
       </div>
 
       {groups.length === 0 ? (
-        <p className="settings-empty">
-          {events.length === 0
-            ? t("cacheMissBillingEventsEmpty")
-            : outcomeFilteredEvents.length === 0
-              ? t("activityNoMatches")
-              : t("cacheMissEventFilterEmpty")}
-        </p>
+        <EmptyState
+          compact
+          title={
+            events.length === 0
+              ? t("cacheMissBillingEventsEmpty")
+              : outcomeFilteredEvents.length === 0
+                ? t("activityNoMatches")
+                : t("cacheMissEventFilterEmpty")
+          }
+        />
       ) : (
         <div className={styles.scroller}>
           <table className={styles.table}>

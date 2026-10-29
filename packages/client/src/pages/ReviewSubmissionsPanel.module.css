@@ -7,13 +7,23 @@
   min-width: 0;
 }
 
-.empty {
-  padding: var(--space-4) 0;
-  color: var(--text-secondary);
-  font-size: 15px;
+/* The submission list is one flush card with dashed row rules. */
+.submissionList {
+  align-self: start;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  list-style: none;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xs);
 }
 
-.submissionList,
+.submissionList > li + li {
+  border-top: 1px dashed var(--dash);
+}
+
 .siteList,
 .entryList {
   display: flex;
@@ -31,16 +41,20 @@
   gap: var(--space-2);
   width: 100%;
   min-height: var(--tap-min);
-  padding: var(--space-2) var(--space-3);
+  padding: 10px 16px;
   overflow: hidden;
-  color: var(--text-secondary);
+  color: var(--ink-2);
   font: inherit;
   font-size: 14px;
   text-align: left;
-  background: var(--bg-card);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
+  background: transparent;
+  border: 0;
   cursor: pointer;
+  transition: background var(--duration-fast) var(--ease-standard);
+}
+
+.submissionButton:focus-visible {
+  box-shadow: inset 0 0 0 2px var(--indigo-soft-2);
 }
 
 .submissionButton > span:first-child {
@@ -50,23 +64,24 @@
 }
 
 .submissionButton:hover {
-  color: var(--text-primary);
-  border-color: var(--line-strong);
+  color: var(--ink);
+  background: var(--bg-2);
 }
 
 .submissionButton.active {
-  color: var(--text-primary);
+  color: var(--indigo-ink);
   background: var(--indigo-soft);
-  border-color: var(--indigo);
+  font-weight: 500;
 }
 
 .loadMore {
   width: 100%;
   min-height: var(--tap-min);
-  color: var(--link-color);
+  color: var(--indigo);
   font: inherit;
+  font-size: 13px;
   cursor: pointer;
-  background: transparent;
+  background: var(--bg-2);
   border: 0;
 }
 
@@ -167,9 +182,9 @@
 }
 
 .site {
-  padding: var(--space-3) var(--space-4);
-  background: var(--bg-card);
-  border: 1px solid var(--border-color);
+  padding: 16px 20px;
+  background: var(--card);
+  border: 1px solid var(--line);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-xs);
 }
@@ -386,14 +401,6 @@
 
   .mobileSelector select {
     width: 100%;
-    min-height: var(--tap-min);
-    padding: 0 var(--space-3);
-    color: var(--text-primary);
-    font: inherit;
-    font-size: 16px;
     font-weight: 400;
-    background: var(--bg-input);
-    border: 1px solid var(--border-input);
-    border-radius: var(--radius-md);
   }
 }

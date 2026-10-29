@@ -1,4 +1,6 @@
 import { useBrowserProfiles } from "../../hooks/useBrowserProfiles";
+import { EmptyState } from "../../components/garden/EmptyState";
+import { LoadingState } from "../../components/garden/LoadingState";
 import { useConnectedDevices } from "../../hooks/useConnectedDevices";
 import { usePushNotifications } from "../../hooks/usePushNotifications";
 import { useI18n } from "../../i18n";
@@ -71,9 +73,12 @@ export function DevicesSettings() {
 
         <div className="settings-group">
           {isLoading ? (
-            <p className="settings-hint">{t("devicesLoadingProfiles")}</p>
+            <LoadingState
+              label={t("devicesLoadingProfiles")}
+              variant="compact"
+            />
           ) : profiles.length === 0 ? (
-            <p className="settings-hint">{t("devicesEmpty")}</p>
+            <EmptyState compact title={t("devicesEmpty")} />
           ) : (
             <div className="device-list">
               {profiles.map((profile) => {

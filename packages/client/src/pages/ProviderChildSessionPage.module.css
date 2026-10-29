@@ -9,8 +9,9 @@
   display: inline-flex;
   align-items: center;
   min-height: var(--tap-min);
-  color: var(--link-color);
+  color: var(--indigo);
   font-size: 14px;
+  font-weight: 500;
   text-decoration: none;
   white-space: nowrap;
 }
@@ -28,6 +29,6 @@
 
 .status {
   margin: var(--space-4);
-  color: var(--text-muted);
+  color: var(--ink-3);
   font-size: 15px;
 }

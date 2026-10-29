@@ -3,10 +3,13 @@ import {
   serverHasCapability,
   type ProjectAppInventory,
 } from "@vibeallday/shared";
+import { ErrorState } from "../../components/garden/ErrorState";
+import { LoadingState } from "../../components/garden/LoadingState";
 import { useEffect, useState } from "react";
 import { projectAppApi } from "../../api/projectApp";
 import { api } from "../../api/client";
 import { ProjectAppViewer } from "../../components/ProjectAppViewer";
+import { projectAppStatusText } from "../../components/projectAppState";
 import { useVersion } from "../../hooks/useVersion";
 import { useI18n } from "../../i18n";
 import styles from "./ProjectAppInventorySection.module.css";
@@ -74,7 +77,7 @@ export function ProjectAppInventorySection() {
         retained: undefined,
         name: project.name,
         path: project.path,
-        status: t("projectAppState", { state: project.info.state }),
+        status: projectAppStatusText(t, project.info.state),
         addresses: inventory!.reservations.filter(
           (address) => address.projectId === project.projectId,
         ),
@@ -172,8 +175,10 @@ export function ProjectAppInventorySection() {
       <p>
         {t(supported ? "projectAppInventoryHint" : "projectAppInventoryUpdate")}
       </p>
-      {error && <p role="alert">{error}</p>}
-      {loading && <p role="status">{t("projectAppLoading")}</p>}
+      {error && <ErrorState inline message={error} />}
+      {loading && (
+        <LoadingState label={t("projectAppLoading")} variant="compact" />
+      )}
       {supported && inventory && (
         <>
           {inventory.projects.length === 0 && retained.length === 0 && (

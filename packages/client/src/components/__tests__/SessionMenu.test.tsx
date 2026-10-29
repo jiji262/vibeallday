@@ -16,6 +16,11 @@ afterEach(() => {
   cleanup();
 });
 
+function openMoreSection() {
+  fireEvent.click(screen.getByRole("button", { name: "Session options" }));
+  fireEvent.click(screen.getByRole("button", { name: "More" }));
+}
+
 function renderMenu(props: Partial<SessionMenuProps> = {}) {
   return render(
     <I18nProvider>
@@ -53,8 +58,9 @@ describe("SessionMenu CSS module contracts", () => {
     fireEvent.click(trigger);
 
     expect(wrapper.classList.contains("is-open")).toBe(true);
-    const dropdown = screen.getByRole("button", { name: "Star" })
-      .parentElement as HTMLElement;
+    const dropdown = screen
+      .getByRole("button", { name: "Star" })
+      .closest("[data-session-menu-open]") as HTMLElement;
     expect(dropdown.classList.contains(styles.dropdown ?? "")).toBe(true);
     expect(dropdown.classList.contains("session-menu-dropdown")).toBe(false);
   });
@@ -70,7 +76,9 @@ describe("SessionMenu CSS module contracts", () => {
     fireEvent.click(trigger);
 
     const terminateButton = screen.getByRole("button", { name: "Terminate" });
-    const dropdown = terminateButton.parentElement as HTMLElement;
+    const dropdown = terminateButton.closest(
+      "[data-session-menu-open]",
+    ) as HTMLElement;
     expect(container.contains(dropdown)).toBe(false);
     expect(document.body.contains(dropdown)).toBe(true);
     expect(dropdown.classList.contains(styles.dropdown ?? "")).toBe(true);
@@ -132,6 +140,7 @@ describe("SessionMenu CSS module contracts", () => {
     renderMenu({ onConfigureProjectSettings });
 
     fireEvent.click(screen.getByRole("button", { name: "Session options" }));
+    fireEvent.click(screen.getByRole("button", { name: "More" }));
     fireEvent.click(screen.getByRole("button", { name: "Project settings" }));
 
     expect(onConfigureProjectSettings).toHaveBeenCalledOnce();
@@ -160,7 +169,7 @@ describe("SessionMenu CSS module contracts", () => {
       configurable: true,
     });
     renderMenu({ sessionId: "abc-123" });
-    fireEvent.click(screen.getByRole("button", { name: "Session options" }));
+    openMoreSection();
 
     await act(async () => {
       fireEvent.click(screen.getByRole("button", { name: "Copy session id" }));
@@ -178,7 +187,7 @@ describe("SessionMenu CSS module contracts", () => {
     });
 
     function openMenu() {
-      fireEvent.click(screen.getByRole("button", { name: "Session options" }));
+      openMoreSection();
     }
 
     function menuIsOpen() {
@@ -268,7 +277,7 @@ describe("SessionMenu CSS module contracts", () => {
       configurable: true,
     });
     renderMenu();
-    fireEvent.click(screen.getByRole("button", { name: "Session options" }));
+    openMoreSection();
 
     await act(async () => {
       fireEvent.click(screen.getByRole("button", { name: "Copy session id" }));
@@ -330,5 +339,61 @@ describe("SessionMenu sidebar categories", () => {
     expect(
       screen.queryByRole("button", { name: "Move to category" }),
     ).toBeNull();
+  });
+});
+
+describe("SessionMenu sections", () => {
+  it("groups entries in order and ends with a separate danger zone", () => {
+    renderMenu({
+      processId: "process-1",
+      onTerminate: vi.fn(),
+      onShare: vi.fn(),
+      onClone: vi.fn(),
+      onConfigureHeartbeat: vi.fn(),
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Session options" }));
+
+    const groups = screen
+      .getAllByRole("group")
+      .map((group) => group.getAttribute("aria-labelledby"))
+      .filter(Boolean)
+      .map((id) => document.getElementById(id as string)?.textContent);
+    expect(groups).toEqual(["Organize", "Share & export", "Branch", "Agent"]);
+
+    const terminate = screen.getByRole("button", { name: "Terminate" });
+    const archive = screen.getByRole("button", { name: "Archive" });
+    expect(terminate.closest("[role=group]")).toBe(
+      archive.closest("[role=group]"),
+    );
+    expect(archive.classList.contains(styles.dangerItem ?? "")).toBe(true);
+  });
+
+  it("folds rarely used entries under More until opened", () => {
+    renderMenu();
+    fireEvent.click(screen.getByRole("button", { name: "Session options" }));
+    expect(
+      screen.queryByRole("button", { name: "Copy session id" }),
+    ).toBeNull();
+
+    const more = screen.getByRole("button", { name: "More" });
+    fireEvent.click(more);
+    expect(more.getAttribute("aria-expanded")).toBe("true");
+    expect(
+      screen.getByRole("button", { name: "Copy session id" }),
+    ).toBeTruthy();
+  });
+
+  it("opens the project's changes from Review changes", () => {
+    const onReviewChanges = vi.fn();
+    renderMenu({ onReviewChanges });
+    fireEvent.click(screen.getByRole("button", { name: "Session options" }));
+    fireEvent.click(screen.getByRole("button", { name: "Review changes" }));
+
+    expect(onReviewChanges).toHaveBeenCalledOnce();
+    expect(
+      screen
+        .getByRole("button", { name: "Session options" })
+        .getAttribute("aria-expanded"),
+    ).toBe("false");
   });
 });

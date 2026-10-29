@@ -9,8 +9,8 @@
   padding: var(--space-2) var(--space-3);
   margin-bottom: var(--space-3);
   font-size: 14px;
-  background: var(--bg-card);
-  border: 1px solid var(--border-color);
+  background: var(--card);
+  border: 1px solid var(--line);
   border-radius: var(--radius-md);
 }
 
@@ -51,7 +51,7 @@
 }
 
 .bar .copyButton:hover {
-  background: var(--bg-tertiary);
+  background: var(--bg-soft);
 }
 
 .branch {
@@ -60,14 +60,14 @@
   flex: 0 1 auto;
   align-items: center;
   gap: var(--space-1);
-  color: var(--text-secondary);
+  color: var(--ink-2);
 }
 
 .branchName {
   min-width: 0;
   overflow: hidden;
-  color: var(--text-primary);
-  font-family: var(--font-mono);
+  color: var(--ink);
+  font-family: var(--label-font);
   font-size: 14px;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -75,7 +75,7 @@
 
 /* The branch name is navigation to its tip commit; the adjacent icon copies. */
 .branchLink {
-  color: var(--text-primary);
+  color: var(--ink);
   text-decoration: none;
   cursor: pointer;
 }
@@ -87,8 +87,8 @@
 
 .upstream,
 .sync {
-  color: var(--text-muted);
-  font-family: var(--font-mono);
+  color: var(--ink-3);
+  font-family: var(--label-font);
   font-size: 12px;
 }
 
@@ -105,23 +105,23 @@
   white-space: nowrap;
 }
 
+/* The dirty badge as a button: the garden Badge recipe on a native control. */
 .badge {
-  margin-left: auto;
-  padding: 3px 10px;
+  display: inline-flex;
+  align-items: center;
+  height: 22px;
+  padding: 0 8px;
   border-radius: var(--radius-pill);
-  font-family: var(--font-mono);
+  font-family: var(--label-font);
   font-size: 12px;
   font-weight: 500;
+  letter-spacing: var(--badge-tracking);
+  white-space: nowrap;
 }
 
-.bar.inline .badge {
-  margin-left: 0;
+.bar.inline .badge,
+.stateBadge {
   flex-shrink: 0;
-}
-
-.badge.clean {
-  color: var(--mint-ink);
-  background: var(--mint-soft);
 }
 
 .badge.dirty {
@@ -161,7 +161,7 @@
 
 .upstreamButton:hover,
 .upstreamButton:focus-visible {
-  color: var(--text-primary);
+  color: var(--ink);
   text-decoration: underline;
 }
 
@@ -170,27 +170,32 @@
 }
 
 .incomingIntro,
-.incomingState,
 .incomingTruncated {
   margin: 0;
-  color: var(--text-secondary);
+  color: var(--ink-3);
+  font-size: 13px;
 }
 
 .incomingList {
   display: grid;
-  gap: var(--space-2);
   padding: 0;
   margin: var(--space-3) 0 0;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--card);
   list-style: none;
 }
 
 .incomingCommit {
   display: grid;
   gap: 3px;
-  padding: var(--space-3);
-  background: var(--bg-card);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px dashed var(--dash);
+}
+
+.incomingCommit:last-child {
+  border-bottom: 0;
 }
 
 .incomingCommitHeader {
@@ -202,8 +207,8 @@
 
 .incomingCommitHeader code {
   flex-shrink: 0;
-  color: var(--text-muted);
-  font-family: var(--font-mono);
+  color: var(--ink-3);
+  font-family: var(--label-font);
   font-size: 12px;
 }
 
@@ -213,8 +218,8 @@
 }
 
 .incomingMeta {
-  color: var(--text-muted);
-  font-family: var(--font-mono);
+  color: var(--ink-3);
+  font-family: var(--label-font);
   font-size: 12px;
 }
 

@@ -1,0 +1,12 @@
+/* Width presets for `.page-content-inner`; the shell default is 1440px. */
+.reading {
+  --page-content-max-width: var(--content-max-width);
+}
+
+.narrow {
+  --page-content-max-width: 960px;
+}
+
+.form {
+  --page-content-max-width: 880px;
+}

@@ -13,8 +13,8 @@
 
 .title {
   color: var(--text-primary);
-  font-size: 15px;
-  font-weight: 600;
+  font-size: var(--font-size-lg);
+  font-weight: 500;
 }
 
 .buttons {
@@ -23,8 +23,9 @@
   gap: var(--space-2);
 }
 
+/* Height comes from the shared settings-button (36px, 44px on touch) so the
+   rail's buttons match the rest of settings. */
 .buttons :global(.settings-button) {
-  min-height: 44px;
   width: 100%;
   padding-inline: var(--space-2);
   text-align: center;

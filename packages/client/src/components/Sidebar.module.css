@@ -1,44 +1,55 @@
-.console :global(.sidebar-header) {
-  min-height: 76px;
-  border-bottom: 1px dashed var(--dash);
+/*
+ * Garden Console sidebar: sunken column, brand row, project switcher and new
+ * session above a scrolling column of navigation and session sections, with
+ * the host pill pinned at the bottom. The same aside renders as the desktop
+ * column, the collapsed rail and the overlay drawer.
+ */
+.console {
+  padding: max(20px, env(safe-area-inset-top, 0px)) var(--space-3)
+    max(var(--space-4), env(safe-area-inset-bottom, 0px));
+  background: var(--bg-2);
 }
 
-.console :global(.sidebar-nav-item) {
-  font-size: max(13px, var(--font-size-sm));
+:global(.sidebar-collapsed) .console {
+  padding-inline: var(--space-2);
 }
 
-.pendingQueueRow {
+.actions {
   display: flex;
-  align-items: stretch;
-  min-width: 0;
+  flex-direction: column;
+  flex-shrink: 0;
+  margin-bottom: var(--space-2);
+  padding-top: var(--sidebar-actions-padding-top, 0);
 }
 
-.pendingQueueLink {
+/* The scroller reaches the sidebar edges so its bar sits on the border. */
+.sessions {
   flex: 1;
-  min-width: 0;
+  min-height: 0;
+  margin-inline: calc(-1 * var(--space-3));
+  padding: var(--sidebar-sessions-padding-top, 0.25rem) var(--space-3)
+    var(--space-4);
+  overflow-y: auto;
 }
 
-/*
- * The expanded header's collapse toggle sits opposite the wordmark, which has
- * no padding of its own. Absorb the button's padding so both read as the same
- * 1rem inset from the sidebar's left and right edges.
- */
-.headerToggle {
-  margin-right: calc(-1 * var(--space-1));
+:global(.sidebar-collapsed) .sessions {
+  margin-inline: calc(-1 * var(--space-2));
+  padding-inline: var(--space-2);
+  overflow: hidden;
 }
 
-/*
- * The brand anchor wraps an inline-flex logo. Left as a block, it builds a line
- * box that reserves the font's descender space below the glyph, making the
- * anchor taller than the glyph with all the slack underneath. The header then
- * centers that padded box, so the glyph's center sits above the row's center
- * and every other control in the row reads as hanging low. A flex container has
- * no line box, so the anchor is exactly the logo's height and the header's
- * `align-items: center` aligns its controls on the glyph.
- */
-.brandLink {
-  display: flex;
-  align-items: center;
+.section {
+  margin-bottom: var(--sidebar-section-gap, 1rem);
+}
+
+.sessionList {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sessionList > li {
+  margin: 0;
 }
 
 .sectionHeading {
@@ -55,32 +66,37 @@
 .sectionToggle {
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 6px;
   width: 100%;
-  min-height: 20px;
+  min-height: 22px;
   padding: 0;
-  background: transparent;
   border: 0;
-  color: var(--text-muted);
-  cursor: pointer;
-  font-size: var(--font-size-xs);
-  font-weight: 600;
+  border-radius: var(--radius-xs);
+  background: transparent;
+  color: var(--ink-4);
+  font-family: var(--label-font);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: var(--eyebrow-tracking);
   text-align: left;
-  text-transform: none;
-  transition: color 0.15s;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: color var(--duration-fast) var(--ease-standard);
 }
 
 .sectionToggle:hover {
-  color: var(--text-muted);
+  color: var(--ink-2);
 }
 
 .sectionToggle:focus-visible {
-  outline: 1px solid var(--accent-color);
-  outline-offset: 2px;
-  border-radius: var(--radius-sm);
+  box-shadow: 0 0 0 3px var(--indigo-soft);
 }
 
+/* Category and creator names keep the casing their owner typed. */
 .sectionTitleAsTyped {
+  font-family: var(--font-ui);
+  font-size: 12px;
+  letter-spacing: 0;
   text-transform: none;
 }
 
@@ -97,7 +113,7 @@
   width: 8px;
   height: 8px;
   stroke-width: 1.4;
-  transition: transform 0.12s;
+  transition: transform var(--duration-fast) var(--ease-standard);
 }
 
 .sectionChevron[data-expanded="false"] {
@@ -112,15 +128,90 @@
 
 .sectionCount {
   margin-left: auto;
-  font-weight: 500;
   font-variant-numeric: tabular-nums;
 }
+
+/* Compact session rows: 13px titles, the current row lifts onto a card. */
+.console :global(.session-list-item--compact .session-list-item__title-text) {
+  font-size: 13px;
+}
+
+.console :global(.session-list-item--compact):hover {
+  background: var(--bg-soft);
+}
+
+.console :global(.session-list-item--compact.current) {
+  border-radius: var(--radius-md);
+  background: var(--card);
+  box-shadow: var(--shadow-xs);
+}
+
+.pendingQueueRow {
+  display: flex;
+  align-items: stretch;
+  min-width: 0;
+}
+
+.pendingQueueLink {
+  flex: 1;
+  min-width: 0;
+}
+
 .recentMore {
   display: flex;
   align-items: center;
   min-height: var(--tap-min);
   padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
   color: var(--indigo);
   font-size: 13px;
+  font-weight: 500;
   text-decoration: none;
+}
+
+.recentMore:hover {
+  background: var(--bg-soft);
+}
+
+.recentMore:focus-visible {
+  box-shadow: 0 0 0 3px var(--indigo-soft);
+}
+
+.empty {
+  padding: var(--space-4);
+  color: var(--ink-4);
+  font-family: var(--label-font);
+  font-size: 11px;
+  letter-spacing: var(--meta-tracking);
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.newSession:global(.sidebar-nav-item) {
+  color: var(--indigo-ink);
+  font-weight: 500;
+}
+
+.hiddenDupsToggle {
+  min-height: 28px;
+  padding: var(--space-1) var(--sidebar-navigation-inline-spacing, 0.75rem);
+  border: 0;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--ink-3);
+  font-family: var(--label-font);
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.hiddenDupsToggle:hover {
+  background: var(--bg-soft);
+  color: var(--ink);
+}
+
+/* The rail shows only icons; session sections leave it entirely. */
+:global(.sidebar-collapsed) .section,
+:global(.sidebar-collapsed) .recentMore,
+:global(.sidebar-collapsed) .empty {
+  display: none;
 }

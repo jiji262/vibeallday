@@ -1,0 +1,59 @@
+/* Source Control page intro. The page is a full-height workbench, so the
+   intro keeps its rows tight: identity and operations, then repository state
+   and the underline mode tabs spanning the content width. */
+.intro {
+  flex-shrink: 0;
+}
+
+/* The project switcher reads as the page title: serif, inherited size. */
+.title {
+  display: inline-flex;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.title > span {
+  min-width: 0;
+  max-width: 100%;
+}
+
+/* The selector button bleeds its hover padding into the gutter with negative
+   inline margins (ProjectSelector.module.css), so the column it may fill is
+   100% plus that bleed. Capping it at 100% shrank the border box by the bleed
+   and clipped the last glyphs of the name even with free room. */
+.title button {
+  min-width: 0;
+  max-width: calc(100% + 2 * var(--space-2));
+  font: inherit;
+  letter-spacing: inherit;
+}
+
+/* Block, not the selector's inline-flex, so a real overflow ellipsizes. */
+.title button > span {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* A single-project selector renders a plain `.session-title` span. */
+.title :global(.session-title) {
+  font: inherit;
+}
+
+.rows {
+  display: grid;
+  flex: 1 1 100%;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.repoStatus {
+  max-width: 100%;
+}
+
+@media (width < 768px) {
+  .title button > span {
+    max-width: calc(100dvw - 80px);
+  }
+}

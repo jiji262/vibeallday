@@ -1,13 +1,181 @@
+/* Garden Console navigation: 14px rows on the sunken sidebar, a white card
+ * with an indigo edge bar for the current destination, mono group captions. */
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0 0 var(--sidebar-section-gap, 1rem);
+  padding: 0;
+}
+
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.groupLabel {
+  margin: var(--space-4) 0 0;
+  padding: 6px var(--sidebar-navigation-inline-spacing, 0.75rem);
+  color: var(--ink-4);
+  font-family: var(--label-font);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: var(--eyebrow-tracking);
+  line-height: 1.4;
+  text-transform: uppercase;
+}
+
+.groupLabelText {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--sidebar-navigation-inline-spacing, 0.75rem);
+  min-width: 0;
+  padding: var(--sidebar-navigation-padding-block, 0.5rem)
+    var(--sidebar-navigation-inline-spacing, 0.75rem);
+  border: 0;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--ink-2);
+  font: inherit;
+  font-size: 14px;
+  line-height: 1.35;
+  text-align: start;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    background-color var(--duration-fast) var(--ease-standard),
+    color var(--duration-fast) var(--ease-standard);
+}
+
+.item:hover {
+  background: var(--bg-soft);
+  color: var(--ink);
+}
+
+.item:focus-visible {
+  box-shadow: 0 0 0 3px var(--indigo-soft);
+}
+
+.icon {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  color: var(--ink-3);
+}
+
+.icon > svg {
+  flex-shrink: 0;
+}
+
+.text {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.current,
+.current:hover {
+  background: var(--card);
+  box-shadow: var(--shadow-xs);
+  color: var(--ink);
+  font-weight: 500;
+}
+
+.current .icon {
+  color: var(--indigo);
+}
+
+/* The bar sits in the sidebar's inline padding, outside the row. */
+.current::before {
+  position: absolute;
+  top: 8px;
+  bottom: 8px;
+  left: -4px;
+  width: 3px;
+  border-radius: 2px;
+  background: var(--indigo);
+  content: "";
+}
+
+.badge {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  margin-inline-start: auto;
+  padding: 0 6px;
+  border-radius: var(--radius-pill);
+  font-family: var(--label-font);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+  line-height: 1;
+}
+
+.badgeNeedsYou {
+  background: var(--rose-soft);
+  color: var(--rose-ink);
+}
+
+.badgeQueue {
+  background: var(--sand-soft);
+  color: var(--sand-ink);
+}
+
+.tag {
+  margin-inline-start: auto;
+}
+
+.tag + .badge {
+  margin-inline-start: 0;
+}
+
 .row {
   display: flex;
   align-items: center;
   gap: 4px;
   min-inline-size: 0;
+  border-radius: var(--radius-md);
+  transition: background-color var(--duration-fast) var(--ease-standard);
 }
+
 .row > a {
   flex: 1;
   min-inline-size: 0;
 }
+
+.row:hover {
+  background: var(--bg-soft);
+}
+
+.rowCurrent,
+.rowCurrent:hover {
+  background: var(--card);
+  box-shadow: var(--shadow-xs);
+}
+
+.row > .item:hover,
+.rowCurrent > .current {
+  background: transparent;
+  box-shadow: none;
+}
+
 /* Matches the inline-end inset of a session row's own trailing control, so a
  * navigation accessory and the counts below it share one right edge. */
 .accessory {
@@ -16,6 +184,66 @@
   align-items: center;
   margin-inline-end: 4px;
 }
+
+@media (pointer: coarse) {
+  :global(.sidebar) .item {
+    min-height: var(--tap-min);
+  }
+}
+
+/* Collapsed rail: 40px icon squares, captions become dashed rules. */
 :global(.sidebar-collapsed) .row {
   flex-direction: column;
+}
+
+:global(.sidebar-collapsed) .item {
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  margin-inline: auto;
+  padding: 0;
+}
+
+/* The rail stacks the accessory under a square icon: only the icon washes. */
+:global(.sidebar-collapsed) .row,
+:global(.sidebar-collapsed) .rowCurrent {
+  background: transparent;
+  box-shadow: none;
+}
+
+/* In the column the link's flex: 1 would size it to its icon, not 40px. */
+:global(.sidebar-collapsed) .row > a {
+  flex: none;
+}
+
+/* Centre the chip under its icon and pull its padding in, so a two-digit
+ * count still fits inside the rail. */
+:global(.sidebar-collapsed) .accessory {
+  margin-inline: auto;
+}
+
+:global(.sidebar-collapsed) .accessory > * {
+  gap: var(--space-1);
+  padding-inline: var(--space-1);
+}
+
+:global(.sidebar-collapsed) .row > .item:hover {
+  background: var(--bg-soft);
+}
+
+:global(.sidebar-collapsed) .rowCurrent > .current {
+  background: var(--card);
+  box-shadow: var(--shadow-xs);
+}
+
+:global(.sidebar-collapsed) .current::before,
+:global(.sidebar-collapsed) .tag {
+  display: none;
+}
+
+:global(.sidebar-collapsed) .groupLabel {
+  height: 0;
+  margin: var(--space-2);
+  padding: 0;
+  border-top: 1px dashed var(--dash);
 }

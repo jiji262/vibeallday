@@ -4,6 +4,9 @@ import type {
   IssueSession,
 } from "@vibeallday/shared";
 import { useEffect, useRef, useState } from "react";
+import { Button, IconButton } from "../components/garden/Button";
+import { MoreHorizontalIcon } from "../components/garden/icons";
+import { LoadingState } from "../components/garden/LoadingState";
 import { SessionListItem } from "../components/SessionListItem";
 import { useSourceContextMenu } from "../components/SourceContextMenu";
 import { useCurrentSourceRuntime } from "../contexts/SourceRuntimeContext";
@@ -211,10 +214,8 @@ export function IssueSessionRow({
             />
           )}
         </div>
-        <button
-          className={styles.iconButton}
-          type="button"
-          aria-label={t("issuesAssociationActions")}
+        <IconButton
+          label={t("issuesAssociationActions")}
           onClick={(e) =>
             menu.openFromButton(e, [
               ...(unresolved ||
@@ -255,8 +256,8 @@ export function IssueSessionRow({
             ])
           }
         >
-          ⋯
-        </button>
+          <MoreHorizontalIcon />
+        </IconButton>
       </div>
       <div className={styles.sessionMeta}>
         <span
@@ -281,9 +282,10 @@ export function IssueSessionRow({
         excerpt(entry, !expanded),
       )}
       {session.evidenceCount > 1 && (
-        <button
+        <Button
+          variant="link"
+          size="sm"
           className={styles.textButton}
-          type="button"
           aria-expanded={expanded}
           onClick={() => {
             setExpanded(!expanded);
@@ -293,22 +295,27 @@ export function IssueSessionRow({
           {t(expanded ? "issuesFewerMentions" : "issuesMoreMentions", {
             count: session.evidenceCount - 1,
           })}
-        </button>
+        </Button>
       )}
       {expanded && evidence.length > 1 && nextOffset !== null && (
-        <button
+        <Button
+          variant="link"
+          size="sm"
           className={styles.textButton}
-          type="button"
           disabled={loading}
           onClick={() => void more()}
         >
           {t("issuesMoreEvidence")}
-        </button>
+        </Button>
       )}
       {loading && (
-        <span className={styles.muted}>{t("issuesLoadingMentions")}</span>
+        <LoadingState variant="compact" label={t("issuesLoadingMentions")} />
       )}
-      {error && <p role="alert">{error}</p>}
+      {error && (
+        <p role="alert" className={styles.sessionError}>
+          {error}
+        </p>
+      )}
       {menu.menu}
     </article>
   );

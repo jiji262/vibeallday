@@ -1,15 +1,27 @@
 import type { ReactNode } from "react";
+import { Link } from "react-router-dom";
 import { useI18n } from "../i18n";
 import { useOptionalNavigationLayout } from "../layouts/NavigationLayout";
 import { truncateText } from "../lib/text";
+import {
+  Breadcrumb,
+  type Crumb,
+  type CrumbLinkProps,
+} from "./garden/Breadcrumb";
+import { Eyebrow } from "./garden/Eyebrow";
+import { ChevronLeftIcon } from "./garden/icons";
 import { HostIdentityMarker } from "./HostIdentityMarker";
 import styles from "./PageHeader.module.css";
-import sessionHeaderStyles from "./SessionHeader.module.css";
+import { SearchTrigger } from "./shell/SearchTrigger";
 import { SidebarLauncher } from "./SidebarLauncher";
+
+/** Titles longer than this keep their full text in a tooltip. */
+const TITLE_TOOLTIP_LENGTH = 60;
+const BACK_ICON_SIZE = 18;
 
 interface PageHeaderProps {
   title: string;
-  /** Short page guidance; session workspace headers keep their compact owner. */
+  /** Short page guidance shown under the header intro title. */
   description?: string;
   /** Optional custom element to render instead of the default title */
   titleElement?: ReactNode;
@@ -23,96 +35,150 @@ interface PageHeaderProps {
   showBack?: boolean;
   /** Callback when back button is clicked */
   onBack?: () => void;
-  /** Right-aligned header actions (same row as the title) */
+  /** Right-aligned top-bar actions, before the search trigger. */
   actions?: ReactNode;
+  /** Top-bar path; defaults to a single crumb holding `title`. */
+  breadcrumbs?: readonly Crumb[];
+  /**
+   * "header" draws the compact page title under the top bar (unmigrated
+   * pages). "content" leaves the title to a `PageIntro` in the page body.
+   */
+  intro?: "header" | "content";
+  /** Mono context line above the header intro title. */
+  eyebrow?: ReactNode[];
 }
 
-const BackIcon = () => (
-  <svg
-    width="20"
-    height="20"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    aria-hidden="true"
-  >
-    <polyline points="15 18 9 12 15 6" />
-  </svg>
-);
+function crumbLink({ to, className, title, children }: CrumbLinkProps) {
+  return (
+    <Link to={to} className={className} title={title}>
+      {children}
+    </Link>
+  );
+}
 
-export function PageHeader({
+function LeadingControl({
+  onBack,
+  onOpen,
+}: {
+  onBack?: () => void;
+  onOpen?: () => void;
+}) {
+  const { t } = useI18n();
+  if (onBack) {
+    return (
+      <button
+        type="button"
+        className={`sidebar-toggle ${styles.control}`}
+        onClick={onBack}
+        title={t("actionBack")}
+        aria-label={t("actionBack")}
+      >
+        <ChevronLeftIcon size={BACK_ICON_SIZE} />
+      </button>
+    );
+  }
+  if (!onOpen) return null;
+  return (
+    <SidebarLauncher
+      label={t("actionOpenSidebar")}
+      newSessionLabel={t("sidebarNewSession")}
+      onActivate={onOpen}
+      className={styles.control}
+    />
+  );
+}
+
+interface IntroProps {
+  title: string;
+  description?: string;
+  titleElement?: ReactNode;
+  onTitleClick?: () => void;
+  eyebrow?: ReactNode[];
+}
+
+function HeaderIntro({
   title,
   description,
   titleElement,
   onTitleClick,
-  onOpenSidebar,
+  eyebrow,
+}: IntroProps) {
+  const tooltip = title.length > TITLE_TOOLTIP_LENGTH ? title : undefined;
+  const titleClass = `session-title ${styles.title}`;
+  return (
+    <div className={styles.intro}>
+      {eyebrow && eyebrow.length > 0 ? <Eyebrow parts={eyebrow} /> : null}
+      {titleElement ??
+        (onTitleClick ? (
+          <button
+            type="button"
+            className={titleClass}
+            onClick={onTitleClick}
+            title={tooltip}
+          >
+            {truncateText(title)}
+          </button>
+        ) : (
+          <h1 className={titleClass} title={tooltip}>
+            {truncateText(title)}
+          </h1>
+        ))}
+      {description && <p className={styles.description}>{description}</p>}
+    </div>
+  );
+}
+
+/**
+ * The page top bar: leading control, breadcrumb, actions and the search
+ * trigger, with an optional compact intro row for pages that have not moved
+ * their title into a `PageIntro`.
+ */
+export function PageHeader({
+  title,
   isWideScreen = false,
   showBack = false,
   onBack,
+  onOpenSidebar,
   actions,
+  breadcrumbs,
+  intro = "header",
+  ...introProps
 }: PageHeaderProps) {
   const { t } = useI18n();
   // Desktop keeps the toggle inside the sidebar itself, whether expanded or
   // collapsed to the icon rail, and phone tab-bar routes navigate by the tab
   // bar. Only the remaining overlay case opens the sidebar from here.
-  const tabBarNavigation = useOptionalNavigationLayout()?.tabBarNavigation;
-  const handleToggle =
-    isWideScreen || tabBarNavigation ? undefined : onOpenSidebar;
-  const toggleTitle = t("actionOpenSidebar");
-  const hasLeadingControl = Boolean((showBack && onBack) || handleToggle);
+  // 页面没传 isWideScreen 时以布局上下文为准，避免宽屏多出侧栏按钮。
+  const layout = useOptionalNavigationLayout();
+  const hideSidebarToggle =
+    isWideScreen || layout?.isWideScreen || layout?.tabBarNavigation;
+  const openSidebar = hideSidebarToggle ? undefined : onOpenSidebar;
+  const back = showBack ? onBack : undefined;
+  const crumbs = breadcrumbs ?? [{ label: title, title }];
+  const headerIntro = intro === "header";
 
   return (
-    <header className={`session-header ${styles.header}`}>
-      <div
-        className={`session-header-inner ${sessionHeaderStyles.row} ${styles.row}${hasLeadingControl ? "" : ` ${sessionHeaderStyles.noLeadingControl}`}`}
-      >
-        <div className="session-header-left">
-          {showBack && onBack ? (
-            <button
-              type="button"
-              className="sidebar-toggle"
-              onClick={onBack}
-              title={t("actionBack")}
-              aria-label={t("actionBack")}
-            >
-              <BackIcon />
-            </button>
-          ) : (
-            handleToggle && (
-              <SidebarLauncher
-                label={toggleTitle}
-                newSessionLabel={t("sidebarNewSession")}
-                onActivate={handleToggle}
-              />
-            )
-          )}
+    <header
+      className={`session-header ${styles.header}`}
+      data-intro={intro}
+      data-default-crumbs={breadcrumbs ? undefined : ""}
+    >
+      <div className={`session-header-inner ${styles.inner}`}>
+        <div className={`session-header-left ${styles.lead}`}>
+          <LeadingControl onBack={back} onOpen={openSidebar} />
           <HostIdentityMarker />
-          <div className={styles.identity}>
-            {titleElement ??
-              (onTitleClick ? (
-                <button
-                  type="button"
-                  className={`session-title ${styles.title}`}
-                  onClick={onTitleClick}
-                  title={title.length > 60 ? title : undefined}
-                >
-                  {truncateText(title)}
-                </button>
-              ) : (
-                <h1
-                  className={`session-title ${styles.title}`}
-                  title={title.length > 60 ? title : undefined}
-                >
-                  {truncateText(title)}
-                </h1>
-              ))}
-            {description && <p className={styles.description}>{description}</p>}
-          </div>
+          <Breadcrumb
+            items={crumbs}
+            label={t("breadcrumbLabel")}
+            renderLink={crumbLink}
+            className={styles.crumbs}
+          />
         </div>
-        {actions && <div className="session-header-actions">{actions}</div>}
+        <div className={`session-header-actions ${styles.tools}`}>
+          {actions}
+          <SearchTrigger />
+        </div>
+        {headerIntro ? <HeaderIntro title={title} {...introProps} /> : null}
       </div>
     </header>
   );

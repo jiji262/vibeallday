@@ -1,6 +1,13 @@
 import type { PublicSessionShareMode } from "@vibeallday/shared";
 import type { ReactNode } from "react";
+import { Spinner } from "./garden/Spinner";
 import styles from "./PublicShareInventory.module.css";
+
+const WORKING_SPINNER_SIZE = 12;
+
+function WorkingSpinner() {
+  return <Spinner size={WORKING_SPINNER_SIZE} tone="current" />;
+}
 
 export interface PublicShareRowAction {
   disabled?: boolean;
@@ -80,7 +87,7 @@ export function PublicShareInventoryRow({
           title={copyAction.label}
           aria-label={copyAction.label}
         >
-          {copyAction.working ? "…" : <CopyIcon />}
+          {copyAction.working ? <WorkingSpinner /> : <CopyIcon />}
         </button>
         {freezeAction && (
           <button
@@ -91,7 +98,11 @@ export function PublicShareInventoryRow({
             title={freezeAction.label}
             aria-label={freezeAction.label}
           >
-            {freezeAction.working ? "…" : <PublicShareFreezeIcon />}
+            {freezeAction.working ? (
+              <WorkingSpinner />
+            ) : (
+              <PublicShareFreezeIcon />
+            )}
           </button>
         )}
         <button
@@ -102,7 +113,11 @@ export function PublicShareInventoryRow({
           title={revokeAction.label}
           aria-label={revokeAction.label}
         >
-          {revokeAction.working ? "…" : <PublicShareRevokeIcon />}
+          {revokeAction.working ? (
+            <WorkingSpinner />
+          ) : (
+            <PublicShareRevokeIcon />
+          )}
         </button>
       </div>
     </div>
@@ -126,6 +141,7 @@ export function PublicShareInventoryEmpty({
 }) {
   return (
     <div className={styles.empty} role={loading ? "status" : undefined}>
+      {loading ? <WorkingSpinner /> : null}
       {children}
     </div>
   );

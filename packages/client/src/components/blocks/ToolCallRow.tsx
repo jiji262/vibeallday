@@ -62,6 +62,7 @@ import { WorkflowOutput } from "../WorkflowOutput";
 import { ToolCommentaryBoundary } from "../ToolCommentaryBoundary";
 import { TimelineDisclosure } from "../TimelineDisclosure";
 import styles from "./ToolCallRow.module.css";
+import { Spinner } from "../garden/Spinner";
 import type { McpAppToolCall } from "@vibeallday/shared";
 import { McpAppToolCard } from "../McpAppToolCard";
 
@@ -101,6 +102,8 @@ interface DeferredPreviewTypographyMetrics {
   outputLineHeightPx: number;
   outputRowChromePx: number;
 }
+
+const TOOL_SPINNER_SIZE = 12;
 
 const DEFAULT_DEFERRED_PREVIEW_TYPOGRAPHY: DeferredPreviewTypographyMetrics = {
   averageCharWidthPx: DEFERRED_PREVIEW_HEIGHT.averageCharWidthPx,
@@ -719,6 +722,7 @@ const ToolCallRowContent = memo(function ToolCallRowContent({
   prepared,
   mcpApp,
 }: Props & { originalOutput?: unknown; prepared: PreparedToolDisplay }) {
+  const { t } = useI18n();
   const [summaryExpanded, setSummaryExpanded] = useRememberedDisclosureState(
     id,
     "interactive-summary",
@@ -1410,15 +1414,23 @@ const ToolCallRowContent = memo(function ToolCallRowContent({
         }
       >
         {status === "pending" && (
-          <span className="tool-spinner" role="status" aria-label="Running">
-            <Spinner />
+          <span
+            className="tool-spinner"
+            role="status"
+            aria-label={t("toolStatusRunning")}
+          >
+            <Spinner
+              size={TOOL_SPINNER_SIZE}
+              tone="muted"
+              className={styles.pendingSpinner}
+            />
           </span>
         )}
         {status === "aborted" && (
           <span
             className="tool-aborted-icon"
             role="img"
-            aria-label="Interrupted"
+            aria-label={t("toolStatusInterrupted")}
           >
             ⨯
           </span>
@@ -1427,7 +1439,7 @@ const ToolCallRowContent = memo(function ToolCallRowContent({
           <span
             className="tool-incomplete-icon"
             role="img"
-            aria-label="Result unavailable"
+            aria-label={t("toolStatusResultUnavailable")}
           >
             ?
           </span>
@@ -1857,29 +1869,6 @@ function ToolResultExpanded({
     <div className="tool-result-expanded">
       {prepared.renderToolResult(context)}
     </div>
-  );
-}
-
-function Spinner() {
-  return (
-    <svg
-      className="spinner"
-      viewBox="0 0 16 16"
-      width="12"
-      height="12"
-      aria-hidden="true"
-    >
-      <circle
-        cx="8"
-        cy="8"
-        r="6"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeDasharray="24"
-        strokeDashoffset="8"
-      />
-    </svg>
   );
 }
 

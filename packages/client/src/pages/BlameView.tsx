@@ -41,6 +41,11 @@ import {
   getBlameAuthorKey,
   groupConsecutiveBlameRows,
 } from "./blamePresentation";
+import {
+  SourcePaneEmpty,
+  SourcePaneError,
+  SourcePaneLoading,
+} from "./SourcePaneStates";
 
 interface OpenBlameComment {
   /** Index into `blame.lines` of the clicked line. */
@@ -408,14 +413,14 @@ export function BlameView({
   if (contentLoading && !blame) {
     return (
       <section className={`blame-view ${styles.root}`}>
-        <div className="git-diff-loading">{t("gitStatusLoading")}</div>
+        <SourcePaneLoading label={t("gitStatusLoading")} />
       </section>
     );
   }
   if (contentError && blameError && !blame) {
     return (
       <section className={`blame-view ${styles.root}`}>
-        <div className="git-diff-error">{contentError}</div>
+        <SourcePaneError message={contentError} />
       </section>
     );
   }
@@ -467,9 +472,10 @@ export function BlameView({
         />
       </div>
       {contentError && (
-        <div className={`git-diff-error ${styles.contentError}`}>
-          {contentError}
-        </div>
+        <SourcePaneError
+          className={styles.contentError}
+          message={contentError}
+        />
       )}
       {blameError && (
         <div className={styles.provenanceError} role="status">
@@ -477,7 +483,7 @@ export function BlameView({
         </div>
       )}
       {file && !file.metadata.isText && !blame && (
-        <div className="git-status-empty">{t("fileViewerBinary")}</div>
+        <SourcePaneEmpty title={t("fileViewerBinary")} />
       )}
       <div
         className={styles.lines}

@@ -5,9 +5,12 @@
 .searchRow {
   flex-wrap: wrap;
   gap: 0;
-  padding: 8px 6px 8px 44px;
-  background: var(--bg-secondary);
-  border-bottom: 1px solid var(--border-color);
+  padding: 10px var(--space-3) 10px 44px;
+  background: transparent;
+  border-bottom: 1px dashed var(--dash);
+}
+.searchRow:last-child {
+  border-bottom: 0;
 }
 .searchRow :global(.session-list-item__link) {
   padding: 0;
@@ -37,12 +40,12 @@
 }
 .searchSelection input {
   position: absolute;
-  left: 3px;
+  left: 14px;
   top: 11px;
   width: 16px;
   height: 16px;
   margin: 0;
-  accent-color: var(--accent-primary);
+  accent-color: var(--indigo);
 }
 .searchPreviews {
   flex-basis: 100%;
@@ -83,46 +86,44 @@
   text-decoration: none;
 }
 
-/* Garden session card (Now, Sessions): provider rule, display-serif title,
-   quiet meta line. Doubled with the global card class so it wins over the
-   legacy card rules regardless of stylesheet order. */
+/* Garden session row (Overview cards, Sessions list): the DataList row
+   recipe. Doubled with the global card class so it wins over the legacy card
+   rules regardless of stylesheet order. */
+.card:global(.session-list-item--card) {
+  border-bottom: 1px dashed var(--dash);
+  transition: background-color var(--duration-fast) var(--ease-standard);
+}
+
+.card:global(.session-list-item--card):last-child {
+  border-bottom: 0;
+}
+
+.card:global(.session-list-item--card):hover {
+  background: var(--bg-2);
+}
+
 .card:global(.session-list-item--card) :global(.session-list-item__link) {
   position: relative;
   min-width: 0;
-  padding: 18px 20px 17px 24px;
+  padding: 14px var(--space-5);
   border: 0;
   border-radius: 0;
   background: transparent;
   box-shadow: none;
-  transition:
-    background-color 120ms ease,
-    border-color 120ms ease;
 }
 
 .card:global(.session-list-item--card)
-  :global(.session-list-item__link)::before {
-  content: "";
-  position: absolute;
-  top: 12px;
-  bottom: 12px;
-  left: -1px;
-  width: 3px;
-  border-radius: 0 3px 3px 0;
-  background: var(--row-accent, var(--line-strong));
-}
-
-.card:global(.session-list-item--card) :global(.session-list-item__link):hover {
-  background: var(--bg-sunken);
+  :global(.session-list-item__link):focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 0 2px var(--indigo);
 }
 
 .card:global(.session-list-item--card) :global(.session-list-item__title) {
   align-items: flex-start;
   font-family: var(--font-ui);
-  font-size: 15px;
-  font-weight: 500;
-  font-optical-sizing: auto;
-  line-height: 1.32;
-  letter-spacing: -0.005em;
+  font-size: 14px;
+  line-height: 1.4;
+  letter-spacing: 0;
 }
 
 .cardTitleText {
@@ -136,11 +137,11 @@
 
 .card:global(.session-list-item--card) :global(.session-list-item__meta) {
   flex-wrap: wrap;
-  row-gap: 6px;
-  margin-top: 6px;
-  font-family: var(--font-mono);
+  gap: var(--space-1) var(--space-3);
+  margin-top: var(--space-1);
+  color: var(--ink-3);
+  font-family: var(--label-font);
   font-size: 12px;
-  color: var(--text-muted);
 }
 
 /* Meta pills sit on the flex gap; the legacy left margin indents a wrap. */
@@ -157,14 +158,48 @@
   color: var(--sand);
 }
 
-@media (prefers-reduced-motion: reduce) {
+.state {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.time {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.questions {
+  flex: 0 0 auto;
+  align-self: center;
+  margin-inline-end: 4px;
+}
+.questions:empty {
+  display: none;
+}
+
+/* The question flag closes the row with the link's own inline inset, so it
+   never meets the card edge. The Sessions table sets the same inset. */
+.card:global(.session-list-item--card) > .questions {
+  margin-inline-end: 0;
+  padding-inline-end: var(--space-5);
+}
+
+@media (width < 768px) {
   .card:global(.session-list-item--card) :global(.session-list-item__link) {
-    transition: none;
+    padding: var(--space-3) var(--space-4);
+  }
+
+  .card:global(.session-list-item--card) > .questions {
+    padding-inline-end: var(--space-4);
   }
 }
 
-.card:global(.session-list-item--card) + .card {
-  border-top: 1px dashed var(--dash);
+@media (prefers-reduced-motion: reduce) {
+  .card:global(.session-list-item--card) {
+    transition: none;
+  }
 }
 
 /*
@@ -182,15 +217,6 @@
 .compactRow:global(.session-list-item--compact):global(.current)
   :global(.session-list-item__link) {
   background: transparent;
-}
-
-.questions {
-  flex: 0 0 auto;
-  align-self: center;
-  margin-inline-end: 4px;
-}
-.questions:empty {
-  display: none;
 }
 
 .providerChildrenBadge {
@@ -414,4 +440,13 @@
   :global(.session-list-item):hover .body > :global(.session-list-item__menu) {
     opacity: 1;
   }
+}
+
+/* The overlay menu fades into the row fill, resting and hovered. */
+.card:global(.session-list-item--card) :global(.session-list-item__menu) {
+  background: linear-gradient(to right, transparent, var(--card) 60%);
+}
+
+.card:global(.session-list-item--card):hover :global(.session-list-item__menu) {
+  background: linear-gradient(to right, transparent, var(--bg-2) 60%);
 }

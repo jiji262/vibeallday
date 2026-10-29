@@ -2,6 +2,7 @@ import {
   HOST_AGENT_PROCESS_OBSERVABILITY_CAPABILITY,
   serverHasCapability,
 } from "@vibeallday/shared";
+import { ErrorState } from "../../components/garden/ErrorState";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { CommittedRangeInput } from "../../components/ui/CommittedRangeInput";
 import { useSessionLoadingProgress } from "../../hooks/useSessionLoadingProgress";
@@ -535,7 +536,7 @@ export function PerformanceSettings() {
             keywords={["Agents", "CPU", "memory", "external processes"]}
             after={
               serverSettingsError ? (
-                <p className="settings-error">{serverSettingsError}</p>
+                <ErrorState inline message={serverSettingsError} />
               ) : null
             }
           >

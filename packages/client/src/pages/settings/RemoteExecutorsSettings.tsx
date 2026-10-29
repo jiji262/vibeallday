@@ -1,4 +1,7 @@
 import { useCallback, useMemo, useState } from "react";
+import { ErrorState } from "../../components/garden/ErrorState";
+import { EmptyState } from "../../components/garden/EmptyState";
+import { LoadingState } from "../../components/garden/LoadingState";
 import type { RemoteExecutorTestResult } from "../../api/client";
 import { useRemoteExecutors } from "../../hooks/useRemoteExecutors";
 import { useI18n } from "../../i18n";
@@ -144,7 +147,7 @@ export function RemoteExecutorsSettings() {
               {isAdding ? t("remoteExecutorsAdding") : t("remoteExecutorsAdd")}
             </button>
           </div>
-          {addError && <p className="settings-error">{addError}</p>}
+          {addError && <ErrorState inline message={addError} />}
         </SettingsItem>
       </div>
 
@@ -153,9 +156,9 @@ export function RemoteExecutorsSettings() {
         <div className="settings-group">
           <h3>{t("remoteExecutorsConfigured")}</h3>
           {loading ? (
-            <p className="settings-loading">{t("loginLoading")}</p>
+            <LoadingState label={t("loginLoading")} variant="compact" />
           ) : executors.length === 0 ? (
-            <p className="settings-empty">{t("remoteExecutorsEmpty")}</p>
+            <EmptyState compact title={t("remoteExecutorsEmpty")} />
           ) : (
             <div className={styles.list}>
               {executors.map((host) => {

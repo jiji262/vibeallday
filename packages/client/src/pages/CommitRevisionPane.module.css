@@ -2,13 +2,14 @@
   text-decoration: none;
 }
 
+/* Uncommitted work is attention (peach); a clean tree is ok (mint). */
 .dirty {
-  border-left: 2px solid var(--warning-color);
-  background: color-mix(in srgb, var(--warning-color) 6%, transparent);
+  border-left: 2px solid var(--peach);
+  background: var(--peach-soft);
 }
 
 .dirtySelected {
-  background: color-mix(in srgb, var(--warning-color) 13%, transparent);
+  background: color-mix(in srgb, var(--peach) 20%, transparent);
 }
 
 .dirtyLabel,
@@ -17,16 +18,16 @@
 }
 
 .dirtyLabel {
-  color: var(--warning-color);
+  color: var(--peach-ink);
 }
 
 .cleanLabel {
-  color: var(--success-color);
+  color: var(--mint-ink);
 }
 
 .matchContext {
   max-width: 100%;
-  color: var(--text-muted);
+  color: var(--ink-3);
   font-family: var(--font-mono);
   font-size: 0.72rem;
   line-height: 1.3;

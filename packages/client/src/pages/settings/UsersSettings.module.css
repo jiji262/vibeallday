@@ -235,50 +235,25 @@
   margin-top: var(--space-4, 1rem);
 }
 
-/* Wide tables scroll inside their own box on a narrow screen. */
-.usageScroll {
-  overflow-x: auto;
+/* Usage tables: garden Table inside a flush card. The row header reads
+   like a data cell, the breakdown caption like a card title. */
+.usageCard {
   margin-top: var(--space-3);
-}
-
-.usageTable {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: var(--font-size-sm);
 }
 
 .usageCaption {
   caption-side: top;
-  padding-bottom: var(--space-2);
-  color: var(--text-primary);
-  font-weight: 600;
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px dashed var(--dash);
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 500;
   text-align: start;
 }
 
-/* Figures align on their right edge so rows compare at a glance. */
-.usageTable .usageNumber {
-  padding-inline: var(--space-3) 0;
-  text-align: end;
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
-}
-
-@media (width < 700px) {
-  .usageTable .usageNumber {
-    padding-inline-start: var(--space-2);
-  }
-
-  .usageTable {
-    font-size: var(--font-size-xs);
-  }
-}
-
 .usageWindow {
-  display: inline-flex;
-  gap: 0;
-  margin: var(--space-2) 0 0;
-  padding: 0;
-  border: 0;
+  margin-top: var(--space-2);
 }
 
 .usageWindowLegend {
@@ -290,44 +265,17 @@
   white-space: nowrap;
 }
 
-.usageWindowOption {
-  padding: var(--space-1) var(--space-3);
-  border: 1px solid var(--border-color);
-  background: transparent;
-  color: var(--text-muted);
-  font-size: var(--font-size-sm);
-  cursor: pointer;
-}
-
-.usageWindowOption:first-of-type {
-  border-radius: var(--radius-md) 0 0 var(--radius-md);
-}
-
-.usageWindowOption:last-of-type {
-  border-left: 0;
-  border-radius: 0 var(--radius-md) var(--radius-md) 0;
-}
-
-.usageWindowSelected {
-  background: var(--bg-code);
-  color: var(--text-primary);
-  font-weight: 600;
-}
-
-.usageTable th,
-.usageTable td {
-  padding: var(--space-2) var(--space-2) var(--space-2) 0;
-  text-align: start;
-  vertical-align: top;
-  border-bottom: 1px solid var(--border-color);
-}
-
-.usageTable thead th {
-  color: var(--text-muted);
-  font-weight: 600;
-}
-
 /* Names wrap at their hyphens, never mid-word; the table scrolls instead. */
 .usageUser {
+  padding: 14px var(--space-4);
+  border-bottom: 1px dashed var(--dash);
+  color: var(--ink);
+  font-weight: 500;
+  text-align: start;
+  vertical-align: middle;
   overflow-wrap: normal;
+}
+
+tr:last-child > .usageUser {
+  border-bottom: 0;
 }

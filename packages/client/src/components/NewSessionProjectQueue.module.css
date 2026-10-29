@@ -1,10 +1,11 @@
+/* The selected project's queue: a small garden card with a dashed-underline
+   header, mono count, dashed row rules and sand/peach/rose state pills. */
 .section {
   display: grid;
   min-width: 0;
-  gap: var(--space-2);
-  padding: var(--space-3);
-  background: var(--bg-card);
-  border: 1px solid var(--border-color);
+  overflow: hidden;
+  background: var(--card);
+  border: 1px solid var(--line);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-xs);
 }
@@ -12,19 +13,21 @@
 .header {
   display: flex;
   min-width: 0;
-  align-items: center;
+  align-items: baseline;
   justify-content: space-between;
   gap: var(--space-2);
-  padding-inline: 0.1rem;
+  padding: var(--space-3) var(--space-4) 10px;
+  border-bottom: 1px dashed var(--dash);
 }
 
 .header h3 {
   min-width: 0;
   margin: 0;
   overflow: hidden;
-  color: var(--text-muted);
-  font-size: 13px;
-  font-weight: 600;
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 500;
   line-height: 1.25;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -32,22 +35,28 @@
 
 .count {
   flex-shrink: 0;
-  color: var(--project-queue-action-bg);
-  font-size: var(--font-size-xs);
-  font-weight: 600;
+  color: var(--ink-3);
+  font-family: var(--label-font);
+  font-size: 11px;
+  letter-spacing: var(--meta-tracking);
+  text-transform: uppercase;
 }
 
 .error,
 .itemError {
   margin: 0;
-  color: var(--error-color);
-  font-size: var(--font-size-xs);
+  color: var(--rose-ink);
+  font-size: 12px;
   line-height: 1.3;
+}
+
+.error {
+  padding: var(--space-2) var(--space-4);
+  background: var(--rose-soft);
 }
 
 .list {
   display: grid;
-  gap: var(--space-1);
   padding: 0;
   margin: 0;
   list-style: none;
@@ -57,36 +66,31 @@
   min-width: 0;
 }
 
+.item + .item {
+  border-top: 1px dashed var(--dash);
+}
+
 .itemButton {
   display: grid;
   width: 100%;
   min-width: 0;
-  gap: 0.2rem;
-  padding: 0.5rem 0.55rem;
-  color: var(--text-primary);
-  background: var(--bg-sunken);
-  border: 1px solid var(--border-color);
-  border-left: 3px solid var(--project-queue-action-bg);
-  border-radius: var(--radius-md);
+  gap: var(--space-1);
+  padding: 10px var(--space-4);
+  color: var(--ink);
+  background: transparent;
+  border: 0;
   cursor: pointer;
+  font: inherit;
   text-align: left;
-  transition:
-    background 0.15s,
-    border-color 0.15s;
+  transition: background-color var(--duration-fast) var(--ease-standard);
 }
 
 .itemButton:hover {
-  background: var(--bg-hover);
-  border-color: color-mix(
-    in srgb,
-    var(--project-queue-action-bg) 55%,
-    var(--border-color)
-  );
+  background: var(--bg-2);
 }
 
 .itemButton:focus-visible {
-  outline: 2px solid var(--project-queue-action-bg);
-  outline-offset: 2px;
+  box-shadow: inset 0 0 0 3px var(--indigo-soft);
 }
 
 .itemHeading {
@@ -100,35 +104,34 @@
 .itemTitle {
   min-width: 0;
   overflow: hidden;
-  font-size: var(--font-size-sm);
-  font-weight: 600;
+  font-size: 13px;
+  font-weight: 500;
   line-height: 1.25;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
+/* Badge recipe: mono 11px pill; queued items read sand. */
 .status {
   flex-shrink: 0;
-  padding: 0.1rem 0.35rem;
-  color: var(--project-queue-action-bg);
-  background: color-mix(
-    in srgb,
-    var(--project-queue-action-bg) 10%,
-    transparent
-  );
-  border-radius: 999px;
-  font-size: var(--font-size-xs);
-  font-weight: 600;
+  padding: 1px var(--space-2);
+  color: var(--sand-ink);
+  background: var(--sand-soft);
+  border-radius: var(--radius-pill);
+  font-family: var(--label-font);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: var(--badge-tracking);
 }
 
 .statusDispatching {
-  color: var(--warning-color);
-  background: color-mix(in srgb, var(--warning-color) 10%, transparent);
+  color: var(--peach-ink);
+  background: var(--peach-soft);
 }
 
 .statusFailed {
-  color: var(--error-color);
-  background: color-mix(in srgb, var(--error-color) 10%, transparent);
+  color: var(--rose-ink);
+  background: var(--rose-soft);
 }
 
 .targetRow {
@@ -141,8 +144,9 @@
 .target {
   min-width: 0;
   overflow: hidden;
-  color: var(--text-muted);
-  font-size: var(--font-size-xs);
+  color: var(--ink-3);
+  font-family: var(--label-font);
+  font-size: 11px;
   line-height: 1.25;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -150,4 +154,10 @@
 
 .provider {
   flex-shrink: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .itemButton {
+    transition: none;
+  }
 }

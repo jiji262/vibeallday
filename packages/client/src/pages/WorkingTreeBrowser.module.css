@@ -39,6 +39,9 @@
 }
 
 .scanProgress {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   flex: 0 1 auto;
   margin-left: auto;
   color: var(--text-muted);
@@ -71,4 +74,11 @@
   flex: 1;
   border: 0;
   border-radius: 0;
+}
+
+/* The clean-tree landing fills the pane, so its empty state centres there. */
+.cleanState {
+  display: grid;
+  flex: 1;
+  align-content: center;
 }

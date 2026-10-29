@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
+import { EmptyState } from "../../components/garden/EmptyState";
+import { LoadingState } from "../../components/garden/LoadingState";
 import { api, type EnvSettingEntry } from "../../api/client";
 import { useI18n } from "../../i18n";
 import styles from "./EnvironmentSettings.module.css";
@@ -67,7 +69,9 @@ export function EnvironmentSettings() {
         {error && (
           <p className="settings-warning">{t("environmentLoadError")}</p>
         )}
-        {!error && entries === null && <p>{t("environmentLoading")}</p>}
+        {!error && entries === null && (
+          <LoadingState label={t("environmentLoading")} variant="compact" />
+        )}
 
         {!error && entries && (
           <label className={styles.filter}>
@@ -88,7 +92,7 @@ export function EnvironmentSettings() {
         )}
 
         {!error && entries && !showAll && groups.length === 0 && (
-          <p className="settings-empty">{t("environmentEmptySet")}</p>
+          <EmptyState compact title={t("environmentEmptySet")} />
         )}
       </HideInSettingsSearch>
       {groups.map((group) => (

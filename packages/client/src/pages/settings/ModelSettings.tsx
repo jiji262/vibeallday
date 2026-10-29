@@ -567,9 +567,10 @@ export function ModelSettings() {
   };
 
   return (
+    // The page intro already shows the pane title; keep it search-only here.
     <SettingsSection
-      title={t("modelSettingsSessionDefaultsTitle")}
       keywords={[
+        t("modelSettingsSessionDefaultsTitle"),
         "session defaults",
         "default model",
         "provider",
@@ -651,6 +652,7 @@ export function ModelSettings() {
             <div className="new-session-model-field">
               {selectedModels.length > 0 ? (
                 <FilterDropdown
+                  triggerClassName={styles.modelTrigger}
                   label={t("newSessionModelTitle")}
                   options={modelOptions}
                   selected={selectedModel ? [selectedModel] : []}
@@ -673,9 +675,14 @@ export function ModelSettings() {
           {showThinkingControls && (
             <SettingsItem
               id="session-default-thinking"
-              label={sessionDefaultCopy.thinking.title}
+              // The mode picker labels itself "default thinking mode"; the row
+              // spans mode + effort, so it takes the broader "Thinking" title.
+              label={t("newSessionThinkingEffortTitle")}
               description={sessionDefaultCopy.thinking.description}
-              keywords={sessionDefaultCopy.thinking.settings?.keywords}
+              keywords={[
+                sessionDefaultCopy.thinking.title,
+                ...(sessionDefaultCopy.thinking.settings?.keywords ?? []),
+              ]}
               valueText={`${effectiveThinkingMode} ${effectiveEffortLevel ?? ""}`.trim()}
               className="new-session-helper-section session-default-thinking-section settings-item--session-default-block settings-item--wide-control"
             >

@@ -1,19 +1,20 @@
 /* Category row, shared by the phone home, the desktop rail and search hits.
-   Same vocabulary as the More page rows: 56px, icon tile, label, hint. */
+   Same vocabulary as the More page rows: icon tile, label, hint, chevron. */
 .row {
   position: relative;
   display: flex;
   align-items: center;
   gap: var(--space-3);
   width: 100%;
-  min-height: 68px;
-  padding: var(--space-2) var(--space-3) var(--space-2) var(--space-4);
+  min-height: 60px;
+  padding: var(--space-3) var(--space-4);
   border: 0;
   background: transparent;
-  color: var(--text-primary);
+  color: var(--ink);
   font: inherit;
   text-align: start;
   cursor: pointer;
+  transition: background-color var(--duration-fast) var(--ease-standard);
 }
 
 .row + .row {
@@ -21,7 +22,11 @@
 }
 
 .row:hover {
-  background: var(--bg-tertiary);
+  background: var(--bg-soft);
+}
+
+.row:focus-visible {
+  box-shadow: inset 0 0 0 3px var(--indigo-soft);
 }
 
 .text {
@@ -39,8 +44,8 @@
 
 .hint {
   overflow: hidden;
+  color: var(--ink-3);
   font-size: 13px;
-  color: var(--text-muted);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -48,28 +53,64 @@
 .chevron {
   display: flex;
   flex-shrink: 0;
-  color: var(--text-dimmed);
+  color: var(--ink-4);
 }
 
-/* Desktop rail: tighter rows, the open category carries an indigo bar. */
+/* Desktop rail: sidebar nav items. 14px label, bare 18px icon in ink-3; the
+   open category gets the card fill, an indigo icon and a 3px indigo bar. */
 .rail {
-  min-height: 52px;
-  padding-inline: var(--space-3);
+  gap: 10px;
+  min-height: 36px;
+  padding: 7px var(--space-3);
+  border-radius: var(--radius-md);
+  color: var(--ink-2);
+}
+
+.rail + .rail {
+  border-top: 0;
 }
 
 .rail .label {
+  overflow: hidden;
   font-size: 14px;
+  font-weight: 400;
+  text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.rail .hint {
-  font-size: 12px;
+.rail .railIcon {
+  width: 20px;
+  height: 20px;
+  border: 0;
+  background: transparent;
+  color: var(--ink-3);
+}
+
+.rail .railIcon svg {
+  width: 18px;
+  height: 18px;
+}
+
+.rail:hover {
+  color: var(--ink);
 }
 
 .active {
-  border-radius: var(--radius-md);
-  background: var(--bg-card);
+  background: var(--card);
   box-shadow: var(--shadow-xs);
+  color: var(--ink);
+}
+
+.active.rail:hover {
+  background: var(--card);
+}
+
+.active .label {
+  font-weight: 500;
+}
+
+.active .railIcon {
+  color: var(--indigo);
 }
 
 .active::before {
@@ -78,6 +119,12 @@
   inset-block: 8px;
   inset-inline-start: 0;
   width: 3px;
-  border-radius: 0 var(--radius-pill) var(--radius-pill) 0;
+  border-radius: var(--radius-pill);
   background: var(--indigo);
+}
+
+@media (pointer: coarse) {
+  .rail {
+    min-height: var(--tap-min);
+  }
 }

@@ -1,4 +1,7 @@
 import type { ReactNode } from "react";
+import { PageIntro } from "../../components/shell/PageIntro";
+import { pageWidthClass } from "../../components/shell/pageWidth";
+import { useI18n } from "../../i18n";
 import { SettingsGroupList } from "./SettingsGroupList";
 import { SettingsHostCard } from "./SettingsHostCard";
 import styles from "./SettingsHome.module.css";
@@ -22,20 +25,27 @@ export function SettingsHome({
   onSelect,
   extras,
 }: SettingsHomeProps) {
+  const { t } = useI18n();
   return (
-    <div className={`page-content-inner ${styles.home}`}>
-      {searchBar}
-      {searchResults ?? (
-        <>
-          <SettingsHostCard />
-          <SettingsQuickControls />
-          <SettingsGroupList
-            groups={groups}
-            onSelect={onSelect}
-            extras={extras}
-          />
-        </>
-      )}
+    <div className={`page-content-inner ${pageWidthClass("narrow")}`}>
+      <PageIntro
+        title={t("pageTitleSettings")}
+        lede={t("settingsHomeLede")}
+        filters={searchBar}
+      />
+      <div className={styles.home}>
+        {searchResults ?? (
+          <>
+            <SettingsHostCard />
+            <SettingsQuickControls />
+            <SettingsGroupList
+              groups={groups}
+              onSelect={onSelect}
+              extras={extras}
+            />
+          </>
+        )}
+      </div>
     </div>
   );
 }

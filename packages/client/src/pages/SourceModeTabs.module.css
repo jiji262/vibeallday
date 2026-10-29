@@ -1,58 +1,34 @@
-/* Source Control mode tabs: a Garden segmented control. Top-right in a wide
-   header, a full-width row on phones. */
+/* Source Control mode tabs: the garden underline strip (TabList), with a mono
+   count chip. In the page intro it spans its row; on phones the tabs split
+   the row evenly so all four modes stay visible without scrolling. */
 .tabs {
-  display: inline-flex;
-  gap: 2px;
-  padding: 3px;
-  background: var(--bg-sunken);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
+  min-width: 0;
 }
 
 .tab {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  padding: 4px 12px;
-  font: inherit;
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--text-secondary);
-  background: transparent;
-  border: none;
-  border-radius: var(--radius-sm);
-  cursor: pointer;
-}
-
-.tab:hover {
-  color: var(--text-primary);
-}
-
-/* The selected segment is a card on the sunken track, like the page itself. */
-.tab.active {
-  color: var(--indigo);
-  background: var(--bg-card);
-  box-shadow: var(--shadow-xs);
+  font-size: 14px;
 }
 
 .count {
   padding: 0 6px;
   border-radius: var(--radius-pill);
-  font-family: var(--font-mono);
+  color: var(--ink-3);
+  background: var(--bg-soft);
+  font-family: var(--label-font);
   font-size: 11px;
-  color: var(--text-muted);
-  background: var(--bg-tertiary);
   font-variant-numeric: tabular-nums;
+  line-height: 18px;
 }
 
-.tab.active .count {
+.activeCount {
   color: var(--indigo);
   background: var(--indigo-soft);
 }
 
-/* The `stacked` variant is the phone layout, where the tab strip is its own
-   full-width row above the action row instead of sitting in the page header. */
+.stacked {
+  width: 100%;
+}
+
 @media (width < 760px) {
   .tabs.stacked {
     display: grid;
@@ -70,6 +46,7 @@
     font-size: 13px;
     line-height: 1.15;
     text-align: center;
+    white-space: normal;
   }
 
   .tabs.stacked .count {

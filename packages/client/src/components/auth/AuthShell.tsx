@@ -1,10 +1,13 @@
 import type { InputHTMLAttributes, ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { useI18n } from "../../i18n";
+import { ChevronLeftIcon } from "../garden/icons";
+import { Spinner } from "../garden/Spinner";
 import { VibeAllDayGlyph } from "../VibeAllDayLogo";
 import styles from "./AuthShell.module.css";
 
-const LOGO_SIZE = 56;
+const LOGO_SIZE = 40;
+const BACK_ICON_SIZE = 16;
 
 interface AuthShellProps {
   /** Page title, drawn in Fraunces under the logo tile. */
@@ -20,8 +23,8 @@ interface AuthShellProps {
 }
 
 /**
- * The paper shell shared by sign-in, host picker and reconnect screens:
- * gradient logo tile, Fraunces title, then the page's own form.
+ * The paper shell shared by sign-in, host picker and reconnect screens: one
+ * centred card with the logo tile, a serif title, then the page's own form.
  */
 export function AuthShell({
   title,
@@ -37,7 +40,8 @@ export function AuthShell({
       <main className={styles.card}>
         {back ? (
           <Link to={back.to} className={styles.back}>
-            <span aria-hidden="true">←</span> {back.label ?? t("actionBack")}
+            <ChevronLeftIcon size={BACK_ICON_SIZE} />
+            {back.label ?? t("actionBack")}
           </Link>
         ) : null}
         <div className={styles.brand}>
@@ -62,7 +66,7 @@ export function AuthReconnecting() {
         role="status"
         data-testid="auto-resume-loading"
       >
-        <span className={styles.spinner} aria-hidden="true" />
+        <Spinner size={24} />
       </div>
     </AuthShell>
   );
@@ -84,7 +88,7 @@ export function AuthForm({
   );
 }
 
-/** A label above a 48px field, with an optional one-line hint. */
+/** A label above a field (pass `inputClassName()`), with an optional hint. */
 export function AuthField({
   id,
   label,
@@ -165,7 +169,7 @@ export function AuthStatus({
 }) {
   return (
     <div className={styles.status} role="status" {...rest}>
-      <span className={styles.spinner} aria-hidden="true" />
+      <Spinner size={16} />
       <span>{children}</span>
     </div>
   );

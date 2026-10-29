@@ -1,3 +1,7 @@
+import { EmptyState } from "../components/garden/EmptyState";
+import { ErrorState } from "../components/garden/ErrorState";
+import { FolderIcon, GitBranchIcon } from "../components/garden/icons";
+import { Notice } from "../components/garden/Notice";
 import { LoadingState } from "../components/garden/LoadingState";
 import type {
   GitFileChange,
@@ -39,16 +43,11 @@ import { createPortal } from "react-dom";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { PageHeader } from "../components/PageHeader";
 import { GitActionFeedback } from "../components/GitActionFeedback";
-import { ProjectSelector } from "../components/ProjectSelector";
 import { GlossaryProjectBoundary } from "../contexts/GlossaryContext";
 import { SourceReviewDefaultSessionContext } from "../contexts/SourceReviewDefaultSessionContext";
 import { useDocumentTitle } from "../hooks/useDocumentTitle";
 import { useDocumentAttention } from "../hooks/useDocumentAttention";
-import {
-  formatRemoteCheckTime,
-  type GitActionState,
-  useGitActions,
-} from "../hooks/useGitActions";
+import { type GitActionState, useGitActions } from "../hooks/useGitActions";
 import { useGitStatus } from "../hooks/useGitStatus";
 import { useMediaQuery } from "../hooks/useMediaQuery";
 import { useProjectReviewComments } from "../hooks/useProjectReviewComments";
@@ -61,7 +60,6 @@ import {
   resolvePreferredProjectId,
   setRecentProjectId,
 } from "../hooks/useRecentProject";
-import { useRelativeNow } from "../hooks/useRelativeNow";
 import { useRemoteBasePath } from "../hooks/useRemoteBasePath";
 import { useServerSettings } from "../hooks/useServerSettings";
 import { useSourceControlCleanLanding } from "../hooks/useSourceControlCleanLanding";
@@ -83,11 +81,13 @@ import { parseSourceControlNavigationState } from "../lib/sourceControlNavigatio
 import { BlameBrowser } from "./BlameBrowser";
 import { CommitBrowser } from "./CommitBrowser";
 import styles from "./GitStatusPage.module.css";
-import { RepoStatusBar } from "./RepoStatusBar";
 import { ReviewCommentsPanel } from "./ReviewCommentsPanel";
 import { ReviewSubmissionsPanel } from "./ReviewSubmissionsPanel";
 import { ReviewSubmitModal } from "./ReviewSubmitModal";
-import { SourceModeTabs, type SourceTab } from "./SourceModeTabs";
+import { SourceHeaderControls } from "./SourceActionControls";
+import { SourceControlIntro } from "./SourceControlIntro";
+import { useReturnToSession } from "./useReturnToSession";
+import { useSourceTab } from "./useSourceTab";
 import { WorkingTreeBrowser } from "./WorkingTreeBrowser";
 
 interface SourceControlRouteState {
@@ -95,13 +95,6 @@ interface SourceControlRouteState {
 }
 
 const SOURCE_CONTROL_ROUTE_TTL_MS = 5 * 60 * 1000;
-
-/** Source-control modes with a built body (topic: source-review-to-session). */
-const SOURCE_TABS: readonly SourceTab[] = ["changes", "files", "comments"];
-const SOURCE_TABS_WITH_REVIEWS: readonly SourceTab[] = [
-  ...SOURCE_TABS,
-  "reviews",
-];
 
 /** URL keys that name a selection inside a mode, cleared when the mode changes. */
 const SOURCE_SELECTION_PARAMS = [
@@ -137,46 +130,6 @@ function mergeLiveWorktreeStatus(
     }
   }
   return { ...status, files: changes, isClean: changes.length === 0 };
-}
-
-/**
- * Source-mode tab state, derived from the `?tab=` URL param. Shared by the
- * title-row header actions (wide screens) and the status bar (mobile), so both
- * drive the same URL state.
- */
-function useSourceTab(reviewsEnabled = false): {
-  tab: SourceTab;
-  setTab: (next: SourceTab) => void;
-} {
-  const [searchParams, setSearchParams] = useSearchParams();
-  const location = useLocation();
-  const tabParam = searchParams.get("tab");
-  const tab: SourceTab =
-    tabParam === "files"
-      ? "files"
-      : tabParam === "comments"
-        ? "comments"
-        : tabParam === "reviews" && reviewsEnabled
-          ? "reviews"
-          : "changes";
-  const setTab = useCallback(
-    (next: SourceTab) => {
-      setSearchParams(
-        (prev) => {
-          const params = new URLSearchParams(prev);
-          if (next === "changes") params.delete("tab");
-          else params.set("tab", next);
-          params.delete("history");
-          params.delete("rev");
-          if (next !== "reviews") params.delete("submission");
-          return params;
-        },
-        { state: location.state },
-      );
-    },
-    [location.state, setSearchParams],
-  );
-  return { tab, setTab };
 }
 
 /**
@@ -216,402 +169,6 @@ function useHeadCommitLink(
   }, [active, headSha, location.state, setSearchParams]);
   if (!active) return {};
   return { headCommitHref, onOpenHeadCommit };
-}
-
-/**
- * The single source-mode selector. It rides the wrapping header row, so the
- * browser decides whether it shares a line with project identity or takes one
- * of its own; `stacked` then lets it fill that row at phone widths.
- */
-function SourceHeaderTabs({
-  status,
-  pendingCount,
-  reviewsEnabled,
-  supportsWorkingTreeFiles,
-  t,
-}: {
-  status: GitStatusInfo;
-  pendingCount: number;
-  reviewsEnabled: boolean;
-  supportsWorkingTreeFiles: boolean;
-  t: TranslationFn;
-}) {
-  const { tab, setTab } = useSourceTab(reviewsEnabled);
-  const changedFileCount = countChangedPaths(status);
-  return (
-    <SourceModeTabs
-      tab={tab}
-      tabs={reviewsEnabled ? SOURCE_TABS_WITH_REVIEWS : SOURCE_TABS}
-      variant="stacked"
-      counts={{ changes: changedFileCount, comments: pendingCount }}
-      fileTabLabelKey={
-        supportsWorkingTreeFiles ? "sourceTabWorkingTree" : undefined
-      }
-      onSelect={setTab}
-      t={t}
-    />
-  );
-}
-
-function SourceHeaderActions({
-  status,
-  pendingCount,
-  reviewsEnabled,
-  supportsWorkingTreeFiles,
-  worktreePaused,
-  gitActions,
-  isWideScreen,
-  onToggleWorktreePaused,
-  t,
-}: {
-  status: GitStatusInfo;
-  pendingCount: number;
-  reviewsEnabled: boolean;
-  supportsWorkingTreeFiles: boolean;
-  worktreePaused?: boolean;
-  gitActions: GitActionState;
-  isWideScreen: boolean;
-  onToggleWorktreePaused?: () => void;
-  t: TranslationFn;
-}) {
-  const controlsRef = useRef<HTMLDivElement>(null);
-  const tabsRef = useRef<HTMLDivElement>(null);
-  const [fitsTitleRow, setFitsTitleRow] = useState(false);
-
-  useLayoutEffect(() => {
-    if (!isWideScreen) {
-      setFitsTitleRow(false);
-      return undefined;
-    }
-    const controls = controlsRef.current;
-    const tabs = tabsRef.current;
-    const header = controls?.closest<HTMLElement>(".session-header-inner");
-    const identity = header?.querySelector<HTMLElement>(".session-header-left");
-    const actionGroup = controls?.querySelector<HTMLElement>(
-      "[data-source-action-group]",
-    );
-    const tabList = tabs?.querySelector<HTMLElement>('[role="tablist"]');
-    if (
-      !controls ||
-      !tabs ||
-      !header ||
-      !identity ||
-      !actionGroup ||
-      !tabList
-    ) {
-      return undefined;
-    }
-
-    const update = () => {
-      const headerStyle = getComputedStyle(header);
-      const available =
-        header.clientWidth -
-        cssPixels(headerStyle.paddingLeft) -
-        cssPixels(headerStyle.paddingRight);
-      const gap = cssPixels(headerStyle.columnGap);
-      if (available <= 0) {
-        setFitsTitleRow(false);
-        return;
-      }
-      const demand =
-        horizontalContentWidth(identity) +
-        horizontalContentWidth(actionGroup) +
-        horizontalContentWidth(tabList) +
-        2 * gap;
-      setFitsTitleRow(demand <= available + 0.5);
-    };
-
-    update();
-    if (typeof ResizeObserver === "undefined") return undefined;
-    const observer = new ResizeObserver(update);
-    observer.observe(header);
-    observer.observe(identity);
-    observer.observe(actionGroup);
-    observer.observe(tabList);
-    return () => observer.disconnect();
-  }, [isWideScreen]);
-
-  return (
-    <>
-      <div
-        ref={controlsRef}
-        className={`${styles.headerControls} ${
-          fitsTitleRow ? styles.titleRow : styles.fallbackRow
-        }`}
-        data-source-actions-placement={fitsTitleRow ? "title" : "fallback"}
-      >
-        <SourceHeaderControls
-          gitActions={gitActions}
-          worktreePaused={worktreePaused}
-          onToggleWorktreePaused={onToggleWorktreePaused}
-          t={t}
-        />
-      </div>
-      <div ref={tabsRef} className={styles.headerTabs}>
-        <SourceHeaderTabs
-          status={status}
-          pendingCount={pendingCount}
-          reviewsEnabled={reviewsEnabled}
-          supportsWorkingTreeFiles={supportsWorkingTreeFiles}
-          t={t}
-        />
-      </div>
-    </>
-  );
-}
-
-function horizontalContentWidth(element: HTMLElement): number {
-  const style = getComputedStyle(element);
-  const children = Array.from(element.children).filter(
-    (child): child is HTMLElement =>
-      child instanceof HTMLElement &&
-      getComputedStyle(child).display !== "none",
-  );
-  const childrenWidth = children.reduce(
-    (total, child) =>
-      total + Math.max(child.getBoundingClientRect().width, child.scrollWidth),
-    0,
-  );
-  return (
-    childrenWidth +
-    Math.max(0, children.length - 1) * cssPixels(style.columnGap) +
-    cssPixels(style.paddingLeft) +
-    cssPixels(style.paddingRight) +
-    cssPixels(style.borderLeftWidth) +
-    cssPixels(style.borderRightWidth)
-  );
-}
-
-function cssPixels(value: string): number {
-  const parsed = Number.parseFloat(value);
-  return Number.isFinite(parsed) ? parsed : 0;
-}
-
-function SourceHeaderControls({
-  gitActions,
-  worktreePaused,
-  onToggleWorktreePaused,
-  t,
-}: {
-  gitActions: GitActionState;
-  worktreePaused?: boolean;
-  onToggleWorktreePaused?: () => void;
-  t: TranslationFn;
-}) {
-  const nowMs = useRelativeNow();
-  const remoteTitle = t("gitStatusLastCheckedRemote", {
-    time: formatRemoteCheckTime(gitActions.checkedRemoteAt, nowMs, t),
-  });
-  return (
-    <div className={styles.actionGroup} data-source-action-group>
-      {gitActions.supportsPull && (
-        <SourceActionButton
-          action="pull"
-          label={t("gitStatusPull")}
-          runningLabel={t("gitStatusPulling")}
-          running={gitActions.isPulling}
-          feedback={gitActions.pullFeedback}
-          tone={gitActions.pullFeedbackTone}
-          onClick={gitActions.handlePull}
-          disabled={gitActions.isRunning}
-        />
-      )}
-      {gitActions.supportsPush && (
-        <SourceActionButton
-          action="push"
-          label={t("gitStatusPush")}
-          runningLabel={t("gitStatusPushing")}
-          running={gitActions.isPushing}
-          feedback={gitActions.pushFeedback}
-          tone={gitActions.pushFeedbackTone}
-          onClick={gitActions.handlePush}
-          disabled={gitActions.isRunning}
-        />
-      )}
-      {gitActions.supportsRemoteCheck && (
-        <SourceActionButton
-          action="check"
-          label={t("gitStatusCheckRemote")}
-          runningLabel={t("gitStatusCheckingRemote")}
-          running={gitActions.isCheckingRemote}
-          feedback={gitActions.checkFeedback}
-          tone={gitActions.checkFeedbackTone}
-          title={
-            gitActions.checkFeedback
-              ? `${gitActions.checkFeedback} · ${remoteTitle}`
-              : remoteTitle
-          }
-          className={styles.checkRemote}
-          onClick={gitActions.handleCheckRemote}
-          disabled={gitActions.isRunning}
-        />
-      )}
-      {onToggleWorktreePaused && (
-        <button
-          type="button"
-          className="git-status-action-button"
-          aria-pressed={worktreePaused}
-          title={
-            worktreePaused
-              ? t("sourceResumeLiveUpdates")
-              : t("sourcePauseLiveUpdates")
-          }
-          onClick={onToggleWorktreePaused}
-        >
-          <span className="git-status-action-indicator" aria-hidden="true">
-            <SourceActionGlyph action={worktreePaused ? "play" : "pause"} />
-          </span>
-          <span className={styles.actionLabel}>
-            {worktreePaused
-              ? t("sourceResumeLiveUpdates")
-              : t("sourcePauseLiveUpdates")}
-          </span>
-        </button>
-      )}
-    </div>
-  );
-}
-
-function SourceActionButton({
-  action,
-  label,
-  runningLabel,
-  running,
-  feedback,
-  tone,
-  title,
-  className = "",
-  onClick,
-  disabled,
-}: {
-  action: "pull" | "push" | "check";
-  label: string;
-  runningLabel: string;
-  running: boolean;
-  feedback: string;
-  tone: "success" | "warning" | null;
-  title?: string;
-  className?: string;
-  onClick: () => void;
-  disabled: boolean;
-}) {
-  const feedbackTitle = title ?? feedback;
-  // The outcome shows on the button itself only briefly after an action
-  // completes; the tooltip keeps the detail as long as the result stands.
-  // Handlers reset results to null before each run, so feedback passes
-  // through "" and retriggers this even when the outcome text repeats.
-  const [recent, setRecent] = useState(false);
-  useEffect(() => {
-    if (!tone || !feedback) {
-      setRecent(false);
-      return;
-    }
-    setRecent(true);
-    const timer = setTimeout(() => setRecent(false), 6000);
-    return () => clearTimeout(timer);
-  }, [tone, feedback]);
-  const showOutcome = recent && tone !== null && feedback !== "";
-  return (
-    <button
-      type="button"
-      className={`git-status-action-button ${className} ${
-        showOutcome ? `git-status-action-${tone}` : ""
-      } ${running ? "git-status-action-running" : ""}`}
-      title={feedbackTitle}
-      aria-label={
-        running
-          ? `${label}: ${runningLabel}`
-          : feedback
-            ? `${label}: ${feedback}`
-            : label
-      }
-      onClick={onClick}
-      disabled={disabled}
-    >
-      <span className="git-status-action-indicator" aria-hidden="true">
-        {running ? null : showOutcome ? (
-          tone === "success" ? (
-            "✓"
-          ) : (
-            "!"
-          )
-        ) : (
-          <SourceActionGlyph action={action} />
-        )}
-      </span>
-      <span className={styles.actionLabel}>{label}</span>
-    </button>
-  );
-}
-
-function SourceActionGlyph({
-  action,
-}: {
-  action: "pull" | "push" | "check" | "pause" | "play";
-}) {
-  if (action === "pause") {
-    return (
-      <svg
-        className="git-status-action-glyph"
-        aria-hidden="true"
-        viewBox="0 0 16 16"
-        fill="currentColor"
-      >
-        <rect x="4" y="3" width="2.75" height="10" rx="0.6" />
-        <rect x="9.25" y="3" width="2.75" height="10" rx="0.6" />
-      </svg>
-    );
-  }
-  if (action === "play") {
-    return (
-      <svg
-        className="git-status-action-glyph"
-        aria-hidden="true"
-        viewBox="0 0 16 16"
-        fill="currentColor"
-      >
-        <path d="M5 3.15 13 8 5 12.85Z" />
-      </svg>
-    );
-  }
-  if (action === "check") {
-    return (
-      <svg
-        className="git-status-action-glyph"
-        aria-hidden="true"
-        viewBox="0 0 16 16"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <path d="M13 5V2.5L11.4 4A5.5 5.5 0 1 0 13.1 10" />
-      </svg>
-    );
-  }
-
-  const isPull = action === "pull";
-  return (
-    <svg
-      className="git-status-action-glyph"
-      aria-hidden="true"
-      viewBox="0 0 16 16"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path
-        d={
-          isPull
-            ? "M8 2v10M4.5 8.5 8 12l3.5-3.5"
-            : "M8 14V4M4.5 7.5 8 4l3.5 3.5"
-        }
-      />
-    </svg>
-  );
 }
 
 function getSourceControlRouteRetentionKey(
@@ -663,6 +220,7 @@ export function GitStatusPage() {
   const projectId = searchParams.get("projectId");
   const sourceKey = useClientSummarySourceKey();
   const { openSidebar, isWideScreen } = useNavigationLayout();
+  const returnToSession = useReturnToSession();
   const pageScrollRef = useRef<HTMLElement | null>(null);
   const [worktreePaused, setWorktreePaused] = useState(false);
   const documentAttentive = useDocumentAttention();
@@ -861,81 +419,76 @@ export function GitStatusPage() {
   };
 
   if (!effectiveProjectId && !projectsLoading && projects.length === 0) {
-    return <div className="error">{t("gitStatusNoProjects")}</div>;
+    return <EmptyState title={t("gitStatusNoProjects")} />;
   }
+
+  const projectName = project?.name ?? t("gitStatusTitle");
+  const intro = (
+    <SourceControlIntro
+      projectId={effectiveProjectId}
+      projectName={project?.name}
+      codeName={supportsProjectCodeNames ? project?.codeName : undefined}
+      status={gitStatus}
+      onProjectChange={handleProjectChange}
+      supportsIncomingCommits={supportsIncomingCommits}
+      onSelectChanges={
+        supportsSourceReview ? () => setHeaderTab("changes") : undefined
+      }
+      {...headCommitLink}
+      workbench={
+        supportsSourceReview && effectiveProjectId
+          ? {
+              pendingCount: reviewComments.pending.length,
+              reviewsEnabled,
+              supportsWorkingTreeFiles,
+              gitActions,
+              worktreePaused,
+              onToggleWorktreePaused: supportsWorkingTreeSections
+                ? () => setWorktreePaused((paused) => !paused)
+                : undefined,
+            }
+          : undefined
+      }
+      t={t}
+    />
+  );
 
   return (
     <MainContent
       isWideScreen={isWideScreen}
-      innerClassName={`source-control-main-content ${styles.sourceHeader}`}
+      innerClassName="source-control-main-content"
     >
       <PageHeader
-        title={project?.name ?? t("gitStatusTitle")}
-        titleElement={
-          effectiveProjectId ? (
-            <div className="source-header-identity">
-              <ProjectSelector
-                currentProjectId={effectiveProjectId}
-                currentProjectName={project?.name}
-                onProjectChange={(p) => handleProjectChange(p.id)}
-              />
-              {gitStatus?.isGitRepo && (
-                <RepoStatusBar
-                  status={gitStatus}
-                  projectId={effectiveProjectId}
-                  supportsIncomingCommits={supportsIncomingCommits}
-                  className="source-header-repo-status"
-                  onSelectChanges={
-                    supportsSourceReview
-                      ? () => setHeaderTab("changes")
-                      : undefined
-                  }
-                  {...headCommitLink}
-                  t={t}
-                />
-              )}
-            </div>
-          ) : undefined
-        }
+        title={projectName}
+        intro="content"
+        breadcrumbs={[{ label: t("gitStatusTitle") }, { label: projectName }]}
+        showBack={returnToSession !== undefined}
+        onBack={returnToSession}
         onOpenSidebar={openSidebar}
         isWideScreen={isWideScreen}
-        actions={
-          supportsSourceReview && effectiveProjectId && gitStatus?.isGitRepo ? (
-            <SourceHeaderActions
-              status={gitStatus}
-              pendingCount={reviewComments.pending.length}
-              reviewsEnabled={reviewsEnabled}
-              supportsWorkingTreeFiles={supportsWorkingTreeFiles}
-              gitActions={gitActions}
-              isWideScreen={isWideScreen}
-              worktreePaused={worktreePaused}
-              onToggleWorktreePaused={
-                supportsWorkingTreeSections
-                  ? () => setWorktreePaused((paused) => !paused)
-                  : undefined
-              }
-              t={t}
-            />
-          ) : undefined
-        }
       />
 
       <main className="page-scroll-container" ref={pageScrollRef}>
         <div className="page-content-inner">
+          {intro}
           {versionLoading || projectsLoading ? (
-            <LoadingState label={t("gitStatusLoading")} />
+            <LoadingState label={t("gitStatusLoading")} variant="page" />
           ) : versionError ? (
-            <div className="error">
-              {t("gitStatusErrorPrefix")} {versionError.message}
-            </div>
+            <ErrorState
+              tag={t("errorTag")}
+              message={`${t("gitStatusErrorPrefix")} ${versionError.message}`}
+            />
           ) : !supportsEnhancedGitStatus ? (
             <GitStatusUpgradeRequired t={t} />
           ) : loading ? (
-            <LoadingState label={t("gitStatusLoading")} />
+            <LoadingState label={t("gitStatusLoading")} variant="page" />
           ) : error ? (
-            <div className="error">
-              {t("gitStatusErrorPrefix")} {error.message}
-            </div>
+            <ErrorState
+              tag={t("errorTag")}
+              message={`${t("gitStatusErrorPrefix")} ${error.message}`}
+              onRetry={refetch}
+              retryLabel={t("retry")}
+            />
           ) : gitStatus &&
             !gitStatus.isGitRepo &&
             effectiveProjectId &&
@@ -958,7 +511,7 @@ export function GitStatusPage() {
               </ProjectWorktreePauseContext.Provider>
             </GlossaryProjectBoundary>
           ) : gitStatus && !gitStatus.isGitRepo ? (
-            <div className="git-status-empty">{t("gitStatusNotRepo")}</div>
+            <EmptyState title={t("gitStatusNotRepo")} icon={<FolderIcon />} />
           ) : gitStatus && effectiveProjectId && supportsSourceReview ? (
             <GlossaryProjectBoundary projectId={effectiveProjectId}>
               <ProjectWorktreePauseContext.Provider value={worktreeLeasePaused}>
@@ -1014,10 +567,11 @@ export function GitStatusPage() {
 
 function GitStatusUpgradeRequired({ t }: { t: TranslationFn }) {
   return (
-    <div className="git-status-upgrade">
-      <h2>{t("gitStatusUpgradeRequiredTitle")}</h2>
-      <p>{t("gitStatusUpgradeRequiredDescription")}</p>
-    </div>
+    <EmptyState
+      title={t("gitStatusUpgradeRequiredTitle")}
+      hint={t("gitStatusUpgradeRequiredDescription")}
+      icon={<GitBranchIcon />}
+    />
   );
 }
 
@@ -1036,9 +590,9 @@ function GitStatusCompatibilityContent({
         <SourceHeaderControls gitActions={gitActions} t={t} />
       </div>
       <GitActionNotices gitActions={gitActions} t={t} />
-      <section className="git-status-compatibility-notice">
+      <section className={styles.compatibilityNote}>
         <h2>{t("gitStatusCompatibilityTitle")}</h2>
-        <p>{t("gitStatusCompatibilityDescription")}</p>
+        <Notice tone="warning">{t("gitStatusCompatibilityDescription")}</Notice>
       </section>
     </div>
   );
@@ -1349,10 +903,6 @@ function GitStatusContent({
       )}
     </div>
   );
-}
-
-function countChangedPaths(status: GitStatusInfo): number {
-  return new Set(status.files.map((file) => file.path)).size;
 }
 
 function GitActionNotices({

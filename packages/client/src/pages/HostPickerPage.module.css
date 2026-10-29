@@ -1,4 +1,4 @@
-/* Saved hosts and the ways to add one, inside the shared auth shell. */
+/* Saved hosts and the ways to add one, inside the shared auth card. */
 .section {
   display: flex;
   flex-direction: column;
@@ -6,10 +6,13 @@
 }
 
 .sectionTitle {
-  margin: 0 var(--space-1);
-  color: var(--text-muted);
-  font-size: 13px;
-  font-weight: 600;
+  margin: 0;
+  color: var(--ink-3);
+  font-family: var(--label-font);
+  font-size: var(--eyebrow-size);
+  font-weight: 500;
+  letter-spacing: var(--eyebrow-tracking);
+  text-transform: uppercase;
 }
 
 .list {
@@ -17,12 +20,11 @@
   flex-direction: column;
   margin: 0;
   padding: 0;
-  list-style: none;
   overflow: hidden;
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-lg);
-  background: var(--bg-card);
-  box-shadow: none;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--card);
+  list-style: none;
 }
 
 .host {
@@ -40,52 +42,30 @@
   align-items: center;
   gap: var(--space-3);
   min-width: 0;
-  min-height: 76px;
-  padding: var(--space-3) var(--space-2) var(--space-3) var(--space-4);
+  min-height: 60px;
+  padding: var(--space-3) var(--space-3) var(--space-3) var(--space-4);
   border: 0;
   background: transparent;
-  color: var(--text-primary);
+  color: var(--ink);
   font: inherit;
   text-align: start;
   cursor: pointer;
+  transition: background-color var(--duration-fast) var(--ease-standard);
 }
 
 .hostMain:hover:not(:disabled) {
-  background: var(--bg-tertiary);
+  background: var(--bg-2);
+}
+
+.hostMain:focus-visible,
+.remove:focus-visible,
+.option:focus-visible {
+  outline: 2px solid var(--indigo);
+  outline-offset: -2px;
 }
 
 .hostMain:disabled {
   cursor: wait;
-}
-
-.dot {
-  flex-shrink: 0;
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-}
-
-.online {
-  background: var(--mint);
-}
-
-.offline {
-  background: var(--rose);
-}
-
-.checking {
-  background: var(--sand);
-  animation: host-pulse 1.5s ease-in-out infinite;
-}
-
-.unknown {
-  background: var(--text-dimmed);
-}
-
-@keyframes host-pulse {
-  50% {
-    opacity: 0.35;
-  }
 }
 
 .hostText {
@@ -98,33 +78,18 @@
 
 .hostName {
   overflow: hidden;
-  font-family: var(--font-display);
-  font-size: 17px;
-  font-weight: 600;
+  font-size: 14px;
+  font-weight: 500;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .hostMeta {
-  color: var(--text-muted);
-  font-family: var(--font-mono);
-  font-size: 12px;
-}
-
-.spinner {
-  flex-shrink: 0;
-  width: 18px;
-  height: 18px;
-  border: 2px solid var(--line-strong);
-  border-top-color: var(--indigo);
-  border-radius: 50%;
-  animation: host-spin 0.8s linear infinite;
-}
-
-@keyframes host-spin {
-  to {
-    transform: rotate(360deg);
-  }
+  color: var(--ink-3);
+  font-family: var(--label-font);
+  font-size: 11px;
+  letter-spacing: var(--meta-tracking);
+  text-transform: uppercase;
 }
 
 /* Always visible: touch has no hover to reveal it. */
@@ -135,9 +100,11 @@
   justify-content: center;
   width: var(--tap-min);
   border: 0;
+  border-left: 1px dashed var(--dash);
   background: transparent;
-  color: var(--text-dimmed);
+  color: var(--ink-4);
   cursor: pointer;
+  transition: color var(--duration-fast) var(--ease-standard);
 }
 
 .remove:hover {
@@ -148,27 +115,33 @@
 .options {
   display: flex;
   flex-direction: column;
-  gap: var(--space-2);
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--card);
 }
 
 .option {
   display: flex;
   align-items: center;
   gap: var(--space-3);
-  min-height: 76px;
+  min-height: 60px;
   padding: var(--space-3) var(--space-3) var(--space-3) var(--space-4);
-  border: 1px solid var(--line-strong);
-  border-radius: var(--radius-lg);
-  background: var(--bg-card);
-  box-shadow: none;
-  color: var(--text-primary);
+  border: 0;
+  background: transparent;
+  color: var(--ink);
   font: inherit;
   text-align: start;
   cursor: pointer;
+  transition: background-color var(--duration-fast) var(--ease-standard);
+}
+
+.option + .option {
+  border-top: 1px dashed var(--dash);
 }
 
 .option:hover {
-  background: var(--bg-tertiary);
+  background: var(--bg-2);
 }
 
 .optionText {
@@ -180,25 +153,17 @@
 }
 
 .optionTitle {
-  font-size: 16px;
-  font-weight: 600;
+  font-size: 14px;
+  font-weight: 500;
 }
 
 .optionDesc {
-  color: var(--text-muted);
+  color: var(--ink-3);
   font-size: 13px;
-  line-height: 1.4;
+  line-height: 1.45;
 }
 
 .chevron {
-  display: flex;
   flex-shrink: 0;
-  color: var(--text-dimmed);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .checking,
-  .spinner {
-    animation: none;
-  }
+  color: var(--ink-4);
 }

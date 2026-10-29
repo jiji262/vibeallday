@@ -10,7 +10,7 @@
     transform var(--panel-slide-duration, 0.2s) ease,
     visibility 0s;
   background: var(--bg-surface);
-  border-left: 1px solid var(--border-color);
+  border-left: 1px solid var(--line);
 }
 .hidden {
   transform: translateX(100%);
@@ -30,7 +30,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  color: var(--text-primary);
+  color: var(--ink);
 }
 .frame {
   flex: 1;
@@ -68,7 +68,7 @@
 }
 .splitter:hover,
 .splitter:focus-visible {
-  background: var(--accent-color);
+  background: var(--indigo);
   opacity: 0.6;
 }
 .dragShield {
@@ -80,26 +80,57 @@
   position: absolute;
   inset: 0;
   border: 0;
-  background: rgb(0 0 0 / 35%);
+  background: var(--overlay-scrim);
   z-index: 29;
 }
 .error {
-  padding: 16px;
+  margin: 16px;
+  padding: 12px 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--bg-2);
+  color: var(--ink-2);
+  font-size: 13px;
+  line-height: 1.5;
 }
+/* Header icon control: garden IconButton anatomy (36px, 44px on touch). */
 .launcher {
   flex-shrink: 0;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 2px;
+  min-width: 36px;
+  min-height: 36px;
   font-size: 13px;
   cursor: pointer;
   padding: 8px;
-  border: 1px solid var(--border-color);
-  border-radius: 4px;
-  background: var(--bg-secondary);
-  color: var(--text-primary);
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--ink-3);
   text-decoration: none;
+  transition:
+    background var(--duration-fast),
+    color var(--duration-fast);
+}
+
+.launcher:hover,
+.launcher[aria-pressed="true"] {
+  background: var(--bg-soft);
+  color: var(--ink);
+}
+
+.launcher:focus-visible {
+  border-color: var(--indigo);
+  box-shadow: 0 0 0 3px var(--indigo-soft);
+}
+
+@media (pointer: coarse) {
+  .launcher {
+    min-width: var(--tap-min);
+    min-height: var(--tap-min);
+  }
 }
 @media (width >= 1100px) {
   .pane {
@@ -125,6 +156,6 @@
     position: absolute;
     inset: 0 0 0 24px;
     z-index: 30;
-    box-shadow: -4px 0 16px rgb(0 0 0 / 25%);
+    box-shadow: var(--shadow-lg);
   }
 }

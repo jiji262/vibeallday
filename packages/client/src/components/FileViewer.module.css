@@ -91,36 +91,29 @@
 }
 
 .reloadStale {
-  color: var(--warning-color, #d08a00);
+  color: var(--peach-ink);
 }
 
-.rawToggle[aria-pressed="true"] {
-  background: color-mix(in srgb, var(--primary-color) 18%, transparent);
-  color: var(--primary-color);
-}
-
+.rawToggle[aria-pressed="true"],
 .rawToggle[aria-pressed="true"]:hover {
-  background: color-mix(in srgb, var(--primary-color) 28%, transparent);
-  color: var(--primary-color);
+  background: var(--indigo-soft);
+  color: var(--indigo);
 }
 
-.commentToggle[aria-pressed="true"] {
-  background: color-mix(in srgb, var(--success-color) 18%, transparent);
-  color: var(--success-color);
-}
-
+.commentToggle[aria-pressed="true"],
 .commentToggle[aria-pressed="true"]:hover {
-  background: color-mix(in srgb, var(--success-color) 28%, transparent);
-  color: var(--success-color);
+  background: var(--mint-soft);
+  color: var(--mint-ink);
 }
 
 .commentSend {
   min-height: 32px;
   border: 0;
-  border-radius: var(--radius-sm, 4px);
-  padding: var(--space-1, 4px) var(--space-3, 12px);
-  background: var(--accent-color);
-  color: var(--accent-contrast);
+  border-radius: var(--radius-md);
+  padding: var(--space-1) var(--space-3);
+  background: var(--indigo);
+  color: var(--ink-on);
+  font-weight: 500;
 }
 
 .commentSend:disabled {
@@ -144,6 +137,10 @@
 .provenanceRow > :global(.file-viewer-meta) {
   min-width: 0;
   overflow: hidden;
+  color: var(--ink-3);
+  font-family: var(--label-font);
+  font-size: 11px;
+  letter-spacing: var(--meta-tracking);
   text-overflow: ellipsis;
 }
 
@@ -161,6 +158,56 @@
 
 .fullscreenButton {
   flex: 0 0 auto;
+}
+
+/* Garden viewer bar: sunken strip on a hairline, ink mono path, ghost icon
+   actions with the indigo focus ring. Layout stays with the rules above. */
+.viewer .header {
+  background: var(--bg-2);
+  border-bottom-color: var(--line);
+}
+
+.viewer .path {
+  color: var(--ink-2);
+}
+
+.viewer :global(.file-viewer-action) {
+  color: var(--ink-3);
+  border-radius: var(--radius-md);
+  transition:
+    background var(--duration-fast) var(--ease-standard),
+    color var(--duration-fast) var(--ease-standard);
+}
+
+.viewer :global(.file-viewer-action):hover:not(:disabled) {
+  background: var(--bg-soft);
+  color: var(--ink);
+}
+
+.viewer :global(.file-viewer-action):focus-visible {
+  box-shadow: 0 0 0 3px var(--indigo-soft);
+}
+
+/* Narrow viewers (phones, side panes): the action row stays one strip that
+   scrolls sideways instead of wrapping its last control onto a row of its
+   own. The 3px inset keeps the focus ring inside the scroll clip; the
+   matching negative margin keeps the row where it sat. */
+@container file-viewer (width < 640px) {
+  .actions {
+    --actions-ring-inset: 3px;
+    --actions-row-gap: 4px;
+
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding: var(--actions-ring-inset);
+    margin: calc(var(--actions-row-gap) - var(--actions-ring-inset))
+      calc(-1 * var(--actions-ring-inset)) calc(-1 * var(--actions-ring-inset));
+    scrollbar-width: thin;
+  }
+
+  .actions > * {
+    flex-shrink: 0;
+  }
 }
 
 /* Touch: the toolbar icons are 44px targets. */

@@ -7,6 +7,9 @@ import {
   rawTokenCount,
 } from "@vibeallday/shared";
 import { useState } from "react";
+import { SegmentedControl } from "../../components/controls/SegmentedControl";
+import { Card } from "../../components/garden/Card";
+import { Table, Td, Th, Tr } from "../../components/garden/DataTable";
 import { useI18n } from "../../i18n";
 import styles from "./UsersSettings.module.css";
 
@@ -28,6 +31,7 @@ export interface UserUsageTableProps {
 }
 
 type UsageWindow = "total" | "lastWeek";
+const USAGE_WINDOWS: readonly UsageWindow[] = ["total", "lastWeek"];
 type Translate = (key: never, vars?: Record<string, string | number>) => string;
 
 const HOUR_MS = 60 * 60 * 1000;
@@ -94,26 +98,18 @@ export function UserUsageTable({ report }: UserUsageTableProps) {
       </p>
       {rows.length > 0 && (
         <>
-          <fieldset className={styles.usageWindow}>
-            <legend className={styles.usageWindowLegend}>
-              {t("userUsageWindowLabel")}
-            </legend>
-            {(["total", "lastWeek"] as const).map((key) => (
-              <button
-                key={key}
-                type="button"
-                className={`${styles.usageWindowOption} ${
-                  usageWindow === key ? styles.usageWindowSelected : ""
-                }`}
-                aria-pressed={usageWindow === key}
-                onClick={() => setUsageWindow(key)}
-              >
-                {windowLabels[key]}
-              </button>
-            ))}
-          </fieldset>
-          <div className={styles.usageScroll}>
-            <table className={styles.usageTable}>
+          <SegmentedControl
+            label={t("userUsageWindowLabel")}
+            options={USAGE_WINDOWS.map((key) => ({
+              value: key,
+              label: windowLabels[key],
+            }))}
+            value={usageWindow}
+            onChange={setUsageWindow}
+            className={styles.usageWindow}
+          />
+          <Card flush className={styles.usageCard}>
+            <Table>
               {/* The switch above already shows the window; this names the
                   table for assistive technology. */}
               <caption className={styles.usageWindowLegend}>
@@ -121,22 +117,12 @@ export function UserUsageTable({ report }: UserUsageTableProps) {
               </caption>
               <thead>
                 <tr>
-                  <th scope="col">{t("userUsageUser")}</th>
-                  <th scope="col" className={styles.usageNumber}>
-                    {t("userUsageColTime")}
-                  </th>
-                  <th scope="col" className={styles.usageNumber}>
-                    {t("userUsageColSessions")}
-                  </th>
-                  <th scope="col" className={styles.usageNumber}>
-                    {t("userUsageColTurns")}
-                  </th>
-                  <th scope="col" className={styles.usageNumber}>
-                    {t("userUsageColWords")}
-                  </th>
-                  <th scope="col" className={styles.usageNumber}>
-                    {t("userUsageColTokens")}
-                  </th>
+                  <Th>{t("userUsageUser")}</Th>
+                  <Th right>{t("userUsageColTime")}</Th>
+                  <Th right>{t("userUsageColSessions")}</Th>
+                  <Th right>{t("userUsageColTurns")}</Th>
+                  <Th right>{t("userUsageColWords")}</Th>
+                  <Th right>{t("userUsageColTokens")}</Th>
                 </tr>
               </thead>
               <tbody>
@@ -144,24 +130,25 @@ export function UserUsageTable({ report }: UserUsageTableProps) {
                   const totals = user[usageWindow];
                   const raw = rawTokenCount(totals.tokens);
                   return (
-                    <tr key={user.username ?? ""}>
+                    <Tr key={user.username ?? ""}>
                       <th scope="row" className={styles.usageUser}>
                         {user.username ?? t("usersSuperuser")}
                       </th>
-                      <td className={styles.usageNumber}>
+                      <Td num right>
                         {formatActiveTime(totals.activeMs, t)}
-                      </td>
-                      <td className={styles.usageNumber}>
+                      </Td>
+                      <Td num right>
                         {totals.sessions.toLocaleString()}
-                      </td>
-                      <td className={styles.usageNumber}>
+                      </Td>
+                      <Td num right>
                         {totals.turns.toLocaleString()}
-                      </td>
-                      <td className={styles.usageNumber}>
+                      </Td>
+                      <Td num right>
                         {totals.words.toLocaleString()}
-                      </td>
-                      <td
-                        className={styles.usageNumber}
+                      </Td>
+                      <Td
+                        num
+                        right
                         title={
                           raw > 0
                             ? t(
@@ -172,13 +159,13 @@ export function UserUsageTable({ report }: UserUsageTableProps) {
                         }
                       >
                         {raw > 0 ? formatTokenCount(raw) : NO_FIGURE}
-                      </td>
-                    </tr>
+                      </Td>
+                    </Tr>
                   );
                 })}
               </tbody>
-            </table>
-          </div>
+            </Table>
+          </Card>
           {rows.map((user) => {
             const name = user.username ?? t("usersSuperuser");
             const totals = user[usageWindow];
@@ -237,48 +224,42 @@ function UsageBreakdownTable({
   const named = buckets.filter((bucket) => rawTokenCount(bucket.tokens) > 0);
   if (named.length === 0) return null;
   return (
-    <div className={styles.usageScroll}>
-      <table className={styles.usageTable}>
+    <Card flush className={styles.usageCard}>
+      <Table>
         <caption className={styles.usageCaption}>{title}</caption>
         <thead>
           <tr>
-            <th scope="col">{nameHeading}</th>
-            <th scope="col" className={styles.usageNumber}>
-              {t("userUsageColOutputEquivalent")}
-            </th>
-            <th scope="col" className={styles.usageNumber}>
-              {t("userUsageColCost")}
-            </th>
-            <th scope="col" className={styles.usageNumber}>
-              {t("userUsageColVolume")}
-            </th>
+            <Th>{nameHeading}</Th>
+            <Th right>{t("userUsageColOutputEquivalent")}</Th>
+            <Th right>{t("userUsageColCost")}</Th>
+            <Th right>{t("userUsageColVolume")}</Th>
           </tr>
         </thead>
         <tbody>
           {named.map((bucket) => (
-            <tr key={bucket.name}>
+            <Tr key={bucket.name}>
               <th scope="row" className={styles.usageUser}>
                 {bucket.name
                   ? displayName(bucket.name)
                   : t("userUsageUnattributed")}
               </th>
-              <td className={styles.usageNumber}>
+              <Td num right>
                 {bucket.equivalentOutputTokens === null
                   ? NO_FIGURE
                   : formatTokenCount(bucket.equivalentOutputTokens)}
-              </td>
-              <td className={styles.usageNumber}>
+              </Td>
+              <Td num right>
                 {bucket.costUsd === null
                   ? NO_FIGURE
                   : formatUsd(bucket.costUsd)}
-              </td>
-              <td className={styles.usageNumber}>
+              </Td>
+              <Td num right>
                 {formatTokenCount(rawTokenCount(bucket.tokens))}
-              </td>
-            </tr>
+              </Td>
+            </Tr>
           ))}
         </tbody>
-      </table>
-    </div>
+      </Table>
+    </Card>
   );
 }

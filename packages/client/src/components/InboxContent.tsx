@@ -1,12 +1,16 @@
 import {
   GIT_SOURCE_REVIEW_SUBMISSIONS_CAPABILITY,
   PUBLIC_SHARE_MANAGEMENT_CAPABILITY,
-  type ProjectQueueItemStatus,
-  type ProjectQueueItemSummary,
   type ReviewInboxItem,
   serverHasCapability,
 } from "@vibeallday/shared";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  type ReactNode,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { api } from "../api/client";
 import { type InboxItem, useInboxContext } from "../contexts/InboxContext";
@@ -25,18 +29,31 @@ import { activityBus } from "../lib/activityBus";
 import { serverSupportsProjectQueue } from "../lib/projectQueueVisibility";
 import type { Project } from "../types";
 import { getSessionDisplayTitle } from "../utils";
-import { FilterDropdown, type FilterOption } from "./FilterDropdown";
-import { Button, IconButton } from "./garden/Button";
+import { Button } from "./garden/Button";
+import { Card, CardHeader } from "./garden/Card";
 import { EmptyState } from "./garden/EmptyState";
+import { ErrorState } from "./garden/ErrorState";
+import { ChevronRightIcon } from "./garden/icons";
 import { LoadingState } from "./garden/LoadingState";
-import { SectionHeader, type SectionTone } from "./garden/SectionHeader";
+import { Spinner } from "./garden/Spinner";
 import styles from "./InboxContent.module.css";
+import {
+  InboxQueueItem,
+  isPendingNewSessionProjectQueueItem,
+  type PendingNewSessionProjectQueueItem,
+} from "./now/InboxQueueItem";
 import { type NowJumpTarget, NowSummary } from "./now/NowSummary";
+import { OverviewToolbar } from "./now/OverviewToolbar";
+import { ReviewOutcomes } from "./now/ReviewOutcomes";
+import { PageIntro } from "./shell/PageIntro";
+import { pageWidthClass } from "./shell/pageWidth";
 import { SessionListItem } from "./SessionListItem";
-import { SessionAsyncQuestionsButton } from "./SessionAsyncQuestionsButton";
 
 const EMPTY_PROJECT_QUEUE_PROJECT_IDS: readonly string[] = [];
 const EMPTY_PROJECT_QUEUE_SESSION_IDS: ReadonlySet<string> = new Set();
+const EMPTY_ITEMS: InboxItem[] = [];
+const CHEVRON_SIZE = 14;
+const NOTE_SPINNER_SIZE = 12;
 
 type TierKey = NowJumpTarget | "recentActivity";
 
@@ -47,7 +64,6 @@ type TierKey = NowJumpTarget | "recentActivity";
 interface TierConfig {
   key: TierKey;
   titleKey: MessageKey;
-  tone: SectionTone;
   getBadge?: (
     item: InboxItem,
   ) => { label: MessageKey; className: string } | null;
@@ -57,7 +73,6 @@ const TIER_CONFIGS: TierConfig[] = [
   {
     key: "needsAttention",
     titleKey: "inboxTierNeedsAttention",
-    tone: "rose",
     getBadge: (item) => {
       if (item.pendingInputType === "tool-approval") {
         return {
@@ -75,89 +90,14 @@ const TIER_CONFIGS: TierConfig[] = [
     },
   },
   // Active items show a pulsing dot instead of a text badge.
-  { key: "active", titleKey: "inboxTierActive", tone: "mint" },
-  { key: "unread", titleKey: "inboxTierUnread", tone: "sand" },
-  {
-    key: "recentActivity",
-    titleKey: "inboxTierRecentActivity",
-    tone: "default",
-  },
+  { key: "active", titleKey: "inboxTierActive" },
+  { key: "unread", titleKey: "inboxTierUnread" },
+  { key: "recentActivity", titleKey: "inboxTierRecentActivity" },
 ];
 
-/** Session rows carry their tier's state color on the card accent rule. */
-const TIER_ACCENT_CLASS: Record<SectionTone, string> = {
-  default: "",
-  rose: styles.accentRose ?? "",
-  mint: styles.accentMint ?? "",
-  sand: styles.accentSand ?? "",
-};
-
-/** Heading id a summary jump scrolls to. */
+/** Id of the tier card a summary jump scrolls to; it holds the count. */
 function tierHeadingId(key: TierKey): string {
   return `now-tier-${key}`;
-}
-
-/**
- * Explicit module classes for the closed Project Queue status union.
- * Only the statuses with a rule get a class; `queued` styles the base
- * item and status pill alone, matching the legacy stylesheet.
- */
-const QUEUE_ITEM_STATUS_CLASSES: Record<ProjectQueueItemStatus, string> = {
-  queued: "",
-  dispatching: "",
-  failed: styles.queueItemFailed ?? "",
-};
-
-const QUEUE_STATUS_CLASSES: Record<ProjectQueueItemStatus, string> = {
-  queued: "",
-  dispatching: styles.queueItemStatusDispatching ?? "",
-  failed: styles.queueItemStatusFailed ?? "",
-};
-
-type Translate = ReturnType<typeof useI18n>["t"];
-
-type PendingNewSessionProjectQueueItem = ProjectQueueItemSummary & {
-  target: Extract<ProjectQueueItemSummary["target"], { type: "new-session" }>;
-};
-
-function isPendingNewSessionProjectQueueItem(
-  item: ProjectQueueItemSummary,
-): item is PendingNewSessionProjectQueueItem {
-  return (
-    item.target.type === "new-session" &&
-    (item.status === "queued" ||
-      item.status === "dispatching" ||
-      item.status === "failed")
-  );
-}
-
-function projectQueueStatusLabel(
-  status: ProjectQueueItemSummary["status"],
-  t: Translate,
-): string {
-  switch (status) {
-    case "dispatching":
-      return t("projectQueueStatusDispatching");
-    case "failed":
-      return t("projectQueueStatusFailed");
-    case "queued":
-      return t("projectQueueStatusQueued");
-  }
-}
-
-function formatProjectQueueAge(timestamp: string, t: Translate): string {
-  const then = new Date(timestamp).getTime();
-  if (!Number.isFinite(then)) return "";
-  const diffMs = Math.max(0, Date.now() - then);
-  const diffMins = Math.floor(diffMs / 60000);
-  const diffHours = Math.floor(diffMs / 3600000);
-  const diffDays = Math.floor(diffMs / 86400000);
-
-  if (diffMins < 1) return t("projectQueueAgeJustNow");
-  if (diffMins < 60) return t("projectQueueAgeMinutes", { count: diffMins });
-  if (diffHours < 24) return t("projectQueueAgeHours", { count: diffHours });
-  if (diffDays < 7) return t("projectQueueAgeDays", { count: diffDays });
-  return new Date(timestamp).toLocaleDateString();
 }
 
 interface InboxSectionProps {
@@ -179,64 +119,6 @@ interface InboxSectionProps {
   publicShareManagementAvailable: boolean;
 }
 
-interface InboxProjectQueueItemProps {
-  item: PendingNewSessionProjectQueueItem;
-  projectName: string;
-  basePath?: string;
-  hideProjectName?: boolean;
-}
-
-function InboxProjectQueueItem({
-  item,
-  projectName,
-  basePath = "",
-  hideProjectName = false,
-}: InboxProjectQueueItemProps) {
-  const { t } = useI18n();
-  const prompt = item.messagePreview.trim() || t("projectQueueAttachmentOnly");
-  const targetTitle = item.target.title?.trim();
-  const title = targetTitle || prompt;
-  const showPromptPreview = !!targetTitle && targetTitle !== prompt;
-  const age = formatProjectQueueAge(item.createdAt, t);
-  const href = `${basePath}/projects?queueItem=${encodeURIComponent(item.id)}`;
-
-  return (
-    <li
-      className={`${styles.queueItem} ${QUEUE_ITEM_STATUS_CLASSES[item.status]}`}
-      data-inbox-project-queue-item-id={item.id}
-    >
-      <Link className={styles.queueItemLink} to={href}>
-        <span className={styles.queueItemTitleRow}>
-          <strong className={styles.queueItemTitle}>{title}</strong>
-          <span className={styles.queueItemTargetBadge}>
-            {t("projectQueueTargetNewSession")}
-          </span>
-          <span
-            className="session-project-queue-badge"
-            title={t("projectQueueSidebarBadge")}
-          >
-            Q
-          </span>
-        </span>
-        {showPromptPreview && (
-          <span className={styles.queueItemPreview}>{prompt}</span>
-        )}
-        <span className={styles.queueItemMeta}>
-          {!hideProjectName && (
-            <span className={styles.queueItemProject}>{projectName}</span>
-          )}
-          {age && <span>{age}</span>}
-          <span
-            className={`${styles.queueItemStatus} ${QUEUE_STATUS_CLASSES[item.status]}`}
-          >
-            {projectQueueStatusLabel(item.status, t)}
-          </span>
-        </span>
-      </Link>
-    </li>
-  );
-}
-
 function getInboxRowActivity(
   item: InboxItem,
   tierKey: string,
@@ -247,152 +129,157 @@ function getInboxRowActivity(
   return item.activity;
 }
 
-function InboxSection({
+function InboxRow({
+  item,
   config,
-  items,
-  projectQueueItems = [],
-  projectNameById,
-  hideProjectName,
-  basePath = "",
-  drafts,
-  projectQueuedSessionIds,
-  publicShareCreationReady,
-  publicShareManagementAvailable,
-}: InboxSectionProps) {
+  props,
+}: {
+  item: InboxItem;
+  config: TierConfig;
+  props: InboxSectionProps;
+}) {
   const { t } = useI18n();
+  const badge = config.getBadge?.(item);
+  return (
+    <SessionListItem
+      sessionId={item.sessionId}
+      projectId={item.projectId}
+      title={getSessionDisplayTitle({
+        customTitle: item.customTitle,
+        title: item.sessionTitle,
+      })}
+      hasCustomTitle={!!item.customTitle}
+      projectName={item.projectName}
+      updatedAt={item.updatedAt}
+      hasUnread={item.hasUnread}
+      isStarred={item.isStarred}
+      activity={getInboxRowActivity(item, config.key)}
+      pendingInputType={item.pendingInputType}
+      mode="card"
+      openNonHumanUserTurn
+      showProjectName={!props.hideProjectName}
+      showTimestamp
+      showStatusBadge={false}
+      showActivityIndicator={config.key === "active"}
+      customBadge={badge ? { ...badge, label: t(badge.label) } : null}
+      basePath={props.basePath}
+      hasDraft={props.drafts.has(item.sessionId)}
+      hasProjectQueue={props.projectQueuedSessionIds.has(item.sessionId)}
+      publicShareCreationReady={props.publicShareCreationReady}
+      publicShareManagementAvailable={props.publicShareManagementAvailable}
+    />
+  );
+}
+
+/** One tier as a flush card: serif title, mono count, dashed rows. */
+function InboxSection(props: InboxSectionProps) {
+  const { t } = useI18n();
+  const { config, items, projectQueueItems = [] } = props;
   const sectionCount = items.length + projectQueueItems.length;
   if (sectionCount === 0) return null;
   const headingId = tierHeadingId(config.key);
 
   return (
-    <section
-      className={`${styles.section} ${TIER_ACCENT_CLASS[config.tone]}`}
-      aria-labelledby={headingId}
+    <Card
+      as="section"
+      flush
+      id={headingId}
+      className={styles.section}
+      aria-labelledby={`${headingId}-title`}
     >
-      <SectionHeader
-        id={headingId}
+      <CardHeader
         title={t(config.titleKey)}
-        count={sectionCount}
-        tone={config.tone}
+        titleId={`${headingId}-title`}
+        meta={sectionCount}
       />
       <ul className={`sessions-list ${styles.collection}`}>
         {projectQueueItems.map((item) => (
-          <InboxProjectQueueItem
+          <InboxQueueItem
             key={item.id}
             item={item}
             projectName={
-              projectNameById.get(item.projectId) ??
+              props.projectNameById.get(item.projectId) ??
               t("projectQueueUnknownProject")
             }
-            hideProjectName={hideProjectName}
-            basePath={basePath}
+            hideProjectName={props.hideProjectName}
+            basePath={props.basePath}
           />
         ))}
-        {items.map((item) => {
-          const badge = config.getBadge?.(item);
-          const activity = getInboxRowActivity(item, config.key);
-          return (
-            <SessionListItem
-              key={item.sessionId}
-              sessionId={item.sessionId}
-              projectId={item.projectId}
-              title={getSessionDisplayTitle({
-                customTitle: item.customTitle,
-                title: item.sessionTitle,
-              })}
-              hasCustomTitle={!!item.customTitle}
-              projectName={item.projectName}
-              updatedAt={item.updatedAt}
-              hasUnread={item.hasUnread}
-              isStarred={item.isStarred}
-              activity={activity}
-              pendingInputType={item.pendingInputType}
-              mode="card"
-              openNonHumanUserTurn
-              showProjectName={!hideProjectName}
-              showTimestamp
-              showStatusBadge={false}
-              showActivityIndicator={config.key === "active"}
-              customBadge={badge ? { ...badge, label: t(badge.label) } : null}
-              basePath={basePath}
-              hasDraft={drafts.has(item.sessionId)}
-              hasProjectQueue={projectQueuedSessionIds.has(item.sessionId)}
-              publicShareCreationReady={publicShareCreationReady}
-              publicShareManagementAvailable={publicShareManagementAvailable}
-            />
-          );
-        })}
+        {items.map((item) => (
+          <InboxRow
+            key={item.sessionId}
+            item={item}
+            config={config}
+            props={props}
+          />
+        ))}
       </ul>
-    </section>
+    </Card>
   );
 }
 
-function ReviewOutcomeSection({
-  items,
-  basePath,
-  hideProjectName,
+type TierProps = Omit<
+  InboxSectionProps,
+  "config" | "items" | "projectQueueItems"
+>;
+
+function tierConfigs(overview: SessionOverviewData | undefined): TierConfig[] {
+  return TIER_CONFIGS.filter(
+    (config) => !overview || config.key !== "unread",
+  ).map((config) =>
+    overview && config.key === "recentActivity"
+      ? { ...config, titleKey: "sessionOverviewRecent" as const }
+      : config,
+  );
+}
+
+/** Review outcomes, then one card per non-empty tier, then "View all". */
+function TierList({
+  overview,
+  tiers,
+  pending,
+  reviewItems,
+  projectId,
+  tierProps,
 }: {
-  items: ReviewInboxItem[];
-  basePath: string;
-  hideProjectName: boolean;
+  overview?: SessionOverviewData;
+  tiers: Record<TierKey, InboxItem[]>;
+  pending: PendingNewSessionProjectQueueItem[];
+  reviewItems: ReviewInboxItem[];
+  projectId?: string;
+  tierProps: TierProps;
 }) {
   const { t } = useI18n();
-  const outcomes = items.flatMap((item) =>
-    item.outcomes.map((outcome) => ({ item, outcome })),
-  );
+  const basePath = tierProps.basePath ?? "";
+  const scope = projectId
+    ? `?${new URLSearchParams({ project: projectId })}`
+    : "";
   return (
-    <section className={styles.section}>
-      <SectionHeader
-        title={t("inboxTierReviewOutcomes")}
-        count={outcomes.length}
-      />
-      <ul className={styles.reviewOutcomeList}>
-        {outcomes.map(({ item, outcome }) => {
-          const reviewParams = new URLSearchParams({
-            projectId: item.projectId,
-            tab: "reviews",
-            submission: item.submissionId,
-          });
-          return (
-            <li
-              key={`${item.submissionId}\0${outcome.siteId}\0${outcome.entryId}`}
-              className={styles.reviewOutcomeCard}
-            >
-              <div className={styles.reviewOutcomeHead}>
-                <Link to={`${basePath}/git-status?${reviewParams}`}>
-                  {item.name ?? t("sourceReviewUnreadSubmission")}
-                </Link>
-                <span>{reviewDispositionLabel(outcome.disposition, t)}</span>
-              </div>
-              <div className={styles.reviewOutcomeText}>{outcome.text}</div>
-              <div className={styles.reviewOutcomeMeta}>
-                {!hideProjectName && <span>{item.projectName}</span>}
-                <span>{outcome.path}</span>
-                {outcome.sessionId && (
-                  <Link
-                    to={`${basePath}/projects/${encodeURIComponent(
-                      item.projectId,
-                    )}/sessions/${encodeURIComponent(outcome.sessionId)}`}
-                  >
-                    {t("sourceReviewOutcomeSession")}
-                  </Link>
-                )}
-              </div>
-            </li>
-          );
-        })}
-      </ul>
-    </section>
+    <div className={styles.tiers} {...overview?.handlers}>
+      {reviewItems.length > 0 && (
+        <ReviewOutcomes
+          items={reviewItems}
+          basePath={basePath}
+          hideProjectName={!!projectId}
+        />
+      )}
+      {tierConfigs(overview).map((config) => (
+        <InboxSection
+          key={config.key}
+          config={config}
+          items={tiers[config.key]}
+          projectQueueItems={config.key === "active" ? pending : []}
+          {...tierProps}
+        />
+      ))}
+      {overview && (
+        <Link className={styles.viewAll} to={`${basePath}/sessions${scope}`}>
+          {t("sessionOverviewViewAll")}
+          <ChevronRightIcon size={CHEVRON_SIZE} />
+        </Link>
+      )}
+    </div>
   );
-}
-
-function reviewDispositionLabel(
-  disposition: ReviewInboxItem["outcomes"][number]["disposition"],
-  t: Translate,
-): string {
-  if (disposition === "wont_fix") return t("sourceReviewOutcomeNoChange");
-  if (disposition === "question") return t("sourceReviewOutcomeQuestion");
-  return t("sourceReviewOutcomeDone");
 }
 
 export interface InboxContentProps {
@@ -403,6 +290,12 @@ export interface InboxContentProps {
   projects?: Project[];
   /** Callback when project filter changes */
   onProjectChange?: (projectId: string | undefined) => void;
+  /** Page title drawn by the intro block; defaults to "Overview". */
+  title?: string;
+  /** Mono context above the title, e.g. the filtered project. */
+  eyebrow?: ReactNode[];
+  /** One sentence under the title. */
+  lede?: string;
 }
 
 /**
@@ -416,6 +309,185 @@ function filterByProject(
   return items.filter((item) => item.projectId === projectId);
 }
 
+/** The optional source-review feed; failures keep the last accepted rows. */
+function useReviewInbox(supported: boolean) {
+  const [items, setItems] = useState<ReviewInboxItem[]>([]);
+  const [loading, setLoading] = useState(false);
+  const load = useCallback(async () => {
+    if (!supported) {
+      setItems([]);
+      setLoading(false);
+      return;
+    }
+    setLoading(true);
+    try {
+      const result = await api.listReviewInbox();
+      setItems(result.items);
+    } finally {
+      setLoading(false);
+    }
+  }, [supported]);
+
+  useEffect(() => {
+    void load().catch(() => {
+      // The ordinary Inbox remains usable if the optional feed fails.
+    });
+    if (!supported) return;
+    return activityBus.on("review-response-changed", () => {
+      void load().catch(() => {
+        // Preserve the last accepted outcome cards on transient failures.
+      });
+    });
+  }, [load, supported]);
+  return { items, loading, load };
+}
+
+/** Tier rows from the overview model, or the legacy inbox feed. */
+function useInboxTiers(
+  overview: SessionOverviewData | undefined,
+  projectId: string | undefined,
+) {
+  const inbox = useInboxContext();
+  const needsAttention =
+    overview?.needsAttention ??
+    filterByProject(inbox.needsAttention, projectId);
+  const active = overview?.active ?? filterByProject(inbox.active, projectId);
+  const recentActivity =
+    overview?.recentActivity ??
+    filterByProject(inbox.recentActivity, projectId);
+  const unread8h = overview
+    ? EMPTY_ITEMS
+    : filterByProject(inbox.unread8h, projectId);
+  const unread24h = overview
+    ? EMPTY_ITEMS
+    : filterByProject(inbox.unread24h, projectId);
+  const all = useMemo(
+    () => [
+      ...needsAttention,
+      ...active,
+      ...recentActivity,
+      ...unread8h,
+      ...unread24h,
+    ],
+    [needsAttention, active, recentActivity, unread8h, unread24h],
+  );
+  return {
+    tiers: {
+      needsAttention,
+      active,
+      unread: [...unread8h, ...unread24h],
+      recentActivity,
+    } satisfies Record<TierKey, InboxItem[]>,
+    all,
+    loading: overview?.loading ?? inbox.loading,
+    error: overview?.error ?? (overview ? null : inbox.error),
+    refresh: inbox.refresh,
+  };
+}
+
+function useProjectNames(
+  projects: Project[] | undefined,
+  items: readonly InboxItem[],
+) {
+  return useMemo(() => {
+    const names = new Map(
+      (projects ?? []).map((project) => [project.id, project.name]),
+    );
+    for (const item of items) {
+      if (!names.has(item.projectId)) {
+        names.set(item.projectId, item.projectName);
+      }
+    }
+    return names;
+  }, [projects, items]);
+}
+
+/**
+ * Keep the queue feed mounted for known inbox projects. Badge rendering reads
+ * from the shared client summary store, while new-session queue items render
+ * as pending Running rows because they have no session yet.
+ */
+function useInboxQueue(
+  projectId: string | undefined,
+  projects: Project[] | undefined,
+  items: readonly InboxItem[],
+) {
+  const { version } = useVersion();
+  const supported = serverSupportsProjectQueue(version);
+  const visibleIds = useMemo(
+    () => [...new Set(items.map((item) => item.projectId).filter(Boolean))],
+    [items],
+  );
+  const feedIds = useMemo(() => {
+    if (projectId) return [projectId];
+    if (projects && projects.length > 0) {
+      return [...new Set(projects.map((project) => project.id))];
+    }
+    return visibleIds;
+  }, [projectId, projects, visibleIds]);
+  const queues = useProjectQueues(
+    supported ? feedIds : EMPTY_PROJECT_QUEUE_PROJECT_IDS,
+  );
+  const queuedIds = useProjectQueuedSessionIds(
+    supported ? visibleIds : EMPTY_PROJECT_QUEUE_PROJECT_IDS,
+  );
+  const pending = useMemo(
+    () =>
+      supported ? queues.items.filter(isPendingNewSessionProjectQueueItem) : [],
+    [queues.items, supported],
+  );
+  return {
+    supported,
+    loading: queues.loading,
+    queuedCount: supported ? queues.items.length : undefined,
+    queuedSessionIds: supported ? queuedIds : EMPTY_PROJECT_QUEUE_SESSION_IDS,
+    pending,
+  };
+}
+
+function usePublicShareFlags() {
+  const { settings } = useServerSettings();
+  const { version } = useVersion();
+  const { status } = usePublicShareStatus({
+    poll: settings?.publicSharesEnabled ?? false,
+  });
+  return {
+    creationReady: status?.canCreate ?? false,
+    managementAvailable: serverHasCapability(
+      version,
+      PUBLIC_SHARE_MANAGEMENT_CAPABILITY,
+    ),
+    reviewInboxSupported:
+      serverHasCapability(version, GIT_SOURCE_REVIEW_SUBMISSIONS_CAPABILITY) &&
+      (settings?.sourceReviewSubmissionsEnabled ?? false),
+  };
+}
+
+function jumpToTier(target: NowJumpTarget) {
+  const reduceMotion = window.matchMedia?.(
+    "(prefers-reduced-motion: reduce)",
+  ).matches;
+  document.getElementById(tierHeadingId(target))?.scrollIntoView({
+    behavior: reduceMotion ? "auto" : "smooth",
+    block: "start",
+  });
+}
+
+function PartialNote({ overview }: { overview?: SessionOverviewData }) {
+  const { t } = useI18n();
+  if (!overview?.partial) return null;
+  return (
+    <p className={styles.note} role="status">
+      {overview.error ? null : (
+        <Spinner size={NOTE_SPINNER_SIZE} tone="muted" />
+      )}
+      {t(
+        overview.error ? "sessionOverviewIncomplete" : "sessionOverviewLoading",
+      )}
+    </p>
+  );
+}
+
 /**
  * Shared inbox content component.
  * Displays inbox tiers, refresh button, and empty/loading/error states.
@@ -426,85 +498,23 @@ export function InboxContent({
   projects,
   onProjectChange,
   overview,
+  title,
+  eyebrow,
+  lede,
 }: InboxContentProps) {
   const { t } = useI18n();
   const basePath = useRemoteBasePath();
   const navigate = useNavigate();
-  const { settings: serverSettings } = useServerSettings();
-  const { version } = useVersion();
-  const supportsProjectQueue = serverSupportsProjectQueue(version);
-  const publicShareManagementAvailable = serverHasCapability(
-    version,
-    PUBLIC_SHARE_MANAGEMENT_CAPABILITY,
+  const share = usePublicShareFlags();
+  const review = useReviewInbox(share.reviewInboxSupported);
+  const { tiers, all, loading, error, refresh } = useInboxTiers(
+    overview,
+    projectId,
   );
-  const supportsSourceReviewInbox =
-    serverHasCapability(version, GIT_SOURCE_REVIEW_SUBMISSIONS_CAPABILITY) &&
-    (serverSettings?.sourceReviewSubmissionsEnabled ?? false);
-  const [reviewInbox, setReviewInbox] = useState<ReviewInboxItem[]>([]);
-  const [reviewInboxLoading, setReviewInboxLoading] = useState(false);
-  const publicSharesEnabled = serverSettings?.publicSharesEnabled ?? false;
-  const { status: publicShareStatus } = usePublicShareStatus({
-    poll: publicSharesEnabled,
-  });
-  const publicShareCreationReady = publicShareStatus?.canCreate ?? false;
-  const {
-    needsAttention: allNeedsAttention,
-    active: allActive,
-    recentActivity: allRecentActivity,
-    unread8h: allUnread8h,
-    unread24h: allUnread24h,
-    loading: inboxLoading,
-    error: inboxError,
-    refresh,
-  } = useInboxContext();
-  const loading = overview?.loading ?? inboxLoading;
-  const error = overview?.error ?? (overview ? null : inboxError);
-
-  // Filter by project if specified
-  const needsAttention =
-    overview?.needsAttention ?? filterByProject(allNeedsAttention, projectId);
-  const active = overview?.active ?? filterByProject(allActive, projectId);
-  const recentActivity =
-    overview?.recentActivity ?? filterByProject(allRecentActivity, projectId);
-  const unread8h = overview ? [] : filterByProject(allUnread8h, projectId);
-  const unread24h = overview ? [] : filterByProject(allUnread24h, projectId);
-  const unread = [...unread8h, ...unread24h];
-
-  const totalSessionItems =
-    needsAttention.length +
-    active.length +
-    recentActivity.length +
-    unread8h.length +
-    unread24h.length;
-
+  const queue = useInboxQueue(projectId, projects, all);
+  const projectNameById = useProjectNames(projects, all);
+  const drafts = useDraftSessionIds();
   const [refreshing, setRefreshing] = useState(false);
-
-  const loadReviewInbox = useCallback(async () => {
-    if (!supportsSourceReviewInbox) {
-      setReviewInbox([]);
-      setReviewInboxLoading(false);
-      return;
-    }
-    setReviewInboxLoading(true);
-    try {
-      const result = await api.listReviewInbox();
-      setReviewInbox(result.items);
-    } finally {
-      setReviewInboxLoading(false);
-    }
-  }, [supportsSourceReviewInbox]);
-
-  useEffect(() => {
-    void loadReviewInbox().catch(() => {
-      // The ordinary Inbox remains usable if the optional feed fails.
-    });
-    if (!supportsSourceReviewInbox) return;
-    return activityBus.on("review-response-changed", () => {
-      void loadReviewInbox().catch(() => {
-        // Preserve the last accepted outcome cards on transient failures.
-      });
-    });
-  }, [loadReviewInbox, supportsSourceReviewInbox]);
 
   const handleRefresh = async () => {
     setRefreshing(true);
@@ -512,7 +522,7 @@ export function InboxContent({
       await Promise.all([
         refresh(),
         overview?.refresh(),
-        loadReviewInbox().catch(() => {
+        review.load().catch(() => {
           // The review feed is optional; retain its last accepted cards.
         }),
       ]);
@@ -521,123 +531,26 @@ export function InboxContent({
     }
   };
 
-  const jumpToTier = (target: NowJumpTarget) => {
-    const reduceMotion = window.matchMedia?.(
-      "(prefers-reduced-motion: reduce)",
-    ).matches;
-    document.getElementById(tierHeadingId(target))?.scrollIntoView({
-      behavior: reduceMotion ? "auto" : "smooth",
-      block: "start",
-    });
-  };
-
-  const tierData: Record<TierKey, InboxItem[]> = {
-    needsAttention,
-    active,
-    unread,
-    recentActivity,
-  };
-
-  const visibleSessionProjectIds = useMemo(
-    () => [
-      ...new Set(
-        [
-          ...needsAttention,
-          ...active,
-          ...recentActivity,
-          ...unread8h,
-          ...unread24h,
-        ]
-          .map((item) => item.projectId)
-          .filter(Boolean),
-      ),
-    ],
-    [needsAttention, active, recentActivity, unread8h, unread24h],
-  );
-  const queueFeedProjectIds = useMemo(() => {
-    if (projectId) return [projectId];
-    if (projects && projects.length > 0) {
-      return [...new Set(projects.map((project) => project.id))];
-    }
-    return visibleSessionProjectIds;
-  }, [projectId, projects, visibleSessionProjectIds]);
-  const projectNameById = useMemo(() => {
-    const names = new Map(
-      (projects ?? []).map((project) => [project.id, project.name]),
-    );
-    for (const item of [
-      ...needsAttention,
-      ...active,
-      ...recentActivity,
-      ...unread8h,
-      ...unread24h,
-    ]) {
-      if (!names.has(item.projectId)) {
-        names.set(item.projectId, item.projectName);
-      }
-    }
-    return names;
-  }, [projects, needsAttention, active, recentActivity, unread8h, unread24h]);
-  // Keep the queue feed mounted for known inbox projects. Badge rendering
-  // reads from the shared client summary store selector below, while new-session
-  // queue items render as pending Active rows because they have no session yet.
-  const projectQueues = useProjectQueues(
-    supportsProjectQueue
-      ? queueFeedProjectIds
-      : EMPTY_PROJECT_QUEUE_PROJECT_IDS,
-  );
-  const rawProjectQueuedSessionIds = useProjectQueuedSessionIds(
-    supportsProjectQueue
-      ? visibleSessionProjectIds
-      : EMPTY_PROJECT_QUEUE_PROJECT_IDS,
-  );
-  const projectQueuedSessionIds = supportsProjectQueue
-    ? rawProjectQueuedSessionIds
-    : EMPTY_PROJECT_QUEUE_SESSION_IDS;
-  const pendingNewSessionQueueItems = useMemo(
-    () =>
-      supportsProjectQueue
-        ? projectQueues.items.filter(isPendingNewSessionProjectQueueItem)
-        : [],
-    [projectQueues.items, supportsProjectQueue],
-  );
   const filteredReviewInbox = useMemo(
     () =>
       projectId
-        ? reviewInbox.filter((item) => item.projectId === projectId)
-        : reviewInbox,
-    [projectId, reviewInbox],
+        ? review.items.filter((item) => item.projectId === projectId)
+        : review.items,
+    [projectId, review.items],
   );
   const reviewOutcomeCount = filteredReviewInbox.reduce(
     (count, item) => count + item.outcomes.length,
     0,
   );
-  const totalItems =
-    totalSessionItems + pendingNewSessionQueueItems.length + reviewOutcomeCount;
-
+  const totalItems = all.length + queue.pending.length + reviewOutcomeCount;
   const pageLoading =
     loading ||
-    reviewInboxLoading ||
-    (totalSessionItems === 0 &&
-      pendingNewSessionQueueItems.length === 0 &&
-      supportsProjectQueue &&
-      projectQueues.loading);
+    review.loading ||
+    (all.length === 0 &&
+      queue.pending.length === 0 &&
+      queue.supported &&
+      queue.loading);
   const isEmpty = totalItems === 0 && !pageLoading && !overview?.partial;
-
-  const drafts = useDraftSessionIds();
-
-  // Build project options for FilterDropdown
-  const projectOptions: FilterOption<string>[] = projects
-    ? [
-        { value: "", label: t("inboxAllProjects") },
-        ...projects.map((p) => ({ value: p.id, label: p.name })),
-      ]
-    : [];
-
-  const handleProjectSelect = (selected: string[]) => {
-    const value = selected[0] ?? "";
-    onProjectChange?.(value === "" ? undefined : value);
-  };
 
   const startNewSession = () => {
     const query = projectId
@@ -646,69 +559,71 @@ export function InboxContent({
     navigate(`${basePath}/new-session${query}`);
   };
 
+  const tierProps: TierProps = {
+    projectNameById,
+    hideProjectName: !!projectId,
+    basePath,
+    drafts,
+    projectQueuedSessionIds: queue.queuedSessionIds,
+    publicShareCreationReady: share.creationReady,
+    publicShareManagementAvailable: share.managementAvailable,
+  };
+
   return (
     <main className="page-scroll-container">
-      <div className={`page-content-inner ${styles.root}`}>
-        <NowSummary
-          overview={overview}
-          projectId={projectId}
-          counts={{
-            needsYou: overview?.counts.needsYou ?? needsAttention.length,
-            running:
-              (overview?.counts.running ?? active.length) +
-              pendingNewSessionQueueItems.length,
-            unread: overview?.counts.unread ?? unread.length,
-          }}
-          showGlance={!pageLoading && !error && !isEmpty}
-          onJump={jumpToTier}
-          action={
-            <IconButton
-              label={refreshing ? t("inboxRefreshing") : t("inboxRefresh")}
-              onClick={handleRefresh}
-              disabled={refreshing || loading}
-            >
-              <svg
-                className={refreshing ? styles.refreshSpinner : ""}
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.8"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                aria-hidden="true"
-              >
-                <polyline points="23 4 23 10 17 10" />
-                <polyline points="1 20 1 14 7 14" />
-                <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
-              </svg>
-            </IconButton>
-          }
+      <div className={`page-content-inner ${pageWidthClass("wide")}`}>
+        <PageIntro
+          eyebrow={eyebrow}
+          title={title ?? t("sessionOverview")}
+          lede={lede}
           filters={
-            <>
-              {projects && projects.length > 0 && (
-                <FilterDropdown
-                  label={t("inboxFilterProject")}
-                  options={projectOptions}
-                  selected={projectId ? [projectId] : []}
-                  onChange={handleProjectSelect}
-                  multiSelect={false}
-                  placeholder={t("inboxAllProjects")}
-                />
-              )}
-              <SessionAsyncQuestionsButton
-                projectId={projectId}
-                basePath={basePath}
-              />
-            </>
+            <OverviewToolbar
+              projects={projects}
+              projectId={projectId}
+              onProjectChange={onProjectChange}
+              basePath={basePath}
+              refreshing={refreshing}
+              refreshDisabled={refreshing || loading}
+              onRefresh={() => void handleRefresh()}
+            />
           }
         />
 
-        {pageLoading && <LoadingState label={t("inboxLoading")} />}
+        {pageLoading && (
+          <div className={styles.tiers}>
+            <LoadingState label={t("inboxLoading")} variant="cards" />
+            <LoadingState label={t("inboxLoading")} variant="list" />
+          </div>
+        )}
 
         {error && (
-          <p className="error">{t("inboxError", { message: error.message })}</p>
+          <ErrorState
+            tag={t("errorTag")}
+            message={t("inboxError", { message: error.message })}
+            onRetry={() => void handleRefresh()}
+            retryLabel={t("retry")}
+          />
+        )}
+
+        {!pageLoading && !error && (
+          <>
+            <NowSummary
+              counts={{
+                needsYou:
+                  overview?.counts.needsYou ?? tiers.needsAttention.length,
+                running:
+                  (overview?.counts.running ?? tiers.active.length) +
+                  queue.pending.length,
+                unread: overview?.counts.unread ?? tiers.unread.length,
+                queued: queue.queuedCount,
+              }}
+              partial={overview?.partial ?? false}
+              projectId={projectId}
+              unreadOnPage={!overview}
+              onJump={jumpToTier}
+            />
+            <PartialNote overview={overview} />
+          </>
         )}
 
         {!pageLoading && !error && isEmpty && (
@@ -728,52 +643,14 @@ export function InboxContent({
         )}
 
         {!pageLoading && !error && !isEmpty && (
-          <div className={styles.tiers} {...overview?.handlers}>
-            {filteredReviewInbox.length > 0 && (
-              <ReviewOutcomeSection
-                items={filteredReviewInbox}
-                basePath={basePath}
-                hideProjectName={!!projectId}
-              />
-            )}
-            {TIER_CONFIGS.filter(
-              (config) => !overview || config.key !== "unread",
-            ).map((originalConfig) => {
-              const config =
-                overview && originalConfig.key === "recentActivity"
-                  ? {
-                      ...originalConfig,
-                      titleKey: "sessionOverviewRecent" as const,
-                    }
-                  : originalConfig;
-              return (
-                <InboxSection
-                  key={config.key}
-                  config={config}
-                  items={tierData[config.key]}
-                  projectQueueItems={
-                    config.key === "active" ? pendingNewSessionQueueItems : []
-                  }
-                  projectNameById={projectNameById}
-                  hideProjectName={!!projectId}
-                  basePath={basePath}
-                  drafts={drafts}
-                  projectQueuedSessionIds={projectQueuedSessionIds}
-                  publicShareCreationReady={publicShareCreationReady}
-                  publicShareManagementAvailable={
-                    publicShareManagementAvailable
-                  }
-                />
-              );
-            })}
-            {overview && (
-              <Link
-                to={`${basePath}/sessions${projectId ? `?${new URLSearchParams({ project: projectId })}` : ""}`}
-              >
-                {t("sessionOverviewViewAll")}
-              </Link>
-            )}
-          </div>
+          <TierList
+            overview={overview}
+            tiers={tiers}
+            pending={queue.pending}
+            reviewItems={filteredReviewInbox}
+            projectId={projectId}
+            tierProps={tierProps}
+          />
         )}
       </div>
     </main>

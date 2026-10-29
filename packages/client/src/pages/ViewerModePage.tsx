@@ -1,6 +1,8 @@
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useState } from "react";
 import { ArtifactLinkViewer } from "../components/ArtifactLinkViewer";
+import { ErrorState } from "../components/garden/ErrorState";
+import { LoadingState } from "../components/garden/LoadingState";
 import { LocalFileModal } from "../components/LocalMediaModal";
 import { useVersion } from "../hooks/useVersion";
 import { useRemoteBasePath } from "../hooks/useRemoteBasePath";
@@ -26,13 +28,14 @@ export function ViewerModePage() {
     return Number.isSafeInteger(number) && number > 0 ? number : undefined;
   };
   if (mode !== "edit" && mode !== "interactive")
-    return <p role="alert">{t("fileInvalidUrl")}</p>;
+    return <ErrorState message={t("fileInvalidUrl")} />;
   if (artifactUrl) {
-    if (!version) return <p role="status">{t("sourceEditorLoading")}</p>;
+    if (!version)
+      return <LoadingState label={t("sourceEditorLoading")} variant="page" />;
     if (
       !isArtifactLink(artifactUrl, version.artifactViewer, window.location.href)
     )
-      return <p role="alert">{t("artifactUnavailable")}</p>;
+      return <ErrorState message={t("artifactUnavailable")} />;
     return (
       <div className={styles.artifactHost} ref={setArtifactHost}>
         {artifactHost && (
@@ -58,7 +61,7 @@ export function ViewerModePage() {
       </div>
     );
   }
-  if (!path) return <p role="alert">{t("fileMissingPath")}</p>;
+  if (!path) return <ErrorState message={t("fileMissingPath")} />;
   return (
     <LocalFileModal
       resource={

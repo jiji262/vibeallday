@@ -1,3 +1,8 @@
+/* Why the server toggles below are disabled: a banner above their card. */
+.gatedNotice {
+  margin-bottom: var(--space-3);
+}
+
 .diagnostics {
   margin-top: var(--space-3);
   overflow: hidden;

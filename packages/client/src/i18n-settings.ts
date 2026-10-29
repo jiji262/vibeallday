@@ -13,13 +13,10 @@ import type {
 } from "./hooks/useOutputAppearance";
 import type { TabSize } from "./hooks/useTabSize";
 import type { Theme } from "./hooks/useTheme";
-import type { Locale } from "./i18n";
+import type { Locale, TranslationFn } from "./i18n";
 import type { SettingsCategory } from "./pages/settings/types";
 
-export function getThemeLabel(
-  theme: Theme,
-  t: (key: string) => string,
-): string {
+export function getThemeLabel(theme: Theme, t: TranslationFn): string {
   switch (theme) {
     case "auto":
       return t("themeAuto");

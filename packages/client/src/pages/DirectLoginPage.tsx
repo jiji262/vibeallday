@@ -16,6 +16,7 @@ import {
   AuthShell,
 } from "../components/auth/AuthShell";
 import { Button } from "../components/garden/Button";
+import { inputClassName } from "../components/garden/Field";
 import { useRemoteConnection } from "../contexts/RemoteConnectionContext";
 import { useSignInRequiredNotice } from "../hooks/useSignInRequiredNotice";
 import { useI18n } from "../i18n";
@@ -145,6 +146,7 @@ export function DirectLoginPage() {
           hint={t("directLoginServerUrlHint")}
         >
           <input
+            className={inputClassName()}
             id="serverUrl"
             type="text"
             value={serverUrl}
@@ -160,6 +162,7 @@ export function DirectLoginPage() {
 
         <AuthField id="username" label={t("directLoginUsername")}>
           <input
+            className={inputClassName()}
             id="username"
             type="text"
             value={username}
@@ -174,6 +177,7 @@ export function DirectLoginPage() {
 
         <AuthField id="password" label={t("directLoginPassword")}>
           <input
+            className={inputClassName()}
             id="password"
             type="password"
             value={password}
@@ -206,9 +210,8 @@ export function DirectLoginPage() {
         <Button
           type="submit"
           variant="primary"
-          size="lg"
           block
-          disabled={isConnecting}
+          loading={isConnecting}
           data-testid="login-button"
         >
           {isConnecting ? t("directLoginConnecting") : t("directLoginConnect")}

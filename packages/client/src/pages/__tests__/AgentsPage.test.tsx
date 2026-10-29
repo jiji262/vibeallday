@@ -140,6 +140,8 @@ vi.mock("../../i18n", () => ({
         providerChildrenCountOne: "{count} provider subagent",
         providerChildrenCountMany: "{count} provider subagents",
         providerChildFallback: "Provider subagent",
+        agentsSearchLabel: "Search processes",
+        agentsNoMatches: "No processes match this search",
       };
       return Object.entries(values ?? {}).reduce(
         (text, [name, value]) => text.replace(`{${name}}`, String(value)),
@@ -235,7 +237,7 @@ describe("AgentsPage process kill", () => {
     expect(screen.getByText("External")).toBeTruthy();
     expect(screen.getByText("Claude process")).toBeTruthy();
     expect(screen.getByText("Outside VIBEALLDAY")).toBeTruthy();
-    expect(screen.getByText("PID 9876")).toBeTruthy();
+    expect(screen.getByText("9876")).toBeTruthy();
     expect(screen.getAllByText("100 MiB RSS")).toHaveLength(1);
     expect(screen.getAllByText("200 MiB RSS")).toHaveLength(1);
     expect(screen.getAllByRole("button", { name: "Kill" })).toHaveLength(1);
@@ -324,7 +326,7 @@ describe("AgentsPage process kill", () => {
       </MemoryRouter>,
     );
 
-    const card = screen.getByText("Claude process").closest("article");
+    const card = screen.getByText("Claude process").closest("tr");
     expect(card).toBeTruthy();
     const touchPointerUp = () => {
       const event = new Event("pointerup", { bubbles: true });
@@ -437,5 +439,59 @@ describe("AgentsPage process kill", () => {
       "Could not stop the agent: Provider PID 43210 is still running after abort",
     );
     expect(refetch).toHaveBeenCalledOnce();
+  });
+
+  it("echoes every search keystroke and filters by session, project or PID", async () => {
+    render(
+      <MemoryRouter>
+        <AgentsPage />
+      </MemoryRouter>,
+    );
+
+    const field = screen.getByRole("searchbox", {
+      name: "Search processes",
+    }) as HTMLInputElement;
+    const typeSequentially = (text: string) => {
+      let value = "";
+      for (const char of text) {
+        value += char;
+        fireEvent.change(field, { target: { value } });
+        // Each keystroke is in the field before filtering catches up.
+        expect(field.value).toBe(value);
+      }
+    };
+    typeSequentially("nomatch");
+    await waitFor(() => {
+      expect(screen.queryByText("Codex session")).toBeNull();
+    });
+
+    typeSequentially("4321");
+    expect(await screen.findByText("Codex session")).toBeTruthy();
+  });
+
+  it("collapses to one empty state that keeps the host observer's reason", async () => {
+    const owned = processesState.processes;
+    processesState.processes = [];
+    hostProcessesState.supported = false;
+    try {
+      render(
+        <MemoryRouter>
+          <AgentsPage />
+        </MemoryRouter>,
+      );
+      expect(screen.getByText("agentsEmptyAllTitle")).toBeTruthy();
+      expect(screen.getByText("agentsExternalUnsupported")).toBeTruthy();
+      expect(screen.queryByRole("region", { name: "Active" })).toBeNull();
+
+      // A search with no results keeps the per-state cards.
+      fireEvent.change(screen.getByRole("searchbox"), {
+        target: { value: "x" },
+      });
+      expect(
+        await screen.findByRole("region", { name: "Active" }),
+      ).toBeTruthy();
+    } finally {
+      processesState.processes = owned;
+    }
   });
 });

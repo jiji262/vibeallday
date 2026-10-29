@@ -7,6 +7,7 @@ import {
   type ProviderName,
   serverHasCapability,
 } from "@vibeallday/shared";
+import { LoadingState } from "../../components/garden/LoadingState";
 import { useCallback, useEffect, useState } from "react";
 import { api } from "../../api/client";
 import { useRelativeNow } from "../../hooks/useRelativeNow";
@@ -255,7 +256,9 @@ export function CacheMissBillingSettings() {
   };
 
   if (isLoading) {
-    return <SettingsSection description={t("cacheMissBillingLoading")} />;
+    return (
+      <LoadingState label={t("cacheMissBillingLoading")} variant="compact" />
+    );
   }
 
   return (

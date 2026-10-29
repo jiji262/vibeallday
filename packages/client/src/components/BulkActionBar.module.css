@@ -1,160 +1,39 @@
-/* Bulk actions for the Sessions page: a dock that rises while sessions are
-   selected. On phones it rides above the tab bar, which owns the bottom edge. */
+/*
+ * Bulk selection band (garden CardBand) at the top of the Sessions result
+ * card. It sticks under the page's sticky search toolbar, whose height the
+ * page publishes as --sessions-toolbar-height.
+ */
 
-.bar {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  z-index: 100;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-3);
-  padding: var(--space-2) var(--space-3);
-  padding-bottom: max(var(--space-2), env(safe-area-inset-bottom, 0px));
-  background: var(--bg-card);
-  border-top: 1px solid var(--line-strong);
-  box-shadow: var(--shadow-lg);
-  animation: slideUp 0.2s ease-out;
-}
-
-.aboveTabBar {
-  bottom: calc(var(--tabbar-height) + env(safe-area-inset-bottom, 0px));
-  padding-bottom: var(--space-2);
-}
-
-@keyframes slideUp {
-  from {
-    transform: translateY(100%);
-  }
-  to {
-    transform: translateY(0);
-  }
-}
-
-.info {
-  display: flex;
-  flex-shrink: 0;
-  align-items: center;
-  gap: var(--space-1);
+.band {
+  position: sticky;
+  top: var(--sessions-toolbar-height, 0);
+  z-index: 3;
 }
 
 .count {
-  font-family: var(--font-mono);
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--text-primary);
-}
-
-.clear {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: var(--tap-min);
-  height: var(--tap-min);
-  padding: 0;
-  background: transparent;
-  border: none;
-  border-radius: var(--radius-md);
-  color: var(--text-muted);
-  cursor: pointer;
-  transition: background-color 120ms ease;
-}
-
-.clear:hover {
-  background: var(--bg-tertiary);
-  color: var(--text-primary);
+  margin-right: var(--space-1);
+  color: var(--ink-2);
+  font-family: var(--label-font);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
 
 .actions {
   display: flex;
-  min-width: 0;
-  gap: var(--space-2);
-  overflow-x: auto;
-}
-
-.actionButton {
-  display: flex;
-  flex-shrink: 0;
+  flex-wrap: wrap;
   align-items: center;
-  gap: var(--space-1);
-  min-height: var(--tap-min);
-  padding: var(--space-2) var(--space-3);
-  background: var(--bg-card);
-  border: 1px solid var(--line-strong);
-  border-radius: var(--radius-md);
-  color: var(--text-primary);
-  font: inherit;
-  font-size: 14px;
-  font-weight: 550;
-  cursor: pointer;
-  transition: background-color 120ms ease;
+  gap: var(--space-2);
+  margin-right: auto;
 }
 
-.actionButton:hover:not(:disabled) {
-  background: var(--bg-tertiary);
+.cancel {
+  flex-shrink: 0;
 }
 
-.actionButton:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.actionButtonPrimary {
-  background: var(--indigo);
-  color: var(--ink-on);
-  border-color: var(--indigo);
-}
-
-.actionButtonPrimary:hover:not(:disabled) {
-  background: var(--indigo-2);
-}
-
-/* Stack icon and text vertically on mobile */
-@media (width <= 768px) {
-  .actionButton {
-    flex-direction: column;
-    justify-content: center;
-    gap: 2px;
-    padding: var(--space-1) var(--space-3);
-  }
-
-  .actionButton span {
-    font-size: 11px;
-  }
-
-  .actionButton svg {
-    width: 20px;
-    height: 20px;
-  }
-
-  .filtered {
-    justify-content: flex-end;
-    padding: var(--space-2) var(--space-3);
-    background: transparent;
-    border-top: none;
-    box-shadow: none;
-    pointer-events: none;
-  }
-
-  .filtered .actions {
-    pointer-events: auto;
-  }
-
-  .filtered .actionButton {
-    flex-direction: row;
-    padding: var(--space-2) var(--space-3);
-    gap: var(--space-1);
-    box-shadow: var(--shadow-md);
-  }
-
-  .filtered .actionButton span {
-    font-size: 14px;
-  }
-
-  .filtered .actionButton svg {
-    width: 16px;
-    height: 16px;
+@media (width < 768px) {
+  .actions {
+    order: 3;
+    width: 100%;
   }
 }

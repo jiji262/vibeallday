@@ -55,18 +55,24 @@ components use the Garden names directly.
 | Ink | `--text-primary` | `#1F2433` | `#F1EDE4` |
 | Ink 2 | `--text-secondary` | `#3D4459` | `#D2CDC1` |
 | Ink 3 (meta) | `--text-muted` | `#5A6377` | `#A29EAE` |
-| Ink 4 (placeholder) | `--text-dimmed` | `#7F879A` | `#7A7789` |
+| Ink 4 (placeholder) | `--text-dimmed` | `#8A92A4` | `#7A7789` |
 | Hairline | `--border-color` | `#E8E2D2` | `#2E2C39` |
 | Strong line | `--border-input`, `--line-strong` | `#D5CDB7` | `#3D3A4B` |
 | Dashed divider | `--dash` | `#D9D2BF` | `#363344` |
 | Indigo (primary, links, focus) | `--indigo`, `--primary-color` | `#4F46B8` | `#8B83F0` |
 | Rose (needs you, danger) | `--rose` / `--rose-ink` | `#E37A88` / `#B85067` | `#EE8E9B` / `#F4A7B1` |
-| Mint (running, ok) | `--mint` / `--mint-ink` | `#84C5A8` / `#3A7D5F` | `#7FCBA9` / `#8EDBB9` |
+| Mint (running, ok) | `--mint` / `--mint-ink` | `#84C5A8` / `#3F8868` | `#7FCBA9` / `#8EDBB9` |
 | Peach (attention, Claude) | `--peach` / `--peach-ink` | `#D97751` / `#A04E2A` | `#E8895F` / `#F2A27E` |
 | Sand (pending, unread) | `--sand` / `--sand-ink` | `#D9A441` / `#8E6C1F` | `#E0B04F` / `#EBC673` |
 
 Each accent has a `-soft` translucent fill (8-18% alpha) used behind its
-`-ink` text. `verydark` keeps Night's ink and accents over near-black surfaces
+`-ink` text. The Garden Console (license-hub) names `--bg-2`, `--bg-soft`,
+`--card`, `--ink`, `--ink-2..4`, `--line`, `--line-strong` and `--dash` alias
+the semantic tokens, so they follow every theme; label recipes
+(`--label-font`, `--eyebrow-size`, `--eyebrow-tracking`, `--meta-tracking`,
+`--badge-tracking`) and page-frame tokens (`--topbar-height`,
+`--page-max-width`, `--page-gutter`, `--z-topbar`, `--overlay-scrim`) sit
+beside them. `verydark` keeps Night's ink and accents over near-black surfaces
 (`#0B0A0F` page, `#15141B` card).
 
 Semantic map, used everywhere a state is shown: mint = running/connected/ok;
@@ -98,9 +104,11 @@ Garden-tuned hues; every provider color keeps >= 4.5:1 against the page.
   body copy and assistant prose.
 - `--font-mono`: JetBrains Mono. Code, paths, ids, hashes, branch names,
   timestamps, counters, and small metadata labels.
-- Labels above content are used only when they carry information (a section
-  name, a step). They are sentence-case mono at 11-12 px with light tracking,
-  never decorative all-caps on every heading. CJK strings get no tracking.
+- Labels follow the Garden Console recipe: mono UPPERCASE with tracking for
+  eyebrows (11 px, 0.08em), table and list headers (11 px/500, 0.08em), card
+  meta (11 px, 0.06em); badges are mono 12 px/500 at 0.02em and keep their
+  case. Eyebrows and meta appear only when they carry information (context,
+  counts, scope). CJK strings get minimal tracking.
 - Phone sizes: page header title 21 px (19 px from 600 px up, since the
   compact sticky header leaves room for its actions), display moments such as
   the Now sentence and the sign-in title 24-28 px, card/row title 16-17 px,
@@ -147,16 +155,31 @@ Garden-tuned hues; every provider color keeps >= 4.5:1 against the page.
 ## Components
 
 Shared primitives live in `packages/client/src/components/garden/` with
-co-located CSS Modules:
+co-located CSS Modules (barrel: `components/garden/index.ts`):
 
-- `Button` (`primary | secondary | ghost | danger`, `sm | md | lg`; md is
-  44 px on touch).
-- `IconButton` (44 px target, 20 px glyph, accessible label required).
-- `Pill` (status chip with optional dot; tone = semantic map).
+- `Button` (`primary | secondary | ghost | danger | danger-soft | link`,
+  `sm | md | lg`, optional `loading`; danger is filled rose; disabled is a
+  muted fill, not opacity; sm/md are 44 px on touch).
+- `IconButton` (36 px, `sm` 28 px, 44 px on touch; accessible label required).
+- `Badge` (state pill, mono, tone = semantic map plus `outline`; `Pill` is a
+  legacy alias) and `Tag` (UPPERCASE event chip).
+- `Card` with `CardHeader` (serif title, mono meta, dashed rule), `CardBody`,
+  `CardFooter`, `CardBand`; `tone="danger"` and `dashed` variants.
+- `Table`/`Th`/`Tr`/`Td`/`TableEmpty`/`RowAction` and `DataList` rows for
+  lists: sunken mono header, dashed row rules, stacked rows on phones.
+- `MetaGrid`/`MetaField`/`MetaDivider`/`BigNumber`, `StatCard`/`StatGrid`,
+  `Eyebrow`, `Kbd`, `CopyChip`, `Notice`, `Tabs`, `Breadcrumb`, and the
+  line-icon set in `icons.tsx`.
+- `Spinner` (the one spinner), `Skeleton`/`SkeletonText`, `LoadingState`
+  (`list | table | cards | compact | page`), `EmptyState` (dashed tile;
+  `compact` inside cards), `ErrorState`.
+- `SearchField` and `inputClassName`/`selectClassName` (40 px fields, indigo
+  focus ring, 16 px text on phones), and `ListToolbar` (list-page bar: search,
+  filters, mono count, trailing actions).
 - `Sheet` (bottom sheet on phones, centered dialog on desktop; drag handle,
   safe-area padding, `max-height: 90dvh`, focus trap, Escape/back closes).
-- `ActionSheet` (menu rendered as a sheet on touch, popover on desktop).
-- `EmptyState` (logo glyph, Fraunces title, one-line hint, one action).
+- `ActionSheet` (menu rendered as a sheet on touch, popover on desktop; items
+  may carry a `section` label and a danger tone).
 - `SectionHeader` (title + count + trailing action).
 
 `ui/Modal` keeps its API and becomes a bottom sheet below 600 px. Viewer modals (files,

@@ -45,3 +45,9 @@
   top: 24px;
   opacity: 0.45;
 }
+
+/* Pending rows pause their spinner while off screen: the row sets
+   `--activity-play` from viewport visibility. */
+:global(.tool-spinner) > .pendingSpinner {
+  animation-play-state: var(--activity-play, paused);
+}

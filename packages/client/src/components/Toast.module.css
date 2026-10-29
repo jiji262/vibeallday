@@ -22,60 +22,90 @@
   }
 }
 
+/* Garden Console toast: a card with a tone fill layered over it. */
 .toast {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
   max-width: 400px;
   padding: var(--space-3) var(--space-4);
-  border-radius: var(--radius-md);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-  font-size: var(--font-size-sm);
-  text-align: center;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background-color: var(--card);
+  box-shadow: var(--shadow-md);
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.5;
+  text-align: left;
   cursor: pointer;
   pointer-events: auto;
   animation: fadeOut var(--toast-fade-duration, 4.5s) linear forwards;
 }
 
 .error {
-  color: #fff;
-  background: #dc2626;
+  border-color: color-mix(in srgb, var(--rose) 30%, var(--line));
+  background-image: linear-gradient(var(--rose-soft), var(--rose-soft));
+  color: var(--rose-ink);
 }
 
 .success {
-  color: #fff;
-  background: #16a34a;
+  border-color: color-mix(in srgb, var(--mint) 30%, var(--line));
+  background-image: linear-gradient(var(--mint-soft), var(--mint-soft));
+  color: var(--mint-ink);
 }
 
 .info {
-  color: var(--text-primary);
-  background: var(--bg-secondary);
-  border: 1px solid var(--border-color);
+  color: var(--ink);
 }
 
-/* Toast with action button - flex layout */
+.icon {
+  display: inline-flex;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.info .icon {
+  color: var(--indigo);
+}
+
 .toast:has(.action) {
-  display: flex;
   align-items: center;
-  gap: var(--space-3);
-  text-align: left;
 }
 
 .message {
   flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .action {
   flex-shrink: 0;
-  padding: var(--space-1) var(--space-2);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  min-height: 28px;
+  padding: 0 10px;
+  border: 1px solid color-mix(in srgb, currentcolor 30%, transparent);
   border-radius: var(--radius-sm);
+  background: transparent;
   color: inherit;
-  background: rgba(255, 255, 255, 0.2);
-  font-size: var(--font-size-xs);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 500;
   white-space: nowrap;
   cursor: pointer;
 }
 
 .action:hover {
-  background: rgba(255, 255, 255, 0.3);
+  background: color-mix(in srgb, currentcolor 10%, transparent);
+}
+
+.action:focus-visible {
+  box-shadow: 0 0 0 3px var(--indigo-soft);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toast {
+    animation-timing-function: steps(1, end);
+  }
 }
 
 @keyframes fadeOut {

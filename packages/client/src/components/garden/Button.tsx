@@ -1,7 +1,14 @@
 import type { ButtonHTMLAttributes, ReactNode } from "react";
 import styles from "./Button.module.css";
+import { Spinner } from "./Spinner";
 
-export type ButtonVariant = "primary" | "secondary" | "ghost" | "danger";
+export type ButtonVariant =
+  | "primary"
+  | "secondary"
+  | "ghost"
+  | "danger"
+  | "danger-soft"
+  | "link";
 export type ButtonSize = "sm" | "md" | "lg";
 
 const VARIANT_CLASS: Record<ButtonVariant, string | undefined> = {
@@ -9,6 +16,8 @@ const VARIANT_CLASS: Record<ButtonVariant, string | undefined> = {
   secondary: styles.secondary,
   ghost: styles.ghost,
   danger: styles.danger,
+  "danger-soft": styles.dangerSoft,
+  link: styles.link,
 };
 
 const SIZE_CLASS: Record<ButtonSize, string | undefined> = {
@@ -17,22 +26,28 @@ const SIZE_CLASS: Record<ButtonSize, string | undefined> = {
   lg: styles.lg,
 };
 
+const SPINNER_SIZE = { sm: 12, md: 14, lg: 16 } as const;
+
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: ButtonVariant;
   size?: ButtonSize;
-  /** Leading icon, drawn at the text size. */
+  /** Leading icon, 14px at `sm`, 16px otherwise. */
   icon?: ReactNode;
   block?: boolean;
+  /** Shows an inline spinner in place of the icon and disables the button. */
+  loading?: boolean;
 }
 
-/** Garden button: one shape, four intents. `md` meets the 44px touch target. */
+/** Garden button: primary is the one indigo action; danger is filled rose. */
 export function Button({
   variant = "secondary",
   size = "md",
   icon,
   block = false,
+  loading = false,
   className,
   children,
+  disabled,
   type = "button",
   ...rest
 }: ButtonProps) {
@@ -45,13 +60,22 @@ export function Button({
   ]
     .filter(Boolean)
     .join(" ");
+  const leading = loading ? (
+    <Spinner size={SPINNER_SIZE[size]} tone="current" />
+  ) : icon ? (
+    <span className={styles.icon} aria-hidden="true">
+      {icon}
+    </span>
+  ) : null;
   return (
-    <button type={type} className={classes} {...rest}>
-      {icon ? (
-        <span className={styles.icon} aria-hidden="true">
-          {icon}
-        </span>
-      ) : null}
+    <button
+      type={type}
+      className={classes}
+      disabled={disabled || loading}
+      aria-busy={loading || undefined}
+      {...rest}
+    >
+      {leading}
       {children}
     </button>
   );
@@ -62,19 +86,23 @@ interface IconButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   label: string;
   children: ReactNode;
   tone?: "default" | "primary";
+  /** `md` 36px, `sm` 28px; both grow to 44px on touch. */
+  size?: "sm" | "md";
 }
 
-/** 44px square icon control with a 20px glyph. */
+/** Square icon control: 36px (28px `sm`), 44px on coarse pointers. */
 export function IconButton({
   label,
   children,
   tone = "default",
+  size = "md",
   className,
   type = "button",
   ...rest
 }: IconButtonProps) {
   const classes = [
     styles.iconButton,
+    size === "sm" ? styles.iconButtonSm : "",
     tone === "primary" ? styles.iconButtonPrimary : "",
     className ?? "",
   ]

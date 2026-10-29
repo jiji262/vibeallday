@@ -1,0 +1,44 @@
+.block {
+  display: grid;
+  justify-items: start;
+  gap: var(--space-2);
+  padding: var(--space-5);
+  border: 1px solid color-mix(in srgb, var(--rose) 30%, transparent);
+  border-radius: var(--radius-lg);
+  background: var(--rose-soft);
+}
+
+.tag {
+  margin: 0;
+  color: var(--rose-ink);
+  font-family: var(--label-font);
+  font-size: var(--eyebrow-size);
+  letter-spacing: var(--eyebrow-tracking);
+  text-transform: uppercase;
+}
+
+.title {
+  margin: 0;
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 500;
+}
+
+.message {
+  margin: 0;
+  color: var(--ink-2);
+  font-size: 14px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+.retry {
+  margin-top: var(--space-2);
+}
+
+@media (width >= 768px) {
+  .block {
+    padding: var(--space-6);
+  }
+}

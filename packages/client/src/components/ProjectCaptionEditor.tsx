@@ -212,6 +212,7 @@ export function ProjectCaptionEditor({
         <button
           type="button"
           className={`${styles.editButton}${caption ? "" : ` ${styles.addButton}`}`}
+          data-row-affordance=""
           aria-label={
             caption ? t("projectCaptionEdit") : t("projectCaptionAdd")
           }

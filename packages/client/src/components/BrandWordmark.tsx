@@ -1,15 +1,18 @@
+import styles from "./BrandWordmark.module.css";
+
 interface BrandWordmarkProps {
   className?: string;
   variant?: "short" | "full";
 }
 
+/** Serif product name; `--brand-wordmark-size` on the element resizes it. */
 export function BrandWordmark({
   className = "",
   variant = "short",
 }: BrandWordmarkProps) {
   return (
     <span
-      className={`brand-wordmark brand-wordmark--${variant} ${className}`.trim()}
+      className={`brand-wordmark brand-wordmark--${variant} ${styles.wordmark} ${className}`.trim()}
     >
       VibeAllDay
     </span>

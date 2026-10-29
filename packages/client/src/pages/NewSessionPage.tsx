@@ -3,6 +3,7 @@ import type {
   ProviderName,
   ThinkingOption,
 } from "@vibeallday/shared";
+import { ErrorState } from "../components/garden/ErrorState";
 import {
   ALL_PERMISSION_MODES,
   PROJECT_CODE_NAMES_CAPABILITY,
@@ -249,9 +250,10 @@ export function NewSessionPage() {
         />
         <main className="page-scroll-container">
           <div className="page-content-inner">
-            <div className="error">
-              {t("newSessionErrorPrefix")} {renderError.message}
-            </div>
+            <ErrorState
+              tag={t("errorTag")}
+              message={`${t("newSessionErrorPrefix")} ${renderError.message}`}
+            />
           </div>
         </main>
       </MainContent>

@@ -33,12 +33,7 @@ function renderControls() {
   render(
     <I18nProvider>
       <SearchHeader query="" onQuery={onQuery} onFields={onFields} supported />
-      <SearchChips
-        filters={["unarchived"]}
-        onFilters={() => {}}
-        selecting={false}
-        onSelecting={() => {}}
-      />
+      <SearchChips filters={["unarchived"]} onFilters={() => {}} />
       <input type="checkbox" aria-label="Select a row" />
     </I18nProvider>,
   );

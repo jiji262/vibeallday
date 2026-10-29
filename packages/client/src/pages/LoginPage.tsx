@@ -15,6 +15,7 @@ import {
   AuthStatus,
 } from "../components/auth/AuthShell";
 import { Button } from "../components/garden/Button";
+import { inputClassName } from "../components/garden/Field";
 import { useAuth } from "../contexts/AuthContext";
 import { useI18n } from "../i18n";
 
@@ -119,6 +120,7 @@ export function LoginPage() {
         {!isSetupMode && limitedUsersEnabled && (
           <AuthField id="username" label={t("loginUsernameOptional")}>
             <input
+              className={inputClassName()}
               id="username"
               type="text"
               autoComplete="username"
@@ -130,6 +132,7 @@ export function LoginPage() {
         )}
         <AuthField id="password" label={t("loginPasswordLabel")}>
           <input
+            className={inputClassName()}
             id="password"
             type="password"
             value={password}
@@ -149,6 +152,7 @@ export function LoginPage() {
             label={t("loginConfirmPasswordLabel")}
           >
             <input
+              className={inputClassName()}
               id="confirmPassword"
               type="password"
               value={confirmPassword}
@@ -161,13 +165,7 @@ export function LoginPage() {
 
         {error && <AuthError>{error}</AuthError>}
 
-        <Button
-          type="submit"
-          variant="primary"
-          size="lg"
-          block
-          disabled={isSubmitting}
-        >
+        <Button type="submit" variant="primary" block loading={isSubmitting}>
           {submitLabel}
         </Button>
       </AuthForm>

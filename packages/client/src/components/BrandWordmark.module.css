@@ -1,0 +1,12 @@
+.wordmark {
+  display: inline-flex;
+  align-items: baseline;
+  color: var(--brand-wordmark-color, var(--ink));
+  font-family: var(--font-display);
+  font-size: var(--brand-wordmark-size, 18px);
+  font-kerning: normal;
+  font-optical-sizing: auto;
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  line-height: 1;
+}

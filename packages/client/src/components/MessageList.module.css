@@ -17,9 +17,10 @@
   display: inline-block;
   margin-right: 0.5em;
   padding: 0 0.45em;
-  border-radius: 999px;
-  background: var(--accent-secondary, #6b7280);
-  color: var(--bg-surface, #fff);
+  border-radius: var(--radius-pill);
+  background: var(--sand-soft);
+  color: var(--sand-ink);
+  font-family: var(--label-font);
   font-size: 0.8em;
   font-variant-numeric: tabular-nums;
   line-height: 1.6;

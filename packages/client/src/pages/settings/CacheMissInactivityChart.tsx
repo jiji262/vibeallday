@@ -1,4 +1,5 @@
 import type { CacheMissBillingRecord } from "@vibeallday/shared";
+import { EmptyState } from "../../components/garden/EmptyState";
 import { useI18n } from "../../i18n";
 import styles from "./CacheMissInactivityChart.module.css";
 
@@ -131,7 +132,7 @@ export function CacheMissInactivityChart({
     );
   const buckets = bucketByInactivity(events);
   if (buckets.length === 0) {
-    return <p className="settings-empty">{t("cacheMissChartEmpty")}</p>;
+    return <EmptyState compact title={t("cacheMissChartEmpty")} />;
   }
 
   const peak = Math.max(...buckets.map((bucket) => bucket.wastedTokens), 1);
@@ -197,7 +198,7 @@ export function CacheMissProbabilityChart({
   );
   const buckets = bucketByInactivity(completeEvents);
   if (buckets.length === 0) {
-    return <p className="settings-empty">{t("cacheMissProbabilityEmpty")}</p>;
+    return <EmptyState compact title={t("cacheMissProbabilityEmpty")} />;
   }
 
   return (
@@ -277,7 +278,7 @@ export function CacheMissProviderChart({
     );
   const buckets = bucketByProvider(events);
   if (buckets.length === 0) {
-    return <p className="settings-empty">{t("cacheMissProviderEmpty")}</p>;
+    return <EmptyState compact title={t("cacheMissProviderEmpty")} />;
   }
 
   return (

@@ -13,7 +13,11 @@ import {
   useState,
 } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { LoadingState } from "../../components/garden/LoadingState";
+import { Notice } from "../../components/garden/Notice";
 import { PageHeader } from "../../components/PageHeader";
+import { PageIntro } from "../../components/shell/PageIntro";
+import { pageWidthClass } from "../../components/shell/pageWidth";
 import { useRemoteBasePath } from "../../hooks/useRemoteBasePath";
 import { useActingPrincipal } from "../../hooks/useActingPrincipal";
 import { useVersion } from "../../hooks/useVersion";
@@ -33,7 +37,6 @@ import {
 } from "./SettingsSearchBar";
 import { SettingsJumpTargetProvider } from "./SettingsSearchContext";
 import { SettingsSearchResults } from "./SettingsSearchResults";
-import { SettingsSection } from "./SettingsSection";
 import {
   SettingsPaneTitleProvider,
   useSettingsPaneTitleRegistration,
@@ -239,16 +242,6 @@ export function SettingsLayout() {
     scrollSettingsToTop();
   };
 
-  const handleSettingsTitleClick = () => {
-    if (category) {
-      navigateToSettingsRoot();
-      return;
-    }
-
-    navigate(`${basePath}/settings`, { replace: true });
-    scrollSettingsToTop();
-  };
-
   const handleCategoryClick = useCallback(
     (categoryId: string, jumpToItemId?: string) => {
       setSearchQuery("");
@@ -331,16 +324,11 @@ export function SettingsLayout() {
       : null;
   const unservedCategoryAnswer =
     !unservedCategory?.requires ? null : !versionInfo && versionLoading ? (
-      <SettingsSection description={t("loading")} />
+      <LoadingState label={t("loading")} variant="compact" />
     ) : (
-      <SettingsSection
-        title={unservedCategory.label}
-        description={unservedCategory.description}
-      >
-        <p className="settings-hint">
-          {unservedCategory.requires.unsupportedMessage}
-        </p>
-      </SettingsSection>
+      <Notice tone="info">
+        {unservedCategory.requires.unsupportedMessage}
+      </Notice>
     );
   const categoryPane = CategoryComponent ? (
     <CategoryComponent />
@@ -348,45 +336,20 @@ export function SettingsLayout() {
     unservedCategoryAnswer
   );
 
-  // Top-strip title for the open pane: the pane registers it via
+  // Pane title for the crumb and the intro: the pane registers it via
   // useSettingsPaneTitle; fall back to the category label until that
   // registers (and for the rare pane that sets nothing).
   const resolvedPaneTitle =
     paneTitle ?? activeCategory?.label ?? t("pageTitleSettings");
-  const breadcrumbDescription =
+  const paneLede =
     effectiveCategory === "model"
       ? t("modelSettingsSessionDefaultsDescription")
-      : null;
-
-  // Settings breadcrumb shown in the header strip (two-column): a clickable
-  // "Settings" root plus the active pane title, so the strip names the page
-  // instead of just "Settings".
-  const settingsBreadcrumb = (
-    <span className={`settings-breadcrumb ${styles.breadcrumb}`}>
-      <button
-        type="button"
-        className="session-title settings-breadcrumb-root"
-        onClick={handleSettingsTitleClick}
-      >
-        {t("pageTitleSettings")}
-      </button>
-      <span className="settings-breadcrumb-sep" aria-hidden="true">
-        ›
-      </span>
-      <span
-        className="settings-breadcrumb-current"
-        role="heading"
-        aria-level={1}
-      >
-        {resolvedPaneTitle}
-      </span>
-      {breadcrumbDescription && (
-        <span className="settings-breadcrumb-description">
-          {breadcrumbDescription}
-        </span>
-      )}
-    </span>
-  );
+      : activeCategory?.description;
+  const settingsTitle = t("pageTitleSettings");
+  const paneCrumbs = [
+    { label: settingsTitle, to: `${basePath}/settings` },
+    { label: resolvedPaneTitle, title: resolvedPaneTitle },
+  ];
 
   // The single per-pane Undo affordance: panes register via useSettingsUndo.
   // Keep the button's header footprint even while hidden so settings rows do
@@ -398,18 +361,28 @@ export function SettingsLayout() {
     />
   );
 
+  const paneIntro = <PageIntro title={resolvedPaneTitle} lede={paneLede} />;
+  const pane = (
+    <SettingsJumpTargetProvider value={jumpTargetValue}>
+      <SettingsPaneTitleProvider value={setPaneTitle}>
+        <SettingsUndoProvider value={setUndoRegistration}>
+          <SettingsPane key={effectiveCategory}>{categoryPane}</SettingsPane>
+        </SettingsUndoProvider>
+      </SettingsPaneTitleProvider>
+    </SettingsJumpTargetProvider>
+  );
+
   // Narrow settings: category list OR category detail (not both)
   if (!useTwoColumnSettings) {
     if (!category) {
-      // Show category list
       return (
         <MainContent
           isWideScreen={isWideScreen}
           innerRef={settingsContainerRef}
         >
           <PageHeader
-            title={t("pageTitleSettings")}
-            onTitleClick={handleSettingsTitleClick}
+            title={settingsTitle}
+            intro="content"
             onOpenSidebar={openSidebar}
             isWideScreen={isWideScreen}
           />
@@ -429,11 +402,12 @@ export function SettingsLayout() {
       );
     }
 
-    // Show category detail with back button
     return (
       <MainContent isWideScreen={isWideScreen} innerRef={settingsContainerRef}>
         <PageHeader
           title={resolvedPaneTitle}
+          intro="content"
+          breadcrumbs={paneCrumbs}
           onOpenSidebar={openSidebar}
           showBack
           onBack={handleBack}
@@ -443,28 +417,22 @@ export function SettingsLayout() {
           ref={setSettingsScrollContainerRef}
           className="page-scroll-container"
         >
-          <div className="page-content-inner">
-            <SettingsJumpTargetProvider value={jumpTargetValue}>
-              <SettingsPaneTitleProvider value={setPaneTitle}>
-                <SettingsUndoProvider value={setUndoRegistration}>
-                  <SettingsPane key={effectiveCategory}>
-                    {categoryPane}
-                  </SettingsPane>
-                </SettingsUndoProvider>
-              </SettingsPaneTitleProvider>
-            </SettingsJumpTargetProvider>
+          <div className={`page-content-inner ${pageWidthClass("narrow")}`}>
+            {paneIntro}
+            {pane}
           </div>
         </main>
       </MainContent>
     );
   }
 
-  // Desktop: two-column layout with category list on left, content on right
+  // Desktop: category rail on the left, the open pane on the right.
   return (
     <MainContent isWideScreen={isWideScreen} innerRef={settingsContainerRef}>
       <PageHeader
-        title={resolvedPaneTitle}
-        titleElement={settingsBreadcrumb}
+        title={searchActive ? settingsTitle : resolvedPaneTitle}
+        intro="content"
+        breadcrumbs={searchActive ? undefined : paneCrumbs}
         onOpenSidebar={openSidebar}
         isWideScreen={isWideScreen}
         actions={undoButton}
@@ -473,8 +441,13 @@ export function SettingsLayout() {
         ref={setSettingsScrollContainerRef}
         className="page-scroll-container"
       >
-        <div className="settings-two-column">
-          <nav className="settings-category-nav">
+        <div
+          className={`page-content-inner settings-two-column ${styles.twoColumn}`}
+        >
+          <nav
+            className={`settings-category-nav ${styles.nav}`}
+            aria-label={t("settingsCategoryNavLabel")}
+          >
             {searchBar}
             <SettingsHostCard compact />
             <SettingsGroupList
@@ -485,17 +458,17 @@ export function SettingsLayout() {
               extras={transferTools}
             />
           </nav>
-          <div className="settings-content-panel">
-            {searchResults ?? (
-              <SettingsJumpTargetProvider value={jumpTargetValue}>
-                <SettingsPaneTitleProvider value={setPaneTitle}>
-                  <SettingsUndoProvider value={setUndoRegistration}>
-                    <SettingsPane key={effectiveCategory}>
-                      {categoryPane}
-                    </SettingsPane>
-                  </SettingsUndoProvider>
-                </SettingsPaneTitleProvider>
-              </SettingsJumpTargetProvider>
+          <div className={`settings-content-panel ${styles.panel}`}>
+            {searchResults ? (
+              <>
+                <PageIntro title={settingsTitle} />
+                {searchResults}
+              </>
+            ) : (
+              <>
+                {paneIntro}
+                {pane}
+              </>
             )}
           </div>
         </div>

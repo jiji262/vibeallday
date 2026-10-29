@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { LoadingState } from "../../components/garden/LoadingState";
 import { useServerSettings } from "../../hooks/useServerSettings";
 import { useI18n } from "../../i18n";
 import { SettingsItem } from "./SettingsItem";
@@ -105,7 +106,9 @@ export function LifecycleWebhooksSettings() {
   }, [dryRun, enabled, normalizedToken, normalizedUrl, t, updateSettings]);
 
   if (isLoading) {
-    return <SettingsSection description={t("lifecycleWebhooksLoading")} />;
+    return (
+      <LoadingState label={t("lifecycleWebhooksLoading")} variant="compact" />
+    );
   }
 
   return (

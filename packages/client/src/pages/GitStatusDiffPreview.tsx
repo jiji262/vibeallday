@@ -39,6 +39,7 @@ import { CHANGED_DIFF_LINE_SELECTOR, UnifiedDiff } from "./UnifiedDiff";
 import type { MessageKey, TranslationFn } from "../i18n";
 import styles from "./GitStatusDiffPreview.module.css";
 import headerStyles from "../components/ViewerHeader.module.css";
+import { SourceDiffLoading, SourcePaneError } from "./SourcePaneStates";
 
 const GIT_DIFF_MAX_RENDERED_HTML_CHARS = 1_000_000 * 20;
 
@@ -684,12 +685,12 @@ export function GitDiffBody({
         />
       )}
       {initialLoading && (
-        <div className="git-diff-loading">{t("gitStatusLoadingDiff")}</div>
+        <SourceDiffLoading label={t("gitStatusLoadingDiff")} />
       )}
-      {!diffResult && error && <div className="git-diff-error">{error}</div>}
+      {!diffResult && error && <SourcePaneError message={error} />}
       {diffResult && (
         <>
-          {error && <div className="git-diff-error">{error}</div>}
+          {error && <SourcePaneError message={error} />}
           <GitDiffContent
             key={requestKey}
             file={file}

@@ -1,112 +1,18 @@
-import { IssueIcon } from "./IssueIcon";
 import { type ReactNode, useRef } from "react";
-import { useLongPress } from "../hooks/useLongPress";
 import { Link, useLocation } from "react-router-dom";
-import { ThinkingIndicator } from "./ThinkingIndicator";
+import { useLongPress } from "../hooks/useLongPress";
+import { Tag } from "./garden/Badge";
 import styles from "./SidebarNavItem.module.css";
+import { ThinkingIndicator } from "./ThinkingIndicator";
+
+/** Navigation glyph size; the garden icon set draws on a 24px grid. */
+export const SIDEBAR_ICON_SIZE = 18;
 
 /**
- * Common SVG icons used in sidebar navigation.
- * Extracted to avoid duplication across components.
+ * Sidebar-only glyphs. Destination icons come from `garden/icons` through
+ * `sidebar/shellDestinations`; the new-session mark keeps its filled disc.
  */
 export const SidebarIcons = {
-  issues: <IssueIcon />,
-  bang: (
-    <svg
-      width="16"
-      height="16"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <rect x="2" y="4" width="20" height="16" rx="2" />
-      <polyline points="6 9 9 12 6 15" />
-      <line x1="12" y1="15" x2="17" y2="15" />
-    </svg>
-  ),
-  inbox: (
-    <svg
-      width="16"
-      height="16"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <polyline points="22 12 16 12 14 15 10 15 8 12 2 12" />
-      <path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z" />
-    </svg>
-  ),
-  projects: (
-    <svg
-      width="16"
-      height="16"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      aria-hidden="true"
-    >
-      <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-    </svg>
-  ),
-  agents: (
-    <svg
-      width="16"
-      height="16"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <rect x="3" y="11" width="18" height="10" rx="2" />
-      <circle cx="12" cy="5" r="3" />
-      <path d="M12 8v3" />
-      <circle cx="8" cy="16" r="1" />
-      <circle cx="16" cy="16" r="1" />
-    </svg>
-  ),
-  settings: (
-    <svg
-      width="16"
-      height="16"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <circle cx="12" cy="12" r="3" />
-      <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
-    </svg>
-  ),
-  allSessions: (
-    <svg
-      width="16"
-      height="16"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      aria-hidden="true"
-    >
-      <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-      <line x1="3" y1="9" x2="21" y2="9" />
-      <line x1="9" y1="21" x2="9" y2="9" />
-    </svg>
-  ),
   newSession: (
     <svg
       className="sidebar-new-session-icon"
@@ -115,13 +21,13 @@ export const SidebarIcons = {
       viewBox="0 0 24 24"
       aria-hidden="true"
     >
-      <circle cx="12" cy="12" r="12" fill="var(--app-accent)" />
+      <circle cx="12" cy="12" r="12" fill="var(--indigo)" />
       <line
         x1="12"
         y1="7"
         x2="12"
         y2="17"
-        stroke="white"
+        stroke="var(--ink-on)"
         strokeWidth="2"
         strokeLinecap="round"
       />
@@ -130,60 +36,10 @@ export const SidebarIcons = {
         y1="12"
         x2="17"
         y2="12"
-        stroke="white"
+        stroke="var(--ink-on)"
         strokeWidth="2"
         strokeLinecap="round"
       />
-    </svg>
-  ),
-  sourceControl: (
-    <svg
-      width="16"
-      height="16"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <line x1="6" y1="3" x2="6" y2="15" />
-      <circle cx="18" cy="6" r="3" />
-      <circle cx="6" cy="18" r="3" />
-      <path d="M18 9a9 9 0 0 1-9 9" />
-    </svg>
-  ),
-  recents: (
-    <svg
-      width="16"
-      height="16"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <circle cx="12" cy="12" r="10" />
-      <polyline points="12 6 12 12 16 14" />
-    </svg>
-  ),
-  emulator: (
-    <svg
-      width="16"
-      height="16"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <rect x="5" y="2" width="14" height="20" rx="2" ry="2" />
-      <line x1="12" y1="18" x2="12" y2="18" />
     </svg>
   ),
 };
@@ -192,7 +48,7 @@ export interface SidebarNavItemProps {
   accessory?: ReactNode;
   /** Route path to navigate to */
   to: string;
-  /** Icon to display (use SidebarIcons or custom ReactNode) */
+  /** Icon to display */
   icon: ReactNode;
   /** Label text */
   label: string;
@@ -202,6 +58,8 @@ export interface SidebarNavItemProps {
   badgeVariant?: "default" | "projectQueue";
   /** Optional badge tooltip */
   badgeTitle?: string;
+  /** Short status tag after the label, e.g. "Beta". */
+  tag?: string;
   /** Called when item is clicked (e.g., to close mobile sidebar) */
   onClick?: () => void;
   /** Title tooltip */
@@ -214,12 +72,49 @@ export interface SidebarNavItemProps {
   basePath?: string;
   /** Explicit aliases belonging to this destination, without a relay prefix. */
   activePaths?: readonly string[];
+  /** Extra classes for the link, e.g. the new-session action. */
+  className?: string;
 }
 
-/**
- * Unified sidebar navigation item component.
- * Provides consistent styling across NavigationSidebar and Sidebar.
- */
+function isCurrentPath(
+  pathname: string,
+  to: string,
+  basePath: string,
+  activePaths: readonly string[],
+): boolean {
+  const fullPath = `${basePath}${to}`;
+  const fullPathname = fullPath.split(/[?#]/)[0] || fullPath;
+  const targetPathname = to.split(/[?#]/)[0] || to;
+  return (
+    pathname === fullPathname ||
+    pathname === targetPathname ||
+    activePaths.some((path) => pathname === `${basePath}${path}`)
+  );
+}
+
+function NavBadge({
+  badge,
+  variant,
+  title,
+}: {
+  badge: number | undefined;
+  variant: "default" | "projectQueue";
+  title?: string;
+}) {
+  if (badge === undefined || badge <= 0) return null;
+  const variantClass =
+    variant === "projectQueue" ? styles.badgeQueue : styles.badgeNeedsYou;
+  return (
+    <span
+      className={`sidebar-nav-badge sidebar-nav-badge--${variant} ${styles.badge} ${variantClass}`}
+      title={title}
+    >
+      {badge}
+    </span>
+  );
+}
+
+/** One destination row: icon, label, then draft, activity, tag and count. */
 export function SidebarNavItem({
   accessory,
   to,
@@ -228,47 +123,50 @@ export function SidebarNavItem({
   badge,
   badgeVariant = "default",
   badgeTitle,
+  tag,
   onClick,
   title,
   hasDraft,
   hasActivityIndicator,
   basePath = "",
   activePaths = [],
+  className,
 }: SidebarNavItemProps) {
   const location = useLocation();
-  const fullPath = `${basePath}${to}`;
-  const fullPathname = fullPath.split(/[?#]/)[0] || fullPath;
-  const targetPathname = to.split(/[?#]/)[0] || to;
-  // Check if current path matches (with or without basePath prefix)
-  const isActive =
-    location.pathname === fullPathname ||
-    location.pathname === targetPathname ||
-    activePaths.some((path) => location.pathname === `${basePath}${path}`);
+  const isActive = isCurrentPath(location.pathname, to, basePath, activePaths);
+  const classes = [
+    "sidebar-nav-item",
+    styles.item,
+    isActive ? `active ${styles.current}` : "",
+    className,
+  ]
+    .filter(Boolean)
+    .join(" ");
 
   const link = (
     <Link
-      to={fullPath}
-      className={`sidebar-nav-item ${isActive ? "active" : ""}`}
+      to={`${basePath}${to}`}
+      className={classes}
       aria-current={isActive ? "page" : undefined}
       onClick={onClick}
       title={title ?? label}
     >
-      {icon}
-      <span className="sidebar-nav-text">{label}</span>
+      <span className={styles.icon}>{icon}</span>
+      <span className={`sidebar-nav-text ${styles.text}`}>{label}</span>
       {hasDraft && <span className="session-draft-badge">Draft</span>}
       {hasActivityIndicator && <ThinkingIndicator />}
-      {badge !== undefined && badge > 0 && (
-        <span
-          className={`sidebar-nav-badge sidebar-nav-badge--${badgeVariant}`}
-          title={badgeTitle}
-        >
-          {badge}
-        </span>
-      )}
+      {tag ? (
+        <Tag tone="indigo" className={styles.tag}>
+          {tag}
+        </Tag>
+      ) : null}
+      <NavBadge badge={badge} variant={badgeVariant} title={badgeTitle} />
     </Link>
   );
+  // The accessory is its own control beside the link, so the row draws the
+  // current and hover wash across both rather than ending it at the link.
   return accessory ? (
-    <div className={styles.row}>
+    <div className={`${styles.row} ${isActive ? styles.rowCurrent : ""}`}>
       {link}
       <span className={styles.accessory}>{accessory}</span>
     </div>
@@ -278,7 +176,7 @@ export function SidebarNavItem({
 }
 
 export interface SidebarNavButtonProps {
-  /** Icon to display (use SidebarIcons or custom ReactNode) */
+  /** Icon to display */
   icon: ReactNode;
   /** Label text (also the accessible name) */
   label: string;
@@ -316,26 +214,53 @@ export function SidebarNavButton({
     <button
       ref={buttonRef}
       type="button"
-      className={`sidebar-nav-item ${className}`.trim()}
+      className={`sidebar-nav-item ${styles.item} ${className}`.trim()}
       {...(onLongPress ? press.handlers : {})}
       onClick={onLongPress ? press.click(onClick) : onClick}
       aria-label={label}
       title={title ?? label}
     >
-      {icon}
-      <span className="sidebar-nav-text">{label}</span>
+      <span className={styles.icon}>{icon}</span>
+      <span className={`sidebar-nav-text ${styles.text}`}>{label}</span>
     </button>
   );
 }
 
 export interface SidebarNavSectionProps {
   children: ReactNode;
+  /** Names the navigation landmark. */
+  label?: string;
+}
+
+/** The navigation landmark holding every destination group. */
+export function SidebarNavSection({ children, label }: SidebarNavSectionProps) {
+  return (
+    <nav className={`sidebar-nav-section ${styles.section}`} aria-label={label}>
+      {children}
+    </nav>
+  );
 }
 
 /**
- * Container for sidebar navigation items.
- * Provides consistent spacing between items.
+ * A run of destinations. Labelled groups get a mono caption, which the
+ * collapsed rail draws as a dashed rule instead.
  */
-export function SidebarNavSection({ children }: SidebarNavSectionProps) {
-  return <nav className="sidebar-nav-section">{children}</nav>;
+export function SidebarNavGroup({
+  label,
+  children,
+}: {
+  label?: string;
+  children: ReactNode;
+}) {
+  if (!label) return <div className={styles.group}>{children}</div>;
+  return (
+    <div className={styles.group} role="group" aria-label={label}>
+      <p className={styles.groupLabel}>
+        <span className={`sidebar-nav-text ${styles.groupLabelText}`}>
+          {label}
+        </span>
+      </p>
+      {children}
+    </div>
+  );
 }

@@ -1,10 +1,15 @@
 import { useEffect, useRef, useState } from "react";
 import { useI18n } from "../../i18n";
+import { Spinner } from "../garden/Spinner";
 import styles from "./SearchToolbar.module.css";
 
+/** Matches the 11px mono count it trails. */
+const SCAN_SPINNER_SIZE = 12;
+
 /**
- * "in 34 sessions" with a scanning ellipsis; tapping it reveals the longer
- * progress sentence (scanned / capped / watching).
+ * "in 34 sessions" with a spinner while the catalog or a scan is still
+ * arriving (a trailing "…" read as clipped text); tapping it reveals the
+ * longer progress sentence (scanned / capped / watching).
  */
 export function SearchStatusLine({
   status,
@@ -18,7 +23,7 @@ export function SearchStatusLine({
   acquiring: boolean;
 }) {
   const { t } = useI18n();
-  const area = useRef<HTMLDivElement>(null);
+  const area = useRef<HTMLSpanElement>(null);
   const [open, setOpen] = useState(false);
   useEffect(() => {
     if (!status) setOpen(false);
@@ -33,7 +38,7 @@ export function SearchStatusLine({
     return () => document.removeEventListener("pointerdown", close);
   }, [open]);
   return (
-    <div ref={area} className={styles.statusArea}>
+    <span ref={area} className={styles.statusArea}>
       <button
         type="button"
         className={styles.statusButton}
@@ -52,10 +57,10 @@ export function SearchStatusLine({
           style={{ visibility: acquiring ? "visible" : "hidden" }}
           aria-hidden="true"
         >
-          …
+          <Spinner size={SCAN_SPINNER_SIZE} />
         </span>
       </button>
-      {open && <div className={styles.statusDetails}>{status}</div>}
-    </div>
+      {open && <span className={styles.statusDetails}>{status}</span>}
+    </span>
   );
 }

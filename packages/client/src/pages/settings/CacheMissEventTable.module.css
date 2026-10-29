@@ -54,14 +54,22 @@
 
 .matchCount {
   flex: 0 0 auto;
-  color: var(--text-muted);
-  font-size: var(--font-size-sm);
+  color: var(--ink-3);
+  font-family: var(--label-font);
+  font-size: 11px;
+  letter-spacing: var(--meta-tracking);
+  text-transform: uppercase;
   font-variant-numeric: tabular-nums;
 }
 
+/* Flush garden card: the table scrolls inside it on narrow screens. */
 .scroller {
   max-width: 100%;
   overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--card);
+  box-shadow: var(--shadow-xs);
 }
 
 .table {
@@ -69,15 +77,15 @@
   min-width: 44rem;
   border-collapse: collapse;
   table-layout: fixed;
-  color: var(--text-primary);
-  font-size: var(--font-size-base);
+  color: var(--ink);
+  font-size: 14px;
 }
 
 .table th,
 .table td {
   box-sizing: border-box;
-  padding: var(--space-2) var(--space-1);
-  border-bottom: 1px solid var(--border-color);
+  padding: var(--space-3);
+  border-bottom: 1px dashed var(--dash);
   overflow-wrap: anywhere;
   text-align: left;
   vertical-align: top;
@@ -85,9 +93,15 @@
 }
 
 .table thead th {
-  color: var(--text-muted);
-  font-size: var(--font-size-sm);
-  font-weight: 600;
+  border-bottom: 1px solid var(--line);
+  background: var(--bg-2);
+  color: var(--ink-3);
+  font-family: var(--label-font);
+  font-size: var(--eyebrow-size);
+  font-weight: 500;
+  letter-spacing: var(--eyebrow-tracking);
+  text-transform: uppercase;
+  vertical-align: middle;
 }
 
 .tupleColumn {
@@ -120,7 +134,7 @@
 }
 
 .groupRow {
-  background: var(--bg-hover);
+  background: var(--bg-soft);
 }
 
 .groupButton {
@@ -131,15 +145,15 @@
   padding: var(--space-1) 0;
   border: 0;
   background: transparent;
-  color: var(--text-primary);
+  color: var(--ink);
   font: inherit;
-  font-weight: 650;
+  font-weight: 500;
   text-align: left;
   cursor: pointer;
 }
 
 .groupSummary {
-  color: var(--text-muted);
+  color: var(--ink-3);
   font-variant-numeric: tabular-nums;
 }
 
@@ -156,8 +170,8 @@
   outline-offset: -2px;
 }
 
-.eventRow:last-child td {
-  border-bottom-color: color-mix(in srgb, var(--border-color) 65%, transparent);
+.table tbody tr:last-child > td {
+  border-bottom: 0;
 }
 
 .numeric {
@@ -167,19 +181,19 @@
 
 .age,
 .messageReference {
-  font-family: var(--font-mono);
+  font-family: var(--label-font);
   white-space: nowrap;
 }
 
 .age {
-  color: var(--text-muted);
+  color: var(--ink-3);
 }
 
 .eventTimestamp {
   display: grid;
-  color: var(--text-muted);
-  font-family: var(--font-mono);
-  font-size: var(--font-size-sm);
+  color: var(--ink-3);
+  font-family: var(--label-font);
+  font-size: 13px;
   font-variant-numeric: tabular-nums;
   overflow-wrap: normal;
   white-space: nowrap;

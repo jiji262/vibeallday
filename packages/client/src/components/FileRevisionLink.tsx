@@ -8,10 +8,12 @@ import { useEffect, useState } from "react";
 import { api } from "../api/client";
 import { useRemoteBasePath } from "../hooks/useRemoteBasePath";
 import { useRetainedVersionInfo } from "../hooks/useVersion";
+import { useI18n } from "../i18n";
 import { toBrowserAppHref } from "../lib/appHref";
 import { useClientSummarySourceKey } from "../lib/clientSummaryStore";
 import styles from "./FileRevisionLink.module.css";
 import { ResourceContextMenu } from "./FileResourceActions";
+import { formatProjectAge } from "./projectRelativeTime";
 
 export interface FileRevisionLinkProps {
   projectId: string;
@@ -100,9 +102,7 @@ export function FileRevisionLink({
       >
         {revision.commit.shortHash}
       </a>
-      <span className={styles.age}>
-        ({formatRevisionAge(revision.commit.authorDate)})
-      </span>
+      <RevisionAge authorDate={revision.commit.authorDate} />
       {revision.dirty && <span className={styles.dirty}>{dirtyLabel}</span>}
       {contextMenu?.identity === identity && (
         <ResourceContextMenu
@@ -121,23 +121,11 @@ export function FileRevisionLink({
   );
 }
 
-export function formatRevisionAge(
-  authorDate: string,
-  now = Date.now(),
-): string {
-  const elapsedSeconds = Math.max(
-    0,
-    Math.floor((now - new Date(authorDate).getTime()) / 1000),
-  );
-  if (elapsedSeconds < 60) return "now";
-  const minutes = Math.floor(elapsedSeconds / 60);
-  if (minutes < 60) return `${minutes}m ago`;
-  const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours}h ago`;
-  const days = Math.floor(hours / 24);
-  if (days < 30) return `${days}d ago`;
-  if (days < 365) return `${Math.floor(days / 30)}mo ago`;
-  return `${Math.floor(days / 365)}y ago`;
+/** Localized commit age; a child so only a rendered commit needs i18n. */
+function RevisionAge({ authorDate }: { authorDate: string }) {
+  const { t } = useI18n();
+  const age = formatProjectAge(authorDate, t);
+  return age ? <span className={styles.age}>({age})</span> : null;
 }
 
 export function formatRevisionTooltip(commit: GitFileRevisionCommit): string {

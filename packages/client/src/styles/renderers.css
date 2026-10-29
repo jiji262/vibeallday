@@ -3302,20 +3302,6 @@ details[open] .collapsible__icon {
   flex-shrink: 0;
 }
 
-.spinner {
-  animation: spin 1s linear infinite;
-  color: #88aaff;
-}
-
-@keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
 /* Badge for running status */
 .badge-running {
   background: var(--bg-secondary);
@@ -3350,9 +3336,12 @@ details[open] .collapsible__icon {
   align-items: center;
   gap: 0.5rem;
   padding: 1rem;
-  color: var(--text-muted);
-  font-size: var(--font-size-base);
-  border-top: 1px solid var(--border-subtle, var(--border-color));
+  color: var(--ink-4);
+  font-family: var(--label-font);
+  font-size: var(--eyebrow-size);
+  letter-spacing: var(--meta-tracking);
+  text-transform: uppercase;
+  border-top: 1px dashed var(--dash);
 }
 
 /* Task Stats in Header */
@@ -4416,17 +4405,6 @@ pre.code-highlighter-plain code {
 .file-page-error {
   align-items: center;
   justify-content: center;
-}
-
-.file-page-error-content {
-  text-align: center;
-  color: var(--text-muted);
-}
-
-.file-page-error-content h1 {
-  margin: 0 0 1rem 0;
-  font-size: 1.25rem;
-  color: var(--text-primary);
 }
 
 .file-page-nav {

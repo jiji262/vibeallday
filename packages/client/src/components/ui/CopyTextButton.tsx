@@ -1,13 +1,11 @@
-import {
-  memo,
-  type MouseEvent as ReactMouseEvent,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
-import { writeClipboardText } from "../../lib/clipboard";
+import { memo, type MouseEvent as ReactMouseEvent, useCallback } from "react";
+import { useI18n } from "../../i18n";
+import { CheckIcon, CopyIcon } from "../garden/icons";
+import { useCopyFeedback } from "../garden/useCopyFeedback";
 import styles from "./CopyTextButton.module.css";
+
+const COPIED_RESET_MS = 1800;
+const ICON_SIZE = 14;
 
 interface Props {
   text: string;
@@ -19,6 +17,12 @@ interface Props {
   onClick?: (event: ReactMouseEvent<HTMLButtonElement>) => void;
 }
 
+/** Visible text label; only text-label callers need the i18n provider. */
+function CopyTextLabel({ copied }: { copied: boolean }) {
+  const { t } = useI18n();
+  return <span className={styles.label}>{t(copied ? "copied" : "copy")}</span>;
+}
+
 export const CopyTextButton = memo(function CopyTextButton({
   text,
   label,
@@ -28,38 +32,16 @@ export const CopyTextButton = memo(function CopyTextButton({
   showTextLabel = false,
   onClick,
 }: Props) {
-  const [copied, setCopied] = useState(false);
-  const copiedResetTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
-    null,
-  );
-  useEffect(
-    () => () => {
-      if (copiedResetTimerRef.current !== null) {
-        clearTimeout(copiedResetTimerRef.current);
-      }
-    },
-    [],
-  );
+  const { copied, copy } = useCopyFeedback(text, COPIED_RESET_MS);
 
   const handleCopy = useCallback(
     async (event: ReactMouseEvent<HTMLButtonElement>) => {
       onClick?.(event);
-      const success = await writeClipboardText(text);
-      if (!success) {
+      if (!(await copy())) {
         console.error(`Failed to copy text for ${label}`);
-        return;
       }
-
-      if (copiedResetTimerRef.current !== null) {
-        clearTimeout(copiedResetTimerRef.current);
-      }
-      setCopied(true);
-      copiedResetTimerRef.current = setTimeout(() => {
-        copiedResetTimerRef.current = null;
-        setCopied(false);
-      }, 1800);
     },
-    [label, onClick, text],
+    [copy, label, onClick],
   );
 
   return (
@@ -70,47 +52,8 @@ export const CopyTextButton = memo(function CopyTextButton({
       aria-label={copied ? copiedLabel : label}
       title={copied ? copiedLabel : label}
     >
-      {copied ? <CheckIcon /> : <CopyIcon />}
-      {showTextLabel && (
-        <span className={styles.label}>{copied ? "Copied" : "Copy"}</span>
-      )}
+      {copied ? <CheckIcon size={ICON_SIZE} /> : <CopyIcon size={ICON_SIZE} />}
+      {showTextLabel && <CopyTextLabel copied={copied} />}
     </button>
   );
 });
-
-function CopyIcon() {
-  return (
-    <svg
-      width="14"
-      height="14"
-      viewBox="0 0 16 16"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <rect x="5" y="5" width="9" height="9" rx="1.5" />
-      <path d="M11 5V3.5A1.5 1.5 0 0 0 9.5 2H3.5A1.5 1.5 0 0 0 2 3.5v6A1.5 1.5 0 0 0 3.5 11H5" />
-    </svg>
-  );
-}
-
-function CheckIcon() {
-  return (
-    <svg
-      width="14"
-      height="14"
-      viewBox="0 0 16 16"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <path d="M13.5 4.5 6.5 11.5 2.5 7.5" />
-    </svg>
-  );
-}

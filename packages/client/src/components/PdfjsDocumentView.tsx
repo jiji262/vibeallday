@@ -13,6 +13,7 @@ import {
   type PdfjsViewport,
 } from "../lib/pdfjsRenderer";
 import styles from "./PdfjsDocumentView.module.css";
+import { FileViewerLoading } from "./FileViewerLoading";
 
 interface PdfjsDocumentViewProps {
   url: string;
@@ -149,7 +150,7 @@ export function PdfjsDocumentView({
       commitZoom(scale, rect.left + rect.width / 2, rect.top + rect.height / 2);
   };
 
-  if (!opened) return <div className="file-viewer-loading">{loading}</div>;
+  if (!opened) return <FileViewerLoading label={loading} />;
   const pageWidth = fitWidth === null ? null : fitWidth * zoom;
   return (
     <div className={styles.view}>

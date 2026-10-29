@@ -244,6 +244,7 @@ vi.mock("../../i18n", () => ({
         sidebarSectionPendingSessions: "Pending Sessions",
         sidebarSettings: "Settings",
         sidebarSwitchHost: "Switch Host",
+        sidebarSwitchHostNamed: "Switch host, now {host}",
         sidebarSectionStarred: "Starred",
         sidebarSectionLast24Hours: "Last 24 Hours",
         sessionRecentSessions: "Recent sessions",
@@ -463,20 +464,24 @@ describe("Sidebar collapsed toggle", () => {
     expect(mockToggleExpanded).not.toHaveBeenCalled();
   });
 
-  it("renders the relay Switch Host with the standard nav-item representation", () => {
+  it("renders the host pill as a standard nav item that switches hosts", () => {
     mockRemoteConnectionState.value = { disconnect: vi.fn() };
 
     renderSidebar();
 
-    // Switch Host must share the exact representation of standard nav items
-    // (a `.sidebar-nav-item` with a `.sidebar-nav-text` label) so it inherits
-    // the shared `.sidebar-collapsed .sidebar-nav-text { display: none }` rule
-    // in the mini rail, rather than relying on a bespoke per-item guard. The
-    // visual icon-only outcome is a CSS concern, verified at the browser level.
-    const switchHost = screen.getByRole("button", { name: "Switch Host" });
+    // The host pill shares the representation of standard nav items (a
+    // `.sidebar-nav-item` with a `.sidebar-nav-text` label) so the mini rail's
+    // shared `.sidebar-collapsed .sidebar-nav-text { display: none }` rule
+    // reduces it to its avatar. Its accessible name carries the visible host
+    // name, so speaking that name reaches the pill.
+    const switchHost = screen.getByRole("button", {
+      name: /^Switch host, now /,
+    });
+    expect(switchHost.classList.contains("sidebar-switch-host")).toBe(true);
     expect(switchHost.classList.contains("sidebar-nav-item")).toBe(true);
     const label = switchHost.querySelector(".sidebar-nav-text");
-    expect(label?.textContent).toBe("Switch Host");
+    expect(label?.textContent).toContain("sidebarHostRemote");
+    expect(label?.textContent).toContain("sidebarHostModeDirect");
   });
 
   it("reloads the host picker when switching hosts", () => {
@@ -494,7 +499,9 @@ describe("Sidebar collapsed toggle", () => {
 
     try {
       renderSidebar();
-      fireEvent.click(screen.getByRole("button", { name: "Switch Host" }));
+      fireEvent.click(
+        screen.getByRole("button", { name: /^Switch host, now / }),
+      );
 
       expect(disconnect).toHaveBeenCalledOnce();
       expect(replace).toHaveBeenCalledOnce();
@@ -563,7 +570,7 @@ describe("Sidebar collapsed toggle", () => {
       );
 
       fireEvent.contextMenu(
-        screen.getByRole("button", { name: "Switch Host" }),
+        screen.getByRole("button", { name: /^Switch host, now / }),
       );
       const items = screen
         .getAllByRole("menuitem")

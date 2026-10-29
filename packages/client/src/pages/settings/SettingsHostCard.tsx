@@ -1,4 +1,4 @@
-import { Pill } from "../../components/garden/Pill";
+import { Badge } from "../../components/garden/Badge";
 import { useHostIdentity } from "../../contexts/HostIdentityContext";
 import { useI18n } from "../../i18n";
 import styles from "./SettingsHostCard.module.css";
@@ -17,7 +17,7 @@ const COMPUTER_ICON = (
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
-    strokeWidth="2"
+    strokeWidth="1.75"
     strokeLinecap="round"
     strokeLinejoin="round"
     aria-hidden="true"
@@ -72,9 +72,9 @@ export function SettingsHostCard({ compact = false }: { compact?: boolean }) {
         {icon ?? COMPUTER_ICON}
       </span>
       {text}
-      <Pill tone="mint" dot>
+      <Badge tone="mint" dot>
         {t("settingsHostConnected")}
-      </Pill>
+      </Badge>
     </section>
   );
 }

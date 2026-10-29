@@ -91,10 +91,17 @@ for (const viewport of [
     page.on("pageerror", (error) => errors.push(error.message));
     await page.setViewportSize(viewport);
     await page.goto(`${baseURL}/inbox?project=${projectId}`);
+    // Overview/All tabs exist only with the phone tab bar; the sidebar lists
+    // both destinations everywhere else.
     const views = page.getByRole("navigation", { name: "Session views" });
-    await expect(
-      views.getByRole("link", { name: "Overview", exact: true }),
-    ).toHaveAttribute("aria-current", "page");
+    const phone = viewport.name === "phone";
+    if (phone) {
+      await expect(
+        views.getByRole("link", { name: "Overview", exact: true }),
+      ).toHaveAttribute("aria-current", "page");
+    } else {
+      await expect(views).toHaveCount(0);
+    }
     await expect(page.locator("#now-tier-needsAttention")).toContainText("26");
     await expect(page.locator("#now-tier-active")).toContainText("1");
     await expect(
@@ -123,9 +130,12 @@ for (const viewport of [
     }
     await recordUiCapture(page, `session-overview-${viewport.name}`);
     await page.getByRole("link", { name: "2 unread", exact: true }).click();
-    await expect(
-      views.getByRole("link", { name: "All", exact: true }),
-    ).toHaveAttribute("aria-current", "page");
+    await expect(page).toHaveURL(/\/sessions\?/);
+    if (phone) {
+      await expect(
+        views.getByRole("link", { name: "All", exact: true }),
+      ).toHaveAttribute("aria-current", "page");
+    }
     await expect(page.locator("main .session-list-item--card")).toHaveCount(2);
     await expect(page.locator("main")).toContainText("Session 1028");
     await expect(page.locator("main")).toContainText("Session 1029");

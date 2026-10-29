@@ -15,6 +15,12 @@ import { loadProjectSessions, reviewSessionLabel } from "../lib/reviewSessions";
 import type { TranslationFn } from "../i18n";
 import { generateUUID } from "../lib/uuid";
 import styles from "./ReviewSubmitModal.module.css";
+import { Button } from "../components/garden/Button";
+import { EmptyState } from "../components/garden/EmptyState";
+import { ErrorState } from "../components/garden/ErrorState";
+import { inputClassName, selectClassName } from "../components/garden/Field";
+import { LoadingState } from "../components/garden/LoadingState";
+import { Notice } from "../components/garden/Notice";
 
 /**
  * The accumulating-review submit flow (topic: source-review-to-session, phase
@@ -213,12 +219,16 @@ export function ReviewSubmitModal({
       onClose={onClose}
     >
       <div className={styles.modal}>
-        {error && <div className={styles.error}>{error}</div>}
-        {notice && <div role="status">{notice}</div>}
+        {error && <ErrorState inline message={error} />}
+        {notice && (
+          <Notice tone="success" role="status">
+            {notice}
+          </Notice>
+        )}
         {items === null ? (
-          <div>{t("loading")}</div>
+          <LoadingState label={t("loading")} variant="compact" />
         ) : items.length === 0 ? (
-          <div>{t("sourceReviewNoPending")}</div>
+          <EmptyState compact title={t("sourceReviewNoPending")} />
         ) : (
           <ul className={styles.list}>
             {items.map((item) => (
@@ -238,6 +248,7 @@ export function ReviewSubmitModal({
             <label className={styles.field}>
               <span>{t("sourceReviewTargetLegend")}</span>
               <select
+                className={selectClassName()}
                 value={targetSessionId}
                 onChange={(event) => {
                   targetTouchedRef.current = true;
@@ -278,6 +289,7 @@ export function ReviewSubmitModal({
                 <label className={styles.field}>
                   <span>{t("sourceReviewProvider")}</span>
                   <select
+                    className={selectClassName()}
                     value={providerName}
                     disabled={
                       providersLoading || availableProviders.length === 0
@@ -297,6 +309,7 @@ export function ReviewSubmitModal({
                 <label className={styles.field}>
                   <span>{t("sourceReviewModel")}</span>
                   <select
+                    className={selectClassName()}
                     value={model}
                     disabled={!selectedProvider}
                     onChange={(event) => setModel(event.target.value)}
@@ -319,6 +332,7 @@ export function ReviewSubmitModal({
             <label className={`${styles.field} ${styles.name}`}>
               <span>{t("sourceReviewSubmissionName")}</span>
               <input
+                className={inputClassName()}
                 value={name}
                 maxLength={120}
                 placeholder={derivedName}
@@ -326,17 +340,17 @@ export function ReviewSubmitModal({
               />
             </label>
           )}
-          <button type="button" onClick={onClose} disabled={busy}>
+          <Button className={styles.button} onClick={onClose} disabled={busy}>
             {t("cancel")}
-          </button>
-          <button
-            type="button"
-            className={styles.go}
+          </Button>
+          <Button
+            variant="primary"
+            className={styles.button}
             onClick={submit}
             disabled={busy || queued || included.size === 0}
           >
             {t("sourceReviewSubmitReview", { count: included.size })}
-          </button>
+          </Button>
         </div>
       </div>
     </Modal>

@@ -9,6 +9,7 @@ import {
 } from "react";
 import { Link, Outlet, useLocation, useOutletContext } from "react-router-dom";
 import { MobileTabBar } from "../components/MobileTabBar";
+import { CommandPaletteHost } from "../components/shell/CommandPaletteHost";
 import { ProviderHostDegradedBanner } from "../components/ProviderHostDegradedBanner";
 import styles from "./NavigationLayout.module.css";
 import { Sidebar, SidebarToggleIcon } from "../components/Sidebar";
@@ -435,100 +436,102 @@ function NavigationLayoutFrame({ sessionElement }: NavigationLayoutProps) {
     <SessionDomLingerHost sessionElement={sessionElement}>
       {({ onSessionNavigate, renderRouteStack }) => (
         <SidebarSessionFeedsProvider enabled={sidebarFeedsEnabled}>
-          <div className={styles.shell}>
-            <ProviderHostDegradedBanner />
-            <div
-              ref={layoutFrameRef}
-              className={`${styles.frame} session-page ${isWideScreen ? "desktop-layout" : ""} ${
-                isContentFrameRoute ? "content-frame-layout" : ""
-              } ${isResizing ? "resizing" : ""} ${showTabBar ? styles.aboveTabBar : ""}`}
-              style={containerStyle}
-            >
-              {/* Desktop sidebar - always visible on wide screens; the minimized mode
-          renders the floating restore toggle in its place */}
-              {isWideScreen &&
-                !isContentFrameRoute &&
-                (isMinimized ? (
-                  <Link
-                    to={{
-                      pathname: location.pathname,
-                      search: location.search,
-                      hash: location.hash,
-                    }}
-                    className="sidebar-toggle sidebar-floating-restore"
-                    role="button"
-                    onClick={(event) => {
-                      if (
-                        event.button !== 0 ||
-                        event.metaKey ||
-                        event.ctrlKey ||
-                        event.shiftKey ||
-                        event.altKey
-                      ) {
-                        return;
-                      }
-                      event.preventDefault();
-                      restoreCollapsedSidebar();
-                    }}
-                    onKeyDown={(event) => {
-                      if (event.key !== " ") {
-                        return;
-                      }
-                      event.preventDefault();
-                      restoreCollapsedSidebar();
-                    }}
-                    title={t("actionRestoreSidebar")}
-                    aria-label={t("actionRestoreSidebar")}
-                  >
-                    <SidebarToggleIcon />
-                  </Link>
-                ) : (
-                  <aside
-                    className={`sidebar-desktop ${effectivelyCollapsed ? "sidebar-collapsed" : ""} ${isResizing ? "resizing" : ""}`}
-                    style={desktopSidebarStyle}
-                  >
-                    <Sidebar
-                      isOpen={true}
-                      onClose={NOOP}
-                      onNavigate={NOOP}
-                      onSessionNavigate={onSessionNavigate}
-                      currentSessionId={sidebarSessionMatch?.sessionId}
-                      isDesktop={true}
-                      isCollapsed={effectivelyCollapsed}
-                      onToggleExpanded={handleToggleExpanded}
-                      onMinimize={minimizeToFloatingToggle}
-                      sidebarWidth={sidebarWidth}
-                      onResizeStart={handleResizeStart}
-                      onResize={setSidebarWidth}
-                      onResizeEnd={handleResizeEnd}
-                    />
-                  </aside>
-                ))}
-
-              {/* Mobile sidebar - modal overlay (also used for constrained desktop overlay) */}
-              {(isContentFrameRoute
-                ? sidebarOpen
-                : !isWideScreen || sidebarOpen) && (
-                <Sidebar
-                  isOpen={sidebarOpen}
-                  onClose={closeSidebar}
-                  onNavigate={closeSidebar}
-                  onSessionNavigate={onSessionNavigate}
-                  currentSessionId={sidebarSessionMatch?.sessionId}
-                />
-              )}
-
-              <GlossaryProjectProvider
-                projectId={currentProjectId ?? ""}
-                enabled={currentProjectId !== null}
+          <CommandPaletteHost>
+            <div className={styles.shell}>
+              <ProviderHostDegradedBanner />
+              <div
+                ref={layoutFrameRef}
+                className={`${styles.frame} session-page ${isWideScreen ? "desktop-layout" : ""} ${
+                  isContentFrameRoute ? "content-frame-layout" : ""
+                } ${isResizing ? "resizing" : ""} ${showTabBar ? styles.aboveTabBar : ""}`}
+                style={containerStyle}
               >
-                <NavigationLayoutReactContext.Provider value={context}>
-                  {renderRouteStack(<Outlet context={context} />)}
-                </NavigationLayoutReactContext.Provider>
-              </GlossaryProjectProvider>
+                {/* Desktop sidebar - always visible on wide screens; the minimized mode
+          renders the floating restore toggle in its place */}
+                {isWideScreen &&
+                  !isContentFrameRoute &&
+                  (isMinimized ? (
+                    <Link
+                      to={{
+                        pathname: location.pathname,
+                        search: location.search,
+                        hash: location.hash,
+                      }}
+                      className="sidebar-toggle sidebar-floating-restore"
+                      role="button"
+                      onClick={(event) => {
+                        if (
+                          event.button !== 0 ||
+                          event.metaKey ||
+                          event.ctrlKey ||
+                          event.shiftKey ||
+                          event.altKey
+                        ) {
+                          return;
+                        }
+                        event.preventDefault();
+                        restoreCollapsedSidebar();
+                      }}
+                      onKeyDown={(event) => {
+                        if (event.key !== " ") {
+                          return;
+                        }
+                        event.preventDefault();
+                        restoreCollapsedSidebar();
+                      }}
+                      title={t("actionRestoreSidebar")}
+                      aria-label={t("actionRestoreSidebar")}
+                    >
+                      <SidebarToggleIcon />
+                    </Link>
+                  ) : (
+                    <aside
+                      className={`sidebar-desktop ${effectivelyCollapsed ? "sidebar-collapsed" : ""} ${isResizing ? "resizing" : ""}`}
+                      style={desktopSidebarStyle}
+                    >
+                      <Sidebar
+                        isOpen={true}
+                        onClose={NOOP}
+                        onNavigate={NOOP}
+                        onSessionNavigate={onSessionNavigate}
+                        currentSessionId={sidebarSessionMatch?.sessionId}
+                        isDesktop={true}
+                        isCollapsed={effectivelyCollapsed}
+                        onToggleExpanded={handleToggleExpanded}
+                        onMinimize={minimizeToFloatingToggle}
+                        sidebarWidth={sidebarWidth}
+                        onResizeStart={handleResizeStart}
+                        onResize={setSidebarWidth}
+                        onResizeEnd={handleResizeEnd}
+                      />
+                    </aside>
+                  ))}
+
+                {/* Mobile sidebar - modal overlay (also used for constrained desktop overlay) */}
+                {(isContentFrameRoute
+                  ? sidebarOpen
+                  : !isWideScreen || sidebarOpen) && (
+                  <Sidebar
+                    isOpen={sidebarOpen}
+                    onClose={closeSidebar}
+                    onNavigate={closeSidebar}
+                    onSessionNavigate={onSessionNavigate}
+                    currentSessionId={sidebarSessionMatch?.sessionId}
+                  />
+                )}
+
+                <GlossaryProjectProvider
+                  projectId={currentProjectId ?? ""}
+                  enabled={currentProjectId !== null}
+                >
+                  <NavigationLayoutReactContext.Provider value={context}>
+                    {renderRouteStack(<Outlet context={context} />)}
+                  </NavigationLayoutReactContext.Provider>
+                </GlossaryProjectProvider>
+              </div>
+              {showTabBar && <MobileTabBar />}
             </div>
-            {showTabBar && <MobileTabBar />}
-          </div>
+          </CommandPaletteHost>
         </SidebarSessionFeedsProvider>
       )}
     </SessionDomLingerHost>

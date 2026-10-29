@@ -1,0 +1,116 @@
+/* Row lists that stay <ul>/<li> or links: one grid template shared by the
+   sunken header and every row through --data-list-columns. */
+.list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.header,
+.row {
+  display: grid;
+  grid-template-columns: var(--data-list-columns, minmax(0, 1fr));
+  align-items: center;
+  column-gap: var(--space-4);
+}
+
+.header {
+  padding: 10px var(--space-5);
+  border-bottom: 1px solid var(--line);
+  background: var(--bg-2);
+  color: var(--ink-3);
+  font-family: var(--label-font);
+  font-size: var(--eyebrow-size);
+  font-weight: 500;
+  letter-spacing: var(--eyebrow-tracking);
+  text-transform: uppercase;
+}
+
+.row {
+  position: relative;
+  min-width: 0;
+  padding: 14px var(--space-5);
+  border-bottom: 1px dashed var(--dash);
+  color: var(--ink);
+  text-decoration: none;
+  transition: background-color var(--duration-fast) var(--ease-standard);
+}
+
+.list > .row:last-child,
+.list > :last-child > .row {
+  border-bottom: 0;
+}
+
+.danger {
+  background: var(--rose-soft);
+}
+
+.interactive {
+  cursor: pointer;
+}
+
+.interactive:hover,
+.selected {
+  background: var(--bg-2);
+}
+
+.interactive:focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 0 2px var(--indigo);
+}
+
+.cell {
+  min-width: 0;
+}
+
+.primary {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mono {
+  color: var(--ink-2);
+  font-family: var(--label-font);
+  font-size: 13px;
+}
+
+.num {
+  font-variant-numeric: tabular-nums;
+}
+
+.muted {
+  color: var(--ink-3);
+}
+
+.right {
+  justify-self: end;
+  text-align: right;
+}
+
+@media (width < 768px) {
+  .header {
+    display: none;
+  }
+
+  .row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-1) var(--space-3);
+    padding: var(--space-3) var(--space-4);
+  }
+
+  .primary {
+    flex: 1 0 100%;
+  }
+
+  .phoneHidden {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .row {
+    transition: none;
+  }
+}

@@ -1,6 +1,8 @@
 import { Link, useParams, useSearchParams } from "react-router-dom";
 import { BackArrowIcon } from "../components/BackArrowIcon";
 import { FileViewer } from "../components/FileViewer";
+import { EmptyState } from "../components/garden/EmptyState";
+import { AlertIcon } from "../components/garden/icons";
 import { SidebarLauncher } from "../components/SidebarLauncher";
 import { GlossaryProjectBoundary } from "../contexts/GlossaryContext";
 import { useRemoteBasePath } from "../hooks/useRemoteBasePath";
@@ -27,13 +29,16 @@ export function FilePage() {
   if (!projectId) {
     return (
       <div className="file-page file-page-error">
-        <div className="file-page-error-content">
-          <h1>{t("fileInvalidUrl" as never)}</h1>
-          <p>{t("fileMissingProjectId" as never)}</p>
-          <Link to={`${basePath}/projects`} className="file-page-back-link">
-            {t("fileGoToProjects" as never)}
-          </Link>
-        </div>
+        <EmptyState
+          title={t("fileInvalidUrl" as never)}
+          hint={t("fileMissingProjectId" as never)}
+          icon={<AlertIcon />}
+          action={
+            <Link to={`${basePath}/projects`} className="file-page-back-link">
+              {t("fileGoToProjects" as never)}
+            </Link>
+          }
+        />
       </div>
     );
   }
@@ -41,16 +46,19 @@ export function FilePage() {
   if (!filePath) {
     return (
       <div className="file-page file-page-error">
-        <div className="file-page-error-content">
-          <h1>{t("fileInvalidUrl" as never)}</h1>
-          <p>{t("fileMissingPath" as never)}</p>
-          <Link
-            to={`${basePath}/projects/${projectId}`}
-            className="file-page-back-link"
-          >
-            {t("fileGoToProject" as never)}
-          </Link>
-        </div>
+        <EmptyState
+          title={t("fileInvalidUrl" as never)}
+          hint={t("fileMissingPath" as never)}
+          icon={<AlertIcon />}
+          action={
+            <Link
+              to={`${basePath}/projects/${projectId}`}
+              className="file-page-back-link"
+            >
+              {t("fileGoToProject" as never)}
+            </Link>
+          }
+        />
       </div>
     );
   }

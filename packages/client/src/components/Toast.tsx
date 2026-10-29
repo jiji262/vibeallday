@@ -1,6 +1,15 @@
 import type { CSSProperties } from "react";
 import { getToastDurationMs, type Toast as ToastType } from "../hooks/useToast";
+import { AlertIcon, CheckIcon, InfoIcon } from "./garden/icons";
 import styles from "./Toast.module.css";
+
+const TOAST_ICON_SIZE = 16;
+
+const TOAST_ICON = {
+  error: AlertIcon,
+  success: CheckIcon,
+  info: InfoIcon,
+} satisfies Record<ToastType["type"], unknown>;
 
 interface Props {
   toasts: ToastType[];
@@ -31,6 +40,7 @@ export function ToastContainer({ toasts, onDismiss }: Props) {
           onKeyDown={(e) => e.key === "Enter" && onDismiss(toast.id)}
           role="alert"
         >
+          <ToastIcon type={toast.type} />
           <span className={styles.message}>{toast.message}</span>
           {toast.action && (
             <button
@@ -48,5 +58,14 @@ export function ToastContainer({ toasts, onDismiss }: Props) {
         </div>
       ))}
     </div>
+  );
+}
+
+function ToastIcon({ type }: { type: ToastType["type"] }) {
+  const Icon = TOAST_ICON[type];
+  return (
+    <span className={styles.icon} aria-hidden="true">
+      <Icon size={TOAST_ICON_SIZE} />
+    </span>
   );
 }

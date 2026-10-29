@@ -69,6 +69,10 @@ import {
   type GitDiffSource,
   type GitDiffViewState,
 } from "./GitStatusDiffPreview";
+import { EmptyState } from "../components/garden/EmptyState";
+import { CheckIcon } from "../components/garden/icons";
+import { Spinner } from "../components/garden/Spinner";
+import { SourcePaneEmpty } from "./SourcePaneStates";
 
 type WorktreeState = "staged" | "unstaged" | "both" | "untracked";
 type WorktreeFileChange = GitFileChange & { worktreeState: WorktreeState };
@@ -82,6 +86,8 @@ const WORKING_TREE_SOURCE: GitDiffSource = {
  * per-host connection budget so foreground Source Control requests stay
  * responsive while a large untracked corpus fills in behind them.
  */
+/** Inline spinner beside the inventory progress text. */
+const INVENTORY_SPINNER_SIZE = 12;
 const UNTRACKED_FOLDER_CONCURRENCY = 4;
 
 /** How long arriving expansions accumulate before one list re-render. */
@@ -1002,25 +1008,21 @@ export function WorkingTreeBrowser({
       >
         {historyParentLink}
         {embeddedInHistory ? (
-          <div className="working-tree-clean-state working-tree-history-clean">
-            <span className="working-tree-clean-icon" aria-hidden="true">
-              ✓
-            </span>
-            <div className="git-status-empty">
-              {t("gitStatusWorkingTreeClean")}
-            </div>
-            <p>{t("sourceWorkingTreeCleanDescription")}</p>
+          <div className={`working-tree-history-clean ${styles.cleanState}`}>
+            <EmptyState
+              compact
+              title={t("gitStatusWorkingTreeClean")}
+              hint={t("sourceWorkingTreeCleanDescription")}
+            />
           </div>
         ) : (
           <div className="working-tree-clean-landing">
-            <div className="working-tree-clean-state">
-              <span className="working-tree-clean-icon" aria-hidden="true">
-                ✓
-              </span>
-              <div className="git-status-empty">
-                {t("gitStatusWorkingTreeClean")}
-              </div>
-              <p>{t("sourceWorkingTreeCleanDescription")}</p>
+            <div className={styles.cleanState}>
+              <EmptyState
+                title={t("gitStatusWorkingTreeClean")}
+                hint={t("sourceWorkingTreeCleanDescription")}
+                icon={<CheckIcon />}
+              />
             </div>
           </div>
         )}
@@ -1089,6 +1091,7 @@ export function WorkingTreeBrowser({
             )}
             {effectiveInventoryLoading && (
               <span className={styles.scanProgress} role="status">
+                <Spinner size={INVENTORY_SPINNER_SIZE} />
                 {t("gitStatusLoading")}
               </span>
             )}
@@ -1276,7 +1279,7 @@ export function WorkingTreeBrowser({
             )}
           </div>
           {listEntries.length === 0 && !effectiveInventoryPending && (
-            <div className="git-status-empty">{t("sourceNoMatches")}</div>
+            <SourcePaneEmpty title={t("sourceNoMatches")} />
           )}
         </div>
 

@@ -1,0 +1,22 @@
+/* Relay setup form framed as one settings card, padded like its rows. */
+.setupCard {
+  padding: var(--space-4) var(--space-5);
+}
+
+/* Hosted-client facts read as row description text, not body copy. */
+.clientInfo {
+  display: grid;
+  gap: var(--space-1);
+  color: var(--ink-3);
+  font-size: var(--font-size-base);
+  line-height: 1.5;
+}
+
+.clientInfo p {
+  margin: 0;
+}
+
+.clientInfo strong {
+  color: var(--ink-2);
+  font-weight: 500;
+}

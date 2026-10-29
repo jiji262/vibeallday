@@ -1,6 +1,7 @@
 import type { ProviderName } from "@vibeallday/shared";
 import type { MouseEvent } from "react";
 import { useI18n } from "../i18n";
+import { Badge, type BadgeTone } from "./garden/Badge";
 import { ProviderBadge } from "./ProviderBadge";
 import styles from "./SessionHeaderMeta.module.css";
 
@@ -27,6 +28,39 @@ const STATE_CLASS: Record<SessionHeaderState, string | undefined> = {
   stopped: styles.quiet,
   external: styles.external,
 };
+
+const STATE_TONE: Record<SessionHeaderState, BadgeTone> = {
+  running: "mint",
+  "needs-you": "rose",
+  idle: "grey",
+  stopped: "outline",
+  external: "sand",
+};
+
+/**
+ * Wide-header state pill after the title: mint pulse while a turn runs, rose
+ * when the session waits on the reader, grey when idle. Narrow headers carry
+ * the same word in their mono meta line instead.
+ */
+export function SessionHeaderStateBadge({
+  state,
+  className,
+}: {
+  state: SessionHeaderState;
+  className?: string;
+}) {
+  const { t } = useI18n();
+  const live = state === "running" || state === "needs-you";
+  return (
+    <Badge
+      tone={STATE_TONE[state]}
+      dot={state === "running" ? "pulse" : live}
+      className={className}
+    >
+      {t(STATE_LABEL_KEY[state])}
+    </Badge>
+  );
+}
 
 /** Map ownership and process state to the single word the header shows. */
 export function getSessionHeaderState(

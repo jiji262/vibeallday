@@ -43,8 +43,8 @@ export function EmulatorNavButtons({
           className={styles.button}
           onClick={() => sendKey("GoBack")}
           disabled={disabled}
-          title="Back"
-          aria-label="Back"
+          title={t("emulatorNavBack")}
+          aria-label={t("emulatorNavBack")}
         >
           <svg
             width="24"
@@ -52,7 +52,7 @@ export function EmulatorNavButtons({
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
-            strokeWidth="2"
+            strokeWidth="1.75"
             strokeLinecap="round"
             strokeLinejoin="round"
             aria-hidden="true"
@@ -66,8 +66,8 @@ export function EmulatorNavButtons({
         className={styles.button}
         onClick={() => sendKey("GoHome")}
         disabled={disabled}
-        title="Home"
-        aria-label="Home"
+        title={t("emulatorNavHome")}
+        aria-label={t("emulatorNavHome")}
       >
         <svg
           width="24"
@@ -75,7 +75,7 @@ export function EmulatorNavButtons({
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
-          strokeWidth="2"
+          strokeWidth="1.75"
           strokeLinecap="round"
           strokeLinejoin="round"
           aria-hidden="true"
@@ -89,8 +89,8 @@ export function EmulatorNavButtons({
           className={styles.button}
           onClick={() => sendKey("AppSwitch")}
           disabled={disabled}
-          title="Recents"
-          aria-label="Recents"
+          title={t("emulatorNavRecents")}
+          aria-label={t("emulatorNavRecents")}
         >
           <svg
             width="24"
@@ -98,7 +98,7 @@ export function EmulatorNavButtons({
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
-            strokeWidth="2"
+            strokeWidth="1.75"
             strokeLinecap="round"
             strokeLinejoin="round"
             aria-hidden="true"

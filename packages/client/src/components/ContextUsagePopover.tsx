@@ -9,6 +9,9 @@ import { useI18n } from "../i18n";
 import type { ContextUsage } from "../types";
 import { ContextBreakdownSection } from "./ContextBreakdownSection";
 import styles from "./ContextUsagePopover.module.css";
+import { RefreshIcon } from "./garden/icons";
+
+const REFRESH_ICON_SIZE = 14;
 
 function formatDuration(minutes: number | undefined): string {
   if (!minutes) return "—";
@@ -152,7 +155,10 @@ export function ContextUsagePopover({
             aria-label={t("subscriptionUsageRefresh")}
             title={t("subscriptionUsageRefresh")}
           >
-            ↻
+            <RefreshIcon
+              size={REFRESH_ICON_SIZE}
+              className={styles.refreshIcon}
+            />
           </button>
         </div>
       )}

@@ -36,23 +36,25 @@
   gap: var(--space-2);
 }
 
+/* Garden Notice look, opaque because it floats over content: peach for a
+   plain reload, rose when restarting would interrupt work. */
 .banner {
   position: relative;
   display: flex;
   width: max-content;
   max-width: 100%;
-  min-height: 40px;
-  padding: var(--space-2) var(--space-2) var(--space-2) var(--space-3);
+  min-height: 44px;
+  padding: var(--space-2) var(--space-2) var(--space-2) var(--space-4);
   box-sizing: border-box;
   align-items: center;
   justify-content: center;
   gap: var(--space-3);
-  color: #000;
-  background: var(--warning-color);
-  border: 1px solid rgba(0, 0, 0, 0.24);
+  color: var(--peach-ink);
+  background: color-mix(in srgb, var(--peach) 12%, var(--card));
+  border: 1px solid color-mix(in srgb, var(--peach) 28%, transparent);
   border-radius: var(--radius-md);
-  box-shadow: var(--shadow-lg);
-  font-size: var(--font-size-sm);
+  box-shadow: var(--shadow-md);
+  font-size: 13px;
   font-weight: 500;
 }
 
@@ -102,78 +104,96 @@
   align-items: center;
   justify-content: center;
   flex: 0 0 auto;
-  height: 36px;
-  min-height: 36px;
-  padding: var(--space-1) var(--space-2);
-  border: 1px solid rgba(0, 0, 0, 0.3);
-  border-radius: var(--radius-sm);
-  background: rgba(255, 255, 255, 0.2);
-  color: #000;
-  font-size: var(--font-size-sm);
+  height: 32px;
+  min-height: 32px;
+  padding: 0 var(--space-3);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-md);
+  background: var(--card);
+  box-shadow: var(--shadow-xs);
+  color: var(--ink);
+  font-size: 13px;
   font-weight: 500;
   white-space: nowrap;
   cursor: pointer;
-  transition: background 0.15s;
+  transition: background-color var(--duration-fast) var(--ease-standard);
 }
 
 .button:hover {
-  background: rgba(255, 255, 255, 0.4);
+  background: var(--bg-2);
+}
+
+.button:focus-visible {
+  border-color: var(--indigo);
+  box-shadow: 0 0 0 3px var(--indigo-soft);
 }
 
 .buttonLabel {
   display: inline-block;
-  transform: translateY(1px);
 }
 
 .button:disabled {
+  border-color: var(--line);
+  background: var(--bg-soft);
+  color: var(--ink-3);
   cursor: wait;
-  opacity: 0.65;
 }
 
 .buttonPrimary {
-  background: #000;
-  color: var(--warning-color);
   border-color: transparent;
+  background: var(--indigo);
+  color: var(--ink-on);
 }
 
 .buttonPrimary:hover {
-  background: #222;
+  background: var(--indigo-ink);
 }
 
 /* Warning state for unsafe restart */
 .warning {
-  background: var(--error-color);
-}
-
-.warning .buttonPrimary {
-  color: var(--error-color);
+  color: var(--rose-ink);
+  background: color-mix(in srgb, var(--rose) 12%, var(--card));
+  border-color: color-mix(in srgb, var(--rose) 28%, transparent);
 }
 
 .buttonSafe {
-  background: rgba(255, 255, 255, 0.32);
+  border-color: var(--indigo);
+  color: var(--indigo);
 }
 
-.buttonDanger {
-  background: #000;
+.buttonDanger,
+.buttonDanger:hover {
   border-color: transparent;
+  background: var(--rose-ink);
+  color: var(--ink-on);
 }
 
 .buttonDanger:hover {
-  background: #222;
+  filter: brightness(0.95);
 }
 
 .dismiss {
-  width: 36px;
+  width: 32px;
   padding: 0;
-  font-size: 1.4rem;
-  line-height: 1;
+  border-color: transparent;
+  background: transparent;
+  box-shadow: none;
+  color: currentcolor;
 }
 
-.dismiss > span {
-  display: inline-flex;
-  height: 100%;
-  align-items: center;
-  justify-content: center;
+.dismiss > svg {
+  display: block;
+}
+
+@media (pointer: coarse) {
+  .button {
+    height: var(--tap-min);
+    min-height: var(--tap-min);
+  }
+
+  .dismiss {
+    width: var(--tap-min);
+  }
 }
 
 /* Mobile adjustments */

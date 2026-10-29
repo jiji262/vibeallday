@@ -187,7 +187,7 @@ test("automatically discovers Jira and GitHub references from viewed and recent 
       }),
     ).toBeVisible();
     await expect(
-      page.getByRole("link", { name: "AUTOTEST-123 ↗" }),
+      page.getByRole("link", { name: "Open AUTOTEST-123 in its tracker" }),
     ).toHaveAttribute("href", "https://jira.example.test/browse/AUTOTEST-123");
     await page
       .getByRole("button", { name: "Actions for AUTOTEST-123" })
