@@ -117,7 +117,6 @@ import {
   ServerSettingsService,
   loadOrCreateSessionWakeSecret,
   SessionQueuePersistenceService,
-  SharingService,
   WorkstreamService,
 } from "./services/index.js";
 import { providerInstallationCoordinator } from "./services/ProviderInstallationCoordinator.js";
@@ -733,9 +732,6 @@ const workstreamService = new WorkstreamService({
   dataDir: config.dataDir,
   eventBus,
 });
-const sharingService = new SharingService({
-  dataDir: config.dataDir,
-});
 const publicShareService = new PublicShareService({
   dataDir: config.dataDir,
 });
@@ -882,8 +878,6 @@ async function startServer() {
   markStartup("limitedUserBrowserDefaultsService initialized");
   await workstreamService.initialize();
   markStartup("workstreamService initialized");
-  await sharingService.initialize();
-  markStartup("sharingService initialized");
   // Loading persisted public shares is not required to bind the listening
   // socket or serve /health, but on a large data dir this file read parks the
   // event loop for several seconds (it queues behind the FileWatcher's initial
@@ -1226,7 +1220,6 @@ async function startServer() {
     projectStoragePolicy,
     hostAwakeService,
     workstreamService,
-    sharingService,
     publicShareService,
     deviceBridgeService,
     modelInfoService,

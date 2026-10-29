@@ -49,11 +49,9 @@ Build shared first so the generated, existing find agent is available:
 
 ```bash
 pnpm --filter shared build
-npm ci --prefix sharing-worker
 node --test artifact-host/host.test.mjs
 cd artifact-host
-# Use the project's credentialed Wrangler installation.
-../sharing-worker/node_modules/.bin/wrangler deploy --config wrangler.jsonc
+npx -y wrangler@4.141.0 deploy --config wrangler.jsonc
 ```
 
 The route uses `*.vibeallday.navs.dpdns.org/*`. DNS must provide a proxied wildcard

@@ -277,7 +277,6 @@ import { createSessionsRoutes } from "./routes/sessions.js";
 import { createSessionWakeRoutes } from "./routes/session-wake.js";
 import { createSettingsRoutes } from "./routes/settings.js";
 import { streamNewSessionBootstrap } from "./routes/new-session-bootstrap.js";
-import { createSharingRoutes } from "./routes/sharing.js";
 import { createSupervisorQueueRoutes } from "./routes/supervisor-queue.js";
 import { createToolResultMediaRoutes } from "./routes/tool-result-media.js";
 import { ClaudeGatewayProvider } from "./sdk/providers/claude-gateway.js";
@@ -360,7 +359,6 @@ import type {
   SessionQueuePersistenceService,
 } from "./services/SessionQueuePersistenceService.js";
 import { SafeRestartService } from "./services/SafeRestartService.js";
-import type { SharingService } from "./services/SharingService.js";
 import type { SpeechBackendRegistry } from "./services/voice/registry.js";
 import { VocabularyStore } from "./services/voice/VocabularyStore.js";
 import { VocabularyLearning } from "./services/voice/VocabularyLearning.js";
@@ -563,8 +561,6 @@ export interface AppOptions {
   workstreamService?: WorkstreamService;
   /** ModelInfoService for cached model metadata (context windows, etc.) */
   modelInfoService?: ModelInfoService;
-  /** SharingService for session sharing */
-  sharingService?: SharingService;
   /** PublicShareService for secret-link read-only session shares */
   publicShareService?: PublicShareService;
   /** DeviceBridgeService for Android emulator streaming */
@@ -3542,14 +3538,6 @@ export function createApp(options: AppOptions): AppResult {
         console.warn("[codex-update] Auto-update threw:", err);
       }
     })();
-  }
-
-  // Sharing routes (session snapshot sharing via Worker)
-  if (options.sharingService) {
-    app.route(
-      "/api/sharing",
-      createSharingRoutes({ sharingService: options.sharingService }),
-    );
   }
 
   // Public read-only session shares. Creation is authenticated under /api;

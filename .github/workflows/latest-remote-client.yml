@@ -96,10 +96,6 @@ jobs:
           test -f packages/client/dist-remote/_headers
           test -f packages/client/dist-remote/asset-generation.json
 
-      - name: Install Wrangler
-        if: steps.cloudflare-config.outputs.enabled == 'true'
-        run: npm ci --prefix sharing-worker
-
       - name: Deploy to Cloudflare Pages
         if: steps.cloudflare-config.outputs.enabled == 'true'
         env:
@@ -108,7 +104,7 @@ jobs:
           CLOUDFLARE_PAGES_PROJECT_NAME: ${{ vars.CLOUDFLARE_PAGES_PROJECT_NAME }}
           HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
         run: |
-          sharing-worker/node_modules/.bin/wrangler pages deploy packages/client/dist-remote \
+          npx -y wrangler@4.141.0 pages deploy packages/client/dist-remote \
             --project-name "$CLOUDFLARE_PAGES_PROJECT_NAME" \
             --branch main \
             --commit-hash "$HEAD_SHA" \

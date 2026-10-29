@@ -96,12 +96,6 @@ export {
 } from "./ProjectQueueScheduler.js";
 
 export {
-  SharingService,
-  type SharingConfig,
-  type SharingServiceOptions,
-} from "./SharingService.js";
-
-export {
   PUBLIC_SHARE_SECRET_BITS,
   PUBLIC_SHARE_SECRET_BYTES,
   PublicShareService,

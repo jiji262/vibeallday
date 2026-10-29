@@ -83,7 +83,6 @@ const DENIED_PREFIXES: readonly string[] = [
   "/api/computer-control",
   "/api/public-shares",
   "/api/public-file-shares",
-  "/api/sharing",
   "/api/vhost",
   "/api/apps",
   "/api/security",

@@ -1,7 +1,0 @@
-name = "vibeallday-sharing"
-main = "src/index.ts"
-compatibility_date = "2025-01-01"
-
-[[r2_buckets]]
-binding = "SHARES"
-bucket_name = "vibealldayshares"

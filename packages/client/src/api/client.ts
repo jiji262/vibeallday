@@ -1821,15 +1821,6 @@ export const api = {
       { method: "POST" },
     ),
 
-  // Sharing API
-  getSharingStatus: () => fetchJSON<{ configured: boolean }>("/sharing/status"),
-
-  shareSession: (html: string, title?: string) =>
-    fetchJSON<{ url: string }>("/sharing/upload", {
-      method: "POST",
-      body: JSON.stringify({ html, title }),
-    }),
-
   getPublicShareStatus: () =>
     fetchJSON<PublicShareStatusResponse>("/public-shares/status"),
 
