@@ -1559,6 +1559,3 @@ export class ProjectScanner {
     }
   }
 }
-
-// Singleton for convenience
-export const projectScanner = new ProjectScanner();

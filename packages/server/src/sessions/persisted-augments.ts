@@ -1,8 +1,6 @@
 import {
   augmentEditToolUsesInMessage,
-  augmentExitPlanModeAndReadResultsInMessage,
   augmentFinalizedMessage,
-  augmentWriteToolUsesInMessage,
 } from "../augments/finalized-message-augmenter.js";
 import {
   type MarkdownAugmentCacheResult,
@@ -71,31 +69,6 @@ export async function augmentEditToolUses(messages: Message[]): Promise<void> {
   await Promise.all(
     messages.map((message) =>
       augmentEditToolUsesInMessage(asAugmentableMessage(message)),
-    ),
-  );
-}
-
-/**
- * Embed Write augment data directly into tool_use inputs.
- * Adds syntax-highlighted fields to Write tool_use input blocks.
- */
-export async function augmentWriteToolUses(messages: Message[]): Promise<void> {
-  await Promise.all(
-    messages.map((message) =>
-      augmentWriteToolUsesInMessage(asAugmentableMessage(message)),
-    ),
-  );
-}
-
-/**
- * Render ExitPlanMode plan HTML and augment structured Read tool results.
- */
-export async function augmentExitPlanModeAndReadResults(
-  messages: Message[],
-): Promise<void> {
-  await Promise.all(
-    messages.map((message) =>
-      augmentExitPlanModeAndReadResultsInMessage(asAugmentableMessage(message)),
     ),
   );
 }

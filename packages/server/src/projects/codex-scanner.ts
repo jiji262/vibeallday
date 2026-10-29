@@ -502,9 +502,6 @@ export class CodexSessionScanner {
   }
 }
 
-// Singleton for convenience
-export const codexSessionScanner = new CodexSessionScanner();
-
 function createCodexScannerMetrics(sessionsDir: string): CodexScannerMetrics {
   return {
     sessionsDir,

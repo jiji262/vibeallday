@@ -421,6 +421,3 @@ export class GeminiSessionScanner {
     }
   }
 }
-
-// Singleton for convenience
-export const geminiSessionScanner = new GeminiSessionScanner();

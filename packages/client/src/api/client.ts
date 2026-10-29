@@ -28,8 +28,6 @@ import type {
   CreatePublicFileShareRequest,
   ContextBreakdown,
   CreatePublicFileShareResponse,
-  CreateProjectWorkstreamRequest,
-  CreateProjectWorkstreamResponse,
   CreateProjectQueueItemRequest,
   CreatePublicSessionShareRequest,
   CreatePublicSessionShareResponse,
@@ -55,7 +53,6 @@ import type {
   PublicFileShareListResponse,
   PublicShareManagementListResponse,
   PublicShareStorageState,
-  WorkstreamCheckoutPreviewResponse,
   PromptSuggestionMode,
   PromptCacheKeepaliveSettings,
   PostCompactReplaySettings,
@@ -716,25 +713,6 @@ export const api = {
 
   getProjectWorkstreams: (projectId: string) =>
     fetchJSON<ProjectWorkstreamsResponse>(`/projects/${projectId}/workstreams`),
-
-  getProjectWorkstreamCheckoutPreview: (projectId: string, label: string) => {
-    const params = new URLSearchParams({ label });
-    return fetchJSON<WorkstreamCheckoutPreviewResponse>(
-      `/projects/${projectId}/workstreams/checkout-preview?${params}`,
-    );
-  },
-
-  createProjectWorkstream: (
-    projectId: string,
-    request: CreateProjectWorkstreamRequest,
-  ) =>
-    fetchJSON<CreateProjectWorkstreamResponse>(
-      `/projects/${projectId}/workstreams`,
-      {
-        method: "POST",
-        body: JSON.stringify(request),
-      },
-    ),
 
   getProjectQueueItems: () =>
     fetchJSON<ProjectQueueListResponse>("/project-queue"),

@@ -55,8 +55,6 @@ const TaskResultObjectSchema = z.object({
  */
 export const TaskResultSchema = withStringError(TaskResultObjectSchema);
 
-export type TaskResultValidated = z.infer<typeof TaskResultSchema>;
-
 /**
  * Bash tool structured result (success case)
  */
@@ -74,8 +72,6 @@ const BashResultObjectSchema = z.object({
  * Accepts either structured object OR string error message from SDK
  */
 export const BashResultSchema = withStringError(BashResultObjectSchema);
-
-export type BashResultValidated = z.infer<typeof BashResultSchema>;
 
 /**
  * Read tool result schemas
@@ -114,8 +110,6 @@ const ReadResultObjectSchema = z.object({
  */
 export const ReadResultSchema = withStringError(ReadResultObjectSchema);
 
-export type ReadResultValidated = z.infer<typeof ReadResultSchema>;
-
 /**
  * Edit tool result schema
  * Matches the EditResult and PatchHunk interfaces
@@ -148,8 +142,6 @@ const EditResultObjectSchema = z.object({
  */
 export const EditResultSchema = withStringError(EditResultObjectSchema);
 
-export type EditResultValidated = z.infer<typeof EditResultSchema>;
-
 const WriteResultObjectSchema = z.object({
   type: z.literal("text").optional(),
   file: z
@@ -169,8 +161,6 @@ const WriteResultObjectSchema = z.object({
  */
 export const WriteResultSchema = withStringError(WriteResultObjectSchema);
 
-export type WriteResultValidated = z.infer<typeof WriteResultSchema>;
-
 const GlobResultObjectSchema = z.object({
   filenames: z.array(z.string()).optional(),
   durationMs: z.number().optional(),
@@ -183,8 +173,6 @@ const GlobResultObjectSchema = z.object({
  * Accepts either structured object OR string error message from SDK
  */
 export const GlobResultSchema = withStringError(GlobResultObjectSchema);
-
-export type GlobResultValidated = z.infer<typeof GlobResultSchema>;
 
 const GrepMatchRangeSchema = z.object({
   start: z.number(),
@@ -215,8 +203,6 @@ const GrepResultObjectSchema = z.object({
  */
 export const GrepResultSchema = withStringError(GrepResultObjectSchema);
 
-export type GrepResultValidated = z.infer<typeof GrepResultSchema>;
-
 const TodoSchema = z.object({
   content: z.string().optional(),
   status: z.enum(["pending", "in_progress", "completed"]).optional(),
@@ -235,8 +221,6 @@ const TodoWriteResultObjectSchema = z.object({
 export const TodoWriteResultSchema = withStringError(
   TodoWriteResultObjectSchema,
 );
-
-export type TodoWriteResultValidated = z.infer<typeof TodoWriteResultSchema>;
 
 /**
  * WebSearch result item - can be an object with search results or a string summary
@@ -267,8 +251,6 @@ export const WebSearchResultSchema = withStringError(
   WebSearchResultObjectSchema,
 );
 
-export type WebSearchResultValidated = z.infer<typeof WebSearchResultSchema>;
-
 const WebFetchResultObjectSchema = z.object({
   bytes: z.number().optional(),
   code: z.number().optional(),
@@ -283,8 +265,6 @@ const WebFetchResultObjectSchema = z.object({
  * Accepts either structured object OR string error message from SDK
  */
 export const WebFetchResultSchema = withStringError(WebFetchResultObjectSchema);
-
-export type WebFetchResultValidated = z.infer<typeof WebFetchResultSchema>;
 
 const QuestionOptionSchema = z.object({
   label: z.string().optional(),
@@ -341,8 +321,6 @@ export const BashOutputResultSchema = withStringError(
   BashOutputResultObjectSchema,
 );
 
-export type BashOutputResultValidated = z.infer<typeof BashOutputResultSchema>;
-
 const TaskOutputResultObjectSchema = z.object({
   retrieval_status: z
     .enum(["completed", "success", "not_ready", "timeout", "running"])
@@ -367,8 +345,6 @@ export const TaskOutputResultSchema = withStringError(
   TaskOutputResultObjectSchema,
 );
 
-export type TaskOutputResultValidated = z.infer<typeof TaskOutputResultSchema>;
-
 const KillShellResultObjectSchema = z.object({
   message: z.string().optional(),
   shell_id: z.string().optional(),
@@ -382,8 +358,6 @@ export const KillShellResultSchema = withStringError(
   KillShellResultObjectSchema,
 );
 
-export type KillShellResultValidated = z.infer<typeof KillShellResultSchema>;
-
 const TaskStopResultObjectSchema = z.object({
   message: z.string().optional(),
   task_id: z.string().optional(),
@@ -396,8 +370,6 @@ const TaskStopResultObjectSchema = z.object({
  * Accepts either structured object OR string error message from SDK
  */
 export const TaskStopResultSchema = withStringError(TaskStopResultObjectSchema);
-
-export type TaskStopResultValidated = z.infer<typeof TaskStopResultSchema>;
 
 const ToolSearchResultObjectSchema = z.object({
   matches: z.array(z.string()).optional(),
@@ -413,8 +385,6 @@ const ToolSearchResultObjectSchema = z.object({
 export const ToolSearchResultSchema = withStringError(
   ToolSearchResultObjectSchema,
 );
-
-export type ToolSearchResultValidated = z.infer<typeof ToolSearchResultSchema>;
 
 const EnterPlanModeResultObjectSchema = z.object({
   message: z.string().optional(),

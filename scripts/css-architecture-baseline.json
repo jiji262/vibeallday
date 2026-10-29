@@ -5,7 +5,7 @@
       "reason": "Device stream video vocabulary produced by EmulatorStream."
     },
     "packages/client/src/styles/index.css": {
-      "maxLines": 12248,
+      "maxLines": 12153,
       "reason": "Legacy application shell and page styles; tokens and themes live in theme.css."
     },
     "packages/client/src/styles/provider-colors.css": {
