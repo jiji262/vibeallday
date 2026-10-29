@@ -694,12 +694,18 @@ test("reviews collapsed commit files with bracket navigation", async ({
     `button[data-source-file-item]:has([data-source-path="src/grouped/${tooltipFixtureName}"])`,
   );
   await tooltipFile.click();
-  await diffBody.hover({ position: { x: 10, y: 10 } });
-  await page.waitForTimeout(120);
-  await tooltipFile.hover();
-  await expect(page.getByRole("tooltip")).toContainText(
-    `src/grouped/${tooltipFixtureName}`,
-  );
+  // The themed tooltip opens on a hover dwell, which a busy render can
+  // swallow, and re-entering is what restarts that dwell. Leave the row and
+  // come back until it opens, so one pointer pass does not decide the test.
+  await expect(async () => {
+    await diffBody.hover({ position: { x: 10, y: 10 } });
+    await page.waitForTimeout(120);
+    await tooltipFile.hover();
+    await expect(page.getByRole("tooltip")).toContainText(
+      `src/grouped/${tooltipFixtureName}`,
+      { timeout: 1_000 },
+    );
+  }).toPass({ timeout: 15_000 });
   const tooltipPath = `src/grouped/${tooltipFixtureName}`;
   const tooltipIndex = orderedPaths.indexOf(tooltipPath);
   const stepKey = tooltipIndex < orderedPaths.length - 1 ? "]" : "[";
