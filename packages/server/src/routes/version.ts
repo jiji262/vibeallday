@@ -483,6 +483,7 @@ const BASE_CAPABILITIES: string[] = [
   SERVER_CAPABILITIES.agentServerAccess.name,
   SERVER_CAPABILITIES.sessionScopedLocalFiles.name,
   SERVER_CAPABILITIES.turnEffortModifiers.name,
+  SERVER_CAPABILITIES.processUltracode.name,
   SERVER_CAPABILITIES.syntheticTerminateCommand.name,
   SERVER_CAPABILITIES.speechBackendSetup.name,
   SERVER_CAPABILITIES.localSpeechModelSelection.name,

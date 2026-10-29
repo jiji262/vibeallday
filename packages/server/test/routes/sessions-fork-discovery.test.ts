@@ -149,6 +149,7 @@ describe("fork discovery before immediate navigation", () => {
         serviceTier: "priority",
         thinking: { type: "adaptive" as const },
         effort: "high" as const,
+        ultracode: false,
       };
       await metadata.recordEffectiveLaunchSettings(sourceId, settings);
       const sourceMetadata = metadata.getMetadata(sourceId);

@@ -273,6 +273,8 @@ export interface ProcessInfo {
   thinking?: ThinkingConfig;
   /** Selected effort for the next response (undefined = provider default) */
   effort?: EffortLevel;
+  /** Selected ultracode orchestration for the next response (undefined = off) */
+  ultracode?: boolean;
   /** Provider-visible service tier. undefined means provider/default behavior. */
   serviceTier?: string;
   /** Reported model for this session (e.g., "claude-opus-4-5-20251101"), for display */
@@ -408,6 +410,8 @@ export interface ProcessOptions {
   thinking?: ThinkingConfig;
   /** Effort level for response quality (undefined = SDK default) */
   effort?: EffortLevel;
+  /** Standing ultracode orchestration (undefined = off) */
+  ultracode?: boolean;
   /** Provider-visible service tier. undefined means provider/default behavior. */
   serviceTier?: string;
   /** Model used for this session (e.g., "claude-opus-4-5-20251101") */

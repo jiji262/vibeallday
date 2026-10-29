@@ -962,6 +962,11 @@ export class ProviderSessionOwner {
           (args[0] ?? undefined) as Parameters<
             NonNullable<AgentSession["setEffort"]>
           >[0],
+          // A peer that predates ultracode sends one argument, which reads as
+          // off — the only state such a peer can be in.
+          (args[1] ?? undefined) as Parameters<
+            NonNullable<AgentSession["setEffort"]>
+          >[1],
         );
       case "setServiceTier":
         if (!session.setServiceTier)

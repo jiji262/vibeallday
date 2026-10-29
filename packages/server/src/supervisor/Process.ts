@@ -953,8 +953,12 @@ export interface ProcessConstructorOptions extends ProcessOptions {
   isAutomationPaused?: () => boolean;
   /** Function to change max thinking tokens at runtime (SDK 0.2.7+) */
   setMaxThinkingTokensFn?: (tokens: number | null) => Promise<void>;
-  /** Function to change effort without restarting the provider process. */
-  setEffortFn?: (effort?: EffortLevel) => Promise<void>;
+  /**
+   * Function to change effort without restarting the provider process.
+   * `ultracode` is the full desired state and travels with every call: the
+   * provider writes both as one settings object.
+   */
+  setEffortFn?: (effort?: EffortLevel, ultracode?: boolean) => Promise<void>;
   /** Function to change the service tier without restarting the provider. */
   setServiceTierFn?: (serviceTier?: string) => Promise<void>;
   /** Publish selected/pending settings to the optional owning-session projection. */
@@ -1156,9 +1160,17 @@ export class Process {
   private _thinking: ThinkingConfig | undefined;
   /** Effort level for response quality */
   private _effort: EffortLevel | undefined;
-  /** Latest effort selected while the current provider turn is still active. */
-  private pendingEffortUpdate: { effort: EffortLevel | undefined } | null =
-    null;
+  /** Standing ultracode orchestration (undefined = off). */
+  private _ultracode: boolean | undefined;
+  /**
+   * Latest effort selection made while the current provider turn is still
+   * active. Effort and ultracode queue as one unit so the boundary write
+   * cannot carry half of the selection.
+   */
+  private pendingEffortUpdate: {
+    effort: EffortLevel | undefined;
+    ultracode: boolean | undefined;
+  } | null = null;
   /** Serializes provider effort controls so slower writes cannot win late. */
   private effortApplyTail: Promise<void> = Promise.resolve();
   /** A failed turn-boundary effort write keeps the process non-idle. */
@@ -1170,7 +1182,9 @@ export class Process {
     | ((tokens: number | null) => Promise<void>)
     | null;
   /** Function to change effort without restarting the provider process. */
-  private setEffortFn: ((effort?: EffortLevel) => Promise<void>) | null;
+  private setEffortFn:
+    | ((effort?: EffortLevel, ultracode?: boolean) => Promise<void>)
+    | null;
   private setServiceTierFn: ((serviceTier?: string) => Promise<void>) | null;
   /** Publish selected/pending settings to the optional owning-session projection. */
   private publishAgentSelfSelectionFn: ProcessConstructorOptions["publishAgentSelfSelectionFn"];
@@ -1361,6 +1375,7 @@ export class Process {
     this.sandboxProjectPath = options.sandboxProjectPath;
     this._thinking = options.thinking;
     this._effort = options.effort;
+    this._ultracode = options.ultracode;
     this.setMaxThinkingTokensFn = options.setMaxThinkingTokensFn ?? null;
     this.setEffortFn = options.setEffortFn ?? null;
     this.setServiceTierFn = options.setServiceTierFn ?? null;
@@ -2167,9 +2182,24 @@ export class Process {
       : this._effort;
   }
 
+  /**
+   * Selected ultracode orchestration, queued-selection-aware exactly as
+   * {@link effort}: the two are chosen and applied together.
+   */
+  get ultracode(): boolean | undefined {
+    return this.pendingEffortUpdate
+      ? this.pendingEffortUpdate.ultracode
+      : this._ultracode;
+  }
+
   /** Effort already accepted by the provider, excluding a queued next turn. */
   get appliedEffort(): EffortLevel | undefined {
     return this._effort;
+  }
+
+  /** Ultracode already accepted by the provider, excluding a queued next turn. */
+  get appliedUltracode(): boolean | undefined {
+    return this._ultracode;
   }
 
   /**
@@ -2357,12 +2387,12 @@ export class Process {
    * active-turn settings control apply it immediately; other active or waiting
    * processes hold the latest choice until the provider reports the boundary.
    */
-  async setEffort(effort?: EffortLevel): Promise<boolean> {
+  async setEffort(effort?: EffortLevel, ultracode?: boolean): Promise<boolean> {
     if (!this.setEffortFn) {
       return false;
     }
 
-    this.pendingEffortUpdate = { effort };
+    this.pendingEffortUpdate = { effort, ultracode };
     await this.publishAgentSelfSelectionFn?.({
       effort: effort ?? null,
       pendingEffort: true,
@@ -2407,7 +2437,10 @@ export class Process {
     return true;
   }
 
-  private async applyEffort(effort?: EffortLevel): Promise<void> {
+  private async applyEffort(
+    effort?: EffortLevel,
+    ultracode?: boolean,
+  ): Promise<void> {
     if (!this.setEffortFn) {
       throw new Error("Provider does not support dynamic effort changes");
     }
@@ -2419,11 +2452,14 @@ export class Process {
         processId: this.id,
         oldEffort: this._effort,
         newEffort: effort,
+        oldUltracode: this._ultracode,
+        newUltracode: ultracode,
       },
       `Changing effort: ${this._effort ?? "default"} → ${effort ?? "default"}`,
     );
-    await this.setEffortFn(effort);
+    await this.setEffortFn(effort, ultracode);
     this._effort = effort;
+    this._ultracode = ultracode;
     this.emit({ type: "configuration-applied", setting: "effort" });
   }
 
@@ -2431,7 +2467,7 @@ export class Process {
     while (this.pendingEffortUpdate) {
       const pending = this.pendingEffortUpdate;
       try {
-        await this.applyEffort(pending.effort);
+        await this.applyEffort(pending.effort, pending.ultracode);
       } catch (error) {
         if (this.pendingEffortUpdate !== pending) {
           continue;
@@ -3072,6 +3108,7 @@ export class Process {
       serviceTier: this.serviceTier,
       thinking: this._thinking,
       effort: this.effort,
+      ultracode: this.ultracode,
       executor: this.executor,
       pid: this.pid,
       liveness: this.getLivenessSnapshot(),

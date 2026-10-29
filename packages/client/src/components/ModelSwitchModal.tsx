@@ -48,7 +48,10 @@ import {
   serviceTierLabel,
 } from "../lib/serviceTiers";
 import { ProviderBadge } from "./ProviderBadge";
-import { ModelSubscriptionUsage } from "./ModelSubscriptionUsage";
+import {
+  AccountSubscriptionUsage,
+  ModelScopedSubscriptionUsage,
+} from "./ModelSubscriptionUsage";
 import { Modal } from "./ui/Modal";
 
 interface ModelSwitchModalProps {
@@ -90,7 +93,15 @@ interface ModelSwitchModalProps {
 }
 
 type ThinkingMode = "off" | "auto" | "on";
-type DirtySection = "thinking" | "effort" | "model" | null;
+type DirtySection = "thinking" | "effort" | "ultracode" | "model" | null;
+
+/** One side of the comparison the Save button's enabled state is derived from. */
+interface ConfigSelection {
+  model: string | undefined;
+  mode: ThinkingMode;
+  effort: EffortLevel;
+  ultracode: boolean;
+}
 
 function toThinkingOption(
   mode: ThinkingMode,
@@ -101,21 +112,19 @@ function toThinkingOption(
   return `on:${effort}`;
 }
 
-function sameSelection(
-  modelA: string | undefined,
-  modeA: ThinkingMode,
-  effortA: EffortLevel,
-  modelB: string | undefined,
-  modeB: ThinkingMode,
-  effortB: EffortLevel,
-): boolean {
-  if (modelA !== modelB || modeA !== modeB) {
+function sameSelection(a: ConfigSelection, b: ConfigSelection): boolean {
+  if (a.model !== b.model || a.mode !== b.mode) {
     return false;
   }
-  if (modeA !== "on") {
+  // Ultracode stands on its own: it is live at every thinking mode, so it is
+  // compared even where the effort level is not.
+  if (a.ultracode !== b.ultracode) {
+    return false;
+  }
+  if (a.mode !== "on") {
     return true;
   }
-  return effortA === effortB;
+  return a.effort === b.effort;
 }
 
 export function ModelSwitchModal({
@@ -145,8 +154,10 @@ export function ModelSwitchModal({
   const [currentModelId, setCurrentModelId] = useState<string | undefined>(
     currentModel,
   );
+  const [currentUltracode, setCurrentUltracode] = useState(false);
   const [thinkingMode, setThinkingModeState] = useState<ThinkingMode>("off");
   const [effortLevel, setEffortLevelState] = useState<EffortLevel>("high");
+  const [ultracode, setUltracodeState] = useState(false);
   const [selectedModel, setSelectedModel] = useState<string | undefined>(
     currentModel,
   );
@@ -168,6 +179,10 @@ export function ModelSwitchModal({
   const supportsServiceTierChange = serverHasCapability(
     version,
     SERVER_CAPABILITIES.processServiceTierChange,
+  );
+  const serverCarriesUltracode = serverHasCapability(
+    version,
+    SERVER_CAPABILITIES.processUltracode,
   );
 
   useEffect(() => {
@@ -226,6 +241,8 @@ export function ModelSwitchModal({
         setThinkingModeState(resolvedThinkingMode);
         setCurrentEffortLevel(resolvedEffort);
         setEffortLevelState(resolvedEffort);
+        setCurrentUltracode(process?.ultracode === true);
+        setUltracodeState(process?.ultracode === true);
         setCurrentServiceTier(
           isStandardServiceTier(process?.serviceTier)
             ? null
@@ -280,6 +297,14 @@ export function ModelSwitchModal({
     thinkingModeOptions,
   );
   const showEffortOptions = thinkingModeOptions.includes("on");
+  // Three conditions, all required: the server can carry the field, the model
+  // accepts it, and there is a live process to apply it to.
+  const showUltracodeOption =
+    !!processId &&
+    serverCarriesUltracode &&
+    selectedModelInfo?.supportsUltracode === true;
+  // A model that does not accept it cannot be left with it on.
+  const effectiveUltracode = showUltracodeOption && ultracode;
   // Tiers belong to the running model; a model switch keeps the current tier
   // and Codex drops it for a model that does not offer it.
   const currentModelInfo = useMemo(
@@ -305,12 +330,18 @@ export function ModelSwitchModal({
   const dirty =
     !loading &&
     !sameSelection(
-      currentModelId,
-      currentThinkingMode,
-      currentEffortLevel,
-      selectedModel,
-      effectiveThinkingMode,
-      effectiveEffortLevel,
+      {
+        model: currentModelId,
+        mode: currentThinkingMode,
+        effort: currentEffortLevel,
+        ultracode: currentUltracode,
+      },
+      {
+        model: selectedModel,
+        mode: effectiveThinkingMode,
+        effort: effectiveEffortLevel,
+        ultracode: effectiveUltracode,
+      },
     );
 
   const applyConfig = async (afterApply?: () => void) => {
@@ -337,6 +368,9 @@ export function ModelSwitchModal({
         model: selectedModel,
         thinking,
         showThinking: getShowThinkingSetting(),
+        // Sent only to a server that carries it; an older server would read
+        // the unknown key as nothing and the toggle is hidden there anyway.
+        ...(serverCarriesUltracode ? { ultracode: effectiveUltracode } : {}),
       });
       setThinkingMode(effectiveThinkingMode);
       setEffortLevel(effectiveEffortLevel);
@@ -421,29 +455,30 @@ export function ModelSwitchModal({
     effectiveThinkingMode,
     effectiveEffortLevel,
   );
-  const renderThinkingLabel = (mode: ThinkingMode, effort: EffortLevel) => {
-    if (mode === "off") return t("newSessionThinkingOff");
-    if (mode === "auto") return t("newSessionThinkingAuto");
-    return t("newSessionThinkingOn", {
-      level: getEffortLevelLabel(effort, provider, t),
-    });
+  const renderThinkingLabel = (selection: ConfigSelection) => {
+    const base =
+      selection.mode === "off"
+        ? t("newSessionThinkingOff")
+        : selection.mode === "auto"
+          ? t("newSessionThinkingAuto")
+          : t("newSessionThinkingOn", {
+              level: getEffortLevelLabel(selection.effort, provider, t),
+            });
+    return selection.ultracode
+      ? `${base} · ${t("modelSwitchUltracodeLabel")}`
+      : base;
   };
-  const renderConfigBadge = (
-    modelId: string | undefined,
-    mode: ThinkingMode,
-    effort: EffortLevel,
-    tone: string,
-  ) => (
+  const renderConfigBadge = (selection: ConfigSelection, tone: string) => (
     <span className="model-switch-action-badge">
       <span
         className={`model-switch-indicator-dot tone-${tone}`}
         aria-hidden="true"
       />
       <span className="model-switch-action-badge-main">
-        {modelId ?? t("processInfoDefaultModel")}
+        {selection.model ?? t("processInfoDefaultModel")}
       </span>
       <span className="model-switch-action-badge-detail">
-        {renderThinkingLabel(mode, effort)}
+        {renderThinkingLabel(selection)}
       </span>
     </span>
   );
@@ -512,7 +547,12 @@ export function ModelSwitchModal({
                     t("processInfoDefaultModel")}
                 </span>
                 <span className="model-switch-status-detail">
-                  {renderThinkingLabel(currentThinkingMode, currentEffortLevel)}
+                  {renderThinkingLabel({
+                    model: currentModelId,
+                    mode: currentThinkingMode,
+                    effort: currentEffortLevel,
+                    ultracode: currentUltracode,
+                  })}
                 </span>
               </div>
               {dirty && (
@@ -533,10 +573,12 @@ export function ModelSwitchModal({
                       t("processInfoDefaultModel")}
                   </span>
                   <span className="model-switch-status-detail">
-                    {renderThinkingLabel(
-                      effectiveThinkingMode,
-                      effectiveEffortLevel,
-                    )}
+                    {renderThinkingLabel({
+                      model: selectedModel,
+                      mode: effectiveThinkingMode,
+                      effort: effectiveEffortLevel,
+                      ultracode: effectiveUltracode,
+                    })}
                   </span>
                 </div>
               )}
@@ -653,11 +695,45 @@ export function ModelSwitchModal({
                             aria-hidden="true"
                           />
                           <span>{option.label}</span>
+                          {option.recommended && (
+                            <span className="model-switch-tag">
+                              {t("effortLevelRecommendedTag")}
+                            </span>
+                          )}
                         </button>
                         {showInlineSave && renderInlineSave()}
                       </Fragment>
                     );
                   })}
+                </div>
+              </section>
+            )}
+
+            {showUltracodeOption && (
+              <section className="model-switch-section">
+                <div className="model-switch-section-header">
+                  <strong>{t("modelSwitchUltracodeLabel")}</strong>
+                </div>
+                <div className="model-switch-chip-group">
+                  <label className="model-switch-chip">
+                    <input
+                      type="checkbox"
+                      checked={effectiveUltracode}
+                      disabled={switching}
+                      onChange={(event) => {
+                        if (effectiveUltracode !== event.currentTarget.checked)
+                          setLastTouchedSection("ultracode");
+                        setUltracodeState(event.currentTarget.checked);
+                      }}
+                    />
+                    <span>{t("modelSwitchUltracodeOption")}</span>
+                  </label>
+                  {dirty &&
+                    lastTouchedSection === "ultracode" &&
+                    renderInlineSave()}
+                </div>
+                <div className="model-switch-section-note">
+                  {t("modelSwitchUltracodeHint")}
                 </div>
               </section>
             )}
@@ -708,6 +784,9 @@ export function ModelSwitchModal({
               <section className="model-switch-section">
                 <div className="model-switch-section-header">
                   <strong>{t("newSessionModelTitle")}</strong>
+                  {/* Once, beside the list: this quota is the account's, not
+                      any one model's. */}
+                  <AccountSubscriptionUsage usage={subscriptionUsage} />
                 </div>
                 <div className="model-switch-list">
                   {models.map((model, index) => {
@@ -753,7 +832,7 @@ export function ModelSwitchModal({
                               )}
                             </span>
                             <span className="model-switch-item-meta">
-                              <ModelSubscriptionUsage
+                              <ModelScopedSubscriptionUsage
                                 usage={subscriptionUsage}
                                 modelId={model.id}
                               />
@@ -790,9 +869,12 @@ export function ModelSwitchModal({
                     {t("modalCancel")}
                   </span>
                   {renderConfigBadge(
-                    currentModelId ?? currentModel,
-                    currentThinkingMode,
-                    currentEffortLevel,
+                    {
+                      model: currentModelId ?? currentModel,
+                      mode: currentThinkingMode,
+                      effort: currentEffortLevel,
+                      ultracode: currentUltracode,
+                    },
                     currentIndicatorTone,
                   )}
                 </button>
@@ -806,9 +888,12 @@ export function ModelSwitchModal({
                     {t("modelSwitchSaveAll")}
                   </span>
                   {renderConfigBadge(
-                    selectedModel ?? currentModelId ?? currentModel,
-                    effectiveThinkingMode,
-                    effectiveEffortLevel,
+                    {
+                      model: selectedModel ?? currentModelId ?? currentModel,
+                      mode: effectiveThinkingMode,
+                      effort: effectiveEffortLevel,
+                      ultracode: effectiveUltracode,
+                    },
                     pendingIndicatorTone,
                   )}
                 </button>

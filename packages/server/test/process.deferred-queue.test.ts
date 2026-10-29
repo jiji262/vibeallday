@@ -82,7 +82,7 @@ describe("Process", () => {
 
       await expect(process.setEffort("high")).resolves.toBe(true);
 
-      expect(setEffort).toHaveBeenCalledWith("high");
+      expect(setEffort).toHaveBeenCalledWith("high", undefined);
       expect(process.appliedEffort).toBe("high");
       controller.finish();
     });
@@ -130,7 +130,7 @@ describe("Process", () => {
           session_id: "retained-effort-session",
         });
         await waitFor(() => expect(setEffort).toHaveBeenCalledTimes(3));
-        expect(setEffort).toHaveBeenLastCalledWith(effort);
+        expect(setEffort).toHaveBeenLastCalledWith(effort, undefined);
         expect(push).not.toHaveBeenCalled();
 
         releaseBoundary();
@@ -185,7 +185,9 @@ describe("Process", () => {
         type: "result",
         session_id: "effort-failure-session",
       });
-      await waitFor(() => expect(setEffort).toHaveBeenCalledWith("high"));
+      await waitFor(() =>
+        expect(setEffort).toHaveBeenCalledWith("high", undefined),
+      );
       await new Promise((resolve) => setTimeout(resolve, 20));
 
       expect(process.effort).toBe("high");

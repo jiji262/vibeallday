@@ -229,6 +229,9 @@ function effectiveModelSettingsFromMetadata(
     requestedModel: settings.requestedModel,
     thinking: settings.thinking,
     effort: settings.effort,
+    ...(settings.ultracode === undefined
+      ? {}
+      : { ultracode: settings.ultracode }),
   };
 }
 
@@ -445,6 +448,8 @@ interface StartSessionBody {
   thinking?: ThinkingOption;
   /** Display preference for thinking rows (default/on/off). */
   showThinking?: ShowThinking;
+  /** Standing ultracode orchestration, orthogonal to the thinking option. */
+  ultracode?: boolean;
   provider?: ProviderName;
   /** Browser-side timestamp for request latency tracking (epoch ms) */
   clientTimestamp?: number;
@@ -495,6 +500,8 @@ interface CreateSessionBody {
   thinking?: ThinkingOption;
   /** Display preference for thinking rows (default/on/off). */
   showThinking?: ShowThinking;
+  /** Standing ultracode orchestration, orthogonal to the thinking option. */
+  ultracode?: boolean;
   provider?: ProviderName;
   /** SSH host alias for remote execution (undefined = local) */
   executor?: string;
@@ -632,6 +639,7 @@ interface ResumeLaunchRequest {
   serviceTier?: ModelSettings["serviceTier"];
   thinking?: ModelSettings["thinking"];
   effort?: ModelSettings["effort"];
+  ultracode?: ModelSettings["ultracode"];
   /** SSH host alias the request names; absent recovers the saved one. */
   executor?: string;
   permissions?: ModelSettings["permissions"];
@@ -2371,6 +2379,7 @@ export function createSessionsRoutes(deps: SessionsDeps): Hono {
         serviceTier: request.serviceTier,
         thinking: request.thinking,
         effort: request.effort,
+        ultracode: request.ultracode,
         providerName,
         executor,
         sandboxLevel,
@@ -4137,7 +4146,7 @@ export function createSessionsRoutes(deps: SessionsDeps): Hono {
       ),
     };
 
-    const { thinking, effort } = buildThinkingOptions(body);
+    const { thinking, effort, ultracode } = buildThinkingOptions(body);
 
     // Convert model option (undefined or "default" means use CLI default)
     const model =
@@ -4162,6 +4171,7 @@ export function createSessionsRoutes(deps: SessionsDeps): Hono {
         serviceTier,
         thinking,
         effort,
+        ultracode,
         providerName: body.provider,
         routerAccountId: body.routerAccountId,
         routerPoolId: body.routerPoolId,
@@ -4315,7 +4325,7 @@ export function createSessionsRoutes(deps: SessionsDeps): Hono {
       return c.json({ error: workstreamTarget.error }, workstreamTarget.status);
     }
 
-    const { thinking, effort } = buildThinkingOptions(body);
+    const { thinking, effort, ultracode } = buildThinkingOptions(body);
 
     // Convert model option (undefined or "default" means use CLI default)
     const model =
@@ -4331,6 +4341,7 @@ export function createSessionsRoutes(deps: SessionsDeps): Hono {
         serviceTier,
         thinking,
         effort,
+        ultracode,
         providerName: body.provider,
         routerAccountId: body.routerAccountId,
         routerPoolId: body.routerPoolId,
@@ -4482,7 +4493,7 @@ export function createSessionsRoutes(deps: SessionsDeps): Hono {
       ),
     };
 
-    const { thinking, effort } = buildThinkingOptions(body);
+    const { thinking, effort, ultracode } = buildThinkingOptions(body);
     const model =
       body.model && body.model !== "default" ? body.model : undefined;
     const serviceTier = normalizeOptionalServiceTier(body.serviceTier);
@@ -4497,6 +4508,7 @@ export function createSessionsRoutes(deps: SessionsDeps): Hono {
         serviceTier,
         thinking,
         effort,
+        ultracode,
         providerName: body.provider,
         routerAccountId: body.routerAccountId,
         routerPoolId: body.routerPoolId,
@@ -4617,7 +4629,7 @@ export function createSessionsRoutes(deps: SessionsDeps): Hono {
       executor,
       actingUsername(c),
     );
-    const { thinking, effort } = buildThinkingOptions(body);
+    const { thinking, effort, ultracode } = buildThinkingOptions(body);
     const model =
       body.model && body.model !== "default" ? body.model : undefined;
     const serviceTier = normalizeOptionalServiceTier(body.serviceTier);
@@ -4631,6 +4643,7 @@ export function createSessionsRoutes(deps: SessionsDeps): Hono {
         serviceTier,
         thinking,
         effort,
+        ultracode,
         providerName: body.provider,
         routerAccountId: body.routerAccountId,
         routerPoolId: body.routerPoolId,
@@ -5122,6 +5135,7 @@ export function createSessionsRoutes(deps: SessionsDeps): Hono {
       const hasModel = Object.hasOwn(body, "model");
       const hasServiceTier = Object.hasOwn(body, "serviceTier");
       const hasThinking = Object.hasOwn(body, "thinking");
+      const hasUltracode = Object.hasOwn(body, "ultracode");
       const hasSandbox =
         Object.hasOwn(body, "sandboxLevel") ||
         Object.hasOwn(body, "sandboxNetworkFirewall");
@@ -5168,9 +5182,15 @@ export function createSessionsRoutes(deps: SessionsDeps): Hono {
           ? requestedModel
           : undefined;
       const serviceTier = normalizeOptionalServiceTier(body.serviceTier);
-      const thinkingOptions = hasThinking
-        ? buildThinkingOptions(body)
-        : undefined;
+      // Each key appears only when the body named it: the supervisor reads
+      // presence, so an ultracode-only toggle must not also assert thinking.
+      const thinkingOptions =
+        hasThinking || hasUltracode
+          ? {
+              ...(hasThinking ? buildThinkingOptions(body) : {}),
+              ...(hasUltracode ? { ultracode: body.ultracode === true } : {}),
+            }
+          : undefined;
       const sandboxLevel = hasSandbox
         ? parsedSandbox.sandboxLevel
         : metadata?.sandboxLevel;
@@ -5758,6 +5778,7 @@ export function createSessionsRoutes(deps: SessionsDeps): Hono {
       requestedModel,
       thinking,
       effort,
+      ultracode,
       serviceTier,
       permissionMode: restartPermissionMode,
     } = inheritSuccessorLaunchSettings(
@@ -5770,6 +5791,7 @@ export function createSessionsRoutes(deps: SessionsDeps): Hono {
       {
         requestedModel: body.model,
         thinking: body.thinking,
+        ultracode: body.ultracode,
         serviceTier:
           body.serviceTier !== undefined
             ? (normalizeOptionalServiceTier(body.serviceTier) ?? null)
@@ -5802,6 +5824,9 @@ export function createSessionsRoutes(deps: SessionsDeps): Hono {
           launchOverrides: {
             requestedModel,
             thinking: body.thinking,
+            // Already resolved above, model change included, so the fork's own
+            // inheritance pass does not have to decide it a second time.
+            ultracode,
             permissionMode: restartPermissionMode,
             serviceTier:
               body.serviceTier !== undefined
@@ -5849,6 +5874,7 @@ export function createSessionsRoutes(deps: SessionsDeps): Hono {
           serviceTier,
           thinking,
           effort,
+          ultracode,
           providerName: sourceProvider,
           executor,
           sandboxLevel: restartSandboxLevel,
@@ -5989,6 +6015,7 @@ export function createSessionsRoutes(deps: SessionsDeps): Hono {
         serviceTier,
         thinking,
         effort,
+        ultracode,
         providerName,
         clientName: "vibeallday",
         executor,
@@ -6185,20 +6212,26 @@ export function createSessionsRoutes(deps: SessionsDeps): Hono {
       const executor = parsedExecutor.executor;
       const providerName =
         (launchBody.provider as ProviderName | undefined) ?? sourceProvider;
-      const { requestedModel, thinking, effort, serviceTier, permissionMode } =
-        inheritSuccessorLaunchSettings(
-          originalMetadata?.effectiveLaunchSettings,
-          {
-            sameProvider: providerName === sourceProvider,
-            legacyRequestedModel: () =>
-              deps.sessionMetadataService?.getRequestedModel(sessionId),
-          },
-          {
-            requestedModel: launchBody.model,
-            thinking: launchBody.thinking as ThinkingOption | undefined,
-            permissionMode: body.mode,
-          },
-        );
+      const {
+        requestedModel,
+        thinking,
+        effort,
+        ultracode,
+        serviceTier,
+        permissionMode,
+      } = inheritSuccessorLaunchSettings(
+        originalMetadata?.effectiveLaunchSettings,
+        {
+          sameProvider: providerName === sourceProvider,
+          legacyRequestedModel: () =>
+            deps.sessionMetadataService?.getRequestedModel(sessionId),
+        },
+        {
+          requestedModel: launchBody.model,
+          thinking: launchBody.thinking as ThinkingOption | undefined,
+          permissionMode: body.mode,
+        },
+      );
       const model =
         requestedModel && requestedModel !== "default"
           ? requestedModel
@@ -6250,6 +6283,7 @@ export function createSessionsRoutes(deps: SessionsDeps): Hono {
           serviceTier,
           thinking,
           effort,
+          ultracode,
           providerName,
           executor,
           sandboxLevel: sandbox.level,
@@ -6667,6 +6701,7 @@ export function createSessionsRoutes(deps: SessionsDeps): Hono {
         serviceTier: saved?.serviceTier ?? undefined,
         thinking: saved?.thinking ?? undefined,
         effort: saved?.effort ?? undefined,
+        ultracode: saved?.ultracode,
         // The iteration's rewind is armed as the session's pending rewind;
         // the supervisor applies it when this resume launches the process.
         resumeMode: "full",
@@ -8351,7 +8386,7 @@ export function createSessionsRoutes(deps: SessionsDeps): Hono {
       });
     }
 
-    const { thinking, effort } = buildThinkingOptions(body);
+    const { thinking, effort, ultracode } = buildThinkingOptions(body);
 
     const metadataProvider = deps.sessionMetadataService?.getProvider(
       sessionId,
@@ -8413,6 +8448,7 @@ export function createSessionsRoutes(deps: SessionsDeps): Hono {
         serviceTier,
         thinking,
         effort,
+        ultracode,
         providerName: requestedProvider,
         executor:
           executor ??

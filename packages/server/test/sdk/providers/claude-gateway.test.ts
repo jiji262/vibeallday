@@ -99,12 +99,14 @@ describe("ClaudeGatewayProvider", () => {
           { reasoningEffort: "max" },
         ],
         supportsAdaptiveThinking: true,
+        supportsUltracode: false,
       },
       {
         id: "claude-sonnet-5",
         name: "Claude Sonnet 5",
         supportsEffort: false,
         supportsAdaptiveThinking: false,
+        supportsUltracode: false,
       },
     ]);
     expect(fetchMock).toHaveBeenCalledWith(
@@ -322,12 +324,14 @@ describe("ClaudeGatewayProvider", () => {
         name: "Terra",
         supportsEffort: false,
         supportsAdaptiveThinking: false,
+        supportsUltracode: false,
       },
       {
         id: "kimi-k2.7-code",
         name: "kimi-k2.7-code",
         supportsEffort: false,
         supportsAdaptiveThinking: false,
+        supportsUltracode: false,
       },
     ]);
   });
@@ -360,6 +364,7 @@ describe("ClaudeGatewayProvider", () => {
         defaultEffortLevel: "high",
         defaultReasoningEffort: "high",
         supportsAdaptiveThinking: true,
+        supportsUltracode: false,
       },
       {
         id: "qwen3-coder-30b",
@@ -367,6 +372,7 @@ describe("ClaudeGatewayProvider", () => {
         contextWindow: 262_144,
         supportsEffort: false,
         supportsAdaptiveThinking: false,
+        supportsUltracode: false,
       },
     ]);
   });

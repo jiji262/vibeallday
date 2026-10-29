@@ -32,6 +32,7 @@ const source: EffectiveSessionLaunchSettings = {
   serviceTier: "priority",
   thinking: { type: "adaptive", display: "summarized" },
   effort: "high",
+  ultracode: false,
 };
 
 describe("fork launch settings", () => {
@@ -131,6 +132,7 @@ describe("fork launch settings", () => {
               serviceTier: "priority",
               thinking,
               effort,
+              ultracode: false,
             },
           }),
         );
@@ -276,6 +278,7 @@ describe("fork launch settings", () => {
       serviceTier: "priority",
       thinking: source.thinking,
       effort: "low",
+      ultracode: false,
     });
     const frozen = await supervisor.resolveForkLaunchSettings(
       "source",

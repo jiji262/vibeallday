@@ -820,7 +820,9 @@ export {
   type ProjectsChangedEvent,
 } from "./project-names.js";
 export {
+  getAccountSubscriptionUsageWindow,
   getApplicableSubscriptionUsageWindows,
+  getModelSubscriptionUsageWindow,
   getMostUsedSubscriptionUsageWindow,
   type ProviderSubscriptionUsage,
   type ProviderSubscriptionUsageScope,

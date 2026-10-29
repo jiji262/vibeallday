@@ -379,6 +379,10 @@ function parseClaudeGatewayCatalog(
           }
         : {}),
       supportsAdaptiveThinking: supportedEffortLevels.length > 0,
+      // Stated, not left undefined: a gateway id can read as an ultracode
+      // family while the gateway transport carries no such setting, so the
+      // family heuristic must never be allowed to speak for these rows.
+      supportsUltracode: false,
     });
   }
   return { models, launchMetadata, isVllm };

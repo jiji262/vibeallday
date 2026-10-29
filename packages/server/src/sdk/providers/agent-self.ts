@@ -255,9 +255,12 @@ export async function startAgentSelfSession(
       if (property === "setEffort" && original.setEffort)
         return async (
           effort?: Parameters<NonNullable<AgentSession["setEffort"]>>[0],
+          // Forwarded untouched: dropping it here would clear ultracode on
+          // every effort change the supervisor applies.
+          ultracode?: Parameters<NonNullable<AgentSession["setEffort"]>>[1],
         ) => {
           state.select({ effort: effort ?? null });
-          await original.setEffort?.(effort);
+          await original.setEffort?.(effort, ultracode);
           state.accepted("effort", effort);
         };
       return Reflect.get(target, property, target);

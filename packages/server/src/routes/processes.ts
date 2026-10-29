@@ -535,6 +535,7 @@ export function createProcessesRoutes(deps: ProcessesDeps): Hono {
       model?: string;
       thinking?: ThinkingOption;
       showThinking?: ShowThinking;
+      ultracode?: boolean;
       serviceTier?: string | null;
     }>();
     const updates: {
@@ -543,6 +544,7 @@ export function createProcessesRoutes(deps: ProcessesDeps): Hono {
       serviceTier?: string;
       thinking?: ReturnType<typeof thinkingOptionToConfig>["thinking"];
       effort?: ReturnType<typeof thinkingOptionToConfig>["effort"];
+      ultracode?: boolean;
     } = {};
 
     if ("model" in body) {
@@ -562,6 +564,14 @@ export function createProcessesRoutes(deps: ProcessesDeps): Hono {
         updates.thinking = thinking;
         updates.effort = effort;
       }
+    }
+    // Its own key: a thinking option cannot express ultracode, and the
+    // supervisor reads presence, so silence here leaves it as it is.
+    if ("ultracode" in body) {
+      if (body.ultracode !== undefined && typeof body.ultracode !== "boolean") {
+        return c.json({ error: "Invalid ultracode" }, 400);
+      }
+      updates.ultracode = body.ultracode === true;
     }
     if ("serviceTier" in body) {
       const raw = body.serviceTier;
@@ -604,6 +614,9 @@ export function createProcessesRoutes(deps: ProcessesDeps): Hono {
       model: updatedProcess.resolvedModel ?? body.model,
       thinking: updatedProcess.thinking,
       effort: updatedProcess.effort,
+      // Projected to a boolean for the client, whose toggle is two-state:
+      // "nothing has selected one" reads the same as off in the UI.
+      ultracode: updatedProcess.ultracode ?? false,
       serviceTier: updatedProcess.serviceTier ?? null,
     });
   });

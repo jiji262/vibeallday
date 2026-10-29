@@ -113,6 +113,7 @@ export function createSupervisorReviewLauncher(
           model: options.model,
           thinking: options.thinking,
           effort: options.effort,
+          ultracode: options.ultracode,
         }
       : undefined;
     const result = submissionId

@@ -44,6 +44,11 @@ export interface ModelSettings {
   thinking?: ThinkingConfig;
   /** Effort level for response quality. undefined = SDK default */
   effort?: EffortLevel;
+  /**
+   * Standing ultracode orchestration. undefined = off. Shares the effort
+   * dimension because the provider writes both as one settings object.
+   */
+  ultracode?: boolean;
   /** Optional provider-visible client identity. */
   clientName?: string;
   /** Provider to use for this session. undefined = use default (Claude) */
@@ -121,10 +126,13 @@ interface ProcessModelConfiguration {
   nextServiceTier: string | undefined;
   nextThinking: ThinkingConfig | undefined;
   nextEffort: EffortLevel | undefined;
+  nextUltracode: boolean | undefined;
   modelChanged: boolean;
   serviceTierChanged: boolean;
   thinkingChanged: boolean;
   effortChanged: boolean;
+  ultracodeChanged: boolean;
+  /** "effort" covers an ultracode-only change: one write carries both. */
   dynamicChange: "model" | "thinking" | "effort" | "serviceTier" | null;
 }
 
@@ -374,6 +382,9 @@ export class SessionActivationCoordinator {
     const inheritedEffort = durable
       ? (durable.effort ?? undefined)
       : recovered?.effort;
+    // Only the durable snapshot carries it: provider transcript recovery has
+    // no record of a session-scoped flag setting.
+    const inheritedUltracode = durable ? durable.ultracode : undefined;
     const thinkingWasRequested = modelSettings?.thinking !== undefined;
 
     return {
@@ -393,6 +404,9 @@ export class SessionActivationCoordinator {
         effort: thinkingWasRequested
           ? modelSettings?.effort
           : (modelSettings?.effort ?? inheritedEffort),
+        // Not reset by a thinking request: a ThinkingOption cannot express
+        // ultracode, so a thinking change must not decide it.
+        ultracode: modelSettings?.ultracode ?? inheritedUltracode,
       },
     };
   }
@@ -429,6 +443,11 @@ export class SessionActivationCoordinator {
         serviceTier: resolved.modelSettings.serviceTier ?? null,
         thinking: resolved.modelSettings.thinking ?? null,
         effort: resolved.modelSettings.effort ?? null,
+        // Absent, not false, when nothing has selected it: the record is what
+        // a later launch inherits, and an unset flag must stay unset there.
+        ...(resolved.modelSettings.ultracode === undefined
+          ? {}
+          : { ultracode: resolved.modelSettings.ultracode }),
       };
     });
   }
@@ -442,6 +461,9 @@ export class SessionActivationCoordinator {
       serviceTier: process.serviceTier ?? null,
       thinking: process.thinking ?? null,
       effort: process.appliedEffort ?? null,
+      ...(process.appliedUltracode === undefined
+        ? {}
+        : { ultracode: process.appliedUltracode }),
     };
   }
 
@@ -773,6 +795,7 @@ export class SessionActivationCoordinator {
     const hasServiceTierUpdate = Object.hasOwn(updates, "serviceTier");
     const hasThinkingUpdate = Object.hasOwn(updates, "thinking");
     const hasEffortUpdate = Object.hasOwn(updates, "effort");
+    const hasUltracodeUpdate = Object.hasOwn(updates, "ultracode");
 
     const currentRequestedModel = process.requestedModel ?? null;
     const nextRequestedModel = hasRequestedModelUpdate
@@ -792,6 +815,9 @@ export class SessionActivationCoordinator {
       ? updates.thinking
       : process.thinking;
     const nextEffort = hasEffortUpdate ? updates.effort : process.effort;
+    const nextUltracode = hasUltracodeUpdate
+      ? updates.ultracode
+      : process.ultracode;
 
     const modelChanged =
       (hasModelUpdate || hasRequestedModelUpdate) &&
@@ -801,15 +827,24 @@ export class SessionActivationCoordinator {
     const thinkingChanged =
       hasThinkingUpdate &&
       !thinkingConfigsEqual(process.thinking, nextThinking);
-    const effortChanged =
-      hasEffortUpdate && nextEffort !== process.appliedEffort;
+    // Compared against the latest selection, pending or applied — not against
+    // what the provider last accepted. A Claude process holds an effort change
+    // until the turn boundary, so measuring against the applied value makes a
+    // request that reverts a still-queued selection read as "no change": it
+    // would be dropped silently and the stale queued pair would land anyway.
+    const effortChanged = hasEffortUpdate && nextEffort !== process.effort;
+    const ultracodeChanged =
+      hasUltracodeUpdate && nextUltracode !== process.ultracode;
+    // Ultracode rides the effort dimension: one provider write carries both,
+    // so a change to either disqualifies every other dynamic path.
+    const effortDimensionChanged = effortChanged || ultracodeChanged;
 
     let dynamicChange: ProcessModelConfiguration["dynamicChange"] = null;
     if (
       modelChanged &&
       !serviceTierChanged &&
       !thinkingChanged &&
-      !effortChanged &&
+      !effortDimensionChanged &&
       process.supportsSetModel &&
       (process.getProviderRuntimeStatus()?.kind !== "retrying" ||
         process.supportsInterrupt)
@@ -819,7 +854,7 @@ export class SessionActivationCoordinator {
       !modelChanged &&
       !serviceTierChanged &&
       thinkingChanged &&
-      !effortChanged &&
+      !effortDimensionChanged &&
       canApplyThinkingConfigDynamically(process.thinking, nextThinking) &&
       process.supportsThinkingModeChange
     ) {
@@ -828,7 +863,7 @@ export class SessionActivationCoordinator {
       !modelChanged &&
       !serviceTierChanged &&
       !thinkingChanged &&
-      effortChanged &&
+      effortDimensionChanged &&
       process.supportsEffortChange
     ) {
       dynamicChange = "effort";
@@ -836,7 +871,7 @@ export class SessionActivationCoordinator {
       !modelChanged &&
       serviceTierChanged &&
       !thinkingChanged &&
-      !effortChanged &&
+      !effortDimensionChanged &&
       process.supportsServiceTierChange
     ) {
       dynamicChange = "serviceTier";
@@ -848,10 +883,12 @@ export class SessionActivationCoordinator {
       nextServiceTier,
       nextThinking,
       nextEffort,
+      nextUltracode,
       modelChanged,
       serviceTierChanged,
       thinkingChanged,
       effortChanged,
+      ultracodeChanged,
       dynamicChange,
     };
   }
@@ -864,6 +901,7 @@ export class SessionActivationCoordinator {
       configuration.serviceTierChanged ? "service tier" : undefined,
       configuration.thinkingChanged ? "thinking" : undefined,
       configuration.effortChanged ? "effort" : undefined,
+      configuration.ultracodeChanged ? "ultracode" : undefined,
     ].filter((change): change is string => change !== undefined);
   }
 
@@ -890,7 +928,10 @@ export class SessionActivationCoordinator {
         return changed;
       }
       case "effort":
-        return process.setEffort(configuration.nextEffort);
+        return process.setEffort(
+          configuration.nextEffort,
+          configuration.nextUltracode,
+        );
       case "serviceTier":
         return process.setServiceTier(configuration.nextServiceTier);
       case null:
@@ -910,6 +951,7 @@ export class SessionActivationCoordinator {
       serviceTier: configuration.nextServiceTier,
       thinking: configuration.nextThinking,
       effort: configuration.nextEffort,
+      ultracode: configuration.nextUltracode,
       compactAtContextPercent:
         updates.compactAtContextPercent ?? process.compactAtContextPercent,
       compactAtContextWindow:

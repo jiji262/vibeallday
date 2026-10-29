@@ -2068,7 +2068,7 @@ describe("Supervisor", () => {
       // speculative compaction never started for it.
       resolveSetEffort();
       expect(await queued).toMatchObject({ success: true, restarted: false });
-      expect(setEffort).toHaveBeenCalledWith("high");
+      expect(setEffort).toHaveBeenCalledWith("high", undefined);
       await supervisorWithProvider.abortProcess(started.id);
     });
 
@@ -2171,13 +2171,101 @@ describe("Supervisor", () => {
           await vi.waitFor(() => {
             expect(process.state.type).toBe("idle");
           });
-          expect(setEffort).toHaveBeenCalledWith("medium");
+          expect(setEffort).toHaveBeenCalledWith("medium", undefined);
           expect(process.appliedEffort).toBe("medium");
         } finally {
           await supervisorWithProvider.abortProcess(process.id);
         }
       },
     );
+
+    /**
+     * A queued turn can name a thinking option without being able to name
+     * ultracode — the project queue is one such caller. Saying nothing about
+     * ultracode must leave the standing selection alone, because the provider
+     * writes effort and ultracode as one settings object and would otherwise
+     * read the silence as off.
+     */
+    it("keeps a standing ultracode through a thinking-only queued turn", async () => {
+      let aborted = false;
+      const setEffort = vi.fn(async () => {});
+      const startSession = vi.fn(
+        async (options: Parameters<AgentProvider["startSession"]>[0]) => {
+          async function* iterator() {
+            yield {
+              type: "system" as const,
+              subtype: "init" as const,
+              session_id: options.resumeSessionId ?? "ultracode-session",
+            };
+            yield {
+              type: "result" as const,
+              session_id: options.resumeSessionId ?? "ultracode-session",
+            };
+            while (!aborted) {
+              await new Promise((resolve) => setTimeout(resolve, 10));
+            }
+          }
+          return {
+            iterator: iterator(),
+            queue: new MessageQueue(),
+            abort: () => {
+              aborted = true;
+            },
+            setEffort,
+          };
+        },
+      );
+      const supervisorWithProvider = new Supervisor({
+        provider: {
+          name: "claude",
+          displayName: "Claude",
+          supportsPermissionMode: true,
+          supportsThinkingToggle: true,
+          supportsSlashCommands: true,
+          isInstalled: async () => true,
+          isAuthenticated: async () => true,
+          getAuthStatus: async () => ({
+            installed: true,
+            authenticated: true,
+            enabled: true,
+          }),
+          getAvailableModels: async () => [],
+          startSession,
+        } as AgentProvider,
+        idleTimeoutMs: 100,
+      });
+      const process = await supervisorWithProvider.resumeSession(
+        "ultracode-session",
+        "/tmp/test",
+        { text: "first" },
+        undefined,
+        {
+          thinking: { type: "adaptive" },
+          effort: "low",
+          ultracode: true,
+        },
+      );
+      await vi.waitFor(() => expect(process.state.type).toBe("idle"));
+      expect(startSession).toHaveBeenCalledWith(
+        expect.objectContaining({ ultracode: true }),
+      );
+
+      try {
+        await supervisorWithProvider.queueMessageToSession(
+          "ultracode-session",
+          "/tmp/test",
+          { text: "second" },
+          undefined,
+          { thinking: { type: "adaptive" }, effort: "high" },
+        );
+
+        expect(setEffort).toHaveBeenCalledWith("high", true);
+        expect(startSession).toHaveBeenCalledTimes(1);
+        expect(process.ultracode).toBe(true);
+      } finally {
+        await supervisorWithProvider.abortProcess(process.id);
+      }
+    });
 
     it("serializes idle effort changes so the latest selection wins", async () => {
       let aborted = false;
@@ -2250,7 +2338,9 @@ describe("Supervisor", () => {
         process.id,
         { thinking: { type: "adaptive" }, effort: "medium" },
       );
-      await vi.waitFor(() => expect(setEffort).toHaveBeenCalledWith("medium"));
+      await vi.waitFor(() =>
+        expect(setEffort).toHaveBeenCalledWith("medium", undefined),
+      );
       const highUpdate = supervisorWithProvider.reconfigureProcess(process.id, {
         thinking: { type: "adaptive" },
         effort: "high",
@@ -2776,6 +2866,7 @@ describe("Supervisor", () => {
         serviceTier: "priority",
         thinking: { type: "adaptive" },
         effort: "high",
+        ultracode: true,
       });
       const supervisorWithMetadata = new Supervisor({
         provider,
@@ -2800,6 +2891,10 @@ describe("Supervisor", () => {
           serviceTier: "priority",
           thinking: { type: "disabled" },
           effort: undefined,
+          // The override names no ultracode, so the durable snapshot's
+          // standing selection is what launches: a thinking option cannot
+          // express it, and silence is not a request to turn it off.
+          ultracode: true,
         }),
       );
       expect(metadata.current()).toEqual({
@@ -2810,6 +2905,9 @@ describe("Supervisor", () => {
         serviceTier: "priority",
         thinking: { type: "disabled" },
         effort: null,
+        // Carried through the relaunch and written back, so the next cold
+        // launch inherits it too.
+        ultracode: true,
       });
       await expect(
         supervisorWithMetadata.abortProcess(process.id),

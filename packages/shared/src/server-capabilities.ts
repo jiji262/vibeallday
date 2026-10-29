@@ -2887,6 +2887,25 @@ export const SERVER_CAPABILITIES = {
         "Older servers cannot preserve one-turn effort through queue delivery.",
     },
   },
+  processUltracode: {
+    id: CAPABILITY_ID_ALLOCATIONS.processUltracode.id,
+    name: "process-ultracode",
+    kind: "permanent",
+    area: "sessions",
+    introducedIn: "0.9.4",
+    advertisement: { kind: "version-implied" },
+    description:
+      "Carry ultracode, the session-scoped standing workflow orchestration flag, alongside the effort level on launch and on live change.",
+    clientFallback: "Hide the Ultracode toggle and send no ultracode field.",
+    serverContract: {
+      requestFields: ["sessionOptions.ultracode", "processConfig.ultracode"],
+    },
+    lifecycle: {
+      kind: "permanent",
+      reason:
+        "Older servers send effort without ultracode, which the provider reads as turning it off.",
+    },
+  },
   projectFileCompletion: {
     id: CAPABILITY_ID_ALLOCATIONS.projectFileCompletion.id,
     name: "project-file-completion",

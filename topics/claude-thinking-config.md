@@ -30,8 +30,12 @@ warning that gates the live effort control described below).
   `thinking: options.thinking`, `effort: options.effort`
   (`packages/server/src/sdk/providers/claude.ts`). No remap to a budget.
 - A pure live effort change uses the Agent SDK query's
-  `applyFlagSettings({ effortLevel })` control instead of restarting the
-  provider process. If the process is idle, VIBEALLDAY applies the change immediately.
+  `applyFlagSettings({ effortLevel, ultracode })` control instead of
+  restarting the provider process. Both keys travel on every such write: an
+  `effortLevel` that moves the session to a different level, sent without an
+  `ultracode` key, also turns ultracode off, so effort and ultracode are one
+  dimension for the live-versus-relaunch decision even though ultracode is
+  orthogonal to the effort ladder itself. If the process is idle, VIBEALLDAY applies the change immediately.
   If a turn is active or waiting for input, VIBEALLDAY accepts the selection
   immediately but applies only the latest pending effort at the next provider
   idle boundary, before any deferred turn is promoted. The active turn is

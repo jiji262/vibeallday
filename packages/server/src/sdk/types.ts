@@ -228,6 +228,11 @@ export interface StartSessionOptions {
   /** Effort level for response quality (undefined = SDK default) */
   effort?: import("@vibeallday/shared").EffortLevel;
   /**
+   * Standing ultracode orchestration, orthogonal to the effort level.
+   * undefined is off; see the identical field on SessionLaunchOptions.
+   */
+  ultracode?: boolean;
+  /**
    * Launch-time percentage override for Claude Code's own auto-compaction
    * window. Omitted leaves its environment/default unchanged.
    */
@@ -308,10 +313,13 @@ export interface StartSessionResult {
   setMaxThinkingTokens?: (tokens: number | null) => Promise<void>;
   /**
    * Change the effort used by subsequent Claude responses without restarting.
-   * undefined clears the session-scoped override.
+   * undefined clears the session-scoped override. `ultracode` is the full
+   * desired state and rides along because Claude writes both as one settings
+   * object; see the identical member on AgentSession.
    */
   setEffort?: (
     effort?: import("@vibeallday/shared").EffortLevel,
+    ultracode?: boolean,
   ) => Promise<void>;
   /** This provider can publish effort changes into the active turn. */
   effortUpdatesActiveTurn?: boolean;

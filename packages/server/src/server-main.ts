@@ -1301,6 +1301,7 @@ async function startServer() {
           serviceTier: runtime.reattach.serviceTier,
           thinking: runtime.reattach.thinking,
           effort: runtime.reattach.effort,
+          ultracode: runtime.reattach.ultracode,
           clientName: runtime.reattach.clientName,
           executor: runtime.reattach.executor,
           sandboxLevel: runtime.reattach.sandboxLevel,

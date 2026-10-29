@@ -10,9 +10,42 @@ const source: EffectiveSessionLaunchSettings = {
   serviceTier: "priority",
   thinking: { type: "adaptive", display: "summarized" },
   effort: "low",
+  ultracode: true,
 };
 
 describe("inheritSuccessorLaunchSettings", () => {
+  /**
+   * The selection was made against the source model's capabilities and this
+   * helper has no catalog to re-check them with, so a successor that moves to
+   * a different model starts without it rather than carrying a flag the new
+   * model may not accept.
+   */
+  it("drops ultracode when the successor names a different model", () => {
+    expect(
+      inheritSuccessorLaunchSettings(
+        source,
+        { sameProvider: true },
+        { requestedModel: "haiku" },
+      ).ultracode,
+    ).toBeUndefined();
+    // Restating the source's own model, as a fork does, keeps it.
+    expect(
+      inheritSuccessorLaunchSettings(
+        source,
+        { sameProvider: true },
+        { requestedModel: "opus" },
+      ).ultracode,
+    ).toBe(true);
+    // An explicit request wins either way.
+    expect(
+      inheritSuccessorLaunchSettings(
+        source,
+        { sameProvider: true },
+        { requestedModel: "haiku", ultracode: true },
+      ).ultracode,
+    ).toBe(true);
+  });
+
   it("inherits every source setting when nothing is overridden", () => {
     expect(
       inheritSuccessorLaunchSettings(source, { sameProvider: true }, {}),
@@ -20,6 +53,7 @@ describe("inheritSuccessorLaunchSettings", () => {
       requestedModel: "opus",
       thinking: { type: "adaptive", display: "summarized" },
       effort: "low",
+      ultracode: true,
       serviceTier: "priority",
       permissionMode: "plan",
     });

@@ -142,6 +142,7 @@ export interface AgentAuthRouterCliModel {
   supportsAdaptiveThinking?: boolean;
   supportsFastMode?: boolean;
   supportsAutoMode?: boolean;
+  supportsUltracode?: boolean;
 }
 
 const routerText = (value: unknown, max: number): string | undefined =>
@@ -183,6 +184,7 @@ export function sanitizeRouterCliModels(
       "supportsAdaptiveThinking",
       "supportsFastMode",
       "supportsAutoMode",
+      "supportsUltracode",
     ] as const) {
       if (typeof row[flag] === "boolean") model[flag] = row[flag];
     }

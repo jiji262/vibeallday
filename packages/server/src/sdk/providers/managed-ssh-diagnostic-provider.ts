@@ -97,6 +97,7 @@ export class ManagedSshCodexDiagnosticProvider implements AgentProvider {
         serviceTier: options.serviceTier,
         thinking: options.thinking,
         effort: options.effort,
+        ultracode: options.ultracode,
         compactAtContextTokenLimit: options.compactAtContextTokenLimit,
         onToolApproval: options.onToolApproval,
         onPermissionModeApplied: options.onPermissionModeApplied,

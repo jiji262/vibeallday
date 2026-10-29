@@ -959,7 +959,11 @@ export class SessionMetadataService {
       existing.requestedModel === value.requestedModel &&
       existing.serviceTier === value.serviceTier &&
       JSON.stringify(existing.thinking) === JSON.stringify(value.thinking) &&
-      existing.effort === value.effort
+      existing.effort === value.effort &&
+      // Strict, because absent and `false` differ: absent means nothing has
+      // selected it and the provider's own settings sources decide, while
+      // `false` is a selection to turn it off.
+      existing.ultracode === value.ultracode
     ) {
       await this.metadataSaver.flush();
       return existing;

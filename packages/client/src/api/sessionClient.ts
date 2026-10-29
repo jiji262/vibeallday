@@ -220,6 +220,8 @@ export function createSessionApi(fetchJSON: typeof FetchJson) {
           provider: ProviderName;
           thinking?: { type: string };
           effort?: string;
+          /** Absent from servers without the process-ultracode capability. */
+          ultracode?: boolean;
           model?: string;
           /** Provider service tier, e.g. Codex "priority"; absent is Standard. */
           serviceTier?: string;

@@ -451,6 +451,10 @@ function parseNewSessionOptions(
     }
     options.effort = record.effort as EffortLevel;
   }
+  if (record.ultracode !== undefined) {
+    if (typeof record.ultracode !== "boolean") return null;
+    options.ultracode = record.ultracode;
+  }
   return options;
 }
 

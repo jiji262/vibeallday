@@ -1489,6 +1489,7 @@ export class Supervisor {
       model: modelSettings?.model,
       thinking: modelSettings?.thinking,
       effort: modelSettings?.effort,
+      ultracode: modelSettings?.ultracode,
       launchCompactPercentOverride:
         modelSettings?.claudeAutoCompactPercentOverride,
       claudeSteerBackgroundBash: this.getClaudeSteerBackgroundBashSettings?.(),
@@ -1589,6 +1590,7 @@ export class Supervisor {
       serviceTier: modelSettings?.serviceTier,
       thinking: modelSettings?.thinking,
       effort: modelSettings?.effort,
+      ultracode: modelSettings?.ultracode,
       executor: modelSettings?.executor,
       permissions: modelSettings?.permissions,
       recapMode: modelSettings?.recapMode,
@@ -2419,6 +2421,7 @@ export class Supervisor {
       model: modelSettings?.model,
       thinking: modelSettings?.thinking,
       effort: modelSettings?.effort,
+      ultracode: modelSettings?.ultracode,
       launchCompactPercentOverride:
         modelSettings?.claudeAutoCompactPercentOverride,
       claudeSteerBackgroundBash: this.getClaudeSteerBackgroundBashSettings?.(),
@@ -2521,6 +2524,7 @@ export class Supervisor {
       serviceTier: modelSettings?.serviceTier,
       thinking: modelSettings?.thinking,
       effort: modelSettings?.effort,
+      ultracode: modelSettings?.ultracode,
       executor: modelSettings?.executor,
       permissions: modelSettings?.permissions,
       recapMode: modelSettings?.recapMode,
@@ -2688,6 +2692,7 @@ export class Supervisor {
         serviceTier: modelSettings?.serviceTier,
         thinking: modelSettings?.thinking,
         effort: modelSettings?.effort,
+        ultracode: modelSettings?.ultracode,
         ...(compactAtContextTokenLimit === undefined
           ? {}
           : { compactAtContextTokenLimit }),
@@ -2824,6 +2829,7 @@ export class Supervisor {
         serviceTier: modelSettings?.serviceTier,
         thinking: modelSettings?.thinking,
         effort: modelSettings?.effort,
+        ultracode: modelSettings?.ultracode,
         executor: modelSettings?.executor,
         execution: result.execution,
         permissions: modelSettings?.permissions,
@@ -3015,6 +3021,7 @@ export class Supervisor {
         serviceTier: modelSettings?.serviceTier,
         thinking: modelSettings?.thinking,
         effort: modelSettings?.effort,
+        ultracode: modelSettings?.ultracode,
         ...(compactAtContextTokenLimit === undefined
           ? {}
           : { compactAtContextTokenLimit }),
@@ -3150,6 +3157,7 @@ export class Supervisor {
         serviceTier: modelSettings?.serviceTier,
         thinking: modelSettings?.thinking,
         effort: modelSettings?.effort,
+        ultracode: modelSettings?.ultracode,
         executor: modelSettings?.executor,
         execution: result.execution,
         permissions: modelSettings?.permissions,
@@ -3327,10 +3335,18 @@ export class Supervisor {
           const effortChanged =
             effortWasRequested &&
             existingProcess.effort !== modelSettings?.effort;
+          // Effort and ultracode reach the provider as one write, so an
+          // ultracode-only change restarts exactly as an effort change does.
+          // Judged only when the request states it: a request that says
+          // nothing leaves the standing selection alone.
+          const effortDimensionChanged =
+            effortChanged ||
+            (modelSettings?.ultracode !== undefined &&
+              existingProcess.ultracode !== modelSettings.ultracode);
 
           if (
             thinkingChanged ||
-            effortChanged ||
+            effortDimensionChanged ||
             (modelSettings?.model &&
               modelSettings.model !== existingProcess.model)
           ) {
@@ -3345,10 +3361,10 @@ export class Supervisor {
               },
             );
           }
-          if (thinkingChanged || effortChanged) {
+          if (thinkingChanged || effortDimensionChanged) {
             if (
               thinkingChanged &&
-              !effortChanged &&
+              !effortDimensionChanged &&
               canApplyThinkingConfigDynamically(
                 existingProcess.thinking,
                 modelSettings?.thinking,
@@ -3657,6 +3673,9 @@ export class Supervisor {
         serviceTier: launch.serviceTier ?? null,
         thinking: launch.thinking ?? null,
         effort: launch.effort ?? null,
+        ...(launch.ultracode === undefined
+          ? {}
+          : { ultracode: launch.ultracode }),
       };
     }
     const sessionSandbox = await prepareSessionSandbox({
@@ -3811,6 +3830,9 @@ export class Supervisor {
       serviceTier: launch.serviceTier ?? null,
       thinking: launch.thinking ?? null,
       effort: launch.effort ?? null,
+      ...(launch.ultracode === undefined
+        ? {}
+        : { ultracode: launch.ultracode }),
     };
   }
 
@@ -4531,6 +4553,13 @@ export class Supervisor {
       : hasExplicitThinkingSettings
         ? modelSettings?.effort
         : process.effort;
+    // Resolved on its own, not with thinking and effort: a caller that can
+    // only express a thinking option — the project queue, for one — would
+    // otherwise turn a standing ultracode off by saying nothing about it.
+    const requestedUltracode =
+      isActiveSteeringMessage || modelSettings?.ultracode === undefined
+        ? process.ultracode
+        : modelSettings.ultracode;
     const requestedServiceTier = isActiveSteeringMessage
       ? process.serviceTier
       : (modelSettings?.serviceTier ?? process.serviceTier);
@@ -4595,11 +4624,15 @@ export class Supervisor {
       requestedThinking,
     );
     const effortChanged = process.effort !== requestedEffort;
+    // One provider write carries effort and ultracode, so they share a
+    // dimension: either one changing rules out every other dynamic path.
+    const effortDimensionChanged =
+      effortChanged || process.ultracode !== requestedUltracode;
 
     if (
       serviceTierChanged ||
       thinkingChanged ||
-      effortChanged ||
+      effortDimensionChanged ||
       compactThresholdChanged ||
       launchCompactPercentOverrideChanged
     ) {
@@ -4608,7 +4641,7 @@ export class Supervisor {
         !compactThresholdChanged &&
         !launchCompactPercentOverrideChanged &&
         thinkingChanged &&
-        !effortChanged &&
+        !effortDimensionChanged &&
         canApplyThinkingConfigDynamically(
           process.thinking,
           requestedThinking,
@@ -4638,10 +4671,13 @@ export class Supervisor {
         !compactThresholdChanged &&
         !launchCompactPercentOverrideChanged &&
         !thinkingChanged &&
-        effortChanged &&
+        effortDimensionChanged &&
         process.supportsEffortChange
       ) {
-        const changed = await process.setEffort(requestedEffort);
+        const changed = await process.setEffort(
+          requestedEffort,
+          requestedUltracode,
+        );
         if (!changed) {
           throw new Error("Provider did not apply the effort change");
         }
@@ -4655,9 +4691,11 @@ export class Supervisor {
             processId: process.id,
             oldThinking: process.thinking?.type,
             oldEffort: process.effort,
+            oldUltracode: process.ultracode,
             oldServiceTier: process.serviceTier,
             newThinking: requestedThinking?.type,
             newEffort: requestedEffort,
+            newUltracode: requestedUltracode,
             newServiceTier: requestedServiceTier,
             oldCompactAtContextTokenLimit: process.compactAtContextTokenLimit,
             newCompactAtContextTokenLimit: requestedCompactTokenLimit,
@@ -4678,6 +4716,10 @@ export class Supervisor {
           claudeAutoCompactPercentOverride:
             requestedLaunchCompactPercentOverride,
           serviceTier: requestedServiceTier,
+          // Written back like the service tier, not left to the durable
+          // snapshot: a session that predates that snapshot has nothing for
+          // the cold launch to inherit, and the selection would be lost.
+          ultracode: requestedUltracode,
           recapMode: modelSettings?.recapMode ?? process.recapMode,
           recapAfterSeconds:
             modelSettings?.recapAfterSeconds ?? process.recapAfterSeconds,
@@ -5775,6 +5817,7 @@ export class Supervisor {
         model: sourceProcess.resolvedModel ?? sourceProcess.model,
         thinking: sourceProcess.thinking,
         effort: sourceProcess.effort,
+        ultracode: sourceProcess.ultracode,
         providerName,
         executor: sourceProcess.executor,
         permissions: sourceProcess.permissions,

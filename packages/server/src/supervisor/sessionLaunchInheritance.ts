@@ -15,6 +15,8 @@ import type { EffectiveSessionLaunchSettingsValue } from "../metadata/index.js";
 export interface SuccessorLaunchOverrides {
   requestedModel?: string;
   thinking?: ThinkingOption;
+  /** Orthogonal to `thinking`: a thinking override does not clear it. */
+  ultracode?: boolean;
   serviceTier?: string | null;
   permissionMode?: PermissionMode;
 }
@@ -23,8 +25,24 @@ export interface SuccessorLaunchSettings {
   requestedModel: string | undefined;
   thinking: ThinkingConfig | undefined;
   effort: EffortLevel | undefined;
+  ultracode: boolean | undefined;
   serviceTier: string | undefined;
   permissionMode: PermissionMode | undefined;
+}
+
+/**
+ * Whether the successor runs the model the source ran. A fork re-states the
+ * source's own model, which counts as keeping it; only a request that names a
+ * different one is a model change.
+ */
+function keepsSourceModel(
+  source: EffectiveSessionLaunchSettingsValue | undefined,
+  inheritance: { sameProvider: boolean },
+  overrides: SuccessorLaunchOverrides,
+): boolean {
+  if (!inheritance.sameProvider) return false;
+  if (overrides.requestedModel === undefined) return true;
+  return overrides.requestedModel === (source?.requestedModel ?? undefined);
 }
 
 /**
@@ -61,6 +79,17 @@ export function inheritSuccessorLaunchSettings(
         : undefined),
     thinking: thinking.thinking,
     effort: thinking.effort,
+    // Read from the source even when a thinking override replaced the effort
+    // above: a ThinkingOption cannot express ultracode, so deriving it from
+    // one would silently drop a standing selection. An override that moves
+    // the successor to a different model drops it instead, because the
+    // selection was made against the source model's capabilities and this
+    // helper has no catalog to re-check them against.
+    ultracode:
+      overrides.ultracode ??
+      (keepsSourceModel(source, inheritance, overrides)
+        ? providerSource?.ultracode
+        : undefined),
     serviceTier:
       overrides.serviceTier !== undefined
         ? (overrides.serviceTier ?? undefined)

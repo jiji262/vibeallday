@@ -149,6 +149,8 @@ export interface ReviewNewSessionOptions {
   thinking?: ThinkingConfig;
   /** Reasoning effort copied from the session that opened Source Control. */
   effort?: EffortLevel;
+  /** Ultracode selection copied from the session that opened Source Control. */
+  ultracode?: boolean;
 }
 
 export interface ReviewCommentsFile {

@@ -145,6 +145,14 @@ const CLAUDE_EFFORT_LEVELS: EffortLevel[] = [
   "xhigh",
   "max",
 ];
+/**
+ * Model families whose models accept the ultracode setting. Ultracode is
+ * orthogonal to the effort level: it makes workflow orchestration standing
+ * rather than opt-in, which only the orchestration-capable families do.
+ */
+const CLAUDE_ULTRACODE_FAMILIES = new Set(["opus", "fable"]);
+/** Stable aliases that route to an ultracode-capable model. */
+const CLAUDE_ULTRACODE_ALIASES = new Set(["default", "best", "opusplan"]);
 const execFileAsync = promisify(execFile);
 const SESSION_ID_PATTERN = /^[0-9a-f-]{36}$/i;
 
@@ -751,6 +759,7 @@ const CLAUDE_MODELS_FALLBACK: ModelInfo[] = [
     supportsFastMode: false,
     supportedEffortLevels: CLAUDE_EFFORT_LEVELS,
     defaultEffortLevel: "high",
+    supportsUltracode: true,
   },
   {
     id: "sonnet",
@@ -769,6 +778,7 @@ const CLAUDE_MODELS_FALLBACK: ModelInfo[] = [
     supportsFastMode: true,
     supportedEffortLevels: CLAUDE_EFFORT_LEVELS,
     defaultEffortLevel: "high",
+    supportsUltracode: true,
   },
   {
     id: "haiku",
@@ -866,6 +876,10 @@ function enrichClaudeModel(model: ModelInfo): ModelInfo {
       model.contextWindow ?? getModelContextWindow(model.id, "claude"),
     supportsEffort: model.supportsEffort ?? true,
     supportedEffortLevels: model.supportedEffortLevels ?? CLAUDE_EFFORT_LEVELS,
+    // Never `?? true`: ultracode additionally requires workflows enabled on
+    // the account, so support is declared per model, never assumed.
+    supportsUltracode:
+      model.supportsUltracode ?? claudeSupportsUltracode(model),
   };
 }
 
@@ -896,12 +910,18 @@ export function mapClaudeCliModels(
   rows: readonly AgentAuthRouterCliModel[],
 ): ModelInfo[] {
   return mergeClaudeModels(
-    rows.map((row) =>
-      mapClaudeSdkModel({
+    rows.map((row) => ({
+      ...mapClaudeSdkModel({
         ...row,
         description: row.description ?? "",
       } as ClaudeSdkModelInfo),
-    ),
+      // The SDK row shape carries no ultracode field, so a router that states
+      // one would otherwise be overruled by the family heuristic — including
+      // when it states `false` for a pool without workflows enabled.
+      ...(row.supportsUltracode === undefined
+        ? {}
+        : { supportsUltracode: row.supportsUltracode }),
+    })),
   );
 }
 
@@ -915,6 +935,16 @@ function claudeModelFamily(
     }
   }
   return undefined;
+}
+
+/**
+ * Whether a catalog row routes to a model that accepts ultracode. Aliases are
+ * matched on the declared id, concrete models on whatever they resolve to.
+ */
+function claudeSupportsUltracode(model: ModelInfo): boolean {
+  if (CLAUDE_ULTRACODE_ALIASES.has(model.id)) return true;
+  const family = claudeModelFamily(model.resolvedModel ?? model.id);
+  return family !== undefined && CLAUDE_ULTRACODE_FAMILIES.has(family);
 }
 
 export function mergeClaudeModels(models: ModelInfo[]): ModelInfo[] {
@@ -2396,12 +2426,55 @@ export class ClaudeProvider implements AgentProvider {
       options.onProviderRetentionChange,
     );
 
+    /**
+     * Report a standing ultracode as off when the selected model positively
+     * says it does not accept one. Only a catalog row stating `false` is
+     * evidence enough to override the selection: a row VibeAllDay could not
+     * read must not silently disable a choice the user made against one it
+     * could. Pinned-account launches judge it by the account's own rows.
+     */
+    const clampUltracode = async (
+      ultracode: boolean | undefined,
+      model: string | undefined,
+    ): Promise<boolean | undefined> => {
+      if (ultracode !== true) return ultracode;
+      const models = options.routerLaunch
+        ? (options.routerLaunch.models ?? [])
+        : await this.getAvailableModels();
+      const row = models.find(
+        (candidate) => candidate.id === (model ?? "default"),
+      );
+      return row?.supportsUltracode !== false;
+    };
+    const launchUltracode = await clampUltracode(
+      options.ultracode,
+      options.model,
+    );
+    const sessionToolOptions = this.getSessionToolOptions(
+      options.model,
+      sessionSandbox,
+    );
+    /**
+     * Ultracode is a settings key, not a launch option, so it has to merge
+     * into whichever settings object this launch ends up with — including the
+     * router branch, which states its own.
+     */
+    const withLaunchUltracode = (
+      base: Options["settings"],
+    ): Options["settings"] =>
+      launchUltracode === undefined
+        ? base
+        : {
+            ...(typeof base === "object" ? base : {}),
+            ultracode: launchUltracode,
+          };
+
     // Create the SDK query with our message generator
     let sdkQuery: Query;
     let selectedModel = options.model;
-    const turnEffort = new ClaudeTurnEffort(
-      () => sdkQuery,
-      async () => {
+    const turnEffort = new ClaudeTurnEffort({
+      query: () => sdkQuery,
+      model: async () => {
         const models = options.routerLaunch
           ? (options.routerLaunch.models ?? [])
           : await this.getAvailableModels();
@@ -2414,9 +2487,10 @@ export class ClaudeProvider implements AgentProvider {
           );
         return model;
       },
-      options.thinking,
-      options.effort,
-    );
+      thinking: options.thinking,
+      effort: options.effort,
+      ultracode: launchUltracode,
+    });
     try {
       sdkQuery = query({
         prompt: turnEffort.input(queue),
@@ -2456,17 +2530,17 @@ export class ClaudeProvider implements AgentProvider {
           pathToClaudeCodeExecutable,
           // Filter env to exclude npm_*, vibeallday specific, and other irrelevant vars
           env: claudeEnv,
-          ...this.getSessionToolOptions(options.model, sessionSandbox),
-          ...(options.routerLaunch
-            ? {
-                settings: {
+          ...sessionToolOptions,
+          settings: withLaunchUltracode(
+            options.routerLaunch
+              ? {
                   ...this.getSettings(options.model),
                   apiKeyHelper: "",
                   disableClaudeAiConnectors: true,
                   env: claudeRouterEnvironment(options.routerLaunch),
-                },
-              }
-            : {}),
+                }
+              : sessionToolOptions.settings,
+          ),
           hooks: {
             Stop: [
               {
@@ -2629,7 +2703,7 @@ export class ClaudeProvider implements AgentProvider {
       },
       setMaxThinkingTokens: (tokens: number | null) =>
         turnEffort.setThinking(tokens),
-      setEffort: (effort?: EffortLevel) => {
+      setEffort: async (effort?: EffortLevel, ultracode?: boolean) => {
         if (
           options.routerLaunch?.models &&
           !routerModelSupportsThinking(
@@ -2638,7 +2712,10 @@ export class ClaudeProvider implements AgentProvider {
           )
         )
           throw new Error("Thinking level unavailable for the pinned account");
-        return turnEffort.setEffort(effort);
+        return turnEffort.setEffort(
+          effort,
+          await clampUltracode(ultracode, selectedModel),
+        );
       },
       setSessionOptions: (requested) =>
         Promise.resolve(

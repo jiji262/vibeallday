@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import type { Process } from "../../src/supervisor/Process.js";
 import {
   SessionActivationCoordinator,
@@ -65,6 +65,123 @@ describe("SessionActivationCoordinator", () => {
       thinking: { type: "adaptive" },
       effort: "low",
       serviceTier: "priority",
+    });
+  });
+
+  describe("the effort dimension carries ultracode", () => {
+    function liveProcess(overrides: Record<string, unknown> = {}) {
+      return {
+        id: "process-1",
+        sessionId: "session-1",
+        projectPath: "/tmp/project",
+        permissionMode: "default",
+        isTerminated: false,
+        hasUnverifiedProviderOwnership: false,
+        state: { type: "idle" },
+        requestedModel: "opus",
+        resolvedModel: "opus",
+        model: "opus",
+        serviceTier: undefined,
+        thinking: { type: "adaptive" },
+        effort: "high",
+        appliedEffort: "high",
+        ultracode: false,
+        appliedUltracode: false,
+        supportsEffortChange: true,
+        supportsSetModel: true,
+        supportsThinkingModeChange: true,
+        supportsServiceTierChange: true,
+        getProviderRuntimeStatus: () => undefined,
+        setEffort: vi.fn(async () => true),
+        setMaxThinkingTokens: vi.fn(async () => true),
+        updateThinkingConfig: vi.fn(),
+        ...overrides,
+      } as unknown as Process & {
+        setEffort: ReturnType<typeof vi.fn>;
+        setMaxThinkingTokens: ReturnType<typeof vi.fn>;
+      };
+    }
+
+    /**
+     * An ultracode-only change is a change to the effort dimension, because
+     * the provider writes effort and ultracode as one settings object. It must
+     * take the live path and restate the unchanged effort level.
+     */
+    it("applies an ultracode-only change live, with the current effort", async () => {
+      const process = liveProcess();
+      const restartProcess = vi.fn(async () => null);
+      const state = coordinator({
+        getProcess: () => process,
+        restartProcess,
+      });
+
+      await state.reconfigureProcess("process-1", { ultracode: true });
+
+      expect(process.setEffort).toHaveBeenCalledWith("high", true);
+      expect(restartProcess).not.toHaveBeenCalled();
+    });
+
+    /** A thinking change beside it is a second dimension, so it relaunches. */
+    it("relaunches when thinking changes alongside ultracode", async () => {
+      const process = liveProcess();
+      const restartProcess = vi.fn(async () => null);
+      const state = coordinator({
+        getProcess: () => process,
+        restartProcess,
+      });
+
+      await state.reconfigureProcess("process-1", {
+        thinking: { type: "disabled" },
+        ultracode: true,
+      });
+
+      expect(process.setEffort).not.toHaveBeenCalled();
+      expect(process.setMaxThinkingTokens).not.toHaveBeenCalled();
+      expect(restartProcess).toHaveBeenCalledTimes(1);
+      expect(restartProcess.mock.calls[0]?.[3]).toMatchObject({
+        thinking: { type: "disabled" },
+        ultracode: true,
+      });
+    });
+
+    /** Changing the effort alone must not clear a standing ultracode. */
+    it("restates a standing ultracode when only the effort changes", async () => {
+      const process = liveProcess({
+        ultracode: true,
+        appliedUltracode: true,
+      });
+      const state = coordinator({ getProcess: () => process });
+
+      await state.reconfigureProcess("process-1", { effort: "low" });
+
+      expect(process.setEffort).toHaveBeenCalledWith("low", true);
+    });
+
+    /**
+     * A Claude process holds an effort change until the turn boundary, so the
+     * decision has to measure against the latest selection rather than the
+     * last value the provider accepted. Measuring against the applied value
+     * made a request that reverts a still-queued selection read as "no
+     * change": it was dropped, and the stale queued pair landed at the
+     * boundary anyway.
+     */
+    it("re-queues a selection that reverts one still waiting for the boundary", async () => {
+      const process = liveProcess({
+        state: { type: "in-turn" },
+        // What the pending-aware getters report while a change is queued.
+        ultracode: true,
+        appliedUltracode: false,
+      });
+      const restartProcess = vi.fn(async () => null);
+      const state = coordinator({
+        getProcess: () => process,
+        restartProcess,
+      });
+
+      await state.reconfigureProcess("process-1", { ultracode: false });
+
+      expect(process.setEffort).toHaveBeenCalledWith("high", false);
+      expect(restartProcess).not.toHaveBeenCalled();
     });
   });
 

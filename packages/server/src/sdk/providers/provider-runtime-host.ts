@@ -93,6 +93,8 @@ export interface HostedProviderReattachSpec {
   serviceTier?: string;
   thinking?: ThinkingConfig;
   effort?: EffortLevel;
+  /** Absent from a host that predates ultracode, which reads as off. */
+  ultracode?: boolean;
   clientName?: string;
   executor?: string;
   sandboxLevel?: StartSessionOptions["sessionSandboxOptions"] extends infer T
@@ -705,6 +707,7 @@ function reattachSpec(
     serviceTier: options.serviceTier,
     thinking: options.thinking,
     effort: options.effort,
+    ultracode: options.ultracode,
     clientName: options.clientName,
     executor: options.executor,
     sandboxLevel,
@@ -1450,7 +1453,10 @@ class HostedAgentSession {
           }
         : {}),
       ...(capabilities.setEffort
-        ? { setEffort: (effort) => this.rpc("setEffort", [effort]) }
+        ? {
+            setEffort: (effort, ultracode) =>
+              this.rpc("setEffort", [effort, ultracode]),
+          }
         : {}),
       ...(capabilities.effortUpdatesActiveTurn
         ? { effortUpdatesActiveTurn: true }

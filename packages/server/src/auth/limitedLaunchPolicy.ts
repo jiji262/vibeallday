@@ -38,6 +38,7 @@ export interface LimitedLaunchBody {
   provider?: string;
   model?: string;
   thinking?: string;
+  ultracode?: boolean;
   sandboxLevel?: string;
   sandboxNetworkFirewall?: boolean;
   executor?: string;
@@ -167,7 +168,14 @@ export function limitNewSessionLaunch(
   const { lock } = grants;
   if (lock.provider) body.provider = lock.provider;
   if (lock.model) body.model = lock.model;
-  if (lock.effort) body.thinking = lockedThinkingOption(lock.effort);
+  if (lock.effort) {
+    body.thinking = lockedThinkingOption(lock.effort);
+    // The lock vocabulary has no ultracode dimension, and an effort cap is a
+    // cost cap: standing workflow orchestration spends far past the level the
+    // grant allows, so a locked launch runs with it off until the lock can
+    // say otherwise.
+    body.ultracode = false;
+  }
   return null;
 }
 
@@ -216,6 +224,8 @@ export function limitExistingSessionLaunch(
     );
     settings.thinking = thinking;
     settings.effort = effort;
+    // Capped with the effort, for the reason the new-session rule gives.
+    settings.ultracode = false;
   }
   return null;
 }

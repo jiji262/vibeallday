@@ -14,6 +14,8 @@ export interface EffortLevelOption {
   value: EffortLevel;
   label: string;
   description: string;
+  /** The model's own default level; absent when the model names none. */
+  recommended?: boolean;
 }
 
 export type EffortLevelMessageKey =
@@ -177,6 +179,7 @@ export function getEffortLevelOptions(params: {
     description:
       getModelDescription(model, level) ??
       getFallbackDescription(level, params.provider, params.translate),
+    ...(model?.defaultEffortLevel === level ? { recommended: true } : {}),
   }));
 }
 

@@ -295,6 +295,12 @@ export interface StartSessionOptions {
   /** Effort level for response quality (undefined = SDK default) */
   effort?: import("@vibeallday/shared").EffortLevel;
   /**
+   * Standing ultracode orchestration, orthogonal to the effort level.
+   * undefined is off: providers must state it on every effort write, because
+   * an effort change sent without it turns ultracode off.
+   */
+  ultracode?: boolean;
+  /**
    * Explicit automatic-compaction threshold in total active-context tokens.
    * Omitted means the provider's own default; only providers advertising
    * supportsNativeCompactThreshold consume this.
@@ -445,9 +451,15 @@ export interface AgentSession {
   /**
    * Change the effort used by subsequent provider responses without restarting.
    * undefined clears the session-scoped override.
+   *
+   * Both values travel in one call because the provider writes them as one
+   * settings object: an effort change that omits ultracode turns ultracode
+   * off. `ultracode` is the full desired state, never "leave it alone", so a
+   * caller that only knows the effort leaves ultracode off.
    */
   setEffort?: (
     effort?: import("@vibeallday/shared").EffortLevel,
+    ultracode?: boolean,
   ) => Promise<void>;
   /** This provider can publish effort changes into the active turn. */
   effortUpdatesActiveTurn?: boolean;

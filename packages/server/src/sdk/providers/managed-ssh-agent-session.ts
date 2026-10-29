@@ -433,7 +433,10 @@ class RemoteAgentSession {
           }
         : {}),
       ...(capabilities.setEffort
-        ? { setEffort: (effort) => this.rpc("setEffort", [effort]) }
+        ? {
+            setEffort: (effort, ultracode) =>
+              this.rpc("setEffort", [effort, ultracode]),
+          }
         : {}),
       ...(capabilities.setServiceTier
         ? {
@@ -948,6 +951,7 @@ function cloneManagedCodexOptions(
     serviceTier: source.serviceTier,
     thinking: source.thinking,
     effort: source.effort,
+    ultracode: source.ultracode,
     compactAtContextTokenLimit: source.compactAtContextTokenLimit,
     sessionOptions: source.sessionOptions,
   };

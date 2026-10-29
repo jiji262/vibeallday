@@ -757,6 +757,11 @@ export interface SessionEffectiveModelSettings {
   thinking: ThinkingConfig | null;
   /** Effective effort selection; null means provider/default behavior. */
   effort: EffortLevel | null;
+  /**
+   * Effective ultracode selection. Session-scoped and optional: records
+   * written by older servers omit it entirely.
+   */
+  ultracode?: boolean;
 }
 
 /** Complete, last-applied settings that survive provider process replacement. */

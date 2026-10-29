@@ -303,6 +303,92 @@ describe("ModelSwitchModal", () => {
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
+  describe("ultracode", () => {
+    const claudeModels = {
+      models: [
+        { id: "opus", name: "Opus", supportsUltracode: true },
+        { id: "haiku", name: "Haiku" },
+      ],
+    };
+
+    beforeEach(() => {
+      mockGetProcessModels.mockResolvedValue(claudeModels);
+      mockGetProcessInfo.mockResolvedValue({
+        process: {
+          model: "opus",
+          provider: "claude",
+          thinking: { type: "adaptive" },
+          effort: "high",
+          ultracode: false,
+        },
+      });
+    });
+
+    const renderModal = () =>
+      render(
+        <ModelSwitchModal
+          processId="process-1"
+          sessionId="session-1"
+          currentModel="opus"
+          onModelChanged={vi.fn()}
+          onClose={vi.fn()}
+        />,
+      );
+
+    it("sends the toggle with the thinking selection in one save", async () => {
+      mockVersion.current = { capabilities: ["process-ultracode"] };
+      renderModal();
+
+      fireEvent.click(
+        await screen.findByRole("checkbox", {
+          name: "modelSwitchUltracodeOption",
+        }),
+      );
+      const save = (
+        await screen.findAllByRole("button", { name: /modelSwitchSaveAll/ })
+      )[0];
+      if (!save) throw new Error("Expected a save button");
+      fireEvent.click(save);
+
+      await waitFor(() => {
+        // The toggle alone still restates thinking and effort: the server
+        // reads one payload and writes the pair as one settings object.
+        expect(mockSetProcessConfig).toHaveBeenCalledWith("process-1", {
+          model: "opus",
+          thinking: "on:high",
+          showThinking: true,
+          ultracode: true,
+        });
+      });
+    });
+
+    it("hides the toggle for a model that does not accept it", async () => {
+      mockVersion.current = { capabilities: ["process-ultracode"] };
+      renderModal();
+
+      await screen.findByText("Haiku");
+      fireEvent.click(screen.getByRole("button", { name: /Haiku/ }));
+
+      expect(
+        screen.queryByRole("checkbox", {
+          name: "modelSwitchUltracodeOption",
+        }),
+      ).toBeNull();
+    });
+
+    it("hides the toggle from servers that cannot carry it", async () => {
+      mockVersion.current = { capabilities: [] };
+      renderModal();
+
+      await screen.findByText("Opus");
+      expect(
+        screen.queryByRole("checkbox", {
+          name: "modelSwitchUltracodeOption",
+        }),
+      ).toBeNull();
+    });
+  });
+
   describe("speed", () => {
     const codexModels = {
       models: [

@@ -152,6 +152,13 @@ export interface ModelInfo {
   supportsFastMode?: boolean;
   /** Whether this model supports provider auto mode, when available. */
   supportsAutoMode?: boolean;
+  /**
+   * Whether this model supports ultracode: standing dynamic-workflow
+   * orchestration, orthogonal to the effort level. Provider-declared only —
+   * never defaulted to true, because ultracode additionally requires
+   * workflows to be enabled on the account.
+   */
+  supportsUltracode?: boolean;
   /** Provider-reported input modalities, e.g. text/image. */
   inputModalities?: string[];
   /** Adapter image preparation for this model, overriding provider guidance. */

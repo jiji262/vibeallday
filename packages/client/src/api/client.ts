@@ -1549,6 +1549,11 @@ export const api = {
       model?: string;
       thinking?: ThinkingOption;
       showThinking?: ShowThinking;
+      /**
+       * Standing ultracode orchestration. Omitted leaves it as it is; only
+       * send it to a server advertising the process-ultracode capability.
+       */
+      ultracode?: boolean;
       /** null selects the standard tier. */
       serviceTier?: string | null;
     },
@@ -1559,6 +1564,8 @@ export const api = {
       model?: string;
       thinking?: { type: string };
       effort?: string;
+      /** Absent from servers without the process-ultracode capability. */
+      ultracode?: boolean;
       /** Absent from servers without the process-service-tier-change capability. */
       serviceTier?: string | null;
     }>(`/processes/${processId}/config`, {
