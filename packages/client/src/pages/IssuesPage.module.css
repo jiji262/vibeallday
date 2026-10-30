@@ -284,15 +284,6 @@
   min-width: 0;
 }
 
-.detailKey {
-  margin: 0;
-  color: var(--ink-3);
-  font-family: var(--font-mono);
-  font-size: var(--eyebrow-size);
-  letter-spacing: var(--eyebrow-tracking);
-  text-transform: uppercase;
-}
-
 .detailTitle {
   margin: 0;
   color: var(--ink);

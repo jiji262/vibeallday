@@ -1,0 +1,40 @@
+/* Design detail eyebrow: the mono key, then the type and tracker tags. */
+.keyRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+}
+
+.key {
+  color: var(--ink-2);
+  font-family: var(--font-mono);
+  font-size: var(--fs-meta);
+  font-weight: 600;
+}
+
+/* Design .iss-dl: labels share one column at least as wide as the board's. */
+.facts {
+  display: grid;
+  grid-template-columns: minmax(72px, max-content) minmax(0, 1fr);
+  gap: 8px 12px;
+  margin: 0;
+  padding: 14px var(--space-5) var(--space-4);
+  border-bottom: 1px solid var(--line);
+  font-size: var(--fs-small);
+}
+
+.facts dt {
+  color: var(--ink-3);
+}
+
+.facts dd {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  margin: 0;
+  color: var(--ink-2);
+}

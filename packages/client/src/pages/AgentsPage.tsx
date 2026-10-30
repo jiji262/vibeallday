@@ -22,6 +22,14 @@ import {
   ProcessSectionEmpty,
 } from "./AgentsProcessSection";
 import { computeProcessStats, ProcessStatsStrip } from "./AgentsProcessStats";
+import {
+  AgentsStateFilter,
+  countShown,
+  effectiveStateFilter,
+  type ProcessStateFilter,
+  sectionCounts,
+  showsSection,
+} from "./AgentsStateFilter";
 import { observationMatchesQuery, processMatchesQuery } from "./agentsFormat";
 
 /** Process, PID, status, CPU, memory, uptime, actions. */
@@ -206,6 +214,7 @@ interface ProcessGroupsViewProps {
   groups: ProcessGroups;
   host: ReturnType<typeof useHostAgentProcesses>;
   filtered: boolean;
+  stateFilter: ProcessStateFilter;
   kill: (process: ProcessInfo) => void;
   killingIds: ReadonlySet<string>;
 }
@@ -214,12 +223,17 @@ function ProcessGroupsView({
   groups,
   host,
   filtered,
+  stateFilter,
   kill,
   killingIds,
 }: ProcessGroupsViewProps) {
   const { t } = useI18n();
   const basePath = useRemoteBasePath();
-  if (!filtered && !host.loading && shownCount(groups) === 0) {
+  if (
+    !filtered &&
+    !host.loading &&
+    countShown("all", sectionCounts(groups)) === 0
+  ) {
     return <ProcessesEmpty hint={processesEmptyHint(host, t)} />;
   }
   const empty = (key: Parameters<Translate>[0]) => (
@@ -239,14 +253,16 @@ function ProcessGroupsView({
   );
   return (
     <div className={styles.sections}>
-      <ProcessSection
-        title={t("agentsSectionActive")}
-        count={groups.active.length}
-        empty={empty("agentsEmptyActive")}
-      >
-        {groups.active.map(ownedRow)}
-      </ProcessSection>
-      {host.enabled && (
+      {showsSection(stateFilter, "active") && (
+        <ProcessSection
+          title={t("agentsSectionActive")}
+          count={groups.active.length}
+          empty={empty("agentsEmptyActive")}
+        >
+          {groups.active.map(ownedRow)}
+        </ProcessSection>
+      )}
+      {host.enabled && showsSection(stateFilter, "external") && (
         <ProcessSection
           title={t("agentsSectionExternal")}
           count={groups.external.length}
@@ -261,37 +277,32 @@ function ProcessGroupsView({
           ))}
         </ProcessSection>
       )}
-      <ProcessSection
-        title={t("agentsSectionIdle")}
-        count={groups.idle.length}
-        empty={empty("agentsEmptyIdle")}
-      >
-        {groups.idle.map(ownedRow)}
-      </ProcessSection>
-      <ProcessSection
-        title={t("agentsSectionStopped")}
-        count={groups.stopped.length}
-        empty={empty("agentsEmptyStopped")}
-      >
-        {groups.stopped.map((process) => (
-          <ProcessRow
-            key={process.id}
-            process={process}
-            basePath={basePath}
-            terminated
-          />
-        ))}
-      </ProcessSection>
+      {showsSection(stateFilter, "idle") && (
+        <ProcessSection
+          title={t("agentsSectionIdle")}
+          count={groups.idle.length}
+          empty={empty("agentsEmptyIdle")}
+        >
+          {groups.idle.map(ownedRow)}
+        </ProcessSection>
+      )}
+      {showsSection(stateFilter, "stopped") && (
+        <ProcessSection
+          title={t("agentsSectionStopped")}
+          count={groups.stopped.length}
+          empty={empty("agentsEmptyStopped")}
+        >
+          {groups.stopped.map((process) => (
+            <ProcessRow
+              key={process.id}
+              process={process}
+              basePath={basePath}
+              terminated
+            />
+          ))}
+        </ProcessSection>
+      )}
     </div>
-  );
-}
-
-function shownCount(groups: ProcessGroups): number {
-  return (
-    groups.active.length +
-    groups.idle.length +
-    groups.stopped.length +
-    groups.external.length
   );
 }
 
@@ -300,10 +311,13 @@ export function AgentsPage() {
   const { t } = useI18n();
   const { openSidebar, isWideScreen } = useNavigationLayout();
   const [query, setQuery] = useState("");
+  const [chosenFilter, setStateFilter] = useState<ProcessStateFilter>("all");
   // The field echoes `query` at once; filtering follows the deferred copy.
   const deferredQuery = useDeferredValue(query);
   const { groups, host, stats, total, loading, error, refetch } =
     useProcessGroups(deferredQuery);
+  const stateFilter = effectiveStateFilter(chosenFilter, host.enabled);
+  const counts = sectionCounts(groups);
   const { killingIds, feedback, kill } = useKill(refetch);
   return (
     <MainContent isWideScreen={isWideScreen}>
@@ -331,7 +345,18 @@ export function AgentsPage() {
                 onChange={(event) => setQuery(event.target.value)}
               />
             }
-            count={t("agentsCount", { shown: shownCount(groups), total })}
+            filters={
+              <AgentsStateFilter
+                value={stateFilter}
+                onChange={setStateFilter}
+                counts={counts}
+                external={host.enabled}
+              />
+            }
+            count={t("agentsCount", {
+              shown: countShown(stateFilter, counts),
+              total,
+            })}
           />
           {feedback && (
             <Notice
@@ -362,6 +387,7 @@ export function AgentsPage() {
               groups={groups}
               host={host}
               filtered={deferredQuery.trim() !== ""}
+              stateFilter={stateFilter}
               kill={kill}
               killingIds={killingIds}
             />

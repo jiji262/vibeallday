@@ -20,6 +20,7 @@ import { useEmulators } from "../hooks/useEmulators";
 import { useVersion } from "../hooks/useVersion";
 import { useI18n } from "../i18n";
 import { MainContent, useNavigationLayout } from "../layouts";
+import { DeviceHeaderActions } from "./DeviceHeaderActions";
 import { DeviceList, firstStreamableDevice } from "./EmulatorDeviceList";
 import styles from "./EmulatorPage.module.css";
 import { StreamView } from "./EmulatorStreamView";
@@ -116,7 +117,7 @@ export function EmulatorPage() {
         : null;
   const needsDownload = bridgeRuntimeMode !== null;
 
-  const { emulators, loading, error, startEmulator, stopEmulator } =
+  const { emulators, loading, error, startEmulator, stopEmulator, refresh } =
     useEmulators({ enabled: !needsDownload });
   const [activeDevice, setActiveDevice] = useState<DeviceInfo | null>(null);
 
@@ -154,6 +155,11 @@ export function EmulatorPage() {
             eyebrow={[t("sidebarGroupTools")]}
             title={t("sidebarDevices")}
             lede={t("emulatorPageLede")}
+            actions={
+              <DeviceHeaderActions
+                onRefresh={needsDownload ? undefined : refresh}
+              />
+            }
           />
           <Notice tone="warning" className={styles.experimental}>
             <strong>{t("emulatorExperimentalNoticeTitle")}</strong>{" "}

@@ -142,6 +142,8 @@ vi.mock("../../i18n", () => ({
         providerChildFallback: "Provider subagent",
         agentsSearchLabel: "Search processes",
         agentsNoMatches: "No processes match this search",
+        agentsCount: "{shown} / {total} processes",
+        agentsStateAll: "All",
       };
       return Object.entries(values ?? {}).reduce(
         (text, [name, value]) => text.replace(`{${name}}`, String(value)),
@@ -234,7 +236,7 @@ describe("AgentsPage process kill", () => {
       </MemoryRouter>,
     );
 
-    expect(screen.getByText("External")).toBeTruthy();
+    expect(screen.getByRole("heading", { name: "External" })).toBeTruthy();
     expect(screen.getByText("Claude process")).toBeTruthy();
     expect(screen.getByText("Outside VIBEALLDAY")).toBeTruthy();
     expect(screen.getByText("9876")).toBeTruthy();
@@ -467,6 +469,51 @@ describe("AgentsPage process kill", () => {
 
     typeSequentially("4321");
     expect(await screen.findByText("Codex session")).toBeTruthy();
+  });
+
+  it("shows one state's section per chip and all of them on a second press", () => {
+    render(
+      <MemoryRouter>
+        <AgentsPage />
+      </MemoryRouter>,
+    );
+
+    const idle = screen.getByRole("button", { name: "Idle 1" });
+    fireEvent.click(idle);
+    expect(idle.getAttribute("aria-pressed")).toBe("true");
+    expect(screen.getByRole("heading", { name: "Idle" })).toBeTruthy();
+    expect(screen.queryByRole("heading", { name: "Active" })).toBeNull();
+    expect(screen.queryByRole("heading", { name: "Stopped" })).toBeNull();
+
+    fireEvent.click(idle);
+    expect(idle.getAttribute("aria-pressed")).toBe("false");
+    expect(screen.getByRole("heading", { name: "Active" })).toBeTruthy();
+    expect(screen.getByRole("heading", { name: "External" })).toBeTruthy();
+
+    // The toolbar counts what the chip leaves on screen.
+    const count = () => screen.getByText(/^\d+ \/ \d+ processes$/).textContent;
+    expect(count()).toBe("1 / 1 processes");
+    fireEvent.click(screen.getByRole("button", { name: "Active 0" }));
+    expect(count()).toBe("0 / 1 processes");
+  });
+
+  it("returns to every section when the chosen external one goes away", () => {
+    // A fresh element each time, or React skips the re-render.
+    const page = () => (
+      <MemoryRouter>
+        <AgentsPage />
+      </MemoryRouter>
+    );
+    const { rerender } = render(page());
+    fireEvent.click(screen.getByRole("button", { name: /^External \d+$/ }));
+    expect(screen.queryByRole("heading", { name: "Active" })).toBeNull();
+
+    // Host observation switched off: its chip and section are gone.
+    hostProcessesState.enabled = false;
+    rerender(page());
+    expect(screen.getByRole("heading", { name: "Active" })).toBeTruthy();
+    const all = screen.getByRole("button", { name: /^All \d+$/ });
+    expect(all.getAttribute("aria-pressed")).toBe("true");
   });
 
   it("collapses to one empty state that keeps the host observer's reason", async () => {

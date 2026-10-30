@@ -1,6 +1,6 @@
 import type { IssueItem } from "@vibeallday/shared";
 import { useI18n } from "../i18n";
-import { Badge, type BadgeTone } from "./garden/Badge";
+import { type BadgeTone, Tag } from "./garden/Badge";
 
 export const TRACKER_STATUS_LABELS = {
   open: "issuesStatus_open",
@@ -9,12 +9,15 @@ export const TRACKER_STATUS_LABELS = {
   closed: "issuesStatus_closed",
 } as const;
 
-/** Garden tones: open = mint, draft = grey, merged = indigo, closed = rose. */
+/**
+ * Design tag families: open = accent (the board's 开放), draft = idle,
+ * merged = ok (done), closed = outline (inert, not an error).
+ */
 const TONES: Record<keyof typeof TRACKER_STATUS_LABELS, BadgeTone> = {
-  open: "mint",
-  draft: "grey",
-  merged: "indigo",
-  closed: "rose",
+  open: "accent",
+  draft: "idle",
+  merged: "ok",
+  closed: "outline",
 };
 
 /** The tracker's reported state; nothing at all when the server sent none. */
@@ -31,7 +34,7 @@ export function TrackerStatusBadge({
   const label = status && TRACKER_STATUS_LABELS[status.state];
   if (!status || !label) return null;
   return (
-    <Badge
+    <Tag
       tone={TONES[status.state]}
       className={className}
       title={[
@@ -49,6 +52,6 @@ export function TrackerStatusBadge({
         .join(" · ")}
     >
       {t(label)}
-    </Badge>
+    </Tag>
   );
 }

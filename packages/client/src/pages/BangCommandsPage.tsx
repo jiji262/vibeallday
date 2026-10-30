@@ -16,6 +16,7 @@ import { useRemoteBasePath } from "../hooks/useRemoteBasePath";
 import { useI18n } from "../i18n";
 import { MainContent, useNavigationLayout } from "../layouts";
 import type { BangHistoryEntry } from "./BangCommandsPage.days";
+import { BangHistoryFilters, useBangHistoryFilter } from "./BangHistoryFilters";
 import { BangHistoryTimeline } from "./BangHistoryTimeline";
 
 export function BangCommandsPage() {
@@ -24,6 +25,7 @@ export function BangCommandsPage() {
   const { openSidebar, isWideScreen } = useNavigationLayout();
   const [entries, setEntries] = useState<BangHistoryEntry[] | null>(null);
   const [expandedEntryKey, setExpandedEntryKey] = useState<string | null>(null);
+  const filter = useBangHistoryFilter(entries);
 
   useEffect(() => {
     let cancelled = false;
@@ -71,8 +73,16 @@ export function BangCommandsPage() {
             <EmptyState title={t("bangHistoryEmpty")} icon={<TerminalIcon />} />
           )}
           {entries !== null && entries.length > 0 && (
+            <BangHistoryFilters filter={filter} total={entries.length} />
+          )}
+          {filter.shown !== null &&
+            filter.shown.length === 0 &&
+            filter.filtered && (
+              <EmptyState compact title={t("bangHistoryNoMatches")} />
+            )}
+          {filter.shown !== null && filter.shown.length > 0 && (
             <BangHistoryTimeline
-              entries={entries}
+              entries={filter.shown}
               basePath={basePath}
               expandedEntryKey={expandedEntryKey}
               onExpandedEntryKeyChange={setExpandedEntryKey}

@@ -6,6 +6,7 @@ import { selectClassName } from "../components/garden/Field";
 import { ExternalIcon, XIcon } from "../components/garden/icons";
 import { LoadingState } from "../components/garden/LoadingState";
 import { useI18n } from "../i18n";
+import { IssueDetailFacts, IssueDetailKeyRow } from "./IssueDetailFacts";
 import { IssueSessionRow } from "./IssueSessionRow";
 import styles from "./IssuesPage.module.css";
 
@@ -36,7 +37,7 @@ function DetailHeader({
   return (
     <div className={styles.detailHeader}>
       <div className={styles.detailHeading}>
-        <p className={styles.detailKey}>{selected.key}</p>
+        <IssueDetailKeyRow item={selected} />
         <h2 className={styles.detailTitle}>{selected.title ?? selected.key}</h2>
         {selected.url && (
           <a
@@ -101,6 +102,7 @@ export function IssueDetailPane(props: IssueDetailPaneProps) {
       aria-label={t("issuesAssociatedSessions")}
     >
       <DetailHeader selected={selected} onClose={props.onClose} />
+      <IssueDetailFacts item={selected} />
       <CardBody className={styles.detailBody}>
         <div className={styles.sessionHeading}>
           <h3>{t("issuesAssociatedSessions")}</h3>
