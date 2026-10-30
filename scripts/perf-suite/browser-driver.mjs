@@ -766,16 +766,10 @@ async function measureSidebarSwitches(
               )
               .at(-1)
           : null;
-        const latestBackgroundEffects = new Map();
-        for (const mark of allMarks) {
-          if (
-            mark.name === "session_background_effects_changed" &&
-            typeof mark.detail?.sessionId === "string"
-          ) {
-            latestBackgroundEffects.set(mark.detail.sessionId, mark.detail);
-          }
-        }
-        const activeSessionConsumerIds = [...latestBackgroundEffects.values()]
+        const backgroundEffects = Object.values(
+          window.__vibeAllDayPerfBackgroundEffects ?? {},
+        );
+        const activeSessionConsumerIds = backgroundEffects
           .filter((detail) => detail.mounted === true && detail.paused !== true)
           .map((detail) => detail.sessionId)
           .sort();
@@ -799,11 +793,11 @@ async function measureSidebarSwitches(
             : null;
         return {
           activeSessionConsumerCount:
-            latestBackgroundEffects.size > 0
+            backgroundEffects.length > 0
               ? activeSessionConsumerIds.length
               : null,
           activeSessionConsumerIds:
-            latestBackgroundEffects.size > 0 ? activeSessionConsumerIds : null,
+            backgroundEffects.length > 0 ? activeSessionConsumerIds : null,
           dom: {
             activeLayers: document.querySelectorAll(
               '[data-session-dom-linger="active"]',
@@ -877,16 +871,9 @@ async function measureSidebarSwitches(
     let settledActiveSessionConsumerIds = diagnostics.activeSessionConsumerIds;
     if (settledActiveSessionConsumerIds !== null) {
       await page.waitForFunction((expectedSessionId) => {
-        const latestBackgroundEffects = new Map();
-        for (const mark of window.__vibeAllDayPerfMarks ?? []) {
-          if (
-            mark.name === "session_background_effects_changed" &&
-            typeof mark.detail?.sessionId === "string"
-          ) {
-            latestBackgroundEffects.set(mark.detail.sessionId, mark.detail);
-          }
-        }
-        const activeIds = [...latestBackgroundEffects.values()]
+        const activeIds = Object.values(
+          window.__vibeAllDayPerfBackgroundEffects ?? {},
+        )
           .filter((detail) => detail.mounted === true && detail.paused !== true)
           .map((detail) => detail.sessionId);
         return activeIds.length === 1 && activeIds[0] === expectedSessionId;
@@ -1230,6 +1217,10 @@ export async function measureBrowserMode({
           );
           window.__vibeAllDayPerfTelemetry = [];
           window.__vibeAllDayPerfMarks = [];
+          // Profiled steps reset the marks, so the latest background-effects
+          // state per session lives here: a session whose state changed
+          // before a reset must still count as an active consumer.
+          window.__vibeAllDayPerfBackgroundEffects = Object.create(null);
           window.__vibeAllDayPerfNavigationStartMs = 0;
           if (interactionTrace?.enabled) {
             window.__VIBEALLDAY_SEMANTIC_UI_ACTIONS__ = {
@@ -1288,6 +1279,13 @@ export async function measureBrowserMode({
                 detail,
                 name,
               });
+              if (
+                name === "session_background_effects_changed" &&
+                typeof detail?.sessionId === "string"
+              ) {
+                window.__vibeAllDayPerfBackgroundEffects[detail.sessionId] =
+                  detail;
+              }
             },
           };
           const originalFetch = window.fetch.bind(window);
