@@ -339,6 +339,42 @@ describe("InboxContent", () => {
     expect(onProjectChange).toHaveBeenLastCalledWith(undefined);
   });
 
+  it("narrows the page to one section from a status block and back", () => {
+    inboxState.needsAttention = [makeInboxItem("waiting", "project-1")];
+    inboxState.active = [
+      { ...makeInboxItem("running", "project-1"), activity: "in-turn" },
+    ];
+
+    const { container } = renderInbox(<InboxContent />);
+    const running = container.querySelector<HTMLButtonElement>(
+      '[data-summary-tile="running"]',
+    );
+    if (!running) throw new Error("missing running status block");
+
+    fireEvent.click(running);
+    expect(running.getAttribute("aria-pressed")).toBe("true");
+    expect(screen.queryByTestId("session-waiting")).toBe(null);
+    expect(screen.getByTestId("session-running")).toBeTruthy();
+
+    fireEvent.click(running);
+    expect(running.getAttribute("aria-pressed")).toBe("false");
+    expect(screen.getByTestId("session-waiting")).toBeTruthy();
+    expect(screen.getByTestId("session-running")).toBeTruthy();
+  });
+
+  it("offers triage only while something needs the user", () => {
+    renderInbox(<InboxContent />);
+    expect(
+      screen.queryAllByRole("link", { name: "inboxTriageEntryLabel" }),
+    ).toHaveLength(0);
+    cleanup();
+
+    inboxState.needsAttention = [makeInboxItem("waiting", "project-1")];
+    renderInbox(<InboxContent />);
+    const entry = screen.getByRole("link", { name: "inboxTriageEntryLabel" });
+    expect(entry.getAttribute("href")).toBe("/triage");
+  });
+
   it("names the icon-only refresh control", () => {
     renderInbox(<InboxContent />);
 

@@ -3,7 +3,9 @@ import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import { I18nProvider } from "../../i18n";
 import { SearchHeader } from "./SearchControls";
-import { SearchChips } from "./SearchToolbar";
+import { QuickChips, SearchScope } from "./SearchToolbar";
+
+const NO_COUNTS = { attention: 0, running: 0, unread: 0 };
 
 const onQuery = vi.fn();
 const onFields = vi.fn();
@@ -33,7 +35,14 @@ function renderControls() {
   render(
     <I18nProvider>
       <SearchHeader query="" onQuery={onQuery} onFields={onFields} supported />
-      <SearchChips filters={["unarchived"]} onFilters={() => {}} />
+      <SearchScope fields={["title"]} supported onFields={onFields} />
+      <QuickChips
+        statuses={["unarchived"]}
+        onStatuses={() => {}}
+        activity={[]}
+        onActivity={() => {}}
+        counts={NO_COUNTS}
+      />
       <input type="checkbox" aria-label="Select a row" />
     </I18nProvider>,
   );
@@ -90,7 +99,8 @@ it("leaves Space to a focused control instead of typing it into the needle", () 
   const needle = renderControls();
   for (const control of [
     screen.getByRole("checkbox", { name: "Select a row" }),
-    screen.getByRole("button", { name: "Starred" }),
+    screen.getByRole("button", { name: "Unread" }),
+    screen.getByRole("radio", { name: "Content" }),
   ]) {
     control.focus();
     // dispatchEvent reports false once preventDefault ran, which is what stops
@@ -104,7 +114,7 @@ it("leaves Space to a focused control instead of typing it into the needle", () 
 
 it("still types a character over a focused control, which ignores it", () => {
   const needle = renderControls();
-  const filter = screen.getByRole("button", { name: "Starred" });
+  const filter = screen.getByRole("button", { name: "Unread" });
   filter.focus();
   fireEvent.keyDown(filter, { key: "x" });
   expect(needle.value).toBe("x");

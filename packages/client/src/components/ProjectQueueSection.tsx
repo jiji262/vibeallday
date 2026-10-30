@@ -19,9 +19,12 @@ import {
 import { Link } from "react-router-dom";
 import { type MessageKey, useI18n } from "../i18n";
 import type { Project } from "../types";
+import { Button } from "./garden/Button";
+import { StatusDot } from "./garden/StatusDot";
 import { ProjectQueueAttachmentEditor } from "./ProjectQueueAttachmentEditor";
 import { formatProjectAge as formatRelativeTime } from "./projectRelativeTime";
 import { ProviderBadge } from "./ProviderBadge";
+import foldStyles from "./ProjectQueueFold.module.css";
 import styles from "./ProjectQueueSection.module.css";
 
 type Translate = ReturnType<typeof useI18n>["t"];
@@ -59,6 +62,11 @@ interface ProjectQueueSectionProps {
   highlightedItemId?: string | null;
   basePath?: string;
   attachmentEditingEnabled?: boolean;
+  /**
+   * Starts folded to a one-line summary with Expand. A highlighted item,
+   * recovered queues, a failed item or a load error open it on their own.
+   */
+  collapsible?: boolean;
   onPauseDispatch: () => void;
   onResumeDispatch: () => void;
   onPromoteNow: (
@@ -466,6 +474,74 @@ function groupProjectQueueItems(
   });
 }
 
+interface ProjectQueueFoldProps {
+  items: readonly ProjectQueueItemSummary[];
+  projectById: ReadonlyMap<string, Project>;
+  paused: boolean;
+  mutatingDispatchState: boolean;
+  onToggleDispatch: () => void;
+  onExpand: () => void;
+}
+
+/** The folded queue: count, the next item in one line, Pause and Expand. */
+function ProjectQueueFold({
+  items,
+  projectById,
+  paused,
+  mutatingDispatchState,
+  onToggleDispatch,
+  onExpand,
+}: ProjectQueueFoldProps) {
+  const { t } = useI18n();
+  const next = items[0];
+  return (
+    <section
+      className={cx(styles.section, styles.folded)}
+      aria-labelledby="project-queue-title"
+    >
+      <StatusDot state="queued" />
+      <div className={foldStyles.foldText}>
+        <span className={foldStyles.foldTitleLine}>
+          <h2 id="project-queue-title">{t("projectQueueTitle")}</h2>
+          <span className={foldStyles.foldCount}>
+            {t("projectQueueCount", { count: items.length })}
+          </span>
+        </span>
+        {next && (
+          <span className={foldStyles.foldSummary}>
+            {projectById.get(next.projectId)?.name ??
+              t("projectQueueUnknownProject")}
+            {" · "}
+            <span>
+              {next.messagePreview || t("projectQueueAttachmentOnly")}
+            </span>
+            {" · "}
+            {targetLabel(next, t)}
+          </span>
+        )}
+      </div>
+      <div className={styles.headerActions}>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={onToggleDispatch}
+          disabled={mutatingDispatchState}
+        >
+          {paused ? t("projectQueueResume") : t("projectQueuePause")}
+        </Button>
+        <Button
+          variant="secondary"
+          size="sm"
+          aria-expanded={false}
+          onClick={onExpand}
+        >
+          {t("projectQueueExpand")}
+        </Button>
+      </div>
+    </section>
+  );
+}
+
 function isFirstMovableProjectQueueItem(
   item: ProjectQueueItemSummary,
   items: readonly ProjectQueueItemSummary[],
@@ -493,6 +569,7 @@ export function ProjectQueueSection({
   highlightedItemId,
   basePath = "",
   attachmentEditingEnabled = false,
+  collapsible = false,
   onPauseDispatch,
   onResumeDispatch,
   onPromoteNow,
@@ -508,6 +585,8 @@ export function ProjectQueueSection({
   const [editText, setEditText] = useState("");
   const [nowMs, setNowMs] = useState(() => Date.now());
   const highlightedItemRef = useRef<HTMLLIElement | null>(null);
+  // null follows `needsOpen`; Expand and Collapse set it explicitly.
+  const [expandedChoice, setExpandedChoice] = useState<boolean | null>(null);
   const projectById = new Map(projects.map((project) => [project.id, project]));
   const itemGroups = groupProjectQueueItems(items, projectById, t);
   const recoveredGroups = groupRecoveredSessionQueues(recoveredSessionQueues);
@@ -548,6 +627,26 @@ export function ProjectQueueSection({
 
   if (!hasContent && !error) return null;
 
+  const needsOpen =
+    highlightedItemIndex >= 0 ||
+    recoveredCount > 0 ||
+    error !== null ||
+    items.some((item) => item.status === "failed");
+  const expanded = !collapsible || (expandedChoice ?? needsOpen);
+  const toggleDispatch = pausedState ? onResumeDispatch : onPauseDispatch;
+  if (!expanded) {
+    return (
+      <ProjectQueueFold
+        items={items}
+        projectById={projectById}
+        paused={pausedState !== undefined}
+        mutatingDispatchState={mutatingDispatchState}
+        onToggleDispatch={toggleDispatch}
+        onExpand={() => setExpandedChoice(true)}
+      />
+    );
+  }
+
   return (
     <section className={styles.section} aria-labelledby="project-queue-title">
       <div className={styles.header}>
@@ -567,11 +666,21 @@ export function ProjectQueueSection({
             <button
               type="button"
               className={styles.dispatchButton}
-              onClick={pausedState ? onResumeDispatch : onPauseDispatch}
+              onClick={toggleDispatch}
               disabled={mutatingDispatchState}
             >
               {pausedState ? t("projectQueueResume") : t("projectQueuePause")}
             </button>
+          )}
+          {collapsible && hasProjectQueueItems && (
+            <Button
+              variant="secondary"
+              size="sm"
+              aria-expanded
+              onClick={() => setExpandedChoice(false)}
+            >
+              {t("projectQueueCollapse")}
+            </Button>
           )}
         </div>
       </div>

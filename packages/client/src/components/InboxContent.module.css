@@ -1,14 +1,11 @@
 /*
- * Overview content: tier cards and their rows. Tiles live in now/NowSummary,
- * queue rows in now/InboxQueueItem and review rows in now/ReviewOutcomes.
- *
- * `inbox-item-badge` stays global because `SessionListItem.tsx` produces
- * it: it composes the class with the `customBadge.className` supplied from
- * here, and the badge classes below double that hook to win over the global
- * rule.
+ * Inbox page layout (design Inbox-Desktop): status blocks in now/NowSummary,
+ * then the section column beside an aside of review outcomes and quick
+ * start. Sections live in now/InboxSection, queue rows in now/InboxQueueItem
+ * and review rows in now/ReviewOutcomes.
  */
 
-.tiers {
+.loading {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   gap: var(--space-5);
@@ -20,65 +17,41 @@
   gap: var(--space-2);
   margin: 0 0 var(--space-5);
   color: var(--ink-3);
-  font-size: 13px;
+  font-size: var(--fs-small);
 }
 
-/* Approval and question badges: rose asks for a decision, indigo for an
-   answer. Same recipe as garden/Badge. */
-.badgeApproval:global(.inbox-item-badge),
-.badgeQuestion:global(.inbox-item-badge) {
-  display: inline-flex;
-  align-items: center;
-  height: 22px;
-  padding: 0 var(--space-2);
-  border-radius: var(--radius-pill);
-  font-family: var(--label-font);
-  font-size: 12px;
-  font-weight: 500;
-  letter-spacing: var(--badge-tracking);
-  line-height: 1;
-  white-space: nowrap;
+/* Main column grows; the aside wraps under it on narrow windows. */
+.columns {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--space-6);
 }
 
-.badgeApproval:global(.inbox-item-badge) {
-  background: var(--rose-soft);
-  color: var(--rose-ink);
+.main {
+  display: flex;
+  flex: 1 1 560px;
+  flex-direction: column;
+  gap: var(--space-6);
+  min-width: 0;
 }
 
-.badgeQuestion:global(.inbox-item-badge) {
-  background: var(--indigo-soft);
-  color: var(--indigo-ink);
+.aside {
+  display: flex;
+  flex: 0 1 300px;
+  flex-direction: column;
+  gap: var(--space-4);
+  min-width: 260px;
 }
 
-.collection:global(.sessions-list) {
-  gap: 0;
-  margin: 0;
-  padding: 0;
-}
+@media (width < 768px) {
+  .columns,
+  .main {
+    gap: 18px;
+  }
 
-.viewAll {
-  display: inline-flex;
-  align-items: center;
-  justify-self: end;
-  gap: var(--space-1);
-  min-height: var(--tap-min);
-  color: var(--indigo);
-  font-size: 14px;
-  font-weight: 500;
-  text-decoration: none;
-}
-
-.viewAll:hover {
-  text-decoration: underline;
-}
-
-.viewAll:focus-visible {
-  border-radius: var(--radius-sm);
-  outline: 2px solid var(--indigo);
-  outline-offset: 2px;
-}
-
-/* A summary jump lands the card just below the scroll container's top. */
-.section {
-  scroll-margin-top: var(--space-4);
+  .aside {
+    flex-basis: 100%;
+    min-width: 0;
+  }
 }

@@ -199,30 +199,31 @@
   background: var(--ink);
 }
 
-/* Needs you: the row's needs-input badge (approval or question). */
+/* Row state comes from SessionListItem's data-session-state. */
 .console
-:global(.session-list-item--compact):has(
-  > a > :global(.session-badge-needs-input)
-)::before {
+:global(.session-list-item--compact[data-session-state="attn"])::before {
   border: 0;
+  border-radius: 50%;
   background: var(--attn);
 }
 
-/* Running: the row's thinking indicator, the trailing span that is neither
-   the project name nor a badge. The left dot replaces the trailing one. */
 .console
-:global(.session-list-item--compact):has(
-  > a
-    > span:not(
-      :global(.session-list-item__project-compact),
-      :global(.session-badge)
-    )
-)::before {
+  :global(.session-list-item--compact[data-session-state="run"])::before {
   border: 0;
+  border-radius: 50%;
   background: var(--run);
   box-shadow: 0 0 0 3px var(--run-halo);
 }
 
+.console
+  :global(.session-list-item--compact[data-session-state="queued"])::before {
+  border: 1.5px dashed var(--ink-3);
+  border-radius: 50%;
+  background: transparent;
+}
+
+/* The left dot replaces the trailing thinking indicator of a running row:
+   the trailing span that is neither the project name nor a badge. */
 .console
   :global(.session-list-item--compact)
   > a
@@ -244,9 +245,12 @@
   box-shadow: var(--nav-on-shadow);
 }
 
+/* The title line. A zero hypothetical width would let the full-width meta
+   link share this line and collapse the title to nothing; 1px keeps the
+   meta link wrapping onto its own line while the title still ellipsizes. */
 .console :global(.session-list-item--compact) > div {
   flex: 1 1 0;
-  min-width: 0;
+  min-width: 1px;
 }
 
 .console :global(.session-list-item--compact .session-list-item__link) {

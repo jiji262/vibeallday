@@ -2,12 +2,12 @@ import { Link, useLocation, useSearchParams } from "react-router-dom";
 import { useRemoteBasePath } from "../hooks/useRemoteBasePath";
 import { useI18n } from "../i18n";
 import { useOptionalNavigationLayout } from "../layouts/NavigationLayout";
-import { TabList, tabClassName } from "./garden/Tabs";
 import styles from "./SessionViews.module.css";
 
 /**
- * Phone tab-bar layout only: the Sessions tab covers Overview and All, so the
- * page offers both as tabs. The sidebar lists them separately elsewhere.
+ * Phone tab-bar layout only: the Sessions tab covers Inbox and All, so the
+ * page offers both as a segmented control (design `.seg.block`). The sidebar
+ * lists them separately elsewhere.
  */
 export function SessionViews() {
   const { t } = useI18n();
@@ -21,22 +21,22 @@ export function SessionViews() {
   const all = pathname === `${basePath}/sessions`;
   return (
     <nav className={styles.views} aria-label={t("sessionViewsLabel")}>
-      <TabList>
+      <div className={styles.seg}>
         <Link
           to={`${basePath}/inbox${search}`}
-          className={tabClassName(!all, styles.tab)}
+          className={styles.option}
           aria-current={!all ? "page" : undefined}
         >
-          {t("sessionOverview")}
+          {t("shellNavInbox")}
         </Link>
         <Link
           to={`${basePath}/sessions${search}`}
-          className={tabClassName(all, styles.tab)}
+          className={styles.option}
           aria-current={all ? "page" : undefined}
         >
           {t("sessionViewAll")}
         </Link>
-      </TabList>
+      </div>
     </nav>
   );
 }

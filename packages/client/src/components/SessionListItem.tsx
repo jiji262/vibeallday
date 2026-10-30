@@ -53,6 +53,7 @@ import { PublicShareManagerModal } from "./PublicShareManagerModal";
 import { SessionMenu } from "./SessionMenu";
 import { LegacySessionShareModal } from "./SessionShareModal";
 import { SessionStatusBadge } from "./StatusBadge";
+import { StatusDot } from "./garden/StatusDot";
 import { ClearloopRemainingBadge } from "./ClearloopRemainingBadge";
 import { ThinkingIndicator } from "./ThinkingIndicator";
 import styles from "./SessionListItem.module.css";
@@ -150,6 +151,49 @@ interface SessionListItemProps {
   publicShareManagementAvailable?: boolean;
   /** @deprecated Use publicShareCreationReady. */
   publicShareControlsVisible?: boolean;
+  /** Card rows: a trailing star toggle (the Sessions table's last column). */
+  showStarToggle?: boolean;
+}
+
+/**
+ * Design status of a row, from data the summary already carries. Needs-you
+ * outranks running, running outranks a Project Queue item. Error and
+ * completed are not in the summary, so rows never claim them.
+ */
+export type SessionRowState = "attn" | "run" | "queued" | "idle";
+
+export function sessionRowState(row: {
+  pendingInputType?: PendingInputType;
+  activity?: AgentActivity;
+  hasProjectQueue?: boolean;
+}): SessionRowState {
+  if (row.pendingInputType || row.activity === "waiting-input") return "attn";
+  if (row.activity === "in-turn") return "run";
+  if (row.hasProjectQueue) return "queued";
+  return "idle";
+}
+
+const CARD_STAR_ICON_SIZE = 12;
+const STAR_TOGGLE_ICON_SIZE = 16;
+
+/** Leading status column of a card row; unread idle rows show the ink mark. */
+function RowStateMarker({
+  state,
+  unread,
+}: {
+  state: SessionRowState;
+  unread: boolean;
+}) {
+  if (state === "idle" && unread) {
+    return (
+      <span
+        className={`${styles.stateDot} ${styles.unreadMark}`}
+        data-status="unread"
+        aria-hidden="true"
+      />
+    );
+  }
+  return <StatusDot state={state} className={styles.stateDot} />;
 }
 
 async function copyTextToClipboard(text: string): Promise<void> {
@@ -244,6 +288,7 @@ export function SessionListItem({
   publicShareCreationReady,
   publicShareManagementAvailable = false,
   publicShareControlsVisible = false,
+  showStarToggle = false,
 }: SessionListItemProps) {
   const { t } = useI18n();
   const showToast = useOptionalToastContext()?.showToast;
@@ -491,15 +536,21 @@ export function SessionListItem({
   // their own navigation target rather than disappearing under that overlay.
   const compactActivityIndicator =
     mode === "compact" ? getCompactActivityIndicator() : null;
+  const compactProject = showProjectName && projectName ? projectName : null;
+  // A bare <time>: the sidebar reads any other trailing span as activity.
+  const compactAge =
+    mode === "compact" && compactProject && showTimestamp && updatedAt ? (
+      <SessionListTime timestamp={updatedAt} />
+    ) : null;
   const compactTrailing =
-    mode === "compact" &&
-    ((showProjectName && projectName) || compactActivityIndicator) ? (
+    mode === "compact" && (compactProject || compactActivityIndicator) ? (
       <>
-        {showProjectName && projectName && (
+        {compactProject && (
           <span className="session-list-item__project-compact">
-            {projectName}
+            {compactProject}
           </span>
         )}
+        {compactAge}
         {compactActivityIndicator}
       </>
     ) : null;
@@ -608,6 +659,13 @@ export function SessionListItem({
     },
     [clearPreview],
   );
+
+  const rowState = sessionRowState({
+    pendingInputType,
+    activity,
+    hasProjectQueue,
+  });
+  const showStateDot = mode === "card" && searchPreviews === undefined;
 
   // Build CSS classes
   const liClasses = [
@@ -785,6 +843,7 @@ export function SessionListItem({
     <li
       ref={liRef}
       className={liClasses}
+      data-session-state={rowState}
       onKeyDown={(event) => {
         const unread = sessionReadShortcut(event.nativeEvent);
         if (unread === null) return;
@@ -822,6 +881,8 @@ export function SessionListItem({
           aria-label={`Select ${displayTitle}`}
         />
       )}
+
+      {showStateDot && <RowStateMarker state={rowState} unread={!!hasUnread} />}
 
       {mode === "compact" && providerChildren.length > 0 && (
         <button
@@ -866,6 +927,7 @@ export function SessionListItem({
             onMouseDown={handleSessionMouseDown}
             onAuxClick={handleSessionAuxClick}
             onContextMenu={handleSessionContextMenu}
+            aria-current={isCurrent ? "page" : undefined}
             className={`session-list-item__link ${
               mode === "compact" ? styles.compactLink : ""
             }`}
@@ -877,7 +939,9 @@ export function SessionListItem({
                   className="session-list-item__title"
                   {...titleTooltipAttributes}
                 >
-                  {isStarred && <StarIcon filled size={12} />}
+                  {isStarred && !showStarToggle && (
+                    <StarIcon filled size={CARD_STAR_ICON_SIZE} />
+                  )}
                   {showCardThinkingIndicator && <ThinkingIndicator />}
                   {isBtwAside && (
                     // biome-ignore lint/a11y/noStaticElementInteractions: clickable variant has link role and keyboard handling; inert variant only shows the badge
@@ -918,7 +982,15 @@ export function SessionListItem({
                   )}
                 </strong>
                 <span className="session-list-item__meta">
-                  {provider && (
+                  {showProjectName && projectName && (
+                    <span
+                      className="session-list-item__project"
+                      data-session-cell="project"
+                    >
+                      {projectName}
+                    </span>
+                  )}
+                  {provider ? (
                     <span data-session-cell="provider">
                       <ProviderBadge
                         provider={provider}
@@ -927,14 +999,12 @@ export function SessionListItem({
                         className="session-list-item__provider-badge"
                       />
                     </span>
-                  )}
-                  {showProjectName && projectName && (
-                    <span
-                      className="session-list-item__project"
-                      data-session-cell="project"
-                    >
-                      {projectName}
-                    </span>
+                  ) : (
+                    model && (
+                      <span className={styles.model} data-session-cell="model">
+                        {model}
+                      </span>
+                    )
                   )}
                   {showTimestamp && updatedAt && (
                     <SessionListTime timestamp={updatedAt} />
@@ -1142,6 +1212,20 @@ export function SessionListItem({
           onNavigate={onNavigate}
         />
       </span>
+      {showStarToggle && mode === "card" && (
+        <button
+          type="button"
+          className={styles.starToggle}
+          aria-pressed={!!isStarred}
+          aria-label={t("sessionRowStarToggle", { title: visibleTitle })}
+          onClick={(event) => {
+            event.stopPropagation();
+            void handleToggleStar();
+          }}
+        >
+          <StarIcon filled={!!isStarred} size={STAR_TOGGLE_ICON_SIZE} />
+        </button>
+      )}
 
       {mode === "compact" &&
         providerChildren.length > 0 &&

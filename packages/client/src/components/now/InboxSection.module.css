@@ -1,0 +1,117 @@
+/*
+ * One Inbox section (design: heading row, then a `.card.list`). Rows are
+ * SessionListItem cards; queue rows come from InboxQueueItem.
+ *
+ * `inbox-item-badge` stays global because SessionListItem composes it with
+ * the `customBadge.className` supplied here; doubling the hook wins over the
+ * global rule.
+ */
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+  scroll-margin-top: var(--space-4);
+}
+
+.head {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 0 4px;
+}
+
+.title {
+  margin: 0;
+  color: var(--ink);
+  font-size: var(--fs-h2);
+  font-weight: var(--title-weight);
+  line-height: 1.3;
+}
+
+.link {
+  display: inline-flex;
+  align-items: center;
+  align-self: center;
+  gap: var(--space-1);
+  min-height: var(--tap-min);
+  margin-left: auto;
+  color: var(--link);
+  font-size: var(--fs-small);
+  text-decoration: none;
+}
+
+.link:hover {
+  text-decoration: underline;
+}
+
+.link:focus-visible {
+  border-radius: var(--r-sm);
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.card {
+  min-width: 0;
+}
+
+.collection:global(.sessions-list) {
+  gap: 0;
+  margin: 0;
+  padding: 0;
+}
+
+/* The meta line reads "project · model · time"; the project's separator is
+   the global one. */
+.collection
+  :global(.session-list-item__meta)
+  > [data-session-cell="model"]::after {
+  margin-left: var(--space-2);
+  content: "\00B7";
+}
+
+.empty {
+  margin: 0;
+  padding: var(--space-5) var(--space-4);
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--r-card);
+  color: var(--ink-3);
+  font-size: var(--fs-small);
+  text-align: center;
+}
+
+/* Needs-you pill (design .status.attn): filled circle plus label. */
+.badgeAttn:global(.inbox-item-badge) {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 22px;
+  padding: 0 8px;
+  border-radius: var(--r-chip);
+  background: var(--attn-soft);
+  color: var(--attn-ink);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.badgeAttn:global(.inbox-item-badge)::before {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--attn);
+  content: "";
+}
+
+@media (width < 768px) {
+  .title {
+    color: var(--ink-3);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+}

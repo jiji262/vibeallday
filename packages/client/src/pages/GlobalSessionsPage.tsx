@@ -8,6 +8,7 @@ import {
   type ProviderName,
 } from "@vibeallday/shared";
 import {
+  Fragment,
   startTransition,
   useCallback,
   useEffect,
@@ -19,7 +20,7 @@ import {
 import { useLocation, useNavigate } from "react-router-dom";
 import { createSessionApi } from "../api/sessionClient";
 import { useCurrentSourceRuntime } from "../contexts/SourceRuntimeContext";
-import { BulkActionBar } from "../components/BulkActionBar";
+import { Button } from "../components/garden/Button";
 import { ErrorState } from "../components/garden/ErrorState";
 import { PageHeader } from "../components/PageHeader";
 import { LoadingState } from "../components/garden/LoadingState";
@@ -29,7 +30,7 @@ import { SessionViews } from "../components/SessionViews";
 import { useCompleteSessionCatalog } from "../hooks/useCompleteSessionCatalog";
 import { SessionListItem } from "../components/SessionListItem";
 import { SearchFilterSheet } from "../components/session-search/SearchFilterSheet";
-import { SearchScopeFilters } from "../components/session-search/SearchScopeFilters";
+import type { ScopeFilterProps } from "../components/session-search/SearchScopeFilters";
 import {
   SearchSelection,
   SelectionManager,
@@ -40,7 +41,20 @@ import {
   SessionsToolbar,
   searchStatusText,
 } from "../components/session-search/SessionsToolbar";
-import { SessionResults } from "../components/session-search/SessionResults";
+import {
+  SessionGroupHeader,
+  SessionResults,
+} from "../components/session-search/SessionResults";
+import {
+  bulkAvailability,
+  SessionsBulkBar,
+} from "../components/session-search/SessionsBulkBar";
+import {
+  type DateGroupHeader,
+  dateGroupHeaders,
+} from "../components/session-search/dateGroups";
+import { ACTIVITY_LABELS } from "../components/session-search/FilterSheetSections";
+import { PlusIcon } from "../components/garden/icons";
 import { useStickyHeight } from "../components/session-search/useStickyHeight";
 import {
   SearchPreviews,
@@ -51,11 +65,15 @@ import {
 import {
   chipStatuses,
   countActiveFilters,
+  countQuickViews,
   durationMs,
   inTimeRange,
+  matchesActivity,
   matchesStatus,
+  parseActivityParam,
   statuses,
   titleMatches,
+  type ActivityFilter,
   type SearchField,
   type SearchStatus,
   type TimeBasis,
@@ -103,7 +121,10 @@ import { getSessionDisplayTitle } from "../utils";
 const EMPTY_PROJECTS: readonly string[] = [];
 /** URL parameters the scope dropdowns own. */
 const SCOPE_PARAMS = ["project", "provider", "source", "executor", "created"];
+/** URL parameters Clear filters resets besides the scope dropdowns. */
+const CLEARED_PARAMS = [...SCOPE_PARAMS, "status", "activity", "age"];
 const EMPTY_IDS: ReadonlySet<string> = new Set();
+const NO_GROUP_HEADERS: ReadonlyMap<string, DateGroupHeader> = new Map();
 /** Lets the bulk band stick just under the sticky search toolbar. */
 const TOOLBAR_HEIGHT_PROPERTY = "--sessions-toolbar-height";
 
@@ -209,6 +230,11 @@ function SessionSearchPage() {
   const { hideAutomationSessions, setHideAutomationSessions } =
     useHideAutomationSessions();
   const statusParam = params.get("status") ?? "unarchived";
+  const activityParam = params.get("activity") ?? "";
+  const activity = useMemo(
+    () => parseActivityParam(activityParam),
+    [activityParam],
+  );
   const providers = useMemo(
     () =>
       providerParam
@@ -383,6 +409,12 @@ function SessionSearchPage() {
             !created.includes(s.creationProvenance?.surface ?? "unspecified")
           )
             reasons.push(t("sessionSearchOutsideCreation"));
+          if (activity.length && !activity.some((a) => matchesActivity(s, a)))
+            reasons.push(
+              t("sessionSearchOutsideStatus", {
+                status: activity.map((a) => t(ACTIVITY_LABELS[a])).join(" / "),
+              }),
+            );
           for (const status of filters) {
             if (!matchesStatus(s, status))
               reasons.push(
@@ -414,6 +446,7 @@ function SessionSearchPage() {
       executors,
       created,
       creationProvenanceAvailable,
+      activity,
       filters,
       basis,
       bounds,
@@ -441,6 +474,7 @@ function SessionSearchPage() {
       ),
     [sourceCounts],
   );
+  const quickCounts = useMemo(() => countQuickViews(sessions), [sessions]);
   const [viewportRows, setViewportRows] = useState(Infinity);
   const contentCandidates = useMemo(
     () =>
@@ -524,6 +558,14 @@ function SessionSearchPage() {
     basis,
     bounds,
   ]);
+  const dateHeaders = useMemo(
+    () =>
+      dateGroupHeaders(
+        results.map(({ session }) => session),
+        Date.now(),
+      ),
+    [results],
+  );
   const shownIds = useMemo(
     () => new Set(results.map(({ session }) => session.id)),
     [results],
@@ -629,13 +671,14 @@ function SessionSearchPage() {
   const narrowed =
     !!query.trim() ||
     activeFilterCount > 0 ||
+    activity.length > 0 ||
     filters.some((status) =>
       (chipStatuses as readonly string[]).includes(status),
     );
   const clearFilters = (includeQuery: boolean) => {
     setParams((previous) => {
       const next = new URLSearchParams(previous);
-      for (const key of [...SCOPE_PARAMS, "status", "age"]) next.delete(key);
+      for (const key of CLEARED_PARAMS) next.delete(key);
       if (includeQuery) next.delete("q");
       return next;
     });
@@ -780,28 +823,28 @@ function SessionSearchPage() {
     observer.observe(element);
     return () => observer.disconnect();
   }, [showMore, renderedCount, results.length]);
-  const scopeFilters = (
-    <SearchScopeFilters
-      sessions={sessions}
-      projectGroups={projectGroups}
-      project={project}
-      providers={providers}
-      launchSources={launchSources}
-      executors={executors}
-      created={created}
-      executorCounts={feed.stats.executorCounts}
-      sourceCounts={sourceCounts}
-      automationCount={automationCount}
-      hideAutomation={hideAutomationSessions}
-      onHideAutomation={setHideAutomationSessions}
-      supported={supported}
-      turnSearchProviders={turnSearchProviders}
-      creationProvenanceAvailable={creationProvenanceAvailable}
-      onChange={changeParam}
-    />
-  );
+  const scopeFilters: ScopeFilterProps = {
+    sessions,
+    projectGroups,
+    project,
+    providers,
+    launchSources,
+    executors,
+    created,
+    executorCounts: feed.stats.executorCounts,
+    sourceCounts,
+    automationCount,
+    hideAutomation: hideAutomationSessions,
+    onHideAutomation: setHideAutomationSessions,
+    supported,
+    turnSearchProviders,
+    creationProvenanceAvailable,
+    onChange: changeParam,
+  };
   const setStatuses = (next: SearchStatus[]) =>
     changeParam("status", next.join(","));
+  const setActivity = (next: ActivityFilter[]) =>
+    changeParam("activity", next.join(","));
   // Why a session is not among the shown results; empty when it is.
   const describeHidden = (session: (typeof sessions)[number]) =>
     shownIds.has(session.id)
@@ -827,6 +870,8 @@ function SessionSearchPage() {
   const introTitle =
     tabBarNavigation && !projectName ? t("sessionViewAllTitle") : pageTitle;
   const shownCount = Math.min(renderedCount, results.length);
+  // Turn search ranks rows by discovery, so date runs would only fragment it.
+  const groupHeaders = contentSearch ? NO_GROUP_HEADERS : dateHeaders;
   return (
     <MainContent
       isWideScreen={isWideScreen}
@@ -854,16 +899,32 @@ function SessionSearchPage() {
           <PageIntro
             title={introTitle}
             lede={t("consoleSessionsDescription")}
+            actions={
+              // The project CTA below already offers a new session there.
+              activeProject ? undefined : (
+                <Button
+                  size="sm"
+                  icon={<PlusIcon />}
+                  onClick={() => navigate(`${basePath}/new-session`)}
+                >
+                  {t("sessionsNewSession")}
+                </Button>
+              )
+            }
           />
           <div ref={toolbar} className={styles.sticky}>
             <SessionsToolbar
               query={query}
               onQuery={onQuery}
+              fields={effectiveFields}
               onFields={updateFields}
               supported={supported}
               supportKnown={version !== null && version !== undefined}
               statuses={filters}
               onStatuses={setStatuses}
+              activity={activity}
+              onActivity={setActivity}
+              quickCounts={quickCounts}
               sessionCount={
                 effectiveFields.includes("title")
                   ? candidates.length
@@ -963,103 +1024,105 @@ function SessionSearchPage() {
             moreRef={more}
             onMore={showMore}
             band={
-              <BulkActionBar
+              <SessionsBulkBar
                 selectedCount={selected.size}
-                onArchive={() => apply("archived")}
-                onUnarchive={() => apply("unarchived")}
-                onStar={() => apply("starred")}
-                onUnstar={() => apply("unstarred")}
-                onMarkRead={() => apply("read")}
-                onMarkUnread={() => apply("unread")}
+                available={bulkAvailability(selectedSessions)}
+                onApply={(action) => void apply(action)}
                 onClearSelection={() => setSelected(new Set())}
-                isPending={pending}
-                canArchive={selectedSessions.some((s) => !s.isArchived)}
-                canUnarchive={selectedSessions.some((s) => s.isArchived)}
-                canStar={selectedSessions.some((s) => !s.isStarred)}
-                canUnstar={selectedSessions.some((s) => s.isStarred)}
-                canMarkRead={selectedSessions.some((s) => s.hasUnread)}
-                canMarkUnread={selectedSessions.some((s) => !s.hasUnread)}
+                pending={pending}
               />
             }
           >
             {results.slice(0, renderedCount).map(({ session, matches }) => (
-              <SessionListItem
-                key={session.id}
-                sessionId={session.id}
-                projectId={session.projectId}
-                title={getSessionDisplayTitle(session)}
-                // Only a needle needs the one-line excerpt around its match;
-                // otherwise the card keeps its two-line serif title.
-                titleContent={
-                  firstNeedle && effectiveFields.includes("title") ? (
-                    <SearchTitle
-                      text={
-                        matches.find((match) => match.role === "title")
-                          ?.fullText ?? getSessionDisplayTitle(session)
-                      }
-                      query={firstNeedle}
-                    />
-                  ) : undefined
-                }
-                fullTitle={session.fullTitle ?? getSessionDisplayTitle(session)}
-                initialPrompt={session.initialPrompt}
-                hasCustomTitle={!!session.customTitle}
-                lastAgentText={session.lastAgentText}
-                updatedAt={session.updatedAt}
-                createdAt={session.createdAt}
-                hasUnread={session.hasUnread}
-                activity={session.activity}
-                pendingInputType={session.pendingInputType}
-                status={session.ownership}
-                provider={session.provider}
-                model={session.model}
-                parentSessionId={session.parentSessionId}
-                parentSessionKind={session.parentSessionKind}
-                providerChildren={
-                  children.get(session.id) ?? session.providerChildren
-                }
-                isStarred={session.isStarred}
-                isArchived={session.isArchived}
-                mode="card"
-                isSelected={selected.has(session.id)}
-                onSelect={select}
-                showProjectName={!project}
-                projectName={session.projectName}
-                basePath={basePath}
-                messageCount={session.messageCount}
-                hasDraft={drafts.has(session.id)}
-                hasProjectQueue={queues.has(session.id)}
-                publicShareCreationReady={publicShareStatus?.canCreate ?? false}
-                publicShareManagementAvailable={publicShareManagementAvailable}
-                openMessageId={matches.find((m) => m.role !== "title")?.id}
-                // Previews turn a row into a compact search row; without a
-                // turn search it stays the Garden card.
-                searchPreviews={
-                  contentSearch ? (
-                    <SearchPreviews
-                      onExpand={() => setExpanded(session)}
-                      limit={limitNumber}
-                      onAdjustLimit={adjustLimit}
-                      session={session}
-                      matches={matches}
-                      streamingRows={
-                        streamingLayout &&
-                        turnSearchProviders.has(session.provider)
-                          ? Math.min(
-                              Number.isFinite(limitNumber) ? limitNumber : 1,
-                              effectiveFields.filter(
-                                (field) => field !== "title",
-                              ).length,
-                            )
-                          : 0
-                      }
-                      query={firstNeedle}
-                      basePath={basePath}
-                      onZoom={setZoomed}
-                    />
-                  ) : undefined
-                }
-              />
+              // The header keeps its slot whether or not it renders, so a row
+              // never remounts when a header appears or leaves above it.
+              <Fragment key={session.id}>
+                {groupHeaders.has(session.id) && (
+                  <SessionGroupHeader header={groupHeaders.get(session.id)!} />
+                )}
+                <SessionListItem
+                  sessionId={session.id}
+                  projectId={session.projectId}
+                  title={getSessionDisplayTitle(session)}
+                  // Only a needle needs the one-line excerpt around its match;
+                  // otherwise the card keeps its two-line serif title.
+                  titleContent={
+                    firstNeedle && effectiveFields.includes("title") ? (
+                      <SearchTitle
+                        text={
+                          matches.find((match) => match.role === "title")
+                            ?.fullText ?? getSessionDisplayTitle(session)
+                        }
+                        query={firstNeedle}
+                      />
+                    ) : undefined
+                  }
+                  fullTitle={
+                    session.fullTitle ?? getSessionDisplayTitle(session)
+                  }
+                  initialPrompt={session.initialPrompt}
+                  hasCustomTitle={!!session.customTitle}
+                  lastAgentText={session.lastAgentText}
+                  updatedAt={session.updatedAt}
+                  createdAt={session.createdAt}
+                  hasUnread={session.hasUnread}
+                  activity={session.activity}
+                  pendingInputType={session.pendingInputType}
+                  status={session.ownership}
+                  provider={session.provider}
+                  model={session.model}
+                  parentSessionId={session.parentSessionId}
+                  parentSessionKind={session.parentSessionKind}
+                  providerChildren={
+                    children.get(session.id) ?? session.providerChildren
+                  }
+                  isStarred={session.isStarred}
+                  isArchived={session.isArchived}
+                  mode="card"
+                  isSelected={selected.has(session.id)}
+                  onSelect={select}
+                  showProjectName={!project}
+                  projectName={session.projectName}
+                  basePath={basePath}
+                  messageCount={session.messageCount}
+                  hasDraft={drafts.has(session.id)}
+                  hasProjectQueue={queues.has(session.id)}
+                  publicShareCreationReady={
+                    publicShareStatus?.canCreate ?? false
+                  }
+                  publicShareManagementAvailable={
+                    publicShareManagementAvailable
+                  }
+                  openMessageId={matches.find((m) => m.role !== "title")?.id}
+                  // Previews turn a row into a compact search row; without a
+                  // turn search it stays the Garden card.
+                  searchPreviews={
+                    contentSearch ? (
+                      <SearchPreviews
+                        onExpand={() => setExpanded(session)}
+                        limit={limitNumber}
+                        onAdjustLimit={adjustLimit}
+                        session={session}
+                        matches={matches}
+                        streamingRows={
+                          streamingLayout &&
+                          turnSearchProviders.has(session.provider)
+                            ? Math.min(
+                                Number.isFinite(limitNumber) ? limitNumber : 1,
+                                effectiveFields.filter(
+                                  (field) => field !== "title",
+                                ).length,
+                              )
+                            : 0
+                        }
+                        query={firstNeedle}
+                        basePath={basePath}
+                        onZoom={setZoomed}
+                      />
+                    ) : undefined
+                  }
+                />
+              </Fragment>
             ))}
           </SessionResults>
           <div className={styles.footer}>
@@ -1103,6 +1166,8 @@ function SessionSearchPage() {
           showLimit={hasTurnFields}
           statuses={filters}
           onStatuses={setStatuses}
+          activity={activity}
+          onActivity={setActivity}
           scope={scopeFilters}
         />
       )}

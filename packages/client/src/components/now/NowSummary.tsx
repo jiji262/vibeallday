@@ -1,17 +1,8 @@
-import { LAUNCH_SOURCES } from "@vibeallday/shared";
-import { Link } from "react-router-dom";
-import { useRemoteBasePath } from "../../hooks/useRemoteBasePath";
+import type { ReactNode } from "react";
 import { type MessageKey, useI18n } from "../../i18n";
-import {
-  StatCardContent,
-  StatGrid,
-  type StatTone,
-  statCardClassName,
-} from "../garden/StatCard";
+import { Status } from "../garden/StatusDot";
+import type { InboxFilter } from "./inboxSections";
 import styles from "./NowSummary.module.css";
-
-/** Tiers the summary can jump to; each renders a heading with a known id. */
-export type NowJumpTarget = "needsAttention" | "active" | "unread";
 
 export interface NowCounts {
   needsYou: number;
@@ -23,136 +14,103 @@ export interface NowCounts {
 
 interface NowSummaryProps {
   counts: NowCounts;
+  /** Approval and question split of the needs-you rows. */
+  needs: { approvals: number; questions: number };
   /** The catalog is still loading or incomplete, so counts are lower bounds. */
   partial: boolean;
-  projectId?: string;
-  /** The page lists unread rows itself, so Unread jumps instead of linking. */
-  unreadOnPage: boolean;
-  onJump: (target: NowJumpTarget) => void;
+  filter: InboxFilter | null;
+  onFilterChange: (filter: InboxFilter | null) => void;
 }
 
 interface TileSpec {
-  key: string;
-  tone: StatTone;
+  filter: InboxFilter;
   value: number;
-  label: MessageKey;
+  label: ReactNode;
+  hint: string;
   announcement: MessageKey;
-  jump?: NowJumpTarget;
-  href?: string;
-}
-
-function unreadHref(basePath: string, projectId?: string): string {
-  const params = new URLSearchParams({
-    status: "unarchived,unread",
-    source: LAUNCH_SOURCES.join(","),
-  });
-  if (projectId) params.set("project", projectId);
-  return `${basePath}/sessions?${params}`;
 }
 
 function tileSpecs(
   props: NowSummaryProps,
-  basePath: string,
+  t: ReturnType<typeof useI18n>["t"],
 ): readonly TileSpec[] {
-  const { counts, unreadOnPage, projectId } = props;
+  const { counts, needs } = props;
   const tiles: TileSpec[] = [
     {
-      key: "needs-you",
-      tone: "rose",
+      filter: "needs",
       value: counts.needsYou,
-      label: "consoleNeedsYou",
+      label: <Status state="attn">{t("consoleNeedsYou")}</Status>,
+      hint: t("inboxTileNeedsHint", needs),
       announcement: "sessionOverviewNeedsYou",
-      jump: "needsAttention",
     },
     {
-      key: "running",
-      tone: "mint",
+      filter: "running",
       value: counts.running,
-      label: "consoleRunning",
+      label: <Status state="run">{t("consoleRunning")}</Status>,
+      hint: t("inboxTileRunningHint"),
       announcement: "nowGlanceRunning",
-      jump: "active",
     },
     {
-      key: "unread",
-      tone: "sand",
+      filter: "unread",
       value: counts.unread,
-      label: "consoleUnread",
+      label: (
+        <span className={styles.plain}>
+          <span className={styles.unreadMark} aria-hidden="true" />
+          {t("consoleUnread")}
+        </span>
+      ),
+      hint: t("inboxTileUnreadHint"),
       announcement: "nowGlanceUnread",
-      ...(unreadOnPage
-        ? { jump: "unread" as const }
-        : { href: unreadHref(basePath, projectId) }),
     },
   ];
   if (counts.queued !== undefined) {
     tiles.push({
-      key: "queued",
-      tone: "indigo",
+      filter: "queued",
       value: counts.queued,
-      label: "consoleQueued",
+      label: <Status state="queued">{t("consoleQueued")}</Status>,
+      hint: t("inboxTileQueuedHint"),
       announcement: "nowGlanceQueued",
-      href: `${basePath}/projects`,
     });
   }
   return tiles;
 }
 
-function SummaryTile({
-  tile,
-  partial,
-  onJump,
-}: {
-  tile: TileSpec;
-  partial: boolean;
-  onJump: NowSummaryProps["onJump"];
-}) {
-  const { t } = useI18n();
-  const count = partial
-    ? t("sessionOverviewPartialCount", { count: tile.value })
-    : tile.value;
-  const content = <StatCardContent label={t(tile.label)} value={count} />;
-  const shared = {
-    className: statCardClassName(tile.tone, styles.tile),
-    "aria-label": t(tile.announcement, { count }),
-    "data-summary-tile": tile.key,
-  };
-  if (tile.href) {
-    return (
-      <Link {...shared} to={tile.href}>
-        {content}
-      </Link>
-    );
-  }
-  const target = tile.jump;
-  return (
-    <button
-      {...shared}
-      type="button"
-      disabled={!tile.value || !target}
-      onClick={() => target && onJump(target)}
-    >
-      {content}
-    </button>
-  );
-}
-
 /**
- * The top of the Overview: one tile per state that can wait on the user.
- * Tiles jump to their section on this page, or open the list that holds
- * them elsewhere (unread sessions, the Project Queue).
+ * The top of the Inbox: one block per state that can wait on the user. Each
+ * block filters the page to its rows; pressing it again shows everything.
+ * Phone draws the same buttons as a scrolling chip row.
  */
 export function NowSummary(props: NowSummaryProps) {
   const { t } = useI18n();
-  const basePath = useRemoteBasePath();
+  const { partial, filter, onFilterChange } = props;
   return (
-    <StatGrid label={t("nowSummaryLabel")} className={styles.grid}>
-      {tileSpecs(props, basePath).map((tile) => (
-        <SummaryTile
-          key={tile.key}
-          tile={tile}
-          partial={props.partial}
-          onJump={props.onJump}
-        />
-      ))}
-    </StatGrid>
+    <div
+      className={styles.grid}
+      role="group"
+      aria-label={t("inboxFilterGroupLabel")}
+    >
+      {tileSpecs(props, t).map((tile) => {
+        const pressed = filter === tile.filter;
+        const count = partial
+          ? t("sessionOverviewPartialCount", { count: tile.value })
+          : tile.value;
+        return (
+          <button
+            key={tile.filter}
+            type="button"
+            className={styles.tile}
+            aria-pressed={pressed}
+            aria-label={t(tile.announcement, { count })}
+            data-summary-tile={tile.filter}
+            disabled={!pressed && tile.value === 0}
+            onClick={() => onFilterChange(pressed ? null : tile.filter)}
+          >
+            <span className={styles.label}>{tile.label}</span>
+            <span className={styles.num}>{count}</span>
+            <span className={styles.hint}>{tile.hint}</span>
+          </button>
+        );
+      })}
+    </div>
   );
 }

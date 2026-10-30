@@ -1,9 +1,19 @@
 import { useI18n } from "../../i18n";
-import { ListToolbar } from "../garden/ListToolbar";
-import type { SearchField, SearchStatus } from "./model";
+import type {
+  ActivityFilter,
+  QuickCounts,
+  SearchField,
+  SearchStatus,
+} from "./model";
 import { SearchHeader } from "./SearchControls";
 import { SearchStatusLine } from "./SearchStatusLine";
-import { FiltersButton, SearchChips, SelectModeButton } from "./SearchToolbar";
+import {
+  FiltersButton,
+  QuickChips,
+  SearchScope,
+  SelectModeButton,
+} from "./SearchToolbar";
+import styles from "./SearchToolbar.module.css";
 
 type Translate = ReturnType<typeof useI18n>["t"];
 
@@ -32,11 +42,15 @@ export function searchStatusText(scan: ScanProgress, t: Translate): string {
 interface SessionsToolbarProps {
   query: string;
   onQuery: (value: string) => void;
+  fields: SearchField[];
   onFields: (value: SearchField[]) => void;
   supported: boolean;
   supportKnown: boolean;
   statuses: SearchStatus[];
   onStatuses: (next: SearchStatus[]) => void;
+  activity: ActivityFilter[];
+  onActivity: (next: ActivityFilter[]) => void;
+  quickCounts: QuickCounts;
   sessionCount: number;
   scanning: boolean;
   acquiring: boolean;
@@ -48,15 +62,19 @@ interface SessionsToolbarProps {
 }
 
 /**
- * The Sessions list toolbar: needle field, status chips, the mono scope
- * count, then Filters and Select. The needle owns its keystroke echo.
+ * The Sessions list toolbar. First row: the needle field and the 标题 | 内容
+ * scope. Second row: quick chips, Filters, then the mono scope count and
+ * Select. The needle owns its keystroke echo and keeps its place in the tree.
  */
 export function SessionsToolbar(props: SessionsToolbarProps) {
   const { t } = useI18n();
   return (
-    <ListToolbar
-      label={t("sessionSearchToolbarLabel")}
-      search={
+    <div
+      className={styles.toolbar}
+      role="search"
+      aria-label={t("sessionSearchToolbarLabel")}
+    >
+      <div className={styles.searchRow}>
         <SearchHeader
           query={props.query}
           onQuery={props.onQuery}
@@ -64,30 +82,38 @@ export function SessionsToolbar(props: SessionsToolbarProps) {
           supported={props.supported}
           supportKnown={props.supportKnown}
         />
-      }
-      filters={
-        <SearchChips filters={props.statuses} onFilters={props.onStatuses} />
-      }
-      count={
-        <SearchStatusLine
-          sessionCount={props.sessionCount}
-          scanning={props.scanning}
-          acquiring={props.acquiring}
-          status={props.status}
+        <SearchScope
+          fields={props.fields}
+          supported={props.supported}
+          onFields={props.onFields}
         />
-      }
-      actions={
-        <>
-          <FiltersButton
-            count={props.activeFilterCount}
-            onClick={props.onOpenFilters}
+      </div>
+      <div className={styles.filterRow}>
+        <QuickChips
+          statuses={props.statuses}
+          onStatuses={props.onStatuses}
+          activity={props.activity}
+          onActivity={props.onActivity}
+          counts={props.quickCounts}
+        />
+        <span className={styles.divider} aria-hidden="true" />
+        <FiltersButton
+          count={props.activeFilterCount}
+          onClick={props.onOpenFilters}
+        />
+        <div className={styles.end}>
+          <SearchStatusLine
+            sessionCount={props.sessionCount}
+            scanning={props.scanning}
+            acquiring={props.acquiring}
+            status={props.status}
           />
           <SelectModeButton
             selecting={props.selecting}
             onSelecting={props.onSelecting}
           />
-        </>
-      }
-    />
+        </div>
+      </div>
+    </div>
   );
 }

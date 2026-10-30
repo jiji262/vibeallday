@@ -1,46 +1,104 @@
 /*
- * Sessions toolbar: the search field and Filters button, the quick chips, the
- * scope line and the selection bar. The page module makes the first two rows
- * sticky.
+ * Sessions toolbar (design .ses search block): the needle field beside the
+ * 标题 | 内容 scope, then quick chips, Filters, the scope count and Select.
+ * The page module makes the whole block sticky.
  */
+
+.toolbar {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-bottom: 12px;
+}
 
 .searchRow {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: var(--space-2);
+  gap: 10px;
 }
 
 .field {
-  flex: 1 1 auto;
+  flex: 1 1 360px;
+  min-width: 0;
+}
+
+.scope {
+  display: inline-flex;
+  flex: none;
+}
+
+.filterRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
   min-width: 0;
 }
 
 .filtersButton {
   position: relative;
   flex-shrink: 0;
-}
-
-.badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 18px;
-  height: 18px;
-  padding: 0 5px;
-  border-radius: var(--radius-pill);
-  background: var(--indigo);
-  color: var(--ink-on);
-  font-family: var(--label-font);
-  font-size: 11px;
-  font-weight: 500;
-  line-height: 1;
+  font-size: var(--fs-small);
 }
 
 .chips {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  column-gap: var(--space-1);
+  column-gap: 8px;
+  min-width: 0;
+}
+
+.chips > * {
+  flex: none;
+}
+
+/* Design .dot.unread: the accent read-state marker, not a status shape. */
+.unreadDot {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+.divider {
+  flex: none;
+  width: 1px;
+  height: 20px;
+  background: var(--line);
+}
+
+.end {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  margin-left: auto;
+  color: var(--ink-3);
+  font-family: var(--font-mono);
+  font-size: var(--fs-meta);
+}
+
+@media (width < 768px) {
+  .toolbar {
+    gap: 10px;
+  }
+
+  /* Phones scroll the chips sideways instead of wrapping them. */
+  .chips {
+    flex-wrap: nowrap;
+    flex-basis: 100%;
+    margin: 0 calc(var(--page-gutter) * -1);
+    padding: 0 var(--page-gutter);
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .divider {
+    display: none;
+  }
 }
 
 /* Scope line: "in 34 sessions", the toolbar's mono count. */
@@ -72,8 +130,8 @@
 }
 
 .statusButton:focus-visible {
-  border-radius: var(--radius-xs);
-  outline: 2px solid var(--indigo);
+  border-radius: var(--r-chip);
+  outline: 2px solid var(--focus);
   outline-offset: 2px;
 }
 
@@ -92,27 +150,27 @@
   width: max-content;
   max-width: min(320px, calc(100dvw - 32px));
   padding: var(--space-2) var(--space-3);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
-  background: var(--bg-card);
-  box-shadow: var(--shadow-md);
+  border: 1px solid var(--card-line);
+  border-radius: var(--r-card);
+  background: var(--surface);
+  box-shadow: var(--shadow-pop);
   color: var(--ink);
   font-family: var(--font-ui);
-  font-size: 13px;
+  font-size: var(--fs-small);
   letter-spacing: 0;
   line-height: 1.4;
   text-transform: none;
   white-space: normal;
 }
 
-/* Selection bar: shown only once selecting. */
+/* Selection bar (design bulk card): accent-soft, shown only once selecting. */
 .selection {
   display: grid;
   gap: var(--space-1);
-  padding: var(--space-1) var(--space-4) var(--space-3);
-  border: 1px solid var(--line);
-  border-radius: var(--radius-lg);
-  background: var(--bg-2);
+  padding: 8px 10px 10px 16px;
+  border: 1px solid var(--accent-line);
+  border-radius: var(--r-card);
+  background: var(--accent-soft);
 }
 
 .selectionTop {
@@ -129,10 +187,10 @@
   padding: 0 var(--space-1);
   border: 0;
   background: transparent;
-  color: var(--ink);
-  font-family: var(--label-font);
-  font-size: 13px;
-  font-weight: 500;
+  color: var(--accent-ink);
+  font-family: var(--font-ui);
+  font-size: var(--fs-small);
+  font-weight: 600;
   font-variant-numeric: tabular-nums;
   text-decoration: underline;
   text-underline-offset: 3px;
@@ -151,8 +209,8 @@
 
 .selectionHelp {
   margin: var(--space-1) 0 0;
-  color: var(--ink-3);
-  font-size: 13px;
+  color: var(--ink-2);
+  font-size: var(--fs-small);
   line-height: 1.4;
 }
 
@@ -161,7 +219,7 @@
 }
 
 .clearIcon {
-  color: var(--rose-ink);
+  color: var(--err-ink);
 }
 
 /* Selection manager sheet: one checkbox row per session. */
@@ -175,8 +233,8 @@
   gap: var(--space-3);
   min-height: var(--tap-min);
   padding: var(--space-2) 0;
-  border-bottom: 1px dashed var(--dash);
-  font-size: 15px;
+  border-bottom: 1px solid var(--line);
+  font-size: var(--fs-body);
   line-height: 1.35;
 }
 
@@ -189,11 +247,11 @@
   width: 20px;
   height: 20px;
   margin: 2px 0 0;
-  accent-color: var(--indigo);
+  accent-color: var(--accent);
 }
 
 .managerRow small {
   color: var(--ink-3);
-  font-family: var(--label-font);
-  font-size: 12px;
+  font-family: var(--font-mono);
+  font-size: var(--fs-meta);
 }

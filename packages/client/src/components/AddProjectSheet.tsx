@@ -5,7 +5,9 @@ import type { Project } from "../types";
 import { AddProjectForm, type AddProjectRequest } from "./AddProjectForm";
 import formStyles from "./AddProjectForm.module.css";
 import { Button } from "./garden/Button";
+import { Count } from "./garden/Count";
 import { Sheet } from "./garden/Sheet";
+import { type TabItem, Tabs } from "./garden/Tabs";
 import { TemplateProjectForm } from "./TemplateProjectForm";
 
 interface AddProjectSheetProps {
@@ -28,65 +30,113 @@ interface AddProjectSheetProps {
   onTemplateStarted: (projectId: string, sessionId: string) => void;
 }
 
-/**
- * Add project, as a sheet: the superuser enters a path or name first; the
- * template chooser below it leaves once anything is typed there. Limited
- * users can only create from a template.
- */
-export function AddProjectSheet({
-  projects,
-  pathBase,
-  chooseName,
-  chooseCodeName,
-  adding,
-  error,
+type AddProjectMode = "folder" | "template";
+type Translate = ReturnType<typeof useI18n>["t"];
+
+function modeTabs(
+  t: Translate,
+  templateCount: number,
+  busy: boolean,
+): TabItem<AddProjectMode>[] {
+  return [
+    { value: "folder", label: t("addProjectTabFolder"), disabled: busy },
+    {
+      value: "template",
+      label: t("addProjectTabTemplate"),
+      badge: <Count>{templateCount}</Count>,
+      disabled: busy,
+    },
+  ];
+}
+
+type TemplatePanelProps = Pick<
+  AddProjectSheetProps,
+  | "templateChoices"
+  | "templateError"
+  | "emptyMessageKey"
+  | "projects"
+  | "pathBase"
+  | "onTemplateStarted"
+> & { hidden: boolean; onBusyChange: (busy: boolean) => void };
+
+/** The template chooser, mounted while hidden so its draft survives tabs. */
+function TemplatePanel({
   templateChoices,
   templateError,
   emptyMessageKey,
-  limitedTemplateOnly,
-  onSubmit,
-  onClose,
+  projects,
+  pathBase,
   onTemplateStarted,
-}: AddProjectSheetProps) {
+  hidden,
+  onBusyChange,
+}: TemplatePanelProps) {
   const { t } = useI18n();
-  const [typed, setTyped] = useState(false);
+  if (!templateChoices?.enabled) return null;
+  return (
+    <div hidden={hidden}>
+      <TemplateProjectForm
+        templates={templateChoices.templates}
+        emptyMessage={templateError ?? t(emptyMessageKey)}
+        projects={projects}
+        pathBase={pathBase}
+        onBusyChange={onBusyChange}
+        onStarted={onTemplateStarted}
+      />
+    </div>
+  );
+}
+
+/**
+ * Add project: a dialog on desktop and a bottom sheet on phones, with the
+ * 本机文件夹 | 从模板创建 tabs when templates are enabled. Both panels stay
+ * mounted, so switching tabs keeps what was typed. Limited users can only
+ * create from a template, so they get the template panel alone.
+ */
+export function AddProjectSheet(props: AddProjectSheetProps) {
+  const { projects, pathBase, adding, templateChoices, templateError } = props;
+  const { limitedTemplateOnly, onClose } = props;
+  const { t } = useI18n();
+  const [mode, setMode] = useState<AddProjectMode>("folder");
   const [templateBusy, setTemplateBusy] = useState(false);
   // Like the disabled Cancel, the close button, Escape and scrim wait for an
   // in-flight request instead of unmounting the form under it.
   const busy = adding || templateBusy;
   const close = busy ? () => {} : onClose;
+  const showTabs = !!templateChoices?.enabled && !limitedTemplateOnly;
+  const shownMode: AddProjectMode = limitedTemplateOnly ? "template" : mode;
   return (
     <Sheet title={t("projectsAdd")} onClose={close}>
       <div className={formStyles.sheetBody}>
-        {!limitedTemplateOnly && (
-          <AddProjectForm
-            projects={projects}
-            pathBase={pathBase}
-            chooseName={chooseName}
-            chooseCodeName={chooseCodeName}
-            adding={adding || templateBusy}
-            error={error}
-            onSubmit={onSubmit}
-            onCancel={onClose}
-            onTypedChange={setTyped}
+        {showTabs && (
+          <Tabs
+            label={t("addProjectTabsLabel")}
+            items={modeTabs(t, templateChoices?.templates.length ?? 0, busy)}
+            value={shownMode}
+            onChange={setMode}
           />
         )}
-        {templateError && !typed && <p role="alert">{templateError}</p>}
-        {templateChoices?.enabled && (
-          <div hidden={typed && !templateBusy}>
-            {!limitedTemplateOnly && (
-              <p className={formStyles.label}>{t("templateOrStart")}</p>
-            )}
-            <TemplateProjectForm
-              templates={templateChoices.templates}
-              emptyMessage={templateError ?? t(emptyMessageKey)}
+        {!limitedTemplateOnly && (
+          <div hidden={shownMode !== "folder"}>
+            <AddProjectForm
               projects={projects}
               pathBase={pathBase}
-              onBusyChange={setTemplateBusy}
-              onStarted={onTemplateStarted}
+              chooseName={props.chooseName}
+              chooseCodeName={props.chooseCodeName}
+              adding={busy}
+              error={props.error}
+              onSubmit={props.onSubmit}
+              onCancel={onClose}
             />
           </div>
         )}
+        {templateError && (shownMode === "template" || !showTabs) && (
+          <p role="alert">{templateError}</p>
+        )}
+        <TemplatePanel
+          {...props}
+          hidden={shownMode !== "template"}
+          onBusyChange={setTemplateBusy}
+        />
         {limitedTemplateOnly && (
           <Button variant="ghost" disabled={templateBusy} onClick={onClose}>
             {t("projectsCancel")}

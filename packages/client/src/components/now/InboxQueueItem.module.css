@@ -1,11 +1,11 @@
 /*
  * A pending new-session Project Queue item, drawn as one more row of the
- * Running card: same padding and dashed divider as the session rows.
+ * Running card: same padding and divider as the session rows.
  */
 
 .item {
   list-style: none;
-  border-bottom: 1px dashed var(--dash);
+  border-bottom: 1px solid var(--line);
 }
 
 .item:last-child {
@@ -22,12 +22,12 @@
 }
 
 .link:hover {
-  background: var(--bg-2);
+  background: var(--surface-2);
 }
 
 .link:focus-visible {
   outline: none;
-  box-shadow: inset 0 0 0 2px var(--indigo);
+  box-shadow: inset 0 0 0 2px var(--focus);
 }
 
 .titleRow {
@@ -66,8 +66,8 @@
 }
 
 .targetBadge {
-  background: var(--indigo-soft);
-  color: var(--indigo-ink);
+  background: var(--accent-soft);
+  color: var(--accent-ink);
 }
 
 .preview {
@@ -99,22 +99,22 @@
 }
 
 .status {
-  background: var(--sand-soft);
-  color: var(--sand-ink);
+  background: var(--queue-soft);
+  color: var(--ink-2);
 }
 
 .statusDispatching {
-  background: var(--indigo-soft);
-  color: var(--indigo-ink);
+  background: var(--run-soft);
+  color: var(--run-ink);
 }
 
 .statusFailed {
-  background: var(--rose-soft);
-  color: var(--rose-ink);
+  background: var(--err-soft);
+  color: var(--err-ink);
 }
 
 .failed .link {
-  background: color-mix(in srgb, var(--rose) 4%, transparent);
+  background: color-mix(in srgb, var(--err) 4%, transparent);
 }
 
 @media (width < 768px) {

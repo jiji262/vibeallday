@@ -4,11 +4,10 @@ import { Link, useNavigate } from "react-router-dom";
 import { useI18n } from "../i18n";
 import { shortenPath } from "../lib/text";
 import type { Project } from "../types";
-import { Badge } from "./garden/Badge";
 import { Button, IconButton } from "./garden/Button";
-import { DataListCell, dataListRowClassName } from "./garden/DataList";
 import { MoreHorizontalIcon, PlusIcon } from "./garden/icons";
 import { ActionSheet, type ActionSheetItem } from "./garden/Sheet";
+import { StatusDot } from "./garden/StatusDot";
 import styles from "./ProjectCard.module.css";
 import { ProjectCaptionEditor } from "./ProjectCaptionEditor";
 import { ProjectCodeNameEditor } from "./ProjectCodeNameEditor";
@@ -91,18 +90,24 @@ function projectMenuItems(
   return candidates.filter((item): item is ActionSheetItem => Boolean(item));
 }
 
-/** Name, code-name chip, caption and mono path tail: the row's first cell. */
+/** Name linking to the project home, code-name chip and mono path tail. */
 function ProjectIdentity({
   project,
+  basePath = "",
   onUpdateCodeName,
-  onUpdateCaption,
-}: Pick<ProjectCardProps, "project" | "onUpdateCodeName" | "onUpdateCaption">) {
+}: Pick<ProjectCardProps, "project" | "basePath" | "onUpdateCodeName">) {
   const [codeNameError, setCodeNameError] = useState<string | null>(null);
   const codeNameErrorId = useId();
   return (
-    <DataListCell primary className={styles.identity}>
-      <strong className={styles.name}>
-        <span className={styles.nameText}>{projectDisplayName(project)}</span>
+    <div className={styles.identity}>
+      <span className={styles.nameLine}>
+        <Link
+          to={`${basePath}/projects/${project.id}`}
+          className={styles.name}
+          data-project-card-link=""
+        >
+          {projectDisplayName(project)}
+        </Link>
         {onUpdateCodeName && (
           <ProjectCodeNameEditor
             project={project}
@@ -112,7 +117,7 @@ function ProjectIdentity({
             errorId={codeNameErrorId}
           />
         )}
-      </strong>
+      </span>
       {onUpdateCodeName && codeNameError && (
         <span
           id={codeNameErrorId}
@@ -122,66 +127,54 @@ function ProjectIdentity({
           {codeNameError}
         </span>
       )}
-      <ProjectCaptionEditor
-        project={project}
-        onUpdateCaption={onUpdateCaption}
-      />
       <span className={styles.path} title={project.path}>
         <bdi>{shortenPath(project.path)}</bdi>
       </span>
-    </DataListCell>
+    </div>
   );
 }
 
-/** Session count plus the needs-you and running badges. */
-function SessionCell({
+/**
+ * Needs-you, running and queued counts as status dots (only when non-zero),
+ * then the session total and last activity.
+ */
+function ProjectStats({
   project,
   needsAttentionCount,
   thinkingCount,
+  queueCount = 0,
+  hasQueueWarning = false,
 }: Pick<
   ProjectCardProps,
-  "project" | "needsAttentionCount" | "thinkingCount"
+  | "project"
+  | "needsAttentionCount"
+  | "thinkingCount"
+  | "queueCount"
+  | "hasQueueWarning"
 >) {
   const { t } = useI18n();
   return (
-    <DataListCell className={styles.stack}>
-      <span className={styles.count}>
-        {t(
-          project.sessionCount === 1
-            ? "projectCardSessionOne"
-            : "projectCardSessions",
-          { count: project.sessionCount },
-        )}
-      </span>
+    <div className={styles.stats}>
       {needsAttentionCount > 0 && (
-        <Badge tone="rose" dot>
+        <span className={`${styles.stat} ${styles.attn}`}>
+          <StatusDot state="attn" />
           {t("projectCardNeedsYou", { count: needsAttentionCount })}
-        </Badge>
+        </span>
       )}
       {thinkingCount > 0 && (
-        <Badge tone="mint" dot="pulse">
+        <span className={styles.stat}>
+          <StatusDot state="run" />
           {t("projectCardRunning", { count: thinkingCount })}
-        </Badge>
+        </span>
       )}
-    </DataListCell>
-  );
-}
-
-function QueueCell({
-  queueCount = 0,
-  hasQueueWarning = false,
-}: Pick<ProjectCardProps, "queueCount" | "hasQueueWarning">) {
-  const { t } = useI18n();
-  const empty = queueCount === 0 && !hasQueueWarning;
-  return (
-    <DataListCell className={styles.stack} hideOnPhone={empty}>
       {queueCount > 0 && (
-        <Badge
-          tone="sand"
+        <span
+          className={styles.stat}
           title={t("projectCardQueueCount", { count: queueCount })}
         >
+          <StatusDot state="queued" />
           {t("projectCardQueued", { count: queueCount })}
-        </Badge>
+        </span>
       )}
       {hasQueueWarning && (
         <span
@@ -193,19 +186,27 @@ function QueueCell({
           !
         </span>
       )}
-      {empty && (
-        <span className={styles.none} aria-hidden="true">
-          —
+      <span className={styles.meta}>
+        {t(
+          project.sessionCount === 1
+            ? "projectCardSessionOne"
+            : "projectCardSessions",
+          { count: project.sessionCount },
+        )}
+      </span>
+      {project.lastActivity && (
+        <span className={styles.meta}>
+          {formatProjectAge(project.lastActivity, t)}
         </span>
       )}
-    </DataListCell>
+    </div>
   );
 }
 
 /**
- * One row of the projects list: identity, sessions, queue, last activity and
- * the row actions (New session plus an overflow sheet for App, Copy,
- * Settings and Remove). The row itself links to the project's sessions.
+ * One project in the projects grid: identity (the name opens the project
+ * home), caption, live counts, and New session / Open, with an overflow
+ * sheet for App, Copy, Settings and Remove.
  */
 export function ProjectCard(props: ProjectCardProps) {
   const { project, basePath = "" } = props;
@@ -227,48 +228,39 @@ export function ProjectCard(props: ProjectCardProps) {
 
   return (
     <li className={styles.card}>
-      <Link
-        to={`${basePath}/sessions?project=${project.id}&source=projects`}
-        className={dataListRowClassName({ interactive: true }, styles.link)}
-        data-project-card-link=""
-      >
+      <div className={styles.head}>
         <ProjectIdentity {...props} />
-        <SessionCell {...props} />
-        <QueueCell {...props} />
-        <DataListCell mono muted num className={styles.activity}>
-          {project.lastActivity
-            ? formatProjectAge(project.lastActivity, t)
-            : null}
-        </DataListCell>
-        <DataListCell right className={styles.actions}>
-          <Button
-            variant="secondary"
-            size="sm"
-            className={styles.newSession}
-            icon={<PlusIcon size={ACTION_ICON_SIZE} />}
-            title={t("projectCardNewSession")}
-            aria-label={t("projectCardNewSession")}
-            onClick={(event) => {
-              stop(event);
-              navigate(`${basePath}/new-session?projectId=${project.id}`);
-            }}
+        {menuItems.length > 0 && (
+          <IconButton
+            label={t("projectCardActions")}
+            className={styles.more}
+            aria-haspopup="menu"
+            onClick={openMenu}
           >
-            <span className={styles.newSessionLabel}>
-              {t("projectCardNewSession")}
-            </span>
-          </Button>
-          {menuItems.length > 0 && (
-            <IconButton
-              label={t("projectCardActions")}
-              className={styles.more}
-              aria-haspopup="menu"
-              onClick={openMenu}
-            >
-              <MoreHorizontalIcon />
-            </IconButton>
-          )}
-        </DataListCell>
-      </Link>
+            <MoreHorizontalIcon />
+          </IconButton>
+        )}
+      </div>
+      <ProjectCaptionEditor
+        project={project}
+        onUpdateCaption={props.onUpdateCaption}
+      />
+      <ProjectStats {...props} />
+      <div className={styles.actions}>
+        <Button
+          variant="secondary"
+          size="sm"
+          icon={<PlusIcon size={ACTION_ICON_SIZE} />}
+          onClick={() =>
+            navigate(`${basePath}/new-session?projectId=${project.id}`)
+          }
+        >
+          {t("projectCardNewSession")}
+        </Button>
+        <Link to={`${basePath}/projects/${project.id}`} className={styles.open}>
+          {t("projectCardOpen")}
+        </Link>
+      </div>
       {menuOpen && (
         <ActionSheet
           title={projectDisplayName(project)}

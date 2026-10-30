@@ -1,17 +1,49 @@
 /*
- * Overview stat tiles. The tile look comes from garden/StatCard; this module
- * only makes the tiles behave as buttons and links.
+ * Inbox status blocks (design .inb-tile). Each block is a filter toggle;
+ * phone turns the same buttons into a horizontally scrolling chip row.
  */
 
 .grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 12px;
   margin-bottom: var(--space-6);
 }
 
 .tile {
-  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  min-width: 0;
   margin: 0;
+  padding: 14px 16px;
+  border: 1px solid var(--card-line);
+  border-radius: var(--r-lg);
+  background: var(--surface);
+  box-shadow: var(--shadow-card);
+  color: var(--ink);
   font: inherit;
   text-align: left;
+  cursor: pointer;
+}
+
+.tile:hover:not(:disabled) {
+  background: var(--surface-2);
+}
+
+.tile[aria-pressed="true"] {
+  border-color: var(--accent-line);
+  box-shadow:
+    0 0 0 1px var(--accent-line),
+    var(--shadow-card);
+}
+
+.tile[data-summary-tile="needs"][aria-pressed="true"] {
+  border-color: var(--attn-line);
+  box-shadow:
+    0 0 0 1px var(--attn-line),
+    var(--shadow-card);
 }
 
 .tile:disabled {
@@ -19,11 +51,100 @@
 }
 
 .tile:focus-visible {
-  border-color: var(--indigo);
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
 }
 
-@media (pointer: coarse) {
+.label {
+  display: inline-flex;
+  min-width: 0;
+}
+
+.plain {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 22px;
+  color: var(--ink-2);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.unreadMark {
+  width: 7px;
+  height: 7px;
+  border-radius: 2px;
+  background: var(--ink);
+}
+
+.num {
+  color: var(--ink);
+  font-size: 30px;
+  font-stretch: var(--display-stretch);
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--title-weight);
+  line-height: 1;
+}
+
+.hint {
+  overflow: hidden;
+  max-width: 100%;
+  color: var(--ink-3);
+  font-size: var(--fs-small);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (width < 768px) {
+  .grid {
+    display: flex;
+    gap: 8px;
+    margin: 0 calc(var(--page-gutter) * -1) var(--space-4);
+    padding: 0 var(--page-gutter) 2px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
   .tile {
+    flex: none;
+    flex-direction: row;
+    align-items: center;
+    gap: 6px;
     min-height: var(--tap-min);
+    padding: 0 12px;
+    border-color: var(--line-strong);
+    border-radius: var(--r-chip);
+    box-shadow: none;
+    color: var(--ink-2);
+    font-size: var(--fs-small);
+    font-weight: 500;
+    white-space: nowrap;
+  }
+
+  .tile[aria-pressed="true"],
+  .tile[data-summary-tile="needs"][aria-pressed="true"] {
+    border-color: var(--accent-line);
+    background: var(--accent-soft);
+    box-shadow: none;
+    color: var(--accent-ink);
+  }
+
+  /* The pill collapses to marker plus text inside the chip. */
+  .grid .tile .label > * {
+    height: auto;
+    padding: 0;
+    background: transparent;
+    color: inherit;
+    font-size: inherit;
+  }
+
+  .num {
+    color: inherit;
+    font-size: inherit;
+    font-weight: 600;
+  }
+
+  .hint {
+    display: none;
   }
 }

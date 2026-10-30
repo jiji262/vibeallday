@@ -1,14 +1,22 @@
-/* A garden card: hairline border, white fill, dashed header rule. */
+/* A design card: card hairline, surface fill, dashed header rule. */
 .section {
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
   margin: 0 0 var(--space-5);
   padding: var(--space-4) var(--space-5);
-  border: 1px solid var(--line);
-  border-radius: var(--radius-lg);
-  background: var(--card);
-  box-shadow: var(--shadow-xs);
+  border: 1px solid var(--card-line);
+  border-radius: var(--r-card);
+  background: var(--surface);
+  box-shadow: var(--shadow-card);
+}
+
+/* Folded to the design's one-line summary bar. */
+.folded {
+  flex-flow: row wrap;
+  align-items: center;
+  gap: var(--space-2) 14px;
+  padding: 12px 14px 12px 18px;
 }
 
 .header {

@@ -1,7 +1,17 @@
 import { useI18n } from "../../i18n";
 import { Button } from "../garden/Button";
+import { Count } from "../garden/Count";
+import { Segmented } from "../garden/Segmented";
+import { StatusDot } from "../garden/StatusDot";
 import { FilterChip } from "../controls/FilterChip";
-import { type ChipStatus, type SearchStatus, toggleChipStatus } from "./model";
+import {
+  type ActivityFilter,
+  type QuickCounts,
+  type SearchField,
+  type SearchStatus,
+  toggleActivity,
+  toggleChipStatus,
+} from "./model";
 import styles from "./SearchToolbar.module.css";
 
 function SlidersIcon() {
@@ -49,46 +59,103 @@ export function FiltersButton({
     >
       {t("sessionSearchFilters")}
       {count > 0 && (
-        <span className={styles.badge} aria-hidden="true">
-          {count}
+        <span aria-hidden="true">
+          <Count tone="accent">{count}</Count>
         </span>
       )}
     </Button>
   );
 }
 
-const CHIPS: readonly {
-  status: ChipStatus;
-  label:
-    | "globalSessionsStatusUnread"
-    | "globalSessionsStatusStarred"
-    | "globalSessionsStatusArchived";
-}[] = [
-  { status: "unread", label: "globalSessionsStatusUnread" },
-  { status: "starred", label: "globalSessionsStatusStarred" },
-  { status: "archived", label: "globalSessionsStatusArchived" },
-];
+type ScopeValue = "title" | "content";
+const CONTENT_FIELDS: SearchField[] = ["assistant", "user"];
 
-/** Quick status chips. Each chip is one status filter. */
-export function SearchChips({
-  filters,
-  onFilters,
+/**
+ * 标题 | 内容: title-only search, or the assistant and user turns. Finer field
+ * mixes (and C-s / C-r) still come from the Filters sheet; any turn field
+ * shows as Content.
+ */
+export function SearchScope({
+  fields,
+  supported,
+  onFields,
 }: {
-  filters: SearchStatus[];
-  onFilters: (next: SearchStatus[]) => void;
+  fields: readonly SearchField[];
+  supported: boolean;
+  onFields: (fields: SearchField[]) => void;
 }) {
   const { t } = useI18n();
+  const value: ScopeValue = fields.some((field) => field !== "title")
+    ? "content"
+    : "title";
   return (
-    <div className={styles.chips}>
-      {CHIPS.map(({ status, label }) => (
-        <FilterChip
-          key={status}
-          pressed={filters.includes(status)}
-          onClick={() => onFilters(toggleChipStatus(filters, status))}
-        >
-          {t(label)}
-        </FilterChip>
-      ))}
+    <span
+      className={styles.scope}
+      title={supported ? undefined : t("sessionsScopeContentUnsupported")}
+    >
+      <Segmented<ScopeValue>
+        label={t("sessionSearchIn")}
+        value={value}
+        onChange={(next) =>
+          onFields(next === "title" ? ["title"] : CONTENT_FIELDS)
+        }
+        options={[
+          { value: "title", label: t("sessionsScopeTitle") },
+          {
+            value: "content",
+            label: t("sessionsScopeContent"),
+            disabled: !supported,
+          },
+        ]}
+      />
+    </span>
+  );
+}
+
+interface QuickChipsProps {
+  statuses: SearchStatus[];
+  onStatuses: (next: SearchStatus[]) => void;
+  activity: ActivityFilter[];
+  onActivity: (next: ActivityFilter[]) => void;
+  counts: QuickCounts;
+}
+
+/** 需要你 / 运行中 / 未读: the three live views, each a toggle. */
+export function QuickChips(props: QuickChipsProps) {
+  const { t } = useI18n();
+  const { activity, onActivity, counts } = props;
+  return (
+    <div
+      className={styles.chips}
+      role="group"
+      aria-label={t("sessionsQuickFilters")}
+    >
+      <FilterChip
+        pressed={activity.includes("attention")}
+        onClick={() => onActivity(toggleActivity(activity, "attention"))}
+      >
+        <StatusDot state="attn" />
+        {t("sessionsChipNeedsYou")}
+        {counts.attention > 0 && <Count tone="attn">{counts.attention}</Count>}
+      </FilterChip>
+      <FilterChip
+        pressed={activity.includes("running")}
+        onClick={() => onActivity(toggleActivity(activity, "running"))}
+      >
+        <StatusDot state="run" />
+        {t("sessionsChipRunning")}
+        {counts.running > 0 && <Count>{counts.running}</Count>}
+      </FilterChip>
+      <FilterChip
+        pressed={props.statuses.includes("unread")}
+        onClick={() =>
+          props.onStatuses(toggleChipStatus(props.statuses, "unread"))
+        }
+      >
+        <span className={styles.unreadDot} aria-hidden="true" />
+        {t("sessionsChipUnread")}
+        {counts.unread > 0 && <Count>{counts.unread}</Count>}
+      </FilterChip>
     </div>
   );
 }

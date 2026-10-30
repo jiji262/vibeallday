@@ -1,27 +1,26 @@
-import type { ReactNode } from "react";
 import { useI18n } from "../../i18n";
 import { CheckChip, FilterChip } from "../controls/FilterChip";
 import { SegmentedControl } from "../controls/SegmentedControl";
 import { Button } from "../garden/Button";
 import { Sheet } from "../garden/Sheet";
-import {
-  type SearchField,
-  type SearchStatus,
-  type TimeBasis,
-  toggleStatus,
+import type {
+  ActivityFilter,
+  SearchField,
+  SearchStatus,
+  TimeBasis,
 } from "./model";
+import { Section, StatusFilters } from "./FilterSheetSections";
+import {
+  ProjectFilter,
+  ProviderFilter,
+  type ScopeFilterProps,
+  SourceFilters,
+} from "./SearchScopeFilters";
 import styles from "./SearchFilterSheet.module.css";
 
 const FIELDS: readonly SearchField[] = ["title", "assistant", "user"];
 const BASES: readonly TimeBasis[] = ["activity", "turns", "created"];
 const QUICK_AGE_DAYS = [1, 7, 30];
-/** Each pair is mutually exclusive but may be switched off together. */
-const STATUS_PAIRS: readonly (readonly [SearchStatus, SearchStatus])[] = [
-  ["archived", "unarchived"],
-  ["starred", "unstarred"],
-  ["unread", "read"],
-];
-
 export interface FilterSheetProps {
   onClose: () => void;
   onClear: () => void;
@@ -45,24 +44,17 @@ export interface FilterSheetProps {
   showLimit: boolean;
   statuses: SearchStatus[];
   onStatuses: (next: SearchStatus[]) => void;
-  /** The project, provider and source dropdowns. */
-  scope: ReactNode;
-}
-
-function Section({ title, children }: { title: string; children: ReactNode }) {
-  return (
-    <section className={styles.section}>
-      <h3 className={styles.sectionTitle}>{title}</h3>
-      {children}
-    </section>
-  );
+  activity: ActivityFilter[];
+  onActivity: (next: ActivityFilter[]) => void;
+  /** Data for the project, provider and source dropdowns. */
+  scope: ScopeFilterProps;
 }
 
 function SearchInFields(props: FilterSheetProps) {
   const { t } = useI18n();
   const { fields, onFields, supported } = props;
   return (
-    <Section title={t("sessionSearchIn")}>
+    <Section title={t("sessionsFilterSearchIn")}>
       <div className={styles.chipRow}>
         {FIELDS.map((field) => (
           <CheckChip
@@ -206,60 +198,44 @@ function TimeFilters(props: FilterSheetProps) {
   );
 }
 
-function StatusFilters({
-  statuses,
-  onStatuses,
-}: Pick<FilterSheetProps, "statuses" | "onStatuses">) {
-  const { t } = useI18n();
-  return (
-    <Section title={t("globalSessionsFilterStatus")}>
-      <div className={styles.statusList}>
-        {STATUS_PAIRS.map((pair) => (
-          <SegmentedControl<SearchStatus>
-            key={pair[0]}
-            label={pair.map((s) => t(`sessionSearchStatus_${s}`)).join(" / ")}
-            value={pair.find((s) => statuses.includes(s)) ?? null}
-            onChange={(status) => onStatuses(toggleStatus(statuses, status))}
-            options={pair.map((status) => ({
-              value: status,
-              label: t(`sessionSearchStatus_${status}`),
-              ariaLabel: t("sessionSearchStatusFilter", {
-                status: t(`sessionSearchStatus_${status}`),
-              }),
-            }))}
-          />
-        ))}
-      </div>
-    </Section>
-  );
-}
-
 /**
- * Every filter, sort and search-in option of the Sessions page. Choices apply
- * as they are made; the footer button only closes the sheet.
+ * Every filter and search-in option of the Sessions page, grouped as status,
+ * project, provider, time and source, then the finer search-in fields.
+ * Choices apply as they are made; the footer button only closes the sheet.
  */
 export function SearchFilterSheet(props: FilterSheetProps) {
   const { t } = useI18n();
   return (
-    <Sheet title={t("sessionSearchFilters")} onClose={props.onClose}>
+    <Sheet title={t("sessionsFilterSheetTitle")} onClose={props.onClose}>
       <div className={styles.body}>
-        <SearchInFields {...props} />
-        <TimeFilters {...props} />
-        <Section title={t("sessionSearchSectionScope")}>{props.scope}</Section>
         <StatusFilters
           statuses={props.statuses}
           onStatuses={props.onStatuses}
+          activity={props.activity}
+          onActivity={props.onActivity}
         />
+        <Section title={t("sessionsFilterProject")}>
+          <ProjectFilter {...props.scope} />
+        </Section>
+        <Section title={t("sessionsFilterProvider")}>
+          <ProviderFilter {...props.scope} />
+        </Section>
+        <TimeFilters {...props} />
+        <Section title={t("sessionsFilterSource")}>
+          <SourceFilters {...props.scope} />
+        </Section>
+        <SearchInFields {...props} />
       </div>
       <div className={styles.footer}>
         <Button
-          variant="ghost"
+          variant="secondary"
+          size="lg"
           onClick={props.onClear}
           disabled={props.activeCount === 0}
         >
           {t("globalSessionsClearFilters")}
         </Button>
-        <Button variant="primary" onClick={props.onClose}>
+        <Button variant="primary" size="lg" onClick={props.onClose}>
           {t("sessionSearchShowResults", { count: props.resultCount })}
         </Button>
       </div>

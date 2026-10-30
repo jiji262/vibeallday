@@ -1,6 +1,10 @@
 import { expect, it } from "vitest";
+import type { GlobalSessionItem } from "../../api/client";
 import {
   countActiveFilters,
+  countQuickViews,
+  matchesActivity,
+  parseActivityParam,
   type FilterSnapshot,
   limitTurnMatches,
   type SearchMatch,
@@ -59,27 +63,57 @@ it("counts only the sheet groups that differ from their defaults", () => {
   ).toBe(5);
 });
 
-it("leaves chip statuses to the chips and counts a cleared status as a change", () => {
+it("leaves the Unread chip to the chips and counts sheet statuses", () => {
+  expect(
+    countActiveFilters({
+      ...DEFAULT_FILTERS,
+      statuses: ["unarchived", "unread"],
+    }),
+  ).toBe(0);
+  // Starred and Archived moved from the quick chips into the sheet.
   expect(
     countActiveFilters({
       ...DEFAULT_FILTERS,
       statuses: ["unarchived", "unread", "starred"],
     }),
-  ).toBe(0);
+  ).toBe(1);
   expect(countActiveFilters({ ...DEFAULT_FILTERS, statuses: [] })).toBe(1);
   expect(
     countActiveFilters({ ...DEFAULT_FILTERS, statuses: ["archived"] }),
-  ).toBe(0);
+  ).toBe(1);
 });
 
-it("returns to the unarchived view when the Archived chip is released", () => {
-  expect(toggleChipStatus(["unarchived"], "archived")).toEqual(["archived"]);
-  expect(toggleChipStatus(["archived", "unread"], "archived")).toEqual([
-    "unread",
-    "unarchived",
-  ]);
+it("toggles the Unread chip without touching the archive view", () => {
   expect(toggleChipStatus(["unarchived"], "unread")).toEqual([
     "unarchived",
     "unread",
   ]);
+  expect(toggleChipStatus(["unarchived", "unread"], "unread")).toEqual([
+    "unarchived",
+  ]);
+});
+
+it("matches needs-you before running and counts unarchived sessions only", () => {
+  const base = { id: "s", updatedAt: "", hasUnread: false };
+  const waiting = { ...base, activity: "waiting-input" as const };
+  const running = { ...base, activity: "in-turn" as const, hasUnread: true };
+  const asking = {
+    ...base,
+    activity: "in-turn" as const,
+    pendingInputType: "tool-approval" as const,
+  };
+  expect(matchesActivity(waiting, "attention")).toBe(true);
+  expect(matchesActivity(asking, "attention")).toBe(true);
+  expect(matchesActivity(asking, "running")).toBe(false);
+  expect(matchesActivity(running, "running")).toBe(true);
+  expect(parseActivityParam("running,bogus,attention")).toEqual([
+    "running",
+    "attention",
+  ]);
+  const sessions = [waiting, running, asking, { ...running, isArchived: true }];
+  expect(countQuickViews(sessions as unknown as GlobalSessionItem[])).toEqual({
+    attention: 2,
+    running: 1,
+    unread: 1,
+  });
 });

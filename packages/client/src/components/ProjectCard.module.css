@@ -1,59 +1,84 @@
 /*
- * One projects-list row on the garden DataList grid: identity (name, code
- * chip, caption, mono path tail), sessions, queue, last activity, actions.
- * The grid template comes from the list through --data-list-columns.
+ * One card in the projects grid (design .prj-card): identity head with the
+ * overflow menu, caption, status counts, and New session / Open at the foot.
+ * The grid itself lives in ProjectsPage.module.css.
  */
 
 .card {
   position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-width: 0;
+  padding: 18px 18px 14px;
+  border: 1px solid var(--card-line);
+  border-radius: var(--r-card);
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: var(--shadow-card);
+}
+
+.head {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
   min-width: 0;
 }
 
-.link {
-  align-items: start;
-  color: inherit;
-}
-
 .identity {
-  display: grid;
-  gap: 2px;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
 }
 
-.name {
+.nameLine {
   display: flex;
   align-items: center;
   gap: var(--space-2);
   min-width: 0;
-  color: var(--ink);
-  font-family: var(--font-ui);
-  font-size: 15px;
-  font-weight: 500;
-  line-height: 1.35;
-  white-space: nowrap;
 }
 
 /* Truncates the name itself so the code-name chip beside it stays visible. */
-.nameText {
+.name {
   min-width: 0;
   overflow: hidden;
+  color: var(--ink);
+  font-size: var(--fs-h2);
+  font-weight: var(--title-weight);
+  font-stretch: var(--display-stretch);
+  line-height: 1.25;
+  text-decoration: none;
   text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-/* Its own row under the title line, which would clip it, and above the caption. */
+.name:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.name:focus-visible {
+  border-radius: var(--r-chip);
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/* Its own row under the title line, which would clip it. */
 .codeNameError {
   display: block;
-  max-width: 28rem;
-  color: var(--rose-ink);
-  font-size: 12px;
+  color: var(--err-ink);
+  font-size: var(--fs-meta);
   line-height: 1.25;
 }
 
 .path {
   min-width: 0;
   overflow: hidden;
-  color: var(--ink-4);
-  font-family: var(--label-font);
-  font-size: 12px;
+  color: var(--ink-3);
+  font-family: var(--font-mono);
+  font-size: var(--fs-meta);
   line-height: 1.4;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -63,25 +88,35 @@
   text-align: left;
 }
 
-.stack {
+.more {
+  flex: none;
+  margin: -4px -6px 0 0;
+}
+
+.stats {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: var(--space-1) var(--space-2);
+  gap: var(--space-1) 14px;
+  color: var(--ink-2);
+  font-size: var(--fs-small);
 }
 
-.count {
-  color: var(--ink-2);
-  font-family: var(--label-font);
-  font-size: 13px;
-  font-variant-numeric: tabular-nums;
+.stat {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   white-space: nowrap;
 }
 
-.none {
-  color: var(--ink-4);
-  font-family: var(--label-font);
-  font-size: 13px;
+.attn {
+  color: var(--attn-ink);
+  font-weight: 600;
+}
+
+.meta {
+  color: var(--ink-3);
+  white-space: nowrap;
 }
 
 .queueWarning {
@@ -91,32 +126,45 @@
   width: 20px;
   height: 20px;
   border-radius: 50%;
-  background: var(--peach-soft);
-  color: var(--peach-ink);
-  font-family: var(--label-font);
-  font-size: 12px;
+  background: var(--attn-soft);
+  color: var(--attn-ink);
+  font-family: var(--font-mono);
+  font-size: var(--fs-meta);
   font-weight: 700;
-}
-
-.activity {
-  white-space: nowrap;
 }
 
 .actions {
   display: flex;
   align-items: center;
-  gap: var(--space-1);
+  gap: var(--space-2);
+  margin-top: auto;
 }
 
-.more {
-  flex: none;
+/* The design's ghost `btn-sm`, drawn on a router link. */
+.open {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--btn-h-sm);
+  padding: 0 12px;
+  border-radius: var(--r-btn);
+  color: var(--ink-2);
+  font-size: var(--fs-small);
+  font-weight: 600;
+  text-decoration: none;
 }
 
-.newSessionLabel {
-  display: inline;
+.open:hover {
+  background: var(--surface-3);
+  color: var(--ink);
 }
 
-/* Inline editors keep their edit affordance out of the way until the row is
+.open:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/* Inline editors keep their edit affordance out of the way until the card is
    hovered or focused; touch screens always show it. */
 @media (hover: hover) and (pointer: fine) {
   .card [data-row-affordance] {
@@ -130,31 +178,25 @@
   }
 }
 
-@media (width >= 768px) {
-  .link {
-    align-items: center;
-  }
-}
-
-@media (width < 768px) {
-  .actions {
-    margin-left: auto;
-  }
-}
-
-@media (width < 600px) {
-  .newSessionLabel {
-    display: none;
-  }
-
-  .actions .newSession {
-    width: var(--tap-min);
-    padding: 0;
+@media (pointer: coarse) {
+  .open {
+    min-height: var(--tap-min);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .card [data-row-affordance] {
     transition: none;
+  }
+}
+
+@media (width < 768px) {
+  .card {
+    gap: 10px;
+    padding: 14px;
+  }
+
+  .name {
+    font-size: var(--fs-h3);
   }
 }

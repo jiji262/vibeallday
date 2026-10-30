@@ -51,18 +51,72 @@ export function toggleStatus(
       ];
 }
 /** Statuses the quick chips show; the Filters badge does not count them. */
-export const chipStatuses = ["unread", "starred", "archived"] as const;
+export const chipStatuses = ["unread"] as const;
 export type ChipStatus = (typeof chipStatuses)[number];
-/** Toggles a quick chip. Unpressing Archived returns to the default view of
- * unarchived sessions rather than to "everything". */
+/** Toggles a quick status chip. */
 export function toggleChipStatus(
   previous: SearchStatus[],
   value: ChipStatus,
 ): SearchStatus[] {
-  const next = toggleStatus(previous, value);
-  return value === "archived" && previous.includes("archived")
-    ? toggleStatus(next, "unarchived")
-    : next;
+  return toggleStatus(previous, value);
+}
+/**
+ * Live-state quick filters (URL `activity`). A session passes when it matches
+ * any selected one; they are client-side views over existing session fields.
+ */
+export const activityFilters = ["attention", "running"] as const;
+export type ActivityFilter = (typeof activityFilters)[number];
+type ActivityFields = Pick<
+  GlobalSessionItem,
+  "pendingInputType" | "nonHumanUserTurn" | "activity"
+>;
+/** Same rule as the overview's "Needs you" tier. */
+export function sessionNeedsYou(session: ActivityFields): boolean {
+  return (
+    !!session.pendingInputType ||
+    !!session.nonHumanUserTurn ||
+    session.activity === "waiting-input"
+  );
+}
+export function matchesActivity(
+  session: ActivityFields,
+  filter: ActivityFilter,
+): boolean {
+  if (filter === "attention") return sessionNeedsYou(session);
+  return !sessionNeedsYou(session) && session.activity === "in-turn";
+}
+export function parseActivityParam(text: string): ActivityFilter[] {
+  return text
+    .split(",")
+    .filter((value): value is ActivityFilter =>
+      (activityFilters as readonly string[]).includes(value),
+    );
+}
+/** Totals the quick chips show, over sessions that are not archived. */
+export interface QuickCounts {
+  attention: number;
+  running: number;
+  unread: number;
+}
+export function countQuickViews(
+  sessions: readonly GlobalSessionItem[],
+): QuickCounts {
+  const counts: QuickCounts = { attention: 0, running: 0, unread: 0 };
+  for (const session of sessions) {
+    if (session.isArchived) continue;
+    if (matchesActivity(session, "attention")) counts.attention += 1;
+    else if (matchesActivity(session, "running")) counts.running += 1;
+    if (session.hasUnread) counts.unread += 1;
+  }
+  return counts;
+}
+export function toggleActivity(
+  previous: readonly ActivityFilter[],
+  value: ActivityFilter,
+): ActivityFilter[] {
+  return previous.includes(value)
+    ? previous.filter((filter) => filter !== value)
+    : [...previous, value];
 }
 export interface FilterSnapshot {
   fields: SearchField[];

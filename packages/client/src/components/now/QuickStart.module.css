@@ -1,0 +1,68 @@
+/* Inbox aside: recent projects as new-session shortcuts (design .row). */
+
+.title {
+  margin: 0;
+  padding: 14px 16px 6px;
+  color: var(--ink);
+  font-size: var(--fs-h3);
+  font-weight: var(--title-weight);
+}
+
+.list {
+  margin: 0;
+  padding: 0 0 8px;
+  list-style: none;
+}
+
+.list > li + li {
+  border-top: 1px solid var(--line);
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: var(--tap-min);
+  padding: 8px 16px;
+  color: inherit;
+  text-decoration: none;
+}
+
+.row:hover {
+  background: var(--surface-3);
+}
+
+.row:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: -2px;
+}
+
+.icon {
+  flex: none;
+  color: var(--ink-3);
+}
+
+.text {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.name,
+.meta {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.name {
+  font-size: var(--fs-small);
+  font-weight: 600;
+}
+
+.meta {
+  color: var(--ink-3);
+  font-family: var(--font-mono);
+  font-size: var(--fs-meta);
+}

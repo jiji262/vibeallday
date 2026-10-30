@@ -10,7 +10,7 @@
   display: grid;
   gap: var(--space-2);
   padding: 14px var(--space-5);
-  border-bottom: 1px dashed var(--dash);
+  border-bottom: 1px solid var(--line);
 }
 
 .row:last-child {
@@ -35,7 +35,7 @@
 }
 
 .name:hover {
-  color: var(--indigo);
+  color: var(--link);
   text-decoration: underline;
 }
 
@@ -58,7 +58,7 @@
 }
 
 .meta a {
-  color: var(--indigo);
+  color: var(--link);
   text-decoration: none;
 }
 

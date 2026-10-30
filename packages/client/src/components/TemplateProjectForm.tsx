@@ -451,11 +451,13 @@ export function TemplateProjectForm({
                   setRecentUploadsOpen(true);
                 }
               }}
-              title="Choose files; right-click or swipe down for recent uploads"
+              title={t("templateProjectAttachTitle")}
             >
-              Attach files
+              {t("templateProjectAttachFiles")}
             </button>
-            {uploading > 0 && <p role="status">Uploading attachments…</p>}
+            {uploading > 0 && (
+              <p role="status">{t("templateProjectUploading")}</p>
+            )}
             {localAttachments.map((file) => (
               <span key={file.id} className={styles.attachment}>
                 {file.originalName}

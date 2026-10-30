@@ -447,6 +447,7 @@ export function ProjectsPage() {
               highlightedItemId={highlightedQueueItemId}
               basePath={basePath}
               attachmentEditingEnabled={supportsProjectQueueAttachmentEditing}
+              collapsible
               {...projectsQueueHandlers(projectQueues)}
             />
           )}
@@ -494,6 +495,7 @@ export function ProjectsPage() {
               noMatch={filteredProjects.length === 0}
               remaining={filteredProjects.length - reveal.visible}
               onShowMore={reveal.showMore}
+              onAddProject={openAddForm}
               sentinelRef={reveal.sentinelRef}
             >
               {filteredProjects.slice(0, reveal.visible).map(renderProject)}

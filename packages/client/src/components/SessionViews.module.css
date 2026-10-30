@@ -1,10 +1,54 @@
+/* Phone Inbox | All switch (design `.seg.block`), links instead of radios. */
 .views {
   flex-shrink: 0;
-  padding: 0 var(--page-gutter);
-  background: var(--bg-surface);
+  padding: var(--space-3) var(--page-gutter) 0;
+  background: var(--canvas);
 }
 
-/* Phone-only control: tabs meet the touch-target floor. */
-.views .tab {
-  height: var(--tap-min);
+.seg {
+  display: flex;
+  gap: 3px;
+  padding: 3px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-seg);
+  background: var(--seg-track);
+}
+
+.option {
+  position: relative;
+  display: inline-flex;
+  flex: 1 1 0;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  height: var(--seg-h);
+  padding: 0 14px;
+  border-radius: var(--r-seg-item);
+  color: var(--ink-2);
+  font-size: var(--fs-small);
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.option[aria-current="page"] {
+  background: var(--seg-on);
+  box-shadow: var(--seg-shadow);
+  color: var(--ink);
+}
+
+.option:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 1px;
+}
+
+/* Visual height stays; a transparent layer meets the touch-target floor. */
+.option::after {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100%;
+  height: max(100%, var(--tap-min));
+  transform: translate(-50%, -50%);
+  content: "";
 }

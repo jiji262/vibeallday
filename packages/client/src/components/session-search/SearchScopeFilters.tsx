@@ -60,67 +60,78 @@ function Field({
   );
 }
 
-/** Project, provider, source, machine and creation dropdowns, one per field. */
-export function SearchScopeFilters(props: ScopeFilterProps) {
+/** The project dropdown; its sheet section names it. */
+export function ProjectFilter(props: ScopeFilterProps) {
   const { t } = useI18n();
   const { projectGroups, onChange } = props;
   return (
+    <FilterDropdown
+      label={t("sessionSearchProjects")}
+      placeholder={t("globalSessionsFilterProjectPlaceholder")}
+      fullWidth
+      triggerClassName={styles.trigger}
+      options={[
+        // An explicit first row, so returning to every project is a
+        // visible choice rather than a re-click on the current one.
+        {
+          value: "",
+          label: t("globalSessionsFilterProjectPlaceholder"),
+          clearSelection: true,
+        },
+        ...projectGroups.current.map((p) => ({
+          value: p.id,
+          label: p.name,
+        })),
+        ...projectGroups.older.map((p, index) => ({
+          value: p.id,
+          label: p.name,
+          groupLabelBefore:
+            index === 0 && projectGroups.current.length > 0
+              ? t("globalSessionsFilterProjectOlder")
+              : undefined,
+        })),
+      ]}
+      selected={props.project ? [props.project] : []}
+      onChange={(value) => onChange("project", value[0] ?? "")}
+      multiSelect={false}
+    />
+  );
+}
+
+/** Providers present in the catalog, each with its turn-search support. */
+export function ProviderFilter(props: ScopeFilterProps) {
+  const { t } = useI18n();
+  return (
+    <FilterDropdown
+      label={t("sessionSearchProviders")}
+      placeholder={t("globalSessionsProviderAll")}
+      fullWidth
+      triggerClassName={styles.trigger}
+      options={ALL_PROVIDERS.filter((p) =>
+        props.sessions.some((s) => s.provider === p),
+      ).map((p) => ({
+        value: p,
+        label: p,
+        description: t(
+          !props.supported
+            ? "sessionSearchProviderUpgrade"
+            : props.turnSearchProviders.has(p)
+              ? "sessionSearchProviderBounded"
+              : "sessionSearchProviderTitleOnly",
+        ),
+      }))}
+      selected={props.providers}
+      onChange={(value) => props.onChange("provider", value.join(","))}
+    />
+  );
+}
+
+/** Launch source, creation surface, machine and the automation toggle. */
+export function SourceFilters(props: ScopeFilterProps) {
+  const { t } = useI18n();
+  const { onChange } = props;
+  return (
     <div className={styles.fields}>
-      <Field label={t("inboxFilterProject")} wide>
-        <FilterDropdown
-          label={t("sessionSearchProjects")}
-          placeholder={t("globalSessionsFilterProjectPlaceholder")}
-          fullWidth
-          triggerClassName={styles.trigger}
-          options={[
-            // An explicit first row, so returning to every project is a
-            // visible choice rather than a re-click on the current one.
-            {
-              value: "",
-              label: t("globalSessionsFilterProjectPlaceholder"),
-              clearSelection: true,
-            },
-            ...projectGroups.current.map((p) => ({
-              value: p.id,
-              label: p.name,
-            })),
-            ...projectGroups.older.map((p, index) => ({
-              value: p.id,
-              label: p.name,
-              groupLabelBefore:
-                index === 0 && projectGroups.current.length > 0
-                  ? t("globalSessionsFilterProjectOlder")
-                  : undefined,
-            })),
-          ]}
-          selected={props.project ? [props.project] : []}
-          onChange={(value) => onChange("project", value[0] ?? "")}
-          multiSelect={false}
-        />
-      </Field>
-      <Field label={t("sessionSearchProviders")}>
-        <FilterDropdown
-          label={t("sessionSearchProviders")}
-          placeholder={t("globalSessionsProviderAll")}
-          fullWidth
-          triggerClassName={styles.trigger}
-          options={ALL_PROVIDERS.filter((p) =>
-            props.sessions.some((s) => s.provider === p),
-          ).map((p) => ({
-            value: p,
-            label: p,
-            description: t(
-              !props.supported
-                ? "sessionSearchProviderUpgrade"
-                : props.turnSearchProviders.has(p)
-                  ? "sessionSearchProviderBounded"
-                  : "sessionSearchProviderTitleOnly",
-            ),
-          }))}
-          selected={props.providers}
-          onChange={(value) => onChange("provider", value.join(","))}
-        />
-      </Field>
       <Field label={t("sessionSearchSources")}>
         <FilterDropdown
           label={t("sessionSearchSources")}

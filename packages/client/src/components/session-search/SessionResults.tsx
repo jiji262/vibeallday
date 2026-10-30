@@ -1,19 +1,17 @@
 import type { CSSProperties, ReactNode, Ref } from "react";
-import { useI18n } from "../../i18n";
+import { type MessageKey, useI18n } from "../../i18n";
 import { Button } from "../garden/Button";
 import { Card, CardFooter } from "../garden/Card";
-import { DataListHeader } from "../garden/DataList";
+import type { DateGroup, DateGroupHeader } from "./dateGroups";
 import styles from "./SessionResults.module.css";
 
-/** Column tracks shared by the header and every row from 768px. */
+/** Column tracks shared by every row from 768px. */
 const COLUMNS_WITH_PROJECT =
   "minmax(0, 1fr) minmax(0, 160px) 136px minmax(0, 128px) 72px";
 const COLUMNS_WITHOUT_PROJECT = "minmax(0, 1fr) 136px minmax(0, 128px) 72px";
 /**
- * Reserved on every row for the question flag beside the row link. The
- * header draws it as its last track; the row CSS gives the slot the same
- * width and lead-in, and the header's inline-end padding, so the flag sits on
- * that track inside the card.
+ * Reserved on every row for the question flag beside the row link, so the
+ * column tracks of every row line up whether or not it has one.
  */
 const ACCESSORY_TRACK = "56px";
 const AREAS_WITH_PROJECT = '"title project provider state time"';
@@ -37,23 +35,27 @@ interface SessionResultsProps {
   children: ReactNode;
 }
 
-function useHeaderLabels(showProject: boolean): ReactNode[] {
+const GROUP_LABELS: Record<DateGroup, MessageKey> = {
+  today: "sessionsGroupToday",
+  yesterday: "sessionsGroupYesterday",
+  week: "sessionsGroupThisWeek",
+  earlier: "sessionsGroupEarlier",
+};
+
+/** 今天 · 8: heads a run of rows by last activity. */
+export function SessionGroupHeader({ header }: { header: DateGroupHeader }) {
   const { t } = useI18n();
-  return [
-    t("sessionsColumnSession"),
-    ...(showProject ? [t("sessionsColumnProject")] : []),
-    t("sessionsColumnProvider"),
-    t("sessionsColumnState"),
-    // Relative times are right-aligned in their cell; so is their label.
-    <span key="updated" className={styles.headerEnd}>
-      {t("sessionsColumnUpdated")}
-    </span>,
-  ];
+  return (
+    <li className={styles.group}>
+      <h2 className={styles.groupTitle}>{t(GROUP_LABELS[header.group])}</h2>
+      <span className={styles.groupCount}>{header.count}</span>
+    </li>
+  );
 }
 
 /**
- * The Sessions result list as one card: optional bulk band, sunken column
- * header on wide screens, dashed rows, and a "load more" footer band.
+ * The Sessions result list as one card: optional bulk band, rows (headed by
+ * date-group rows outside turn search), and a "load more" footer band.
  */
 export function SessionResults({
   listRef,
@@ -68,7 +70,6 @@ export function SessionResults({
   children,
 }: SessionResultsProps) {
   const { t } = useI18n();
-  const labels = useHeaderLabels(showProject);
   const columns = showProject ? COLUMNS_WITH_PROJECT : COLUMNS_WITHOUT_PROJECT;
   const areas = showProject ? AREAS_WITH_PROJECT : AREAS_WITHOUT_PROJECT;
   const listStyle = {
@@ -87,13 +88,6 @@ export function SessionResults({
   return (
     <Card className={styles.card}>
       {band}
-      {!searchRows && total > 0 && (
-        <DataListHeader
-          columns={[...labels, ""]}
-          template={`${columns} ${ACCESSORY_TRACK}`}
-          className={selecting ? styles.headerSelecting : undefined}
-        />
-      )}
       <ul ref={listRef} className={listClass} style={listStyle}>
         {children}
       </ul>

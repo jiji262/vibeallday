@@ -398,21 +398,46 @@ describe("GlobalSessionsPage", () => {
     expect(screen.queryByTestId("session-active")).toBeNull();
   });
 
-  it("shows archived sessions from the chip and returns to unarchived when released", () => {
+  it("shows archived sessions from the sheet and counts that as a filter", () => {
     sessionCollectionState.records = [
       makeSessionRecord("active"),
       makeSessionRecord("archived", { isArchived: true }),
     ];
     renderPage("/sessions");
-    const chip = screen.getByRole("button", { name: "Archived" });
-    expect(chip.getAttribute("aria-pressed")).toBe("false");
-    fireEvent.click(chip);
-    expect(chip.getAttribute("aria-pressed")).toBe("true");
+    expect(screen.getByRole("button", { name: "Filters" })).toBeDefined();
+    openFilters();
+    fireEvent.click(screen.getByRole("button", { name: "Filter: Archived" }));
     expect(screen.getByTestId("session-archived")).toBeDefined();
     expect(screen.queryByTestId("session-active")).toBeNull();
-    fireEvent.click(chip);
-    expect(screen.queryByTestId("session-archived")).toBeNull();
-    expect(screen.getByTestId("session-active")).toBeDefined();
+    expect(
+      screen.getByRole("button", { name: "Filters, 1 active" }),
+    ).toBeDefined();
+  });
+
+  it("narrows to needs-you or running sessions from the quick chips", () => {
+    sessionCollectionState.records = [
+      makeSessionRecord("waiting", { activity: "waiting-input" }),
+      makeSessionRecord("running", { activity: "in-turn" }),
+      makeSessionRecord("idle"),
+      makeSessionRecord("stored", { activity: "in-turn", isArchived: true }),
+    ];
+    renderPage("/sessions");
+    const needsYou = screen.getByRole("button", { name: /^Needs you/ });
+    const running = screen.getByRole("button", { name: /^Running/ });
+    expect(needsYou.textContent).toContain("1");
+    expect(running.textContent).toContain("1");
+    fireEvent.click(needsYou);
+    expect(needsYou.getAttribute("aria-pressed")).toBe("true");
+    expect(screen.getByTestId("session-waiting")).toBeDefined();
+    expect(screen.queryByTestId("session-running")).toBeNull();
+    expect(screen.queryByTestId("session-idle")).toBeNull();
+    fireEvent.click(running);
+    expect(screen.getByTestId("session-waiting")).toBeDefined();
+    expect(screen.getByTestId("session-running")).toBeDefined();
+    expect(screen.queryByTestId("session-stored")).toBeNull();
+    fireEvent.click(needsYou);
+    expect(screen.queryByTestId("session-waiting")).toBeNull();
+    expect(screen.getByTestId("session-running")).toBeDefined();
   });
 
   it("badges the Filters button with changed groups and clears them from the sheet", () => {
@@ -697,8 +722,9 @@ describe("GlobalSessionsPage", () => {
     expect(screen.getByRole("button", { name: "Star" })).toBeDefined();
     expect(screen.getByRole("button", { name: "Unstar" })).toBeDefined();
     // Status filters no longer choose an action.
+    openFilters();
     await act(async () => {
-      fireEvent.click(screen.getByRole("button", { name: "Archived" }));
+      fireEvent.click(screen.getByRole("button", { name: "Filter: Archived" }));
     });
     expect(screen.queryByRole("button", { name: /^Make / })).toBeNull();
     expect(screen.queryByRole("button", { name: "Unarchive" })).toBeNull();

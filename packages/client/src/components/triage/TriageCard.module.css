@@ -1,0 +1,119 @@
+/* The current triage item (design Triage `.ask` card). */
+
+.card {
+  overflow: hidden;
+  border: 1px solid var(--ask-line);
+  border-radius: var(--r-card);
+  background: var(--surface);
+  box-shadow: var(--shadow-pop);
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 10px var(--space-4);
+  background: var(--ask-head);
+  color: var(--attn-ink);
+  font-size: var(--fs-small);
+  font-weight: 600;
+}
+
+.reason {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.age {
+  flex: none;
+  margin-left: auto;
+  color: var(--ink-3);
+  font-family: var(--font-mono);
+  font-size: var(--fs-meta);
+  font-weight: 400;
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 22px 24px 24px;
+}
+
+.titleBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.title {
+  color: var(--ink);
+  font-size: var(--fs-h1);
+  font-stretch: var(--display-stretch);
+  font-weight: var(--title-weight);
+  letter-spacing: var(--display-tracking);
+  line-height: 1.25;
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+
+.title:hover {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.title:focus-visible {
+  border-radius: var(--r-sm);
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.meta {
+  overflow: hidden;
+  color: var(--ink-3);
+  font-family: var(--font-mono);
+  font-size: var(--fs-meta);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.skip {
+  margin-left: auto;
+}
+
+.hint {
+  display: inline-flex;
+}
+
+@media (width < 768px) {
+  .body {
+    gap: 14px;
+    padding: 14px var(--space-4) var(--space-4);
+  }
+
+  .title {
+    font-size: var(--fs-h2);
+  }
+
+  .actions > * {
+    flex: 1 1 0;
+  }
+
+  .skip {
+    margin-left: 0;
+  }
+
+  .hint {
+    display: none;
+  }
+}

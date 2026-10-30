@@ -1,7 +1,8 @@
 /*
  * Sessions result card. Rows are SessionListItem cards; from 768px the row
- * link becomes a grid on the header's tracks (--session-columns) and its meta
- * cells take named areas (--session-areas) through `data-session-cell`.
+ * link becomes a grid on shared tracks (--session-columns) and its meta cells
+ * take named areas (--session-areas) through `data-session-cell`. Date-group
+ * rows (今天 / 昨天 / 本周) head each run of rows outside turn search.
  */
 
 /* Clip to the radius without `overflow: hidden`, so the bulk band can stick. */
@@ -51,13 +52,13 @@
   position: absolute;
   inset: 11px;
   border: 1.5px solid var(--line-strong);
-  border-radius: var(--radius-sm);
-  background: var(--card);
+  border-radius: var(--r-chip);
+  background: var(--surface);
 }
 
 .selecting :global(.session-list-item__checkbox):checked::before {
-  border-color: var(--indigo);
-  background: var(--indigo);
+  border-color: var(--accent);
+  background: var(--accent);
 }
 
 .selecting :global(.session-list-item__checkbox):checked::after {
@@ -67,24 +68,45 @@
   left: 17px;
   width: 6px;
   height: 11px;
-  border: solid var(--ink-on);
+  border: solid var(--on-accent);
   border-width: 0 2px 2px 0;
   transform: rotate(45deg);
 }
 
 .selecting :global(.session-list-item__checkbox):focus-visible::before {
-  border-color: var(--indigo);
-  box-shadow: 0 0 0 3px var(--indigo-soft);
+  border-color: var(--focus);
+  box-shadow: 0 0 0 3px var(--accent-soft);
 }
 
-/* The header starts where the row link does: past the select box. */
-.headerSelecting {
-  padding-left: calc(var(--tap-min) - 6px + var(--space-2) + var(--space-5));
+/* Date-group row: eyebrow label and mono count on a sunken band. */
+.group {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 10px var(--pad-card) 8px;
+  border-top: 1px solid var(--line);
+  background: var(--surface-2);
 }
 
-.headerEnd {
-  display: block;
-  text-align: end;
+.group:first-child {
+  border-top: 0;
+}
+
+.groupTitle {
+  margin: 0;
+  color: var(--ink-2);
+  font-family: var(--font-mono);
+  font-size: var(--fs-meta);
+  font-weight: 600;
+  letter-spacing: var(--meta-tracking);
+  text-transform: uppercase;
+}
+
+.groupCount {
+  color: var(--ink-3);
+  font-family: var(--font-mono);
+  font-size: var(--fs-meta);
+  font-variant-numeric: tabular-nums;
 }
 
 .sentinel {
@@ -120,7 +142,7 @@
     grid-area: project;
     max-width: none;
     color: var(--ink-2);
-    font-size: 13px;
+    font-size: var(--fs-small);
   }
 
   .columns
@@ -143,11 +165,11 @@
     grid-area: time;
     justify-self: end;
     color: var(--ink-3);
-    font-size: 13px;
+    font-size: var(--fs-meta);
   }
 
-  /* Every row keeps the flag slot so its tracks line up with the header; the
-     slot carries the header's inline-end padding so the flag stays inside. */
+  /* Every row keeps the flag slot so the tracks of every row line up; the
+     slot carries the card's inline-end padding so the flag stays inside. */
   .columns :global(.session-list-item--card) > [data-session-accessory] {
     display: flex;
     box-sizing: content-box;

@@ -16,7 +16,7 @@
   z-index: 11;
   margin: 0 calc(var(--page-gutter) * -1);
   padding: var(--space-2) var(--page-gutter) 0;
-  background: var(--bg);
+  background: var(--canvas);
 }
 
 .stack {
@@ -31,13 +31,13 @@
 .progress {
   margin: 0;
   color: var(--ink-3);
-  font-size: 13px;
+  font-size: var(--fs-small);
 }
 
 .note {
   margin: var(--space-3) 0 0;
   color: var(--ink-3);
-  font-size: 13px;
+  font-size: var(--fs-small);
   line-height: 1.4;
 }
 

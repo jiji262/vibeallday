@@ -17,8 +17,19 @@ async function dismissOnboardingIfVisible(
 
 function projectCardForCurrentRun(page: import("@playwright/test").Page) {
   return page.locator(
-    `[data-project-card-link][href*="project=${projectId}&source=projects"]`,
+    `[data-project-card-link][href$="/projects/${projectId}"]`,
   );
+}
+
+/** Projects card name -> project home -> its sessions in All sessions. */
+async function openProjectSessions(page: import("@playwright/test").Page) {
+  const projectCard = projectCardForCurrentRun(page);
+  await expect(projectCard).toBeVisible();
+  await projectCard.click();
+  await expect(page).toHaveURL(new RegExp(`/projects/${projectId}$`));
+  await page
+    .getByRole("link", { name: "View mockproject in all sessions" })
+    .click();
 }
 
 test.describe("Project-scoped new session CTA", () => {
@@ -29,10 +40,7 @@ test.describe("Project-scoped new session CTA", () => {
     await page.goto(`${baseURL}/projects`);
     await dismissOnboardingIfVisible(page);
 
-    const projectCard = projectCardForCurrentRun(page);
-    await expect(projectCard).toBeVisible();
-
-    await projectCard.getByText("mockproject", { exact: true }).click();
+    await openProjectSessions(page);
 
     await expect(page).toHaveURL(
       new RegExp(`/sessions\\?project=${projectId}&source=projects`),
@@ -55,9 +63,7 @@ test.describe("Project-scoped new session CTA", () => {
     await page.goto(`${baseURL}/projects`);
     await dismissOnboardingIfVisible(page);
 
-    const projectCard = projectCardForCurrentRun(page);
-    await expect(projectCard).toBeVisible();
-    await projectCard.getByText("mockproject", { exact: true }).click();
+    await openProjectSessions(page);
 
     const query = "summarize the current mock session";
     const searchInput = page.getByPlaceholder("Search sessions...");
