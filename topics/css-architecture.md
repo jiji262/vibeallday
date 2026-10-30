@@ -53,7 +53,10 @@ not carry a migration queue.
   as `styles` by the owning component.
 - `packages/client/src/styles/index.css`, `renderers.css`, `tool-rows.css`, and
   `emulator.css` are legacy global stylesheets. Each is frozen at the line limit
-  in `scripts/css-architecture-baseline.json`.
+  in `scripts/css-architecture-baseline.json`. `theme.css` (design tokens, the
+  skins, font faces and base element rules; see
+  [design system](garden-design-system.md)) and `provider-colors.css` are the
+  reviewed global token files and carry ceilings in the same baseline.
 - Feature work must not raise those limits. If a global rule is genuinely
   necessary, offset it by extracting at least as many legacy lines from the
   same file; prefer a reviewed, narrowly owned global exception when offsetting
@@ -152,7 +155,7 @@ Rules that shape new CSS:
   check that no rule whose order flips has equal specificity, an
   overlapping property, and a subject that can be the same element.
 - A selector appears once per file and media context. The diff palette in
-  `index.css` is the one deliberate exception: it is grouped separately from
+  `theme.css` is the one deliberate exception: it is grouped separately from
   the theme blocks under a scoped disable comment.
 - `no-unknown-animations` checks `animation` names against keyframes in the
   same file. That is the CSS Modules contract too: a module's keyframe names

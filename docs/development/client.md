@@ -6,7 +6,9 @@ Commands and code paths below are relative to the repository root unless stated
 otherwise.
 
 For client styles or React components using legacy global classes, read
-[CSS architecture](../../topics/css-architecture.md). For proposed UI appearance
+[CSS architecture](../../topics/css-architecture.md); design tokens, skins and
+shared primitives are in the
+[design system](../../topics/garden-design-system.md). For proposed UI appearance
 or interaction, read [UI design](../../topics/ui-design.md); for UI tweaks and
 browser verification, read [UI testing](../../topics/ui-testing.md). These
 topics own the detailed procedures, including user-owned visual verification.
@@ -20,13 +22,10 @@ text. Do not force brand names, provider names, keyboard keys, terminal commands
 code tokens, protocol values, or source-like renderer text into i18n keys unless
 the surrounding copy needs translation.
 
-Add new strings to `en.json` only. Missing keys in the other locale files
-fall back to English at runtime, and non-English locales are batch-updated
-before a release (a maintainer step). Do not hand-translate per-locale
-entries during feature work.
-
-Non-English locales are sparse overlays; maintainer translation updates add
-locale values only when an actual translation is available.
+This fork ships English and Simplified Chinese: add each new string to both
+`en.json` and `zh-CN.json`. A key missing from `zh-CN.json` falls back to
+English at runtime, so treat a missing Chinese value as a gap to fill, not as
+the expected state.
 
 Run `pnpm i18n:scan` for a permissive advisory scan of likely raw English prose
 in client TSX. It hides low-priority technical labels by default; inspect those

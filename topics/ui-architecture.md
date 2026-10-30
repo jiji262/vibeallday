@@ -127,12 +127,14 @@ without changing which container owns the viewport. The frame retains its
 keyboard and safe-area insets; the outer body does not add a second inset to the
 mobile shell's geometry.
 
-A session App in full view owns the tab bar's viewport space as well as the
-session pane. A large z-index on that pane cannot escape its route layer's
-stacking context and cover the shell's navigation. Hide the bar for the active
-route's full-view state instead; a retained, parked session must not hide
-navigation on the foreground route. Exercise phone full view and route
-parking together, since desktop-only full-view checks have no bottom bar.
+The phone tab bar appears only on the root pages (`/inbox`, `/sessions`,
+`/projects`, `/more`); session details and other pages with a back link have
+none, so a session App in full view owns the session pane without a bar to
+hide. A large z-index on that pane still cannot escape its route layer's
+stacking context and cover the shell's navigation, and a retained, parked
+session must not hide navigation on the foreground route. Exercise phone full
+view and route parking together, since desktop-only full-view checks have no
+bottom bar.
 
 ## Desktop Sidebar Display Modes
 
@@ -165,11 +167,10 @@ is unchanged. The normal default remains the expanded sidebar, so the new
 control appears only after the user has already selected or reached collapsed
 desktop mode.
 
-A fresh Settings window or reload starts with an expanded preference reduced
-to the collapsed icon rail. This initial route choice does not write browser
-preferences or change another open window. A saved minimized mode stays
-minimized, and an explicit `?sidebar=expanded` takes precedence. The reader
-can expand the rail normally; same-window navigation retains its current mode.
+At desktop widths (>= 1100 px) `/settings*` hides the app sidebar entirely
+and shows the settings rail in its place, which leads with a Back-to-app link.
+This route choice does not write browser preferences or change another open
+window; leaving Settings restores the saved sidebar mode.
 
 A tab opened directly on the new-session page or reloaded there honors the
 saved expanded, collapsed or minimized mode. With no saved choice, it starts
@@ -239,16 +240,18 @@ sheet is separate and unaffected.
 ## Global Reload Notice Placement
 
 The shared backend/frontend reload notice preserves page identity and
-navigation rather than claiming the full top edge. On desktop and tablet it is
-an intrinsic-width card at the lower viewport edge, where unused space is more
-likely; it must not cover a session title, page-level navigation, or session
-composer controls or another fixed lower-corner action. The notice stack
+navigation rather than claiming the full top edge. On a fine-pointer screen
+wider than 768 px it is an intrinsic-width card at the lower viewport edge,
+where unused space is more likely; it must not cover a session title,
+page-level navigation, or session composer controls or another fixed
+lower-corner action. The notice stack
 measures live fixed occupants as one allocation problem: it occupies the
 lower-right space when that space is clear and lifts the entire stack above
 the session composer or floating action button when it would collide. A second
-notice must not grow underneath a higher-z-index occupant. On phone it may
-remain at the top, but stays inset from both viewport edges instead of becoming
-a full-width bar.
+notice must not grow underneath a higher-z-index occupant. Wherever the phone
+shell applies (`(width <= 768px), (pointer: coarse)`) the stack sits at the top,
+just under the sticky page header, and stays inset from both viewport edges
+instead of becoming a full-width bar.
 
 Every form has an explicit × dismiss control with at least a 36×36 pixel hit
 target. Visible copy stays compact; complete restart-risk and action wording

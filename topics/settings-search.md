@@ -16,9 +16,9 @@ principle this design follows).
 
 ## Contract
 
-- **Placement.** One search field above the Settings navigation: top of the
-  category rail in two-column layout, top of the category list page on
-  narrow screens. The narrow category-detail page has no field; Back reaches
+- **Placement.** One search field above the Settings navigation: in the
+  category rail's head (under the Settings title and host card) in
+  two-column layout, top of the category list page on narrow screens. The narrow category-detail page has no field; Back reaches
   the searchable list. A visible search field in a settings UI is an
   established cross-platform convention (VS Code, Chrome, macOS/iOS/Android
   system settings), not VIBEALLDAY-novel chrome, so the field ships always-on;
@@ -36,9 +36,11 @@ principle this design follows).
   description, and optional hidden keywords; a section matches on its
   title/description; a category matches on its label/description.
   Configured values are excluded by default (standard practice). Rows may
-  declare a display-text `valueText` that participates only under the
-  values toggle; free-text and credential/secret-bearing fields never
-  declare one, so secrets cannot enter matching by construction.
+  declare a display-text `valueText` that participates in matching only
+  under the values toggle; free-text and credential/secret-bearing fields
+  never declare one, so secrets cannot enter matching by construction. A
+  matched row in the results shows its `valueText` as a visible value chip,
+  whether or not the toggle is on.
 - **Result anatomy.** Results group under clickable category headings, in
   category order. Each matched row is the real control, operable in place —
   toggling/selecting in the result list is the same act as in the pane —
@@ -47,7 +49,9 @@ principle this design follows).
   Each row also carries a jump link labeled `{Category} › {Section} ›`
   that leaves search, opens the category pane, scrolls the row into view
   centered, and flashes it briefly (`prefers-reduced-motion` suppresses
-  the animation).
+  the animation). A provider row's jump opens `/settings/providers`, which
+  forwards (replacing the history entry) to that provider's detail page
+  `/settings/providers/:providerId`, where the row scrolls and flashes.
   Clicking non-control row text or background performs the same jump. Nested
   controls, links, editable content, selected text and caller-handled clicks
   retain their own behavior. A label row remains a checkbox target; its jump
@@ -92,8 +96,9 @@ checkbox rather than choosing one behavior:
 - Values enter matching only as declared display text (`valueText`,
   typically the already-computed select-option label). Boolean toggles
   don't declare one (matching every "off" is noise), and secret-bearing
-  fields must not. Value text is matched, not highlighted — the value
-  renders inside the control, which search does not rewrite.
+  fields must not. Value text is not highlighted: the control renders the
+  value, which search does not rewrite, and the result row repeats it as a
+  plain value chip.
 
 ## Architecture (why rows declare their own text)
 

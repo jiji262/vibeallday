@@ -21,6 +21,17 @@ they can reach a control.
 
 ## Contract
 
+- In the session dock (`trayNonPrimaryControls`) the row keeps only
+  attachments, permission mode, model/thinking and the context ring
+  (`COMPOSER_PRIMARY_CONTROLS`), plus microphone/waveform, session status,
+  recall and send/stop, which never leave the row. Every other shown tool
+  sits in the **+** tray at all widths unless its presence is `pin` (Show
+  always), which keeps it in the row with no tray copy; on phones the `first`
+  tier also always sits in the tray (`getComposerTrayKeys`). Measurement then
+  folds only the primary controls. The tray opens as one panel above the
+  composer card rather than a strip growing sideways. New Session keeps the
+  measured More (`...`) strip described below, folding `first` / `mid` /
+  `last` in that order.
 - Collapse/restore obeys the repo-wide fixed-order rule: widening restores
   controls in exactly the reverse order narrowing removed them, with the same
   width always yielding the same set

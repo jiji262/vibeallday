@@ -523,16 +523,21 @@ submit-to-session action renders only when Source Control was opened from a
 session Edit-block link. The recently-active dropdown satisfies this contract
 before dirty-file provenance lands.
 
-### Pending Comments and Reviews are separate Source Control modes
+### Pending comments and submitted reviews share the Reviews mode
 
-**Pending Comments** is the accumulator: unsubmitted comments, editable in
-place. **Reviews** browses submissions — a submissions list column (phone: a
-selector), and the selected submission's comments shown against the source
-captured at comment time, each with its outcome and a link to its target
-session. Both navigate alike. Source Control therefore has four top-level
-modes: Changes, Files, Pending Comments, and Reviews. The existing
-`?tab=comments` URL continues to select Pending Comments; `?tab=reviews`
-selects Reviews. The selector's wrapping contract in
+**Pending comments** are the accumulator: unsubmitted comments, editable in
+place. **Submitted reviews** browse submissions — a submissions list column
+(phone: a selector), and the selected submission's comments shown against the
+source captured at comment time, each with its outcome and a link to its
+target session. Both live in one **Reviews** (审查) mode: pending first, and
+submitted reviews below only behind the `git-source-review-submissions`
+capability and the review-history opt-in. Source Control therefore has four
+top-level modes: Changes, Commit history, Files, and Reviews. URL parameters
+are unchanged: `?tab=comments` selects Reviews at the pending comments,
+`?tab=reviews` selects it at the submissions (with `submission`), and
+`?tab=files`, `?history=1`, `?rev=` and the legacy `?tab=commits` keep their
+meanings. `?history=0` means Changes was chosen explicitly and overrides the
+clean-tree latest-commit landing. The selector's wrapping contract in
 [Source Control](source-control.md) must be re-verified at phone width rather
 than assumed to still fit.
 
@@ -911,24 +916,27 @@ otherwise grows unbounded; leftover width stays as gutter
 ### Identity header, mode tabs, and stable action row
 
 Project identity, repo/branch state, and Clean/Dirty status form the Source
-Control identity header. Changes/Files/Comments use the top-right space
-on wide layouts and a separate full-width row when constrained. Pull, Push, and
-Check occupy a second, left-anchored action row in fixed order; Review anchors
-independently at its trailing edge. Dynamic branch/status content and Review
-state never displace the three repository actions.
+Control identity header. The mode tabs (Changes / Commit history / Files /
+Reviews) form a full-width strip under the page head. Repository operations
+are one **Sync** split action (pull when the upstream is ahead, push when only
+local commits wait, otherwise a remote check) whose menu keeps Pull, Push and
+Check under their original labels; the compatibility (basic Source Control)
+view keeps the three separate buttons. Review anchors independently at its
+trailing edge. Dynamic branch/status content and Review state never displace
+the repository actions.
 
 Source Control lands on Changes with the synthetic Working tree revision
 selected even when its diff is empty. A clean tree stays visually empty and
-never auto-selects HEAD. Commit history opens only through the
+never auto-selects HEAD. Commit history opens through its own mode tab, the
 **‹ Commit history** parent link, a commit deep link, or the legacy
-`?tab=commits` compatibility URL. Pull, Push, and Check retain constant
-visible labels and a reserved state-indicator slot, whose idle action glyph
-changes in place, so progress and brief results remain visible on the
-initiating button without changing its width. Full feedback appears below the
-action row.
-Review with no pending comments opens Comments and its "click a line" guidance;
-with drafts it opens submit preview directly, so a first-time explorer can
-discover the complete comment → review-session path from the header.
+`?tab=commits` compatibility URL. The Sync button keeps its constant
+**Sync** label (with ahead/behind counts) and a state-indicator slot whose
+glyph shows the chosen operation, its progress and brief results in place;
+Pull, Push and Check in its menu carry the same indicators. Full feedback
+appears below the action row. Review with no pending comments opens the
+Reviews mode and its "click a line" guidance; with drafts it opens submit
+preview directly, so a first-time explorer can discover the complete comment
+→ review-session path from the header.
 
 Phone widths retain project/branch status in the identity header while tabs
 and actions use ordinary scrolling rows in the page body. Both tab placements
@@ -992,9 +1000,8 @@ The converged revision-detail model now has one Changes entry point:
   retains its normal Back behavior. The default Working tree remains outside
   that history stack, so browser Back from Source Control does not
   unexpectedly open commits.
-- **Old entry points remain meaningful.** `?tab=commits` opens history inside
-  Changes, while `?rev=<sha>` selects that explicit commit. Neither restores a
-  separate Commits tab.
+- **Old entry points remain meaningful.** `?tab=commits` opens the Commit
+  history mode, while `?rev=<sha>` selects that explicit commit.
 
 The first review accelerators are small and read-only. Implemented items remain
 shared where their owning surface is shared; the rest stay proposals:

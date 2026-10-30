@@ -1,7 +1,8 @@
 # Toolbar Settings UI
 
 > The Settings → **Toolbar** pane lets users pick which composer-toolbar
-> controls are shown and, for overflow-supported controls, how eagerly each
+> controls are shown and, for overflow-supported controls, where each sits:
+> in a session, the row or the **+** tray; on New Session, how eagerly it
 > moves into the More (`...`) menu as the bar narrows ("narrowing
 > priority"). Both are edited through one **presence slider** per control:
 > a notched scale from Hide (left) through the collapse tiers to
@@ -28,29 +29,37 @@ the server does the same for stored `clientDefaults` in
 
 ## Layout contract
 
-The pane is three stacked pieces, top to bottom:
+The pane is four stacked pieces, top to bottom:
 
-1. **Live top preview** — a full, faithful, inert render of the composer
-   toolbar with the user's actual visibility + priority
-   (`SessionToolbarPreview`). Its job is **spatial memory**: it shows the
-   visible controls in their real left-to-right positions so a user can locate
-   one by where it sits, not by reading a list.
-2. **Hidden zone** (first) — controls that are currently off. Split into **two
-   side-groups**, left-aligned and right-aligned (matching the toolbar edge the
-   control lives on; either group may be empty and shows "None hidden"). The two
-   groups render as **two columns when there is room** and stack to one when
-   narrow (`grid-template-columns: repeat(auto-fit, minmax(240px, 1fr))`). Each
-   row uses the same control-row style as Shown: specimen preview, copy, and
-   the presence slider sitting at its Hide notch. Hidden-first is deliberate:
-   off controls are the ones a user is hunting for to re-enable, and putting
-   them up top makes them scannable even though the live preview already
-   locates the *visible* ones.
-3. A thin **separator**, then the **Shown zone** — visible controls in
-   left-to-right toolbar order, split into the same **left-side** and
-   **right-side** groups as Hidden. Both zones render their side groups as two
-   columns when there is room and stack them when narrow. Each side keeps its
-   heading when empty; Hidden also says "None hidden." Each row has a specimen
-   preview, copy, and the **presence slider**.
+1. **In a session** placement summary (`SessionPlacementSummary`) — live
+   **Row** and **+ tray** chip lists of the shown controls, derived from the
+   same tray rule the session composer uses (`isComposerTrayControl` plus the
+   `first` / `mid` / `last` tray tiers).
+2. **Live preview** — a caption stating that it is the New Session toolbar
+   at the current width, then a full, faithful, inert render of that toolbar
+   with the user's actual visibility + priority (`SessionToolbarPreview`). Its
+   job is **spatial memory**: it shows the visible controls in their real
+   left-to-right positions so a user can locate one by where it sits, not by
+   reading a list.
+3. **Hidden zone** (first) — controls that are currently off ("Off
+   everywhere"). Split into **two side-groups**, left-aligned and
+   right-aligned (matching the toolbar edge the control lives on; either group
+   may be empty and shows "None hidden"). The two groups render as **two
+   columns when there is room** and stack to one when narrow
+   (`grid-template-columns: repeat(auto-fit, minmax(240px, 1fr))`). Each row
+   uses the same control-row style as Shown: specimen preview, copy, and the
+   presence slider sitting at its Hide notch. Hidden-first is deliberate: off
+   controls are the ones a user is hunting for to re-enable, and putting them
+   up top makes them scannable even though the live preview already locates
+   the *visible* ones.
+4. A thin **separator**, then the **Shown zone** — visible controls in
+   left-to-right toolbar order (its heading explains that Show always keeps a
+   control in the session row, the other notches put it in the + tray, and on
+   New Session they set the More (`...`) folding order), split into the same
+   **left-side** and **right-side** groups as Hidden. Both zones render their
+   side groups as two columns when there is room and stack them when narrow.
+   Each side keeps its heading when empty; Hidden also says "None hidden."
+   Each row has a specimen preview, copy, and the **presence slider**.
 
 Both zones show a **per-row specimen** (`ToolbarControlPreview`) so a row is
 identified by the actual element, not just text. The specimen is also an
@@ -84,11 +93,24 @@ meaning, so tier definitions are not tooltip-only):
 
 | notch | stored presence | meaning                              | legacy tier |
 |-------|-----------------|--------------------------------------|-------------|
-| 0     | `hidden`        | not on the toolbar                   | —           |
-| 1     | `first`         | moves to More first                  | `early`     |
-| 2     | `mid`           | moves to More after the first group  | `medium`    |
-| 3     | `last`          | moves to More near the end           | `late`      |
-| 4     | `pin`           | always visible (no menu copy)        | (always-on) |
+| 0     | `hidden`        | off everywhere                       | —           |
+| 1     | `first`         | folds first                          | `early`     |
+| 2     | `mid`           | folds after the first group          | `medium`    |
+| 3     | `last`          | folds near the end                   | `late`      |
+| 4     | `pin`           | Show always (no menu or tray copy)   | (always-on) |
+
+The caption under the slider states what the notch means for that control's
+placement. A **tray tool** (any overflow-supported control other than the row
+tools below) at `first` / `mid` / `last` sits in the session composer's **+**
+tray whatever the width; on New Session those tiers fold it into More (`...`)
+in that order, and `first` always sits in the menu on phones. At `pin` it
+stays in the session row with no tray copy and is always shown on New
+Session. **Row tools** (`COMPOSER_PRIMARY_CONTROLS`: `attachments`,
+`modeSelector`, `thinkingToggle`, `contextUsage`) stay in the session row and
+fold by measured priority, into the + tray in a session and More (`...`) on
+New Session. `sessionStatus`, `microphone`, `waveform` and `composerRecall`
+never enter the tray: the live recorder must not unmount when the tray
+closes.
 
 The stored data model is that single enum (`ToolbarControlPresence` =
 `"off" | "hidden" | ToolbarNarrowingPriority`) — one value per control, no

@@ -54,13 +54,16 @@ Session/server config that seeds new sessions or must survive on the server →
 
 ### Settings home: host, quick controls, groups
 
-The Settings home (the whole screen on phones, the rail on desktop) leads
-with a **host card**: the computer these settings belong to (a saved host's
-name, the relay name, or the page's hostname), how it is reached (this
-computer, relay, direct) and its version, with a "Connected" mark. Phones
-then show **quick controls** for theme and text size; both write the same
-browser-local preferences as Appearance, and text size offers the Appearance
-presets (a custom percentage shows as a figure with no preset selected).
+The Settings index leads with a **host card**: the computer these settings
+belong to (a saved host's name, the relay name, or the page's hostname), how
+it is reached (this computer, relay, direct) and its version, with a
+"Connected" mark. **Quick controls** for theme and text size follow; both
+write the same browser-local preferences as Appearance, and text size offers
+the Appearance presets (a custom percentage shows as a figure with no preset
+selected). On phones the index is the whole screen. On a two-column-wide
+desktop it is an **Overview** (host card, quick controls, an attention card
+that appears only for real problems, then the groups as category cards with
+status lines); opening `/settings` no longer selects the first category.
 
 Categories sit under seven headings, in this order. Every category belongs to
 exactly one group (`pages/settings/settingsGroups.ts`, pinned by a test); a
@@ -70,24 +73,39 @@ a group with no visible category is not drawn.
 
 | Group | Categories |
 | --- | --- |
-| Agents & models | Providers, Session defaults, Agent context, Message delivery, Cache billing, Remote executors |
-| Look & feel | Appearance, Toolbar, Speech backends |
+| Agents & models | Providers, Session defaults, Agent context, Agent behavior, Message delivery, Cache billing, Remote executors |
+| Look & feel | Appearance, Toolbar, Voice input |
 | Notifications & devices | Notifications, Devices, Device bridge |
 | Access & security | Local access, Remote access, Users |
 | Projects & integrations | Source control, Issues & PRs, Project templates, Apps, Lifecycle webhooks, Browser extension |
-| Data & about | Storage, About |
+| Data & about | Storage, Import/Export, About |
 | Advanced & debug | Performance, Environment, Development |
 
-**Transfer browser settings** and **Copy settings between servers** sit
-between the ordinary groups and Advanced & debug, so Advanced & debug is
-always last. Search results replace everything under the search field. On
-phones a category opens as its own page with a back chevron; on desktop the
-rail stays beside the pane and keeps the open category in view.
+Advanced & debug is always last; on phones it folds into one collapsed entry
+row until opened. Users who get the Import/Export category reach **Transfer
+browser settings** and **Copy settings between servers** there; only when
+that category is absent (limited users) do both sit between the ordinary
+groups and Advanced & debug. Search results replace everything under the
+search field. On phones a category opens as its own page with a back
+chevron; on desktop the rail stays beside the pane and keeps the open
+category in view.
+
+Rows may carry a per-row scope tag, **This device / Server** (本机 / 服务器;
+`SettingsItem` `scope`, defaulted by `SettingsSection` `scope`): stored in
+this browser, or on the server for every device. Besides the header Undo
+button, the first change that makes a pane undoable shows a toast (`Changed
+{page}` with **Undo**) that calls the same pane-snapshot undo.
 
 ### The category rail is an index, not a column to fill
 
-In the two-column layout the rail has a fixed 272px width (px, so the text-size
-setting cannot stretch it) and every row's hint stays on one line, truncated.
+In the two-column layout the rail is a full-height settings sidebar on
+`--side-bg` with its own scroll. It replaces the app sidebar and leads with a
+**Back to app** link, the Settings title, a compact host card and the search
+field, then an Overview entry and the groups. Group headers are disclosure
+buttons with category counts; the collapsed set persists per browser
+(`vibeallday-settings-rail-collapsed-groups`), and every group expands while
+searching. The rail has a fixed 272px width (px, so the text-size setting
+cannot stretch it) and every row's hint stays on one line, truncated.
 A category description is a phrase for scanning, and the rail must never be
 sized by the longest one: when it was, a single sentence-long description took
 60% of a 1000px window and starved the pane behind it, collapsing Session
@@ -96,15 +114,18 @@ descriptions, and keep the cap.
 
 ### Explicit browser-settings transfer
 
-The Settings category navigation exposes **Transfer browser settings** below
-the ordinary category groups, in both its desktop rail and narrow-screen list. It has one
-server-stored slot for portable browser preferences. This is a manual transfer
-mechanism layered over (1), not continuous synchronization or a fourth
-persistence scope. **Save from this browser** replaces the single server
-snapshot. **Apply to this browser** applies that snapshot to the current
-browser, even when another device created it, replaces the allowlisted local
-preference set, and then reloads the client. Server-persisted settings in (3)
-already survive and are not duplicated into the transfer slot.
+**Transfer browser settings** lives in the **Data & about › Import/Export**
+pane as its **Server slot** tab (the clipboard copy is the **Copy & paste**
+tab); for limited users, who do not get that category, the Settings category
+navigation still exposes it below the ordinary category groups, in both its
+desktop rail and narrow-screen list. It has one server-stored slot for
+portable browser preferences. This is a manual transfer mechanism layered over
+(1), not continuous synchronization or a fourth persistence scope. **Save from
+this browser** replaces the single server snapshot. **Apply to this browser**
+applies that snapshot to the current browser, even when another device created
+it, replaces the allowlisted local preference set, and then reloads the
+client. Server-persisted settings in (3) already survive and are not
+duplicated into the transfer slot.
 
 The client owns an explicit allowlist. Browser identity, relay/auth and speech
 credentials, source-scoped state, drafts, cache contents and runtime
@@ -114,8 +135,9 @@ the connected server advertises `browser-settings-backup`; older servers retain
 the ordinary local settings behavior.
 
 Because the slot lives on one server, it cannot carry preferences between
-servers. **Copy settings between servers**, beneath the slot controls, moves
-the same allowlisted set as text instead. It is purely client-side, so it
+servers. **Copy settings between servers** (the **Copy & paste** tab, or
+beneath the slot controls for limited users) moves the same allowlisted set
+as text instead. It is purely client-side, so it
 shows for every resolved principal regardless of server capabilities.
 
 - **Copy settings** writes one JSON document,
@@ -179,11 +201,12 @@ UI should state directly.
   committed there. [settings-search](settings-search.md) owns both contracts.
 - **Source Control → Review history and outcomes.** On by default for new
   installs. It stores exact source captures, review submission history, agent
-  outcomes, and unread review responses; those records power the Source Control
-  Reviews view and Inbox outcomes. Turning it off leaves line comments,
-  Pending Comments, and review submission available, but stops creating exact
-  submission records and checking outcomes automatically. It hides existing
-  Reviews and Inbox outcomes without deleting their stored records. Automatic
+  outcomes, and unread review responses; those records power the submitted
+  reviews in the Source Control Review tab and Inbox outcomes. Turning it off
+  leaves line comments, pending comments, and review submission available, but
+  stops creating exact submission records and checking outcomes automatically.
+  It hides existing submitted reviews and Inbox outcomes without deleting their
+  stored records. Automatic
   response observation is a bounded implementation detail of this parent
   feature; Refresh performs a later manual check.
 - **Agent Context → Tell agents this client renders LaTeX math.** Off by
@@ -223,7 +246,7 @@ UI should state directly.
 - **Providers → Compact context early.** Off means VIBEALLDAY sends no threshold or
   `/compact` request and leaves provider defaults unchanged. A percentage asks
   VIBEALLDAY to initiate compaction at that context-window threshold.
-- **Providers → Continue after compaction.** Off for every provider. When a
+- **Agent behavior → Continue after compaction.** Off for every provider. When a
   provider checkbox is on, VIBEALLDAY injects a hidden continuation turn after
   compaction settles and the session is idle. The turn ends with `continue.`
   The N slider (0–20) copies that many recent user/assistant prose turns in
@@ -231,12 +254,13 @@ UI should state directly.
   often redundant with the provider's own compact summary; Codex in particular
   commonly keeps working through compaction. Older servers omit the field and
   the client hides the row.
-- **Providers → Idle harness lifetime.** Sets how long an idle provider harness
+- **Agent behavior → Idle harness lifetime.** Sets how long an idle provider harness
   with no viewer and no feature-owned retention may remain in memory. Running
   and waiting sessions are outside this timer; `-1` disables idle reaping.
-- **Providers → Claude Gateway.** Gateway URL, optional start command, Agent
-  denial policy, and plan-mode exclusion are nested in the Claude Gateway
-  provider card. URL and command edits require explicit confirmation because
+- **Providers → Claude Gateway.** The Providers category opens to an overview
+  of provider cards. Gateway URL, optional start command, Agent denial policy,
+  and plan-mode exclusion are on the Claude Gateway detail page
+  (`/settings/providers/claude-gateway`). URL and command edits require explicit confirmation because
   they control provider launch; Save or Enter submits both fields together.
 - **Providers → Codex reasoning summaries.** The server-persisted Codex app-server
   mode is one of `auto`, `concise`, `detailed`, or `none`, displayed as Automatic,
@@ -291,9 +315,10 @@ UI should state directly.
   outside local home requires the exact same absolute path remotely. The remote
   provider CLI owns authentication and may differ in version from the local
   runtime.
-- **Development / About.** Development is always visible immediately before
-  About; About is last. Restart Server appears only when the development wrapper
-  supports manual backend reload. Its warning counts interruptible active
+- **Development / About.** About is last in Data & about; Development is last
+  in Advanced & debug, which is always the last group. Restart Server sits in
+  About's bottom maintenance section as a danger-soft action and appears only
+  when the development wrapper supports manual backend reload. Its warning counts interruptible active
   sessions and queued messages; a session is excluded only when its reload-safe
   provider host can detach without losing VIBEALLDAY-owned queued input.
 
@@ -426,14 +451,16 @@ sensible one exists.
 ### Making the nature visible
 
 A user cannot be expected to infer that one row in a pane is shared with
-everyone while its neighbours are not. Group server-wide options under their
-own settings category rather than marking them individually: a category carries
-the explanation once, in its description, instead of repeating a badge per row
-and leaving unbadged rows ambiguous. `storage` is the existing precedent — it
-is already server-wide in fact (storage location, tool-result preservation; see
-[storage-settings](storage-settings.md)) — so the category should be the site
-where that fact is stated, and new server-wide options should join it or a
-sibling rather than being scattered by feature area.
+everyone while its neighbours are not. Rows therefore state their scope with
+a **This device / Server** tag (`ScopeTag`, set through `SettingsSection`
+`scope` as the section default and `SettingsItem` `scope` per row; `null` opts
+a row out), and sections that mix both kinds tag each row.
+A category that is server-wide as a whole still says so once in its
+description. `storage` is the existing precedent — it is already server-wide
+in fact (storage location, tool-result preservation; see
+[storage-settings](storage-settings.md)) — and new server-wide options should
+join it or a sibling where they fit rather than being scattered by feature
+area.
 
 Rows must still use the shared `SettingsItem`/`SettingsSection` layer so they
 stay findable by search ([settings-search](settings-search.md)); grouping is
@@ -473,7 +500,8 @@ The category registry is `CATEGORY_COMPONENTS` in
 and order come from `getSettingsCategories` in
 `packages/client/src/i18n-settings.ts`. Current inventory: `appearance`,
 `performance`, `toolbar`, `model`, `message-delivery`, `source-control`,
-`issues`, `storage`, `computer-control`, `agent-context`, `notifications`,
+`issues`, `storage`, `import-export`, `computer-control`, `agent-context`,
+`agent-behavior`, `notifications`,
 `webhooks`, `devices`, `local-access`, `users`, `project-templates`, `apps`,
 `remote`, `providers`, `cache-miss-billing`, `speech`, `remote-executors`,
 `environment`, `development`, `emulator`, `about`.
