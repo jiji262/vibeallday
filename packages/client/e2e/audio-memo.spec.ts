@@ -358,6 +358,11 @@ test("audio memo captures WAV, preserves draft on cancel, and uploads before sen
   expect(submitted).toBeUndefined();
   expect(transcriptions).toBe(0);
 
+  // Cancel leaves the pointer over the voice button. On a slow run its hover
+  // hint appears and covers Attach, and a click on a control under a passive
+  // tooltip is blocked by design (topics/tooltip-interactions.md).
+  await page.mouse.move(1, 1);
+  await expect(page.getByRole("tooltip")).toHaveCount(0);
   await attach.click({ modifiers: ["Shift"] });
   await expect(stop).toBeEnabled();
   await page.getByRole("checkbox", { name: "Include transcript" }).check();

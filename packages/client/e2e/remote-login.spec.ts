@@ -90,8 +90,8 @@ test.describe("Remote Login Flow", () => {
     await disableRemoteAccess(baseURL);
   });
 
-  test("login page renders correctly", async ({ page, remoteClientURL }) => {
-    await page.goto(remoteClientURL);
+  test("login page renders correctly", async ({ page, remotePreviewURL }) => {
+    await page.goto(remotePreviewURL);
     await goToDirectLogin(page);
 
     // Verify login form is visible (already checked by goToDirectLogin)
@@ -103,10 +103,10 @@ test.describe("Remote Login Flow", () => {
 
   test("unremembered direct login does not borrow another saved principal", async ({
     page,
-    remoteClientURL,
+    remotePreviewURL,
     wsURL,
   }) => {
-    await page.goto(remoteClientURL);
+    await page.goto(remotePreviewURL);
     await goToDirectLogin(page);
 
     const savedCredentials = await page.evaluate((endpoint) => {
@@ -159,10 +159,10 @@ test.describe("Remote Login Flow", () => {
 
   test("wrong password shows error", async ({
     page,
-    remoteClientURL,
+    remotePreviewURL,
     wsURL,
   }) => {
-    await page.goto(remoteClientURL);
+    await page.goto(remotePreviewURL);
     await goToDirectLogin(page);
 
     // Fill in login form with wrong password
@@ -184,10 +184,10 @@ test.describe("Remote Login Flow", () => {
 
   test("unknown username shows error", async ({
     page,
-    remoteClientURL,
+    remotePreviewURL,
     wsURL,
   }) => {
-    await page.goto(remoteClientURL);
+    await page.goto(remotePreviewURL);
     await goToDirectLogin(page);
 
     // Fill in login form with unknown username
@@ -209,9 +209,9 @@ test.describe("Remote Login Flow", () => {
 
   test("server unreachable shows connection error", async ({
     page,
-    remoteClientURL,
+    remotePreviewURL,
   }) => {
-    await page.goto(remoteClientURL);
+    await page.goto(remotePreviewURL);
     await goToDirectLogin(page);
 
     // Fill in login form with unreachable server
@@ -236,9 +236,9 @@ test.describe("Remote Login Flow", () => {
 
   test("empty fields show validation error", async ({
     page,
-    remoteClientURL,
+    remotePreviewURL,
   }) => {
-    await page.goto(remoteClientURL);
+    await page.goto(remotePreviewURL);
     await goToDirectLogin(page);
 
     // Clear the server URL field (it has a default value)
@@ -260,12 +260,12 @@ test.describe("Remote Login Flow", () => {
  */
 async function loginViaRemoteClient(
   page: import("@playwright/test").Page,
-  remoteClientURL: string,
+  remotePreviewURL: string,
   wsURL: string,
   username: string,
   password: string,
 ) {
-  await page.goto(remoteClientURL);
+  await page.goto(remotePreviewURL);
   await goToDirectLogin(page);
   await page.fill('[data-testid="ws-url-input"]', wsURL);
   await page.fill('[data-testid="username-input"]', username);
@@ -319,11 +319,11 @@ test.describe("Session Resumption", () => {
 
   test("login with remember me, refresh page, still authenticated", async ({
     page,
-    remoteClientURL,
+    remotePreviewURL,
     wsURL,
   }) => {
     // Navigate and clear localStorage, then reload for fresh state
-    await page.goto(remoteClientURL);
+    await page.goto(remotePreviewURL);
     await page.evaluate(() => {
       localStorage.clear();
       sessionStorage.clear();
@@ -400,11 +400,11 @@ test.describe("Session Resumption", () => {
   test("password change invalidates stored session", async ({
     page,
     baseURL,
-    remoteClientURL,
+    remotePreviewURL,
     wsURL,
   }) => {
     // Navigate and clear localStorage, then reload for fresh state
-    await page.goto(remoteClientURL);
+    await page.goto(remotePreviewURL);
     await page.evaluate(() => {
       localStorage.clear();
       sessionStorage.clear();
@@ -462,11 +462,11 @@ test.describe("Session Resumption", () => {
 
   test("session auto-resumes after brief disconnect", async ({
     page,
-    remoteClientURL,
+    remotePreviewURL,
     wsURL,
   }) => {
     // Navigate and clear localStorage, then reload for fresh state
-    await page.goto(remoteClientURL);
+    await page.goto(remotePreviewURL);
     await page.evaluate(() => {
       localStorage.clear();
       sessionStorage.clear();
@@ -507,7 +507,7 @@ test.describe("Session Resumption", () => {
 
     // Navigate away and back (simulates closing and reopening tab)
     await page.goto("about:blank");
-    await page.goto(remoteClientURL);
+    await page.goto(remotePreviewURL);
 
     // Should auto-resume and show main app
     await expect(page.locator(".sidebar")).toBeVisible({ timeout: 10000 });
@@ -538,12 +538,12 @@ test.describe("Encrypted Data Flow", () => {
 
   test("sidebar navigation loads via SecureConnection", async ({
     page,
-    remoteClientURL,
+    remotePreviewURL,
     wsURL,
   }) => {
     await loginViaRemoteClient(
       page,
-      remoteClientURL,
+      remotePreviewURL,
       wsURL,
       TEST_USERNAME,
       TEST_PASSWORD,
@@ -567,14 +567,14 @@ test.describe("Encrypted Data Flow", () => {
   test("!! Commands sidebar category stays on its remote route", async ({
     page,
     baseURL,
-    remoteClientURL,
+    remotePreviewURL,
     wsURL,
   }) => {
     await setBangHistoryVisibility(baseURL, true);
     try {
       await loginViaRemoteClient(
         page,
-        remoteClientURL,
+        remotePreviewURL,
         wsURL,
         TEST_USERNAME,
         TEST_PASSWORD,
@@ -598,12 +598,12 @@ test.describe("Encrypted Data Flow", () => {
 
   test("activity subscription receives events", async ({
     page,
-    remoteClientURL,
+    remotePreviewURL,
     wsURL,
   }) => {
     await loginViaRemoteClient(
       page,
-      remoteClientURL,
+      remotePreviewURL,
       wsURL,
       TEST_USERNAME,
       TEST_PASSWORD,
@@ -621,12 +621,12 @@ test.describe("Encrypted Data Flow", () => {
 
   test("mock project visible in sidebar", async ({
     page,
-    remoteClientURL,
+    remotePreviewURL,
     wsURL,
   }) => {
     await loginViaRemoteClient(
       page,
-      remoteClientURL,
+      remotePreviewURL,
       wsURL,
       TEST_USERNAME,
       TEST_PASSWORD,

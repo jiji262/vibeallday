@@ -7,6 +7,11 @@ import { createServer, resolveConfig } from "vite";
 import { describe, expect, it, vi } from "vitest";
 import { reloadNotify } from "../../../vite-plugin-reload-notify";
 
+// Boots Vite with the real config and transforms /src/main.tsx: about 450ms
+// here, 2818-4641ms across 11 passing CI runs (2026-10), and one run killed at
+// the 5000ms default. 3x that limit (topics/test-time-budgets.md).
+const REAL_CONFIG_SERVER_BUDGET_MS = 15_000;
+
 describe("Vite dependency cache isolation", () => {
   it("requires an explicit reload before importing changed source in manual mode", async () => {
     // Vite canonicalizes module IDs. Keep manually emitted watcher paths in
@@ -133,53 +138,57 @@ if (location.pathname === '/page') document.querySelector('button').click();`,
     expect(local.server.strictPort).toBe(true);
   });
 
-  it("notifies about source changes in manual reload mode", async () => {
-    const directory = await mkdtemp(
-      resolve(tmpdir(), "vibeallday-vite-notify-"),
-    );
-    vi.stubEnv("NO_FRONTEND_RELOAD", "true");
-    vi.stubEnv("PORT", "4999");
-    vi.stubEnv("VITE_API_PORT", undefined);
-    const notify = vi
-      .spyOn(globalThis, "fetch")
-      .mockResolvedValue(new Response());
-    const root = process.cwd();
-    let server: Awaited<ReturnType<typeof createServer>> | undefined;
-    try {
-      server = await createServer({
-        root,
-        configFile: resolve(root, "vite.config.ts"),
-        cacheDir: resolve(directory, "node_modules/.vite"),
-        server: { middlewareMode: true, watch: null },
-        optimizeDeps: { noDiscovery: true, include: [] },
-      });
-      const send = vi.spyOn(server.hot, "send");
-      const entry = await server.transformRequest("/src/main.tsx");
-      expect(entry?.code).toContain("__vibeAllDayImportFresh(() => import(");
-      // A file no page loaded cannot leave one stale, so it is not a change.
-      server.watcher.emit(
-        "change",
-        resolve(root, "e2e/new-session-preboot-composer.spec.ts"),
+  it(
+    "notifies about source changes in manual reload mode",
+    async () => {
+      const directory = await mkdtemp(
+        resolve(tmpdir(), "vibeallday-vite-notify-"),
       );
-      await server.transformRequest("/src/lib/clientSummaryStore.ts");
-      server.watcher.emit(
-        "change",
-        resolve(root, "src/lib/clientSummaryStore.ts"),
-      );
-      await expect.poll(() => notify.mock.calls.length).toBe(1);
-      expect(notify).toHaveBeenCalledWith(
-        "http://localhost:4999/api/dev/frontend-changed",
-        expect.objectContaining({ method: "POST" }),
-      );
-      expect(
-        notify.mock.calls.map(([, init]) => String(init?.body ?? "")),
-      ).toEqual([expect.stringContaining("src/lib/clientSummaryStore.ts")]);
-      expect(send).not.toHaveBeenCalled();
-    } finally {
-      await server?.close();
-      vi.restoreAllMocks();
-      vi.unstubAllEnvs();
-      await rm(directory, { recursive: true });
-    }
-  });
+      vi.stubEnv("NO_FRONTEND_RELOAD", "true");
+      vi.stubEnv("PORT", "4999");
+      vi.stubEnv("VITE_API_PORT", undefined);
+      const notify = vi
+        .spyOn(globalThis, "fetch")
+        .mockResolvedValue(new Response());
+      const root = process.cwd();
+      let server: Awaited<ReturnType<typeof createServer>> | undefined;
+      try {
+        server = await createServer({
+          root,
+          configFile: resolve(root, "vite.config.ts"),
+          cacheDir: resolve(directory, "node_modules/.vite"),
+          server: { middlewareMode: true, watch: null },
+          optimizeDeps: { noDiscovery: true, include: [] },
+        });
+        const send = vi.spyOn(server.hot, "send");
+        const entry = await server.transformRequest("/src/main.tsx");
+        expect(entry?.code).toContain("__vibeAllDayImportFresh(() => import(");
+        // A file no page loaded cannot leave one stale, so it is not a change.
+        server.watcher.emit(
+          "change",
+          resolve(root, "e2e/new-session-preboot-composer.spec.ts"),
+        );
+        await server.transformRequest("/src/lib/clientSummaryStore.ts");
+        server.watcher.emit(
+          "change",
+          resolve(root, "src/lib/clientSummaryStore.ts"),
+        );
+        await expect.poll(() => notify.mock.calls.length).toBe(1);
+        expect(notify).toHaveBeenCalledWith(
+          "http://localhost:4999/api/dev/frontend-changed",
+          expect.objectContaining({ method: "POST" }),
+        );
+        expect(
+          notify.mock.calls.map(([, init]) => String(init?.body ?? "")),
+        ).toEqual([expect.stringContaining("src/lib/clientSummaryStore.ts")]);
+        expect(send).not.toHaveBeenCalled();
+      } finally {
+        await server?.close();
+        vi.restoreAllMocks();
+        vi.unstubAllEnvs();
+        await rm(directory, { recursive: true });
+      }
+    },
+    REAL_CONFIG_SERVER_BUDGET_MS,
+  );
 });
