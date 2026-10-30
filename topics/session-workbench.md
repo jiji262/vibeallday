@@ -5,19 +5,20 @@ Topic: session-workbench
 ## One destination, two views
 
 Desktop and phone navigation expose one **Sessions** destination. It opens
-**Overview** at `/inbox`; **All** at `/sessions` retains full session search,
+**Inbox** at `/inbox`; **All** at `/sessions` retains full session search,
 project/status/time/archive filters, selection and bulk actions. The shared
 view links preserve the project filter and relay-host prefix. Both existing
 URLs remain valid, and the application landing route remains `/inbox`.
 
-Mobile has Sessions, New, Projects and More. Session details still select
-Sessions, retain the project-specific All back link and existing recent-session
-switcher, and keep the shared keyboard/safe-area behavior. Hiding the bar for
-the keyboard never changes the header's navigation mode.
+Mobile has Sessions, New, Projects and More in a tab bar that appears only on
+the root pages `/inbox`, `/sessions`, `/projects` and `/more`. Session details
+have no tab bar; they retain the project-specific All back link and existing
+recent-session switcher, and keep the shared keyboard/safe-area behavior.
+Hiding the bar for the keyboard never changes the header's navigation mode.
 
-## Overview
+## Inbox
 
-The overview progressively reads the existing non-archived global catalog and
+The inbox progressively reads the existing non-archived global catalog and
 classifies each accessible session once, in this order:
 
 1. **Needs you:** pending approval/question, waiting-input state or an
@@ -31,16 +32,20 @@ classifies each accessible session once, in this order:
 Sections and session cards fit the available phone width even when a title
 contains a long unbroken URL. Titles retain their two-line truncation.
 
-Unread is independent of these sections. Its always-visible shortcut counts
-all loaded, accessible non-archived records, including old and hidden-automation
-sessions. It opens All with the unread/unarchived and explicit all-source
-filters, preserving the project filter. A task completing after days of silence
+The summary tiles above the sections (Needs you, Running, Unread, and Queued
+where the server has a Project Queue) are in-page filter toggles: selecting one
+narrows the inbox to that group and selecting it again clears the filter.
+
+Unread is independent of these sections. Its always-visible tile counts all
+loaded, accessible non-archived records, including old and hidden-automation
+sessions. Its **View all unread** link opens All with the unread/unarchived and
+explicit all-source filters, preserving the project filter. A task completing after days of silence
 is therefore discoverable even if its last human turn is old.
 
 Catalog pagination and discovery remain explicit: incomplete counts carry `+`
 and a loading/incomplete notice. Empty/complete is not asserted while discovery
 is incomplete. The existing `/api/inbox` tier caps and unread windows remain
-its compatibility contract, not the overview's completeness boundary.
+its compatibility contract, not the inbox's completeness boundary.
 
 The hide-automation preference applies to ordinary recent/running rows; a
 session requiring human attention is never hidden by it. Existing pending
@@ -50,7 +55,7 @@ carry their explicit failure status; they are not fabricated session records.
 
 ## Stable chronology and targets
 
-Both overview and sidebar use max(browser composer submission, server
+Both inbox and sidebar use max(browser composer submission, server
 lastHumanTurnAt, createdAt); updatedAt never substitutes for human activity.
 Reading or background output does not reorder recent work. Pointer, keyboard
 focus and touch interaction hold row identity/order/group membership while

@@ -48,26 +48,31 @@ When a remote Git subprocess reaches its execution timeout, its existing error
 detail identifies the elapsed limit (30 seconds for Check remote, 60 seconds
 for Pull/Push). Output-buffer failures are not reported as timeouts.
 
-The navigation surface has these modes:
+The navigation surface is a strip of four views over the `?tab=` modes:
 
 - **Changes** is the default quick check and owns both the current
   HEAD-to-filesystem state and commit history. **Working tree status** is its
   normal landing at every repository state. A browser-local preference may
   instead select the newest commit when the repository is clean; Working tree
   remains available as a pinned revision.
-- **Working Tree** keeps the stable `?tab=files` URL while browsing current
-  filesystem contents. Its complete surface can find every project file except
-  `.git` administrative state. Current content is primary; blame is an optional
+- **Commit history** is the Changes mode showing commits: its revision list
+  opens for `?history=1`, the legacy `?tab=commits`, or the clean-repository
+  landing, and a bare `?rev=` focused commit also selects this view. It is not
+  a separate `?tab=` key; `?history=0` keeps Changes on the working tree
+  despite the clean landing.
+- **Files** (labelled **Working Tree** when the server can browse current
+  files) keeps the stable `?tab=files` URL while browsing current filesystem
+  contents. Its complete surface can find every project file except `.git`
+  administrative state. Current content is primary; blame is an optional
   tracked-file projection.
-- **Pending Comments** is the unsubmitted accumulator owned by
-  [Source Review → New Session](source-review-to-session.md). Its stable URL
-  key remains `comments`, preserving existing `?tab=comments` links.
-- **Reviews** is the submission and comment-site browser owned by that topic.
-  Its URL key is `reviews`; it shows frozen reviewer entries, captured source,
+- **Reviews** holds both review lists owned by
+  [Source Review → New Session](source-review-to-session.md): the unsubmitted
+  Pending Comments accumulator, whose stable URL key remains `comments`
+  (preserving existing `?tab=comments` links), and, behind the review
+  opt-in, the submission and comment-site browser under the URL key
+  `reviews`. That browser shows frozen reviewer entries, captured source,
   target sessions, outcomes, and open/addressed/resolved state as those
-  contracts become available. The added fourth mode means the wrapping rule
-  in *Header hierarchy* below must be re-verified at phone width rather than
-  assumed to still fit.
+  contracts become available.
 
 Normal Source Control navigation opens Changes with Working tree selected. A
 clean repository renders its quiet clean-state confirmation at desktop and
@@ -76,9 +81,9 @@ phone widths; a dirty repository renders its changed files. The browser-local
 instead of the default **Working tree status** landing. If the repository has
 no commits, the clean Working tree confirmation remains the fallback.
 
-A user-selected mode pushes a browser-history entry. Back from Pending Comments
-or Reviews therefore restores the preceding Source Control mode; a direct entry
-at `?tab=comments` still backs out of Source Control rather than inventing an
+A user-selected view pushes a browser-history entry. Back from Reviews
+therefore restores the preceding Source Control view; a direct entry at
+`?tab=comments` still backs out of Source Control rather than inventing an
 internal predecessor. Phone commit-detail history remains a separate nested
 interaction.
 
@@ -87,7 +92,7 @@ explicit source target. A bare `?rev=<sha>` is a focused commit: files and diff
 without the revision sidebar. `?history=1&rev=<sha>` opens history with that
 commit selected; `?history=1` opens history with Working tree selected. The
 detail-level **‹ Commit history** parent link and legacy `?tab=commits` URL open
-history inside Changes. A working-tree file link adds
+the Commit history view inside Changes. A working-tree file link adds
 `?worktreeFile=<path>`; a committed-file link combines `?rev=<sha>` with
 `?commitFile=<path>`. Both select the named file's diff as soon as its corpus is
 available, including the phone drill-in flow.
@@ -108,21 +113,17 @@ the standalone Working tree landing.
 
 ## Header hierarchy
 
-Project selection, branch, upstream, ahead/behind state, and the Clean/Dirty
-badge form the Source Control identity cluster. Changes/Files/Pending
-Comments/Reviews is the trailing mode selector. Pull, Push, Check remote, and
-Pause form one repository-action group in that fixed order. Pending Comments
-is only that mode tab; there is no second Comments action that opens the same
-pane.
-
-On a wide layout, repository actions occupy the title row between identity and
-the trailing modes only when the rendered intrinsic widths of all three groups
-fit. A `ResizeObserver`-backed measurement responds to identity, capability,
-count, and viewport changes; a viewport breakpoint does not infer that fit.
-When they do not fit, identity and modes retain the upper row and repository
-actions take a full-width fallback row below it. Constrained layouts give the
-mode selector and repository actions full-width rows. The same control
-instances move between placements rather than being duplicated.
+The project selector is the page title. Branch, upstream, ahead/behind state,
+and the Clean/Dirty badge form the Source Control identity bar, followed by
+the repository actions: one **Sync** split button and the live-update Pause
+toggle. Sync runs Pull when the upstream is ahead, Push when only local
+commits wait, and Check remote otherwise; its menu offers Pull, Push, and
+Check remote under their own labels. The compatibility view for servers
+without the Source Control workbench keeps separate Pull, Push, and Check
+remote buttons. The four views form a full-width tab strip under the identity
+row, split evenly on phones. Pending Comments is only part of the Reviews
+view; there is no second Comments action that opens the same pane. Each
+control renders once; nothing is duplicated between placements.
 
 The branch name in the identity cluster is navigation to the commit that branch
 points at — `recentCommits[0]`, the current `HEAD` tip. It is a real anchor with
@@ -140,13 +141,12 @@ preview never fetches: it shows only what the last **Check remote** observed.
 Without the capability, upstream remains inert text and the client sends no
 incoming-commit request.
 
-The Pending Comments tab opens that accumulator, including when drafts exist;
-submission remains on that pane. In the full-width fallback, repository
-actions stay left-anchored. Branch names,
-upstream names, count badges, action progress, and action outcomes must not move
-the Pull/Push/Check group. Their visible labels stay constant while a leading
-action glyph changes in place to present progress and brief success/warning
-state. Full action feedback remains visible below the header. The project
+The Reviews tab opens the Pending Comments accumulator, including when drafts
+exist; submission remains on that pane. Branch names, upstream names, count
+badges, action progress, and action outcomes must not move the Sync control.
+Its visible label stays constant (ahead/behind counts sit beside it) while a
+leading action glyph changes in place to present progress and brief
+success/warning state. Full action feedback remains visible below the header. The project
 selector retains its intrinsic width, up to its desktop cap, before branch and
 upstream text yield space; ordinary short project names must not truncate while
 unused header space remains.
