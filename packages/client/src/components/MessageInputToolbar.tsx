@@ -1270,8 +1270,23 @@ function ThinkingToolbarControl({
       scheduleInlinePositionUpdate,
     );
     updateInlinePosition();
+    // The toolbar re-lays out in its own commits (phone media query, measured
+    // overflow, lazy siblings) that move the trigger without resizing it or
+    // the window, so nothing above fires. Follow the trigger while open.
+    let triggerLeft = root.getBoundingClientRect().left;
+    let watchFrameId = 0;
+    const watchTrigger = () => {
+      const left = root.getBoundingClientRect().left;
+      if (left !== triggerLeft) {
+        triggerLeft = left;
+        updateInlinePosition();
+      }
+      watchFrameId = window.requestAnimationFrame(watchTrigger);
+    };
+    watchFrameId = window.requestAnimationFrame(watchTrigger);
 
     return () => {
+      window.cancelAnimationFrame(watchFrameId);
       window.cancelAnimationFrame(frameId);
       resizeObserver?.disconnect();
       window.removeEventListener("resize", scheduleInlinePositionUpdate);
