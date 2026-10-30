@@ -644,428 +644,494 @@ export function MessageDeliverySettings() {
   }
 
   return (
-    <SettingsSection description={t("messageDeliveryDescription")}>
-      <div className="settings-group">
-        {supportsRendez ? (
-          <RendezSettings
-            value={shownRendez}
-            projects={knownProjects}
-            watching={rendezWatching}
-            saving={draftRendez !== null}
-            onChange={saveRendez}
-          />
-        ) : (
+    <SettingsSection
+      description={t("messageDeliveryDescription")}
+      scope="server"
+    >
+      <SettingsSection
+        title={t("settingsDeliveryBusySection")}
+        description={t("settingsDeliveryBusySectionDescription")}
+      >
+        <div className="settings-group">
           <SettingsItem
-            label={t("rendezDefaultTitle")}
-            description={t("rendezDefaultDescription")}
-            descriptionLayout="full-width-on-narrow"
-            keywords={["rendez", ".rendez", "rendezvous", "upload", "watch"]}
-          >
-            <span className="settings-hint">{t("rendezUnavailable")}</span>
-          </SettingsItem>
-        )}
-        <SettingsItem
-          label={t("attachmentQualityTitle")}
-          description={t("attachmentQualityDescription")}
-          descriptionLayout="full-width-on-narrow"
-          keywords={[
-            "SD",
-            "HD",
-            "image",
-            "photo",
-            "screenshot",
-            "resize",
-            "compression",
-            "resolution",
-            "upload",
-          ]}
-          valueText={
-            attachmentQuality === "sd"
-              ? t("attachmentQualitySd")
-              : t("attachmentQualityHd")
-          }
-        >
-          <select
-            className="settings-select"
-            aria-label={t("attachmentQualityTitle")}
-            value={attachmentQuality}
-            onChange={(event) =>
-              setAttachmentQuality(
-                event.target.value as AttachmentUploadQuality,
-              )
-            }
-          >
-            <option value="sd">{t("attachmentQualitySd")}</option>
-            <option value="hd">{t("attachmentQualityHd")}</option>
-          </select>
-        </SettingsItem>
-        <SettingsItem
-          label={t("messageDeliveryJoinWindowTitle")}
-          description={t("messageDeliveryJoinWindowDescription")}
-          valueText={shownJoinWindowText}
-          className="model-settings-item"
-        >
-          <span className="output-appearance-slider-row">
-            <CommittedRangeInput
-              id="message-delivery-join-window"
-              min={0}
-              max={JOIN_WINDOW_SLIDER_MAX_SECONDS}
-              step={5}
-              value={Math.min(
-                shownJoinWindowSeconds,
-                JOIN_WINDOW_SLIDER_MAX_SECONDS,
-              )}
-              aria-label={t("messageDeliveryJoinWindowTitle")}
-              onCommit={(value) => setDraftJoinWindow(String(value))}
-            />
-            <span className="output-appearance-number-wrap">
-              <input
-                type="number"
-                className="settings-input-small output-appearance-number"
-                min={0}
-                max={JOIN_WINDOW_MAX_SECONDS}
-                value={shownJoinWindowText}
-                onChange={(e) => setDraftJoinWindow(e.target.value)}
-                aria-label={t("messageDeliveryJoinWindowTitle")}
-              />
-              <span className="output-appearance-unit">s</span>
-            </span>
-          </span>
-          <span className="settings-hint">
-            {shownJoinWindowSeconds === 0
-              ? t("messageDeliveryJoinWindowOffHint")
-              : t("messageDeliveryJoinWindowOnHint", {
-                  seconds: String(shownJoinWindowSeconds),
-                })}
-          </span>
-        </SettingsItem>
-
-        {supportsClearloop && (
-          <SettingsItem
-            label={t("messageDeliveryClearloopTitle")}
-            description={t("messageDeliveryClearloopDescription")}
+            label={t("appearanceToolbarDefaultActionTitle")}
+            description={t("appearanceToolbarDefaultActionDescription")}
             valueText={
-              shownClearloopInactivitySeconds === null
-                ? shownClearloopInactivityText
-                : formatDurationSeconds(shownClearloopInactivitySeconds)
+              shownBusyDefaultAction === "queue"
+                ? t("appearanceToolbarDefaultActionQueue")
+                : t("appearanceToolbarDefaultActionSteer")
             }
+          >
+            <select
+              className="settings-select"
+              value={shownBusyDefaultAction}
+              onChange={(event) => {
+                const next = event.target.value as BusyComposerDefaultAction;
+                if (!BUSY_COMPOSER_DEFAULT_ACTIONS.includes(next)) return;
+                setDraftBusyDefaultAction(next);
+                void updateSettings({
+                  clientDefaults: { busyComposerDefaultAction: next },
+                }).catch(() => {
+                  // surfaced via the hook's error state
+                });
+              }}
+              aria-label={t("appearanceToolbarDefaultActionTitle")}
+            >
+              <option value="steer">
+                {t("appearanceToolbarDefaultActionSteer")}
+              </option>
+              <option value="queue">
+                {t("appearanceToolbarDefaultActionQueue")}
+              </option>
+            </select>
+          </SettingsItem>
+          <SettingsItem
+            label={t("messageDeliveryJoinWindowTitle")}
+            description={t("messageDeliveryJoinWindowDescription")}
+            valueText={shownJoinWindowText}
             className="model-settings-item"
           >
             <span className="output-appearance-slider-row">
               <CommittedRangeInput
-                id="message-delivery-clearloop-inactivity"
-                min={MIN_CLEARLOOP_INACTIVITY_SECONDS}
-                max={MAX_CLEARLOOP_INACTIVITY_SECONDS}
-                step={10}
-                value={
-                  shownClearloopInactivitySeconds ??
-                  serverClearloopInactivitySeconds
-                }
-                aria-label={t("messageDeliveryClearloopTitle")}
-                onCommit={(value) =>
-                  setDraftClearloopInactivity(formatDurationSeconds(value))
-                }
+                id="message-delivery-join-window"
+                min={0}
+                max={JOIN_WINDOW_SLIDER_MAX_SECONDS}
+                step={5}
+                value={Math.min(
+                  shownJoinWindowSeconds,
+                  JOIN_WINDOW_SLIDER_MAX_SECONDS,
+                )}
+                aria-label={t("messageDeliveryJoinWindowTitle")}
+                onCommit={(value) => setDraftJoinWindow(String(value))}
               />
               <span className="output-appearance-number-wrap">
                 <input
-                  type="text"
-                  inputMode="text"
+                  type="number"
                   className="settings-input-small output-appearance-number"
-                  value={shownClearloopInactivityText}
-                  onChange={(e) => setDraftClearloopInactivity(e.target.value)}
-                  aria-label={t("messageDeliveryClearloopTitle")}
-                  aria-invalid={shownClearloopInactivitySeconds === null}
+                  min={0}
+                  max={JOIN_WINDOW_MAX_SECONDS}
+                  value={shownJoinWindowText}
+                  onChange={(e) => setDraftJoinWindow(e.target.value)}
+                  aria-label={t("messageDeliveryJoinWindowTitle")}
                 />
+                <span className="output-appearance-unit">s</span>
               </span>
             </span>
             <span className="settings-hint">
-              {shownClearloopInactivitySeconds === null
-                ? t("messageDeliveryClearloopInvalid")
-                : t("messageDeliveryClearloopHint", {
-                    duration: formatDurationSeconds(
-                      shownClearloopInactivitySeconds,
-                    ),
+              {shownJoinWindowSeconds === 0
+                ? t("messageDeliveryJoinWindowOffHint")
+                : t("messageDeliveryJoinWindowOnHint", {
+                    seconds: String(shownJoinWindowSeconds),
                   })}
             </span>
           </SettingsItem>
-        )}
-
-        {supportsProjectQueue && (
-          <SettingsSection title={t("projectQueueTitle")}>
+          <SettingsItem
+            as="label"
+            label={t("messageDeliverySteerNowDefaultTitle")}
+            description={t("messageDeliverySteerNowDefaultDescription")}
+            valueText={
+              shownSteerNowDefault
+                ? t("settingsAgentsValueOn")
+                : t("settingsAgentsValueOff")
+            }
+          >
+            <input
+              type="checkbox"
+              checked={shownSteerNowDefault}
+              onChange={(e) => {
+                const next = e.target.checked;
+                setDraftSteerNow(next);
+                void updateSettings({
+                  clientDefaults: { steerNowDefault: next },
+                }).catch(() => {
+                  // surfaced via the hook's error state
+                });
+              }}
+              aria-label={t("messageDeliverySteerNowDefaultTitle")}
+            />
+          </SettingsItem>
+          <SettingsItem
+            as="label"
+            label={t("messageDeliveryPatientQueueDefaultTitle")}
+            description={t("messageDeliveryPatientQueueDefaultDescription")}
+            descriptionLayout="full-width-on-narrow"
+            valueText={
+              shownPatientQueueDefault
+                ? t("settingsAgentsValueOn")
+                : t("settingsAgentsValueOff")
+            }
+          >
+            <input
+              type="checkbox"
+              checked={shownPatientQueueDefault}
+              onChange={(e) => {
+                const next = e.target.checked;
+                setDraftPatientQueue(next);
+                void updateSettings({
+                  clientDefaults: { patientQueueDefault: next },
+                }).catch(() => {
+                  // surfaced via the hook's error state
+                });
+              }}
+              aria-label={t("messageDeliveryPatientQueueDefaultTitle")}
+            />
+          </SettingsItem>
+          {supportsTopicShift && (
+            <>
+              <PatientCompactThresholdItem
+                label={t("messageDeliveryPatientQueueCompactTitle")}
+                description={t("messageDeliveryPatientQueueCompactDescription")}
+                storedPercent={
+                  settings?.clientDefaults?.patientQueueCompactAtPercent
+                }
+                onCommit={(percent) => {
+                  void updateSettings({
+                    clientDefaults: { patientQueueCompactAtPercent: percent },
+                  }).catch(() => {
+                    // surfaced via the hook's error state
+                  });
+                }}
+              />
+              <PatientCompactThresholdItem
+                label={t("messageDeliveryTopicShiftCompactTitle")}
+                description={t("messageDeliveryTopicShiftCompactDescription")}
+                storedPercent={
+                  settings?.clientDefaults?.topicShiftCompactAtPercent
+                }
+                onCommit={(percent) => {
+                  void updateSettings({
+                    clientDefaults: { topicShiftCompactAtPercent: percent },
+                  }).catch(() => {
+                    // surfaced via the hook's error state
+                  });
+                }}
+              />
+            </>
+          )}
+          {supportsClearloop && (
             <SettingsItem
-              label={t("messageDeliveryProjectQueueQuietTitle")}
-              description={t("messageDeliveryProjectQueueQuietDescription")}
-              valueText={shownProjectQueueQuietText}
+              label={t("messageDeliveryClearloopTitle")}
+              description={t("messageDeliveryClearloopDescription")}
+              valueText={
+                shownClearloopInactivitySeconds === null
+                  ? shownClearloopInactivityText
+                  : formatDurationSeconds(shownClearloopInactivitySeconds)
+              }
               className="model-settings-item"
             >
               <span className="output-appearance-slider-row">
                 <CommittedRangeInput
-                  id="message-delivery-project-queue-quiet"
-                  min={0}
-                  max={MAX_PROJECT_QUEUE_QUIET_SECONDS}
-                  step={5}
-                  value={shownProjectQueueQuietSeconds}
-                  aria-label={t("messageDeliveryProjectQueueQuietTitle")}
-                  onCommit={(value) => setDraftProjectQueueQuiet(String(value))}
+                  id="message-delivery-clearloop-inactivity"
+                  min={MIN_CLEARLOOP_INACTIVITY_SECONDS}
+                  max={MAX_CLEARLOOP_INACTIVITY_SECONDS}
+                  step={10}
+                  value={
+                    shownClearloopInactivitySeconds ??
+                    serverClearloopInactivitySeconds
+                  }
+                  aria-label={t("messageDeliveryClearloopTitle")}
+                  onCommit={(value) =>
+                    setDraftClearloopInactivity(formatDurationSeconds(value))
+                  }
                 />
                 <span className="output-appearance-number-wrap">
                   <input
-                    type="number"
+                    type="text"
+                    inputMode="text"
                     className="settings-input-small output-appearance-number"
-                    min={0}
-                    max={MAX_PROJECT_QUEUE_QUIET_SECONDS}
-                    value={shownProjectQueueQuietText}
-                    onChange={(e) => setDraftProjectQueueQuiet(e.target.value)}
-                    aria-label={t("messageDeliveryProjectQueueQuietTitle")}
+                    value={shownClearloopInactivityText}
+                    onChange={(e) =>
+                      setDraftClearloopInactivity(e.target.value)
+                    }
+                    aria-label={t("messageDeliveryClearloopTitle")}
+                    aria-invalid={shownClearloopInactivitySeconds === null}
                   />
-                  <span className="output-appearance-unit">s</span>
                 </span>
               </span>
               <span className="settings-hint">
-                {shownProjectQueueQuietSeconds === 0
-                  ? t("messageDeliveryProjectQueueQuietOffHint")
-                  : t("messageDeliveryProjectQueueQuietOnHint", {
-                      seconds: String(shownProjectQueueQuietSeconds),
+                {shownClearloopInactivitySeconds === null
+                  ? t("messageDeliveryClearloopInvalid")
+                  : t("messageDeliveryClearloopHint", {
+                      duration: formatDurationSeconds(
+                        shownClearloopInactivitySeconds,
+                      ),
                     })}
               </span>
             </SettingsItem>
-            {supportsReadinessCheck && (
-              <ProjectQueueReadinessSettings
-                command={serverReadinessCheck}
-                onSave={async (command) => {
-                  await updateSettings({ projectQueueReadinessCheck: command });
-                }}
-              />
-            )}
-          </SettingsSection>
-        )}
-
-        <SettingsItem
-          as="label"
-          label={t("messageDeliveryComposeAnchorsTitle")}
-          description={t("messageDeliveryComposeAnchorsDescription")}
-        >
-          <input
-            type="checkbox"
-            checked={shownAnchors}
-            onChange={(e) => {
-              const next = e.target.checked;
-              setDraftAnchors(next);
-              void updateSettings({ composeAnchorsEnabled: next }).catch(() => {
-                // surfaced via the hook's error state
-              });
-            }}
-            aria-label={t("messageDeliveryComposeAnchorsTitle")}
-          />
-        </SettingsItem>
-
-        <SettingsItem
-          label={t("messageDeliveryTurnTimestampsTitle")}
-          description={t("messageDeliveryTurnTimestampsDescription")}
-        >
-          <select
-            className="settings-select"
-            value={shownTurnTimestamps}
-            onChange={(event) => {
-              const next = event.target.value as TurnTimestampsPlacement;
-              if (!TURN_TIMESTAMPS_PLACEMENTS.includes(next)) return;
-              setDraftTurnTimestamps(next);
-              void updateSettings({ turnTimestamps: next }).catch(() => {
-                // surfaced via the hook's error state
-              });
-            }}
-            aria-label={t("messageDeliveryTurnTimestampsTitle")}
-          >
-            <option value="off">{t("messageDeliveryTurnTimestampsOff")}</option>
-            <option value="before">
-              {t("messageDeliveryTurnTimestampsBefore")}
-            </option>
-            <option value="after">
-              {t("messageDeliveryTurnTimestampsAfter")}
-            </option>
-          </select>
-        </SettingsItem>
-
-        <SettingsItem
-          as="label"
-          label={t("questionAsideSettingTitle")}
-          description={t("questionAsideSettingDescription")}
-        >
-          <input
-            type="checkbox"
-            checked={questionAsidesEnabled}
-            onChange={(event) => setQuestionAsidesEnabled(event.target.checked)}
-            aria-label={t("questionAsideSettingTitle")}
-          />
-        </SettingsItem>
-
-        {supportsBangCommands && (
+          )}
+        </div>
+      </SettingsSection>
+      <SettingsSection title={t("settingsDeliveryTimeSection")}>
+        <div className="settings-group">
           <SettingsItem
             as="label"
-            label={t("messageDeliveryBangCommandsTitle")}
-            description={t("messageDeliveryBangCommandsDescription")}
-          >
-            <input
-              type="checkbox"
-              checked={shownBangCommands}
-              onChange={(e) => {
-                const next = e.target.checked;
-                setDraftBangCommands(next);
-                void updateSettings({
-                  clientDefaults: { bangCommandsEnabled: next },
-                }).catch(() => {
-                  // surfaced via the hook's error state
-                });
-              }}
-              aria-label={t("messageDeliveryBangCommandsTitle")}
-            />
-          </SettingsItem>
-        )}
-
-        <SettingsItem
-          as="label"
-          label={t("messageDeliveryKeepMobileKeyboardOpenTitle")}
-          description={t("messageDeliveryKeepMobileKeyboardOpenDescription")}
-        >
-          <input
-            type="checkbox"
-            checked={keepMobileKeyboardOpenAfterDelivery}
-            onChange={(event) =>
-              setKeepMobileKeyboardOpenAfterDelivery(event.target.checked)
+            label={t("messageDeliveryComposeAnchorsTitle")}
+            description={t("messageDeliveryComposeAnchorsDescription")}
+            valueText={
+              shownAnchors
+                ? t("settingsAgentsValueOn")
+                : t("settingsAgentsValueOff")
             }
-            aria-label={t("messageDeliveryKeepMobileKeyboardOpenTitle")}
-          />
-        </SettingsItem>
-
-        <SettingsItem
-          label={t("appearanceToolbarDefaultActionTitle")}
-          description={t("appearanceToolbarDefaultActionDescription")}
-        >
-          <select
-            className="settings-select"
-            value={shownBusyDefaultAction}
-            onChange={(event) => {
-              const next = event.target.value as BusyComposerDefaultAction;
-              if (!BUSY_COMPOSER_DEFAULT_ACTIONS.includes(next)) return;
-              setDraftBusyDefaultAction(next);
-              void updateSettings({
-                clientDefaults: { busyComposerDefaultAction: next },
-              }).catch(() => {
-                // surfaced via the hook's error state
-              });
-            }}
-            aria-label={t("appearanceToolbarDefaultActionTitle")}
-          >
-            <option value="steer">
-              {t("appearanceToolbarDefaultActionSteer")}
-            </option>
-            <option value="queue">
-              {t("appearanceToolbarDefaultActionQueue")}
-            </option>
-          </select>
-        </SettingsItem>
-
-        <SettingsItem
-          as="label"
-          label={t("messageDeliverySteerNowDefaultTitle")}
-          description={t("messageDeliverySteerNowDefaultDescription")}
-        >
-          <input
-            type="checkbox"
-            checked={shownSteerNowDefault}
-            onChange={(e) => {
-              const next = e.target.checked;
-              setDraftSteerNow(next);
-              void updateSettings({
-                clientDefaults: { steerNowDefault: next },
-              }).catch(() => {
-                // surfaced via the hook's error state
-              });
-            }}
-            aria-label={t("messageDeliverySteerNowDefaultTitle")}
-          />
-        </SettingsItem>
-
-        <SettingsItem
-          as="label"
-          label={t("messageDeliveryPatientQueueDefaultTitle")}
-          description={t("messageDeliveryPatientQueueDefaultDescription")}
-          descriptionLayout="full-width-on-narrow"
-        >
-          <input
-            type="checkbox"
-            checked={shownPatientQueueDefault}
-            onChange={(e) => {
-              const next = e.target.checked;
-              setDraftPatientQueue(next);
-              void updateSettings({
-                clientDefaults: { patientQueueDefault: next },
-              }).catch(() => {
-                // surfaced via the hook's error state
-              });
-            }}
-            aria-label={t("messageDeliveryPatientQueueDefaultTitle")}
-          />
-        </SettingsItem>
-
-        {supportsTopicShift && (
-          <>
-            <PatientCompactThresholdItem
-              label={t("messageDeliveryPatientQueueCompactTitle")}
-              description={t("messageDeliveryPatientQueueCompactDescription")}
-              storedPercent={
-                settings?.clientDefaults?.patientQueueCompactAtPercent
-              }
-              onCommit={(percent) => {
-                void updateSettings({
-                  clientDefaults: { patientQueueCompactAtPercent: percent },
-                }).catch(() => {
-                  // surfaced via the hook's error state
-                });
-              }}
-            />
-            <PatientCompactThresholdItem
-              label={t("messageDeliveryTopicShiftCompactTitle")}
-              description={t("messageDeliveryTopicShiftCompactDescription")}
-              storedPercent={
-                settings?.clientDefaults?.topicShiftCompactAtPercent
-              }
-              onCommit={(percent) => {
-                void updateSettings({
-                  clientDefaults: { topicShiftCompactAtPercent: percent },
-                }).catch(() => {
-                  // surfaced via the hook's error state
-                });
-              }}
-            />
-          </>
-        )}
-
-        {supportsProjectQueue && (
-          <SettingsItem
-            as="label"
-            label={t("messageDeliveryProjectQueueShortcutTitle")}
-            description={t("messageDeliveryProjectQueueShortcutDescription")}
           >
             <input
               type="checkbox"
-              checked={shownProjectQueueCtrlEnter}
+              checked={shownAnchors}
               onChange={(e) => {
                 const next = e.target.checked;
-                setDraftProjectQueueCtrlEnter(next);
-                void updateSettings({
-                  clientDefaults: { projectQueueCtrlEnterEnabled: next },
-                }).catch(() => {
+                setDraftAnchors(next);
+                void updateSettings({ composeAnchorsEnabled: next }).catch(
+                  () => {
+                    // surfaced via the hook's error state
+                  },
+                );
+              }}
+              aria-label={t("messageDeliveryComposeAnchorsTitle")}
+            />
+          </SettingsItem>
+          <SettingsItem
+            label={t("messageDeliveryTurnTimestampsTitle")}
+            description={t("messageDeliveryTurnTimestampsDescription")}
+            valueText={
+              shownTurnTimestamps === "before"
+                ? t("messageDeliveryTurnTimestampsBefore")
+                : shownTurnTimestamps === "after"
+                  ? t("messageDeliveryTurnTimestampsAfter")
+                  : t("messageDeliveryTurnTimestampsOff")
+            }
+          >
+            <select
+              className="settings-select"
+              value={shownTurnTimestamps}
+              onChange={(event) => {
+                const next = event.target.value as TurnTimestampsPlacement;
+                if (!TURN_TIMESTAMPS_PLACEMENTS.includes(next)) return;
+                setDraftTurnTimestamps(next);
+                void updateSettings({ turnTimestamps: next }).catch(() => {
                   // surfaced via the hook's error state
                 });
               }}
-              aria-label={t("messageDeliveryProjectQueueShortcutTitle")}
+              aria-label={t("messageDeliveryTurnTimestampsTitle")}
+            >
+              <option value="off">
+                {t("messageDeliveryTurnTimestampsOff")}
+              </option>
+              <option value="before">
+                {t("messageDeliveryTurnTimestampsBefore")}
+              </option>
+              <option value="after">
+                {t("messageDeliveryTurnTimestampsAfter")}
+              </option>
+            </select>
+          </SettingsItem>
+        </div>
+      </SettingsSection>
+      <SettingsSection title={t("projectQueueTitle")}>
+        <div className="settings-group">
+          {supportsProjectQueue && (
+            <>
+              <SettingsItem
+                label={t("messageDeliveryProjectQueueQuietTitle")}
+                description={t("messageDeliveryProjectQueueQuietDescription")}
+                valueText={shownProjectQueueQuietText}
+                className="model-settings-item"
+              >
+                <span className="output-appearance-slider-row">
+                  <CommittedRangeInput
+                    id="message-delivery-project-queue-quiet"
+                    min={0}
+                    max={MAX_PROJECT_QUEUE_QUIET_SECONDS}
+                    step={5}
+                    value={shownProjectQueueQuietSeconds}
+                    aria-label={t("messageDeliveryProjectQueueQuietTitle")}
+                    onCommit={(value) =>
+                      setDraftProjectQueueQuiet(String(value))
+                    }
+                  />
+                  <span className="output-appearance-number-wrap">
+                    <input
+                      type="number"
+                      className="settings-input-small output-appearance-number"
+                      min={0}
+                      max={MAX_PROJECT_QUEUE_QUIET_SECONDS}
+                      value={shownProjectQueueQuietText}
+                      onChange={(e) =>
+                        setDraftProjectQueueQuiet(e.target.value)
+                      }
+                      aria-label={t("messageDeliveryProjectQueueQuietTitle")}
+                    />
+                    <span className="output-appearance-unit">s</span>
+                  </span>
+                </span>
+                <span className="settings-hint">
+                  {shownProjectQueueQuietSeconds === 0
+                    ? t("messageDeliveryProjectQueueQuietOffHint")
+                    : t("messageDeliveryProjectQueueQuietOnHint", {
+                        seconds: String(shownProjectQueueQuietSeconds),
+                      })}
+                </span>
+              </SettingsItem>
+              {supportsReadinessCheck && (
+                <ProjectQueueReadinessSettings
+                  command={serverReadinessCheck}
+                  onSave={async (command) => {
+                    await updateSettings({
+                      projectQueueReadinessCheck: command,
+                    });
+                  }}
+                />
+              )}
+            </>
+          )}
+          {supportsProjectQueue && (
+            <SettingsItem
+              as="label"
+              label={t("messageDeliveryProjectQueueShortcutTitle")}
+              description={t("messageDeliveryProjectQueueShortcutDescription")}
+              valueText={
+                shownProjectQueueCtrlEnter
+                  ? t("settingsAgentsValueOn")
+                  : t("settingsAgentsValueOff")
+              }
+            >
+              <input
+                type="checkbox"
+                checked={shownProjectQueueCtrlEnter}
+                onChange={(e) => {
+                  const next = e.target.checked;
+                  setDraftProjectQueueCtrlEnter(next);
+                  void updateSettings({
+                    clientDefaults: { projectQueueCtrlEnterEnabled: next },
+                  }).catch(() => {
+                    // surfaced via the hook's error state
+                  });
+                }}
+                aria-label={t("messageDeliveryProjectQueueShortcutTitle")}
+              />
+            </SettingsItem>
+          )}
+          {supportsRendez ? (
+            <RendezSettings
+              value={shownRendez}
+              projects={knownProjects}
+              watching={rendezWatching}
+              saving={draftRendez !== null}
+              onChange={saveRendez}
+            />
+          ) : (
+            <SettingsItem
+              label={t("rendezDefaultTitle")}
+              description={t("rendezDefaultDescription")}
+              descriptionLayout="full-width-on-narrow"
+              keywords={["rendez", ".rendez", "rendezvous", "upload", "watch"]}
+            >
+              <span className="settings-hint">{t("rendezUnavailable")}</span>
+            </SettingsItem>
+          )}
+        </div>
+      </SettingsSection>
+      <SettingsSection title={t("settingsDeliveryOtherSection")}>
+        <div className="settings-group">
+          {supportsBangCommands && (
+            <SettingsItem
+              as="label"
+              label={t("messageDeliveryBangCommandsTitle")}
+              description={t("messageDeliveryBangCommandsDescription")}
+            >
+              <input
+                type="checkbox"
+                checked={shownBangCommands}
+                onChange={(e) => {
+                  const next = e.target.checked;
+                  setDraftBangCommands(next);
+                  void updateSettings({
+                    clientDefaults: { bangCommandsEnabled: next },
+                  }).catch(() => {
+                    // surfaced via the hook's error state
+                  });
+                }}
+                aria-label={t("messageDeliveryBangCommandsTitle")}
+              />
+            </SettingsItem>
+          )}
+          <SettingsItem
+            scope="local"
+            as="label"
+            label={t("questionAsideSettingTitle")}
+            description={t("questionAsideSettingDescription")}
+            valueText={
+              questionAsidesEnabled
+                ? t("settingsAgentsValueOn")
+                : t("settingsAgentsValueOff")
+            }
+          >
+            <input
+              type="checkbox"
+              checked={questionAsidesEnabled}
+              onChange={(event) =>
+                setQuestionAsidesEnabled(event.target.checked)
+              }
+              aria-label={t("questionAsideSettingTitle")}
             />
           </SettingsItem>
-        )}
-
-        {error && <p className="settings-warning">{error}</p>}
-      </div>
+          <SettingsItem
+            scope="local"
+            as="label"
+            label={t("messageDeliveryKeepMobileKeyboardOpenTitle")}
+            description={t("messageDeliveryKeepMobileKeyboardOpenDescription")}
+            valueText={
+              keepMobileKeyboardOpenAfterDelivery
+                ? t("settingsAgentsValueOn")
+                : t("settingsAgentsValueOff")
+            }
+          >
+            <input
+              type="checkbox"
+              checked={keepMobileKeyboardOpenAfterDelivery}
+              onChange={(event) =>
+                setKeepMobileKeyboardOpenAfterDelivery(event.target.checked)
+              }
+              aria-label={t("messageDeliveryKeepMobileKeyboardOpenTitle")}
+            />
+          </SettingsItem>
+          <SettingsItem
+            scope="local"
+            label={t("attachmentQualityTitle")}
+            description={t("attachmentQualityDescription")}
+            descriptionLayout="full-width-on-narrow"
+            keywords={[
+              "SD",
+              "HD",
+              "image",
+              "photo",
+              "screenshot",
+              "resize",
+              "compression",
+              "resolution",
+              "upload",
+            ]}
+            valueText={
+              attachmentQuality === "sd"
+                ? t("attachmentQualitySd")
+                : t("attachmentQualityHd")
+            }
+          >
+            <select
+              className="settings-select"
+              aria-label={t("attachmentQualityTitle")}
+              value={attachmentQuality}
+              onChange={(event) =>
+                setAttachmentQuality(
+                  event.target.value as AttachmentUploadQuality,
+                )
+              }
+            >
+              <option value="sd">{t("attachmentQualitySd")}</option>
+              <option value="hd">{t("attachmentQualityHd")}</option>
+            </select>
+          </SettingsItem>
+        </div>
+      </SettingsSection>
+      {error && <p className="settings-warning">{error}</p>}
     </SettingsSection>
   );
 }

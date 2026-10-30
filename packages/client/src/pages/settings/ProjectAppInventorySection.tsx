@@ -12,6 +12,7 @@ import { ProjectAppViewer } from "../../components/ProjectAppViewer";
 import { projectAppStatusText } from "../../components/projectAppState";
 import { useVersion } from "../../hooks/useVersion";
 import { useI18n } from "../../i18n";
+import { ScopeTag } from "../../components/garden/ScopeTag";
 import styles from "./ProjectAppInventorySection.module.css";
 import { expandableRowProps, SettingsCollection } from "./SettingsCollection";
 import { ElidedPath } from "../../components/ui/ElidedPath";
@@ -158,7 +159,10 @@ export function ProjectAppInventorySection() {
       aria-label={t("projectAppInventoryTitle")}
     >
       <div className={styles.heading}>
-        <h3>{t("projectAppInventoryTitle")}</h3>
+        <h3>
+          {t("projectAppInventoryTitle")}
+          <ScopeTag scope="server" />
+        </h3>
         {supported && (
           <button
             type="button"
@@ -193,6 +197,7 @@ export function ProjectAppInventorySection() {
                 <span className={styles.deleteActions}>
                   <button
                     type="button"
+                    className={styles.dangerButton}
                     disabled={busy}
                     title={t("projectAppDeleteAppTitle")}
                     onClick={() => void deleteSelected(false)}
@@ -201,6 +206,7 @@ export function ProjectAppInventorySection() {
                   </button>
                   <button
                     type="button"
+                    className={styles.dangerButton}
                     disabled={busy}
                     title={t("projectAppDeleteProject")}
                     onClick={() => void deleteSelected(true)}

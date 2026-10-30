@@ -13,6 +13,12 @@ import {
   SESSION_SCROLL_BEHAVIOR_MODES,
   type SessionScrollBehaviorMode,
 } from "../../lib/sessionScrollBehavior";
+import { Button, Card, Tag } from "../../components/garden";
+import styles from "./DevelopmentSettings.module.css";
+import {
+  ScopedRowTitle,
+  ToggleSettingRow,
+} from "./PerformanceSettings.controls";
 import { SettingsItem } from "./SettingsItem";
 import { useSettingsPaneTitle } from "./SettingsPaneTitleContext";
 import { SettingsSection } from "./SettingsSection";
@@ -169,228 +175,229 @@ export function DevelopmentSettings() {
           });
 
   return (
-    <SettingsSection>
-      <div className="settings-group">
-        <SettingsItem
-          label={t("developmentSchemaTitle")}
-          description={t("developmentSchemaDescription")}
-        >
-          <label className="toggle-switch">
-            <input
-              type="checkbox"
-              checked={validationSettings.enabled}
-              onChange={(e) => setValidationEnabled(e.target.checked)}
-            />
-            <span className="toggle-slider" />
-          </label>
-        </SettingsItem>
-        {ignoredTools.length > 0 && (
-          <SettingsItem
-            label={t("developmentIgnoredToolsTitle")}
-            description={t("developmentIgnoredToolsDescription")}
+    <>
+      <SettingsSection
+        title={t("developmentSectionDiagnostics")}
+        description={t("developmentSectionDiagnosticsMeta")}
+        scope="local"
+      >
+        <div className="settings-group">
+          <ToggleSettingRow
+            label={t("developmentSchemaTitle")}
+            description={t("developmentSchemaDescription")}
+            checked={validationSettings.enabled}
+            onChange={setValidationEnabled}
+          />
+          {ignoredTools.length > 0 && (
+            <SettingsItem
+              label={t("developmentIgnoredToolsTitle")}
+              description={t("developmentIgnoredToolsDescription")}
+              valueText={ignoredTools.join(", ")}
+              info={
+                <>
+                  <ScopedRowTitle
+                    label={t("developmentIgnoredToolsTitle")}
+                    scope="local"
+                  />
+                  <p>{t("developmentIgnoredToolsDescription")}</p>
+                  <div className={styles.ignoredTools}>
+                    {ignoredTools.map((tool) => (
+                      <Tag key={tool}>{tool}</Tag>
+                    ))}
+                  </div>
+                </>
+              }
+            >
+              <Button variant="ghost" size="sm" onClick={clearIgnoredTools}>
+                {t("developmentClearIgnored")}
+              </Button>
+            </SettingsItem>
+          )}
+          <ToggleSettingRow
+            label={t("developmentRelayDebugTitle")}
+            description={t("developmentRelayDebugDescription")}
+            checked={relayDebugEnabled}
+            onChange={setRelayDebugEnabled}
+          />
+          <ToggleSettingRow
+            label={t("developmentDiagnosticsTitle")}
+            description={t("developmentDiagnosticsDescription")}
+            checked={remoteLogCollectionEnabled}
+            onChange={setRemoteLogCollectionEnabled}
+          />
+          {relayMonitorUrl && (
+            <SettingsItem
+              label={t("developmentRelayMonitorTitle")}
+              description={t("developmentRelayMonitorDescription")}
+              scope={null}
+            >
+              <a
+                className="settings-button settings-button-secondary"
+                href={relayMonitorUrl}
+                target="_blank"
+                rel="noreferrer"
+              >
+                {t("developmentRelayMonitorOpen")}
+              </a>
+            </SettingsItem>
+          )}
+        </div>
+      </SettingsSection>
+
+      <SettingsSection
+        title={t("developmentSectionExperimental")}
+        scope="server"
+      >
+        <div className="settings-group">
+          <ToggleSettingRow
+            label={t("developmentWorkstreamsTitle")}
+            description={t("developmentWorkstreamsDescription")}
+            checked={serverSettings?.workstreamsEnabled ?? false}
+            onChange={(enabled) =>
+              updateServerSetting("workstreamsEnabled", enabled)
+            }
             info={
               <>
-                <strong>{t("developmentIgnoredToolsTitle")}</strong>
-                <p>{t("developmentIgnoredToolsDescription")}</p>
-                <div className="ignored-tools-list">
-                  {ignoredTools.map((tool) => (
-                    <span key={tool} className="ignored-tool-badge">
-                      {tool}
-                    </span>
-                  ))}
-                </div>
+                <ScopedRowTitle
+                  label={t("developmentWorkstreamsTitle")}
+                  scope="server"
+                  tag={<Tag tone="attn">{t("developmentExperimentalTag")}</Tag>}
+                />
+                <p>{t("developmentWorkstreamsDescription")}</p>
               </>
             }
-          >
-            <button
-              type="button"
-              className="settings-button settings-button-secondary"
-              onClick={clearIgnoredTools}
-            >
-              {t("developmentClearIgnored")}
-            </button>
-          </SettingsItem>
-        )}
-        {relayMonitorUrl && (
-          <SettingsItem
-            label={t("developmentRelayMonitorTitle")}
-            description={t("developmentRelayMonitorDescription")}
-          >
-            <a
-              className="settings-button settings-button-secondary"
-              href={relayMonitorUrl}
-              target="_blank"
-              rel="noreferrer"
-            >
-              {t("developmentRelayMonitorOpen")}
-            </a>
-          </SettingsItem>
-        )}
-        <SettingsItem
-          label={t("developmentRelayDebugTitle")}
-          description={t("developmentRelayDebugDescription")}
-        >
-          <label className="toggle-switch">
-            <input
-              type="checkbox"
-              aria-label={t("developmentRelayDebugTitle")}
-              checked={relayDebugEnabled}
-              onChange={(e) => setRelayDebugEnabled(e.target.checked)}
-            />
-            <span className="toggle-slider" />
-          </label>
-        </SettingsItem>
-        <SettingsItem
-          label={t("developmentDiagnosticsTitle")}
-          description={t("developmentDiagnosticsDescription")}
-        >
-          <label className="toggle-switch">
-            <input
-              type="checkbox"
-              checked={remoteLogCollectionEnabled}
-              onChange={(e) => setRemoteLogCollectionEnabled(e.target.checked)}
-            />
-            <span className="toggle-slider" />
-          </label>
-        </SettingsItem>
-        <SettingsItem
-          label={t("developmentRetainRejectedSrpTitle")}
-          description={t("developmentRetainRejectedSrpDescription")}
-        >
-          <label className="toggle-switch">
-            <input
-              type="checkbox"
-              aria-label={t("developmentRetainRejectedSrpTitle")}
-              checked={retainRejectedSrpSessions}
-              onChange={(e) => setRetainRejectedSrpSessions(e.target.checked)}
-            />
-            <span className="toggle-slider" />
-          </label>
-        </SettingsItem>
-        <SettingsItem
-          label={t("developmentServiceWorkerTitle")}
-          description={t("developmentServiceWorkerDescription")}
-        >
-          <label className="toggle-switch">
-            <input
-              type="checkbox"
-              checked={serverSettings?.serviceWorkerEnabled ?? true}
-              onChange={(e) =>
-                updateServerSetting("serviceWorkerEnabled", e.target.checked)
-              }
-            />
-            <span className="toggle-slider" />
-          </label>
-        </SettingsItem>
-        <SettingsItem
-          label={t("developmentWorkstreamsTitle")}
-          description={t("developmentWorkstreamsDescription")}
-        >
-          <label className="toggle-switch">
-            <input
-              type="checkbox"
-              checked={serverSettings?.workstreamsEnabled ?? false}
-              onChange={(e) =>
-                updateServerSetting("workstreamsEnabled", e.target.checked)
-              }
-            />
-            <span className="toggle-slider" />
-          </label>
-        </SettingsItem>
-      </div>
+          />
+          <ToggleSettingRow
+            label={t("developmentServiceWorkerTitle")}
+            description={t("developmentServiceWorkerDescription")}
+            checked={serverSettings?.serviceWorkerEnabled ?? true}
+            onChange={(enabled) =>
+              updateServerSetting("serviceWorkerEnabled", enabled)
+            }
+          />
+        </div>
+      </SettingsSection>
 
-      <div className="settings-group">
-        <SettingsItem
-          label={t("developmentSessionScrollMemoryTitle")}
-          description={t("developmentSessionScrollMemoryDescription")}
-          keywords={[
-            t("developmentSessionScrollMemoryControlTitle"),
-            t("developmentSessionScrollMemoryKeywords"),
-            ...SESSION_SCROLL_BEHAVIOR_MODES.flatMap((mode) => [
-              t(sessionScrollMemoryModeLabelKeys[mode]),
-              t(sessionScrollMemoryModeDescriptionKeys[mode]),
-            ]),
-          ]}
-          valueText={t(
-            sessionScrollMemoryModeLabelKeys[sessionScrollBehaviorMode],
-          )}
-          className="settings-item--wide-control"
-          info={
-            <>
-              <strong>{t("developmentSessionScrollMemoryTitle")}</strong>
-              <p>{t("developmentSessionScrollMemoryDescription")}</p>
-              <ul className="settings-option-description-list">
-                {SESSION_SCROLL_BEHAVIOR_MODES.map((mode) => (
-                  <li key={mode}>
-                    <strong>{t(sessionScrollMemoryModeLabelKeys[mode])}</strong>
-                    <span>
-                      {t(sessionScrollMemoryModeDescriptionKeys[mode])}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </>
-          }
-        >
-          <div className="settings-item-actions">
-            <select
-              className="settings-select"
-              value={sessionScrollBehaviorMode}
-              onChange={(event) =>
-                setSessionScrollBehaviorMode(
-                  event.target.value as SessionScrollBehaviorMode,
-                )
-              }
-              aria-label={t("developmentSessionScrollMemoryControlTitle")}
-            >
-              {SESSION_SCROLL_BEHAVIOR_MODES.map((mode) => (
-                <option key={mode} value={mode}>
-                  {t(sessionScrollMemoryModeLabelKeys[mode])}
-                </option>
-              ))}
-            </select>
-          </div>
-        </SettingsItem>
-      </div>
+      <SettingsSection title={t("developmentSectionRecovery")} scope="local">
+        <div className="settings-group">
+          <ToggleSettingRow
+            label={t("developmentRetainRejectedSrpTitle")}
+            description={t("developmentRetainRejectedSrpDescription")}
+            checked={retainRejectedSrpSessions}
+            onChange={setRetainRejectedSrpSessions}
+          />
+          <SessionScrollMemoryRow
+            mode={sessionScrollBehaviorMode}
+            onChange={setSessionScrollBehaviorMode}
+          />
+        </div>
+      </SettingsSection>
 
       {isManualReloadMode && (
-        <div className="settings-group">
-          <SettingsItem
-            label={t("developmentRestartTitle")}
-            description={t("developmentRestartDescription")}
-            info={
-              <>
-                <strong>{t("developmentRestartTitle")}</strong>
-                <p>
-                  {t("developmentRestartDescription")}
-                  {pendingReloads.backend && (
-                    <span className="settings-pending">
-                      {" "}
-                      {t("developmentChangesPending")}
-                    </span>
+        <SettingsSection title={t("settingsMaintenanceTitle")} scope="server">
+          <Card tone="danger" flush className={styles.dangerCard}>
+            <SettingsItem
+              label={t("developmentRestartTitle")}
+              description={t("developmentRestartDescription")}
+              info={
+                <>
+                  <ScopedRowTitle
+                    label={t("developmentRestartTitle")}
+                    scope="server"
+                    tag={<Tag>{t("developmentManualReloadTag")}</Tag>}
+                  />
+                  <p>
+                    {t("developmentRestartDescription")}
+                    {pendingReloads.backend && (
+                      <span className="settings-pending">
+                        {" "}
+                        {t("developmentChangesPending")}
+                      </span>
+                    )}
+                  </p>
+                  {unsafeToRestart && (
+                    <p className="settings-warning">{restartWarning}</p>
                   )}
-                </p>
-                {unsafeToRestart && (
-                  <p className="settings-warning">{restartWarning}</p>
-                )}
-              </>
-            }
-          >
-            <button
-              type="button"
-              className={`settings-button ${unsafeToRestart ? "settings-button-danger" : ""}`}
-              onClick={handleRestartServer}
-              disabled={restarting}
+                </>
+              }
             >
-              {restarting
-                ? t("developmentRestarting")
-                : unsafeToRestart
-                  ? t("developmentRestartAnyway")
-                  : t("developmentRestart")}
-            </button>
-          </SettingsItem>
-        </div>
+              <Button
+                variant="danger-soft"
+                size="sm"
+                onClick={handleRestartServer}
+                disabled={restarting}
+              >
+                {restarting
+                  ? t("developmentRestarting")
+                  : unsafeToRestart
+                    ? t("developmentRestartAnyway")
+                    : t("developmentRestart")}
+              </Button>
+            </SettingsItem>
+          </Card>
+        </SettingsSection>
       )}
-    </SettingsSection>
+    </>
+  );
+}
+
+/** Restore-mode select with each mode's explanation listed under the title. */
+function SessionScrollMemoryRow({
+  mode,
+  onChange,
+}: {
+  mode: SessionScrollBehaviorMode;
+  onChange: (mode: SessionScrollBehaviorMode) => void;
+}) {
+  const { t } = useI18n();
+  return (
+    <SettingsItem
+      label={t("developmentSessionScrollMemoryTitle")}
+      description={t("developmentSessionScrollMemoryDescription")}
+      keywords={[
+        t("developmentSessionScrollMemoryControlTitle"),
+        t("developmentSessionScrollMemoryKeywords"),
+        ...SESSION_SCROLL_BEHAVIOR_MODES.flatMap((option) => [
+          t(sessionScrollMemoryModeLabelKeys[option]),
+          t(sessionScrollMemoryModeDescriptionKeys[option]),
+        ]),
+      ]}
+      valueText={t(sessionScrollMemoryModeLabelKeys[mode])}
+      className="settings-item--wide-control"
+      info={
+        <>
+          <ScopedRowTitle
+            label={t("developmentSessionScrollMemoryTitle")}
+            scope="local"
+          />
+          <p>{t("developmentSessionScrollMemoryDescription")}</p>
+          <ul className="settings-option-description-list">
+            {SESSION_SCROLL_BEHAVIOR_MODES.map((option) => (
+              <li key={option}>
+                <strong>{t(sessionScrollMemoryModeLabelKeys[option])}</strong>
+                <span>{t(sessionScrollMemoryModeDescriptionKeys[option])}</span>
+              </li>
+            ))}
+          </ul>
+        </>
+      }
+    >
+      <div className="settings-item-actions">
+        <select
+          className="settings-select"
+          value={mode}
+          onChange={(event) =>
+            onChange(event.target.value as SessionScrollBehaviorMode)
+          }
+          aria-label={t("developmentSessionScrollMemoryControlTitle")}
+        >
+          {SESSION_SCROLL_BEHAVIOR_MODES.map((option) => (
+            <option key={option} value={option}>
+              {t(sessionScrollMemoryModeLabelKeys[option])}
+            </option>
+          ))}
+        </select>
+      </div>
+    </SettingsItem>
   );
 }

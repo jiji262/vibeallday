@@ -109,3 +109,129 @@
   color: var(--text-muted);
   font-size: var(--font-size-sm);
 }
+
+/* Provider picker (design: provider tabs above the per-provider defaults). */
+.providerSeg {
+  flex-wrap: wrap;
+}
+
+/* Thinking mode + effort: two labelled Segmented rows. */
+.thinkingStack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.thinkingRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+  min-width: 0;
+}
+
+.thinkingLabel {
+  min-width: 5rem;
+  color: var(--ink-2);
+  font-size: var(--fs-small);
+  font-weight: 600;
+}
+
+.effortSeg {
+  flex-wrap: wrap;
+}
+
+/* Permission mode as risk-coloured radio cards (design .smd-perm). */
+.permGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr));
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.perm {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  min-width: 0;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-input);
+  background: var(--surface);
+  cursor: pointer;
+}
+
+.perm:hover {
+  background: var(--surface-2);
+}
+
+.perm:has(input:checked) {
+  border-color: var(--accent-line);
+  background: var(--accent-soft);
+}
+
+.permDanger {
+  border-color: var(--err-line);
+}
+
+.perm input {
+  flex: none;
+  margin-top: 2px;
+}
+
+.permBody {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.permHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+}
+
+.permName {
+  color: var(--ink);
+  font-size: var(--fs-small);
+  font-weight: 600;
+}
+
+.permDanger .permName {
+  color: var(--err-ink);
+}
+
+.permDesc {
+  color: var(--ink-2);
+  font-size: var(--fs-small);
+}
+
+.risk {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  margin-left: auto;
+}
+
+.risk > span {
+  width: 12px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--surface-3);
+}
+
+.risk > span.riskOn {
+  background: var(--ok);
+}
+
+.riskAttn > span.riskOn {
+  background: var(--attn);
+}
+
+.riskErr > span.riskOn {
+  background: var(--err);
+}

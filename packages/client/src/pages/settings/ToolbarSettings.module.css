@@ -50,3 +50,68 @@
   min-width: min(100%, 14rem);
   flex: 1 1 14rem;
 }
+
+/* Live session placement: which shown tools sit in the row vs the + tray. */
+.placement {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  background: var(--surface-2);
+}
+
+.placementHeading {
+  color: var(--ink);
+  font-size: var(--fs-small);
+}
+
+.placementGroup {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.placementLabel {
+  flex: none;
+  min-width: 4.5rem;
+  color: var(--ink-3);
+  font-family: var(--font-mono);
+  font-size: var(--fs-meta);
+}
+
+.placementChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.placementChip {
+  max-width: 100%;
+  padding: 1px var(--space-2);
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--r-chip);
+  background: var(--surface);
+  color: var(--ink-2);
+  font-size: var(--fs-meta);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.placementEmpty {
+  color: var(--ink-3);
+  font-size: var(--fs-meta);
+}
+
+.previewCaption {
+  margin: 0;
+  color: var(--ink-3);
+  font-size: var(--fs-meta);
+}

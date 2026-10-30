@@ -69,10 +69,12 @@ import {
 import { ProviderBadge } from "../../components/ProviderBadge";
 import { ModelSubscriptionUsage } from "../../components/ModelSubscriptionUsage";
 import { RecapAfterSecondsControl } from "../../components/RecapAfterSecondsControl";
+import { ShowThinkingControls } from "../../components/ThinkingControls";
 import {
-  ShowThinkingControls,
-  ThinkingControlsPanel,
-} from "../../components/ThinkingControls";
+  PermissionModeCards,
+  ProviderSegmented,
+  ThinkingDefaults,
+} from "./ModelSettings.controls";
 
 const RECAP_MODE_ORDER: RecapMode[] = ["off", "side-session", "fork"];
 const PROMPT_SUGGESTION_MODE_ORDER: PromptSuggestionMode[] = [
@@ -569,6 +571,7 @@ export function ModelSettings() {
   return (
     // The page intro already shows the pane title; keep it search-only here.
     <SettingsSection
+      scope="server"
       keywords={[
         t("modelSettingsSessionDefaultsTitle"),
         "session defaults",
@@ -611,28 +614,12 @@ export function ModelSettings() {
             valueText={selectedProvider?.displayName}
             className="new-session-provider-section session-default-provider-section settings-item--session-default-block settings-item--wide-control"
           >
-            <div className="provider-options">
-              {availableProviders.map((provider) => (
-                <button
-                  key={provider.name}
-                  type="button"
-                  className={`provider-option ${
-                    selectedProvider?.name === provider.name ? "selected" : ""
-                  }`}
-                  onClick={() => void handleProviderChange(provider.name)}
-                  disabled={providersLoading || settingsLoading}
-                >
-                  <span
-                    className={`provider-option-dot provider-${provider.name}`}
-                  />
-                  <div className="provider-option-content">
-                    <span className="provider-option-label">
-                      {provider.displayName}
-                    </span>
-                  </div>
-                </button>
-              ))}
-            </div>
+            <ProviderSegmented
+              providers={availableProviders}
+              value={selectedProvider?.name}
+              disabled={providersLoading || settingsLoading}
+              onChange={(name) => void handleProviderChange(name)}
+            />
           </SettingsItem>
 
           <SettingsItem
@@ -686,27 +673,20 @@ export function ModelSettings() {
               valueText={`${effectiveThinkingMode} ${effectiveEffortLevel ?? ""}`.trim()}
               className="new-session-helper-section session-default-thinking-section settings-item--session-default-block settings-item--wide-control"
             >
-              <ThinkingControlsPanel
+              <ThinkingDefaults
                 mode={effectiveThinkingMode}
                 modeOptions={thinkingModeOptions}
+                level={effectiveEffortLevel}
+                effortOptions={effortOptions}
                 onSetMode={(mode: ThinkingMode) =>
                   void updateProviderSessionDefaults({ thinkingMode: mode })
                 }
-                level={effectiveEffortLevel}
-                effortOptions={effortOptions}
                 onSetEffort={(level: EffortLevel) =>
-                  void updateProviderSessionDefaults({ effortLevel: level })
-                }
-                onSetEffortMode={(level: EffortLevel) =>
                   void updateProviderSessionDefaults({
                     thinkingMode: "on",
                     effortLevel: level,
                   })
                 }
-                showThinkingControl={false}
-                provider={selectedProvider?.name}
-                t={t}
-                className="thinking-controls-panel--inline session-default-thinking-controls"
               />
             </SettingsItem>
           )}
@@ -719,35 +699,17 @@ export function ModelSettings() {
               valueText={modeLabels[effectiveDefaultPermissionMode]}
               className="new-session-mode-section session-default-mode-section settings-item--session-default-block settings-item--wide-control"
             >
-              <div className="mode-options">
-                {permissionModeOptions.map((modeValue) => (
-                  <button
-                    key={modeValue}
-                    type="button"
-                    className={`mode-option ${
-                      effectiveDefaultPermissionMode === modeValue
-                        ? "selected"
-                        : ""
-                    }`}
-                    onClick={() =>
-                      void updateNewSessionDefaults({
-                        permissionMode: modeValue,
-                      })
-                    }
-                    disabled={settingsLoading}
-                  >
-                    <span className={`mode-option-dot mode-${modeValue}`} />
-                    <div className="mode-option-content">
-                      <span className="mode-option-label">
-                        {modeLabels[modeValue]}
-                      </span>
-                      <span className="mode-option-desc">
-                        {modeDescriptions[modeValue]}
-                      </span>
-                    </div>
-                  </button>
-                ))}
-              </div>
+              <PermissionModeCards
+                label={sessionDefaultCopy.permission.title}
+                modes={permissionModeOptions}
+                value={effectiveDefaultPermissionMode}
+                labels={modeLabels}
+                descriptions={modeDescriptions}
+                disabled={settingsLoading}
+                onChange={(modeValue) =>
+                  void updateNewSessionDefaults({ permissionMode: modeValue })
+                }
+              />
             </SettingsItem>
           )}
 
@@ -835,6 +797,7 @@ export function ModelSettings() {
               description={sessionDefaultCopy.showThinking.description}
               keywords={sessionDefaultCopy.showThinking.settings?.keywords}
               valueText={String(showThinking)}
+              scope="local"
               className="new-session-helper-section session-default-show-thinking-section settings-item--session-default-block settings-item--wide-control"
             >
               <ShowThinkingControls
@@ -988,6 +951,7 @@ export function ModelSettings() {
                 : undefined
             }
             className="new-session-helper-section session-default-fork-summary-section settings-item--session-default-block"
+            scope="local"
           >
             <input
               type="checkbox"
@@ -1151,6 +1115,8 @@ export function ModelSettings() {
             label={t("modelSettingsModelTitle")}
             description={t("modelSettingsModelDescription")}
             className="model-settings-item"
+            scope="local"
+            valueText={model}
           >
             <div className="font-size-selector model-settings-chip-group">
               {MODEL_OPTIONS.map((opt) => (

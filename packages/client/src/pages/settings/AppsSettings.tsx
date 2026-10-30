@@ -17,7 +17,9 @@ export function AppsSettings() {
       {version?.artifactViewer ? (
         <ArtifactSettings />
       ) : (
-        <p>{t("settingsAppsUnavailable")}</p>
+        <Notice tone="neutral" className={styles.movedNotice}>
+          {t("settingsAppsUnavailable")}
+        </Notice>
       )}
       <McpAppViewsSettings />
     </SettingsSection>

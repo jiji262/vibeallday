@@ -333,10 +333,11 @@
    auto under a dark OS repeats Night. Design names (--canvas, --ink, --accent,
    --r-*, --fs-*) hold the values; legacy names alias them in :root so older
    components recolor. data-theme sits on <html>, so a :root alias resolves
-   against the active skin and needs no per-theme copy.
+   against the active skin; a nested data-theme subtree re-scopes skins.
    ========================================================================== */
 
-:root {
+:root,
+[data-theme="light"] {
   color-scheme: light;
 
   /* Celadon (light) design tokens */
@@ -950,7 +951,7 @@
 }
 
 /* Night OLED: Night ink and accents over pure-black surfaces. */
-:root[data-theme="verydark"] {
+[data-theme="verydark"] {
   --canvas: #000000;
   --surface: #0a0c10;
   --surface-2: #11141a;
@@ -1238,8 +1239,7 @@ body {
   font-family: var(--font-ui);
   margin: 0;
   padding: 0;
-  /* Safe area insets for Tauri mobile (edge-to-edge mode) and PWA standalone.
-     On regular browsers these resolve to 0. */
+  /* Safe area insets for Tauri mobile and PWAs; 0 in regular browsers. */
   padding-top: env(safe-area-inset-top, 0px);
   padding-bottom: env(safe-area-inset-bottom, 0px);
   background: var(--bg-surface);

@@ -12,6 +12,9 @@ import {
   type FileAccessSettings,
 } from "../../api/client";
 import { FilterDropdown } from "../../components/FilterDropdown";
+import { Tag } from "../../components/garden/Badge";
+import { Notice } from "../../components/garden/Notice";
+import { StatusDot } from "../../components/garden/StatusDot";
 import { useOptionalAuth } from "../../contexts/AuthContext";
 import { useOptionalRemoteConnection } from "../../contexts/RemoteConnectionContext";
 import { useNetworkBinding } from "../../hooks/useNetworkBinding";
@@ -25,6 +28,10 @@ import { HideInSettingsSearch } from "./SettingsSearchContext";
 import { SettingsSection } from "./SettingsSection";
 import { useSettingsUndo } from "./SettingsUndoContext";
 import styles from "./LocalAccessSettings.module.css";
+import {
+  isWholeDiskPath,
+  LocalAccessStatusCard,
+} from "./LocalAccessSettings.status";
 import { AppsSettingsLink } from "./AppsSettings";
 
 /** File-access form state — `custom` is edited as newline-separated text. */
@@ -103,15 +110,10 @@ function passwordFeedback(password: string, confirm: string): PasswordFeedback {
   return { kind: "mismatch" };
 }
 
-/** A custom line that grants whole-disk read, so the UI can flag it. */
-function isWholeDiskPath(line: string): boolean {
-  const trimmed = line.trim();
-  return trimmed === "/" || /^[A-Za-z]:[\\/]?$/.test(trimmed);
-}
-
 export function LocalAccessSettings() {
   const { t } = useI18n();
   useSettingsPaneTitle(t("settingsLocalAccessTitle"));
+  const onOff = (on: boolean) => (on ? t("commonOn") : t("commonOff"));
   const auth = useOptionalAuth();
   const remoteConnection = useOptionalRemoteConnection();
   const { serverInfo, loading: serverInfoLoading } = useServerInfo();
@@ -471,6 +473,15 @@ export function LocalAccessSettings() {
           t("fileAccessCustomTitle"),
           t("fileAccessCustomDescription"),
         ]}
+        valueText={t("localAccessRiskFilesCount", {
+          folders: [
+            fileAccess.projects,
+            fileAccess.uploads,
+            fileAccess.temp,
+            fileAccess.home,
+          ].filter(Boolean).length,
+          custom: draftFileAccess.custom.length,
+        })}
         layout="custom"
         className="file-access-settings-panel"
         containerProps={{
@@ -640,6 +651,7 @@ export function LocalAccessSettings() {
   const renderApprovalAuditSettings = () => (
     <SettingsItem
       label={t("localAccessApprovalAuditTitle")}
+      valueText={onOff(approvalAuditLogEnabled)}
       description={
         supportsApprovalAuditLog
           ? t("localAccessApprovalAuditDescription")
@@ -667,6 +679,7 @@ export function LocalAccessSettings() {
     <SettingsItem
       label={t("localAccessAgentServerAccessTitle")}
       description={t("localAccessAgentServerAccessDescription")}
+      valueText={onOff(serverSettings?.agentServerAccessEnabled ?? false)}
     >
       <label className="toggle-switch">
         <input
@@ -821,445 +834,434 @@ export function LocalAccessSettings() {
     }
 
     const feedback = passwordFeedback(authPassword, authPasswordConfirm);
+    const lanAccessOn = binding?.network.overriddenByCli
+      ? binding.network.enabled
+      : networkEnabled;
 
     return (
       <SettingsSection description={t("localAccessDescription")}>
-        {/* Current status */}
         <HideInSettingsSearch>
-          <div className="settings-group">
-            <div className="settings-item">
-              <div className="settings-item-info">
-                <strong>{t("localAccessStatusTitle")}</strong>
-                <p>
-                  {serverInfo
-                    ? (() => {
-                        const networkHost = binding?.network.host;
-                        const networkPort =
-                          binding?.network.port ?? serverInfo.port;
-                        const isAllInterfaces =
-                          networkHost === "0.0.0.0" || networkHost === "::";
-                        const samePort = networkPort === serverInfo.port;
-
-                        // If bound to all interfaces on same port, just show that
-                        if (
-                          binding?.network.enabled &&
-                          isAllInterfaces &&
-                          samePort
-                        ) {
-                          return (
-                            <>
-                              {t("localAccessListeningOn")}{" "}
-                              <code>
-                                {networkHost}:{networkPort}
-                              </code>
-                            </>
-                          );
-                        }
-
-                        // Otherwise show localhost, and optionally network
-                        return (
-                          <>
-                            {t("localAccessListeningOn")}{" "}
-                            <code>
-                              {serverInfo.host}:{serverInfo.port}
-                            </code>
-                            {binding?.network.enabled && networkHost && (
-                              <>
-                                {" "}
-                                {t("localAccessListeningAnd")}{" "}
-                                <code>
-                                  {networkHost}:{networkPort}
-                                </code>
-                              </>
-                            )}
-                          </>
-                        );
-                      })()
-                    : t("localAccessUnableToFetch")}
-                </p>
-              </div>
-              {serverInfo?.localhostOnly && !binding?.network.enabled && (
-                <span className="settings-status-badge settings-status-detected">
-                  {t("localAccessBadgeLocalOnly")}
-                </span>
-              )}
-              {(serverInfo?.boundToAllInterfaces || binding?.network.enabled) &&
-                !auth.authEnabled && (
-                  <span className="settings-status-badge settings-status-warning">
-                    {t("localAccessBadgeNetworkExposed")}
-                  </span>
-                )}
-            </div>
-          </div>
+          <LocalAccessStatusCard
+            serverInfo={serverInfo}
+            binding={binding}
+            authEnabled={auth.authEnabled}
+            localhostOpen={auth.localhostOpen}
+            fileAccess={serverSettings?.fileAccess ?? DEFAULT_FILE_ACCESS}
+            fileAccessInfo={fileAccessInfo}
+          />
         </HideInSettingsSearch>
 
         {/* Network Configuration */}
         <form
-          className="settings-group"
+          className={styles.applyForm}
           onSubmit={(e) => {
             e.preventDefault();
             handleApplyChanges();
           }}
         >
-          <SettingsItem
-            label={t("localAccessListeningPortTitle")}
-            description={t("localAccessListeningPortDescription")}
+          <SettingsSection
+            title={t("localAccessSectionNetwork")}
+            scope="server"
           >
-            {binding?.localhost.overriddenByCli ? (
-              <span className="settings-value-readonly">
-                {binding.localhost.port}{" "}
-                <span className="settings-hint">
-                  {t("localAccessSetViaPort")}
-                </span>
-              </span>
-            ) : (
-              <input
-                type="number"
-                className="settings-input-small"
-                value={localhostPort}
-                onChange={(e) => {
-                  setLocalhostPort(e.target.value);
-                  updateHasChanges({ port: e.target.value });
-                }}
-                min={1}
-                max={65535}
-                autoComplete="off"
-              />
-            )}
-          </SettingsItem>
-
-          <SettingsItem
-            label={t("localAccessNetworkTitle")}
-            description={t("localAccessNetworkDescription")}
-          >
-            {binding?.network.overriddenByCli ? (
-              <span className="settings-value-readonly">
-                {binding.network.host}:{binding.network.port}{" "}
-                <span className="settings-hint">
-                  {t("localAccessSetViaHost")}
-                </span>
-              </span>
-            ) : (
-              <label className="toggle-switch">
-                <input
-                  type="checkbox"
-                  checked={networkEnabled}
-                  onChange={(e) => {
-                    setNetworkEnabled(e.target.checked);
-                    updateHasChanges({ networkEnabled: e.target.checked });
-                  }}
-                />
-                <span className="toggle-slider" />
-              </label>
-            )}
-          </SettingsItem>
-
-          {networkEnabled && !binding?.network.overriddenByCli && binding && (
-            <SettingsItem
-              label={t("localAccessInterfaceTitle")}
-              description={t("localAccessInterfaceDescription")}
-            >
-              <FilterDropdown
-                label={t("localAccessInterfaceTitle")}
-                placeholder={t("localAccessInterfacePlaceholder")}
-                multiSelect={false}
-                align="right"
-                options={[
-                  ...binding.interfaces.map((iface) => ({
-                    value: iface.address,
-                    label: iface.displayName,
-                  })),
-                  {
-                    value: "0.0.0.0",
-                    label: t("localAccessInterfaceAll"),
-                  },
-                  { value: "custom", label: t("localAccessInterfaceCustom") },
-                ]}
-                selected={selectedInterface ? [selectedInterface] : []}
-                onChange={(values) => {
-                  const newInterface = values[0] ?? "";
-                  setSelectedInterface(newInterface);
-                  updateHasChanges({ iface: newInterface });
-                }}
-              />
-            </SettingsItem>
-          )}
-
-          {networkEnabled &&
-            !binding?.network.overriddenByCli &&
-            selectedInterface === "custom" && (
+            <div className="settings-group">
               <SettingsItem
-                label={t("localAccessCustomIpTitle")}
-                description={t("localAccessCustomIpDescription")}
-                className="settings-item-inline-field"
+                label={t("localAccessListeningPortTitle")}
+                valueText={localhostPort}
+                description={t("localAccessListeningPortDescription")}
               >
-                <input
-                  type="text"
-                  className="settings-input"
-                  placeholder="192.168.1.100"
-                  value={customIp}
-                  onChange={(e) => setCustomIp(e.target.value)}
-                />
+                {binding?.localhost.overriddenByCli ? (
+                  <span className="settings-value-readonly">
+                    {binding.localhost.port}{" "}
+                    <span className="settings-hint">
+                      {t("localAccessSetViaPort")}
+                    </span>
+                  </span>
+                ) : (
+                  <input
+                    type="number"
+                    className="settings-input-small"
+                    value={localhostPort}
+                    onChange={(e) => {
+                      setLocalhostPort(e.target.value);
+                      updateHasChanges({ port: e.target.value });
+                    }}
+                    min={1}
+                    max={65535}
+                    autoComplete="off"
+                  />
+                )}
               </SettingsItem>
-            )}
 
-          {/* Allowed Hosts — applies even on localhost (reverse proxy may use different hostname) */}
-          <SettingsItem
-            label={t("localAccessAllowAllHostsTitle")}
-            description={t("localAccessAllowAllHostsDescription")}
-          >
-            <label className="toggle-switch">
-              <input
-                type="checkbox"
-                checked={allowAllHostsToggle}
-                onChange={(e) => {
-                  setAllowAllHostsToggle(e.target.checked);
-                  updateHasChanges({ allowAll: e.target.checked });
-                }}
-              />
-              <span className="toggle-slider" />
-            </label>
-          </SettingsItem>
-          {!allowAllHostsToggle && (
-            <SettingsItem
-              label={t("localAccessAllowedHostsTitle")}
-              description={t("localAccessAllowedHostsDescription")}
-              className="settings-item-inline-field"
-            >
-              <input
-                type="text"
-                className="settings-input"
-                placeholder={t("localAccessAllowedHostsPlaceholder")}
-                value={allowedHostsText}
-                onChange={(e) => {
-                  setAllowedHostsText(e.target.value);
-                  updateHasChanges({ hostsText: e.target.value });
-                }}
-              />
-            </SettingsItem>
-          )}
-          <HideInSettingsSearch>
-            <p className="form-hint">{t("localAccessAllowedHostsHint")}</p>
-          </HideInSettingsSearch>
-
-          {renderFileAccessSettings()}
-
-          {/* Require Password toggle */}
-          {!auth.authDisabledByEnv && (
-            <SettingsItem
-              label={t("localAccessRequirePasswordTitle")}
-              description={t("localAccessRequirePasswordDescription")}
-            >
-              <label className="toggle-switch">
-                <input
-                  type="checkbox"
-                  aria-label={t("localAccessRequirePasswordTitle")}
-                  checked={requirePassword}
-                  onChange={(e) => {
-                    setRequirePassword(e.target.checked);
-                    updateHasChanges({ requirePw: e.target.checked });
-                  }}
-                />
-                <span className="toggle-slider" />
-              </label>
-            </SettingsItem>
-          )}
-
-          {/* The password choice, nested under the toggle that gates it and
-              applied from its own button beside the fields. */}
-          {!auth.authDisabledByEnv && (requirePassword || auth.authEnabled) && (
-            <div
-              className={`settings-subsection ${styles.passwordBlock}`}
-              data-local-access-password-block="true"
-            >
-              <HideInSettingsSearch>
-                <p
-                  className={`${styles.passwordState} ${
-                    !requirePassword
-                      ? styles.passwordStateWarning
-                      : auth.authEnabled
-                        ? styles.passwordStateActive
-                        : styles.passwordStatePending
-                  }`}
-                  role="status"
-                >
-                  {!requirePassword
-                    ? t("localAccessPasswordDisableWarning")
-                    : auth.authEnabled
-                      ? t("localAccessPasswordActive")
-                      : t("localAccessPasswordPending")}
-                </p>
-              </HideInSettingsSearch>
-              {requirePassword && (
-                <>
-                  {/* Hidden username field to prevent Chrome from using port as username */}
-                  <HideInSettingsSearch>
+              <SettingsItem
+                label={t("localAccessNetworkTitle")}
+                description={t("localAccessNetworkDescription")}
+                valueText={onOff(lanAccessOn)}
+                after={
+                  lanAccessOn ? (
+                    <div className={styles.rowNotice}>
+                      <Notice tone="warning">
+                        {t("localAccessLanNotice")}
+                      </Notice>
+                    </div>
+                  ) : undefined
+                }
+              >
+                {binding?.network.overriddenByCli ? (
+                  <span className="settings-value-readonly">
+                    {binding.network.host}:{binding.network.port}{" "}
+                    <span className="settings-hint">
+                      {t("localAccessSetViaHost")}
+                    </span>
+                  </span>
+                ) : (
+                  <label className="toggle-switch">
                     <input
-                      type="text"
-                      name="username"
-                      autoComplete="username"
-                      style={{
-                        position: "absolute",
-                        visibility: "hidden",
-                        pointerEvents: "none",
-                      }}
-                      tabIndex={-1}
-                    />
-                  </HideInSettingsSearch>
-                  <SettingsItem
-                    label={
-                      auth.authEnabled
-                        ? t("localAccessPasswordNewTitle")
-                        : t("localAccessPasswordTitle")
-                    }
-                    description={
-                      auth.authEnabled
-                        ? t("localAccessPasswordKeepCurrent")
-                        : t("localAccessPasswordMinLength")
-                    }
-                    className="settings-item-inline-field"
-                  >
-                    <input
-                      type="password"
-                      className="settings-input"
-                      value={authPassword}
+                      type="checkbox"
+                      checked={networkEnabled}
                       onChange={(e) => {
-                        setAuthPassword(e.target.value);
-                        setPasswordError(null);
-                        updateHasChanges({ password: e.target.value });
+                        setNetworkEnabled(e.target.checked);
+                        updateHasChanges({ networkEnabled: e.target.checked });
                       }}
-                      autoComplete="new-password"
-                      placeholder={
-                        auth.authEnabled
-                          ? t("localAccessPasswordNewPlaceholder")
-                          : t("localAccessPasswordPlaceholder")
-                      }
+                    />
+                    <span className="toggle-slider" />
+                  </label>
+                )}
+              </SettingsItem>
+
+              {networkEnabled &&
+                !binding?.network.overriddenByCli &&
+                binding && (
+                  <SettingsItem
+                    label={t("localAccessInterfaceTitle")}
+                    description={t("localAccessInterfaceDescription")}
+                    valueText={selectedInterface}
+                  >
+                    <FilterDropdown
+                      label={t("localAccessInterfaceTitle")}
+                      placeholder={t("localAccessInterfacePlaceholder")}
+                      multiSelect={false}
+                      align="right"
+                      options={[
+                        ...binding.interfaces.map((iface) => ({
+                          value: iface.address,
+                          label: iface.displayName,
+                        })),
+                        {
+                          value: "0.0.0.0",
+                          label: t("localAccessInterfaceAll"),
+                        },
+                        {
+                          value: "custom",
+                          label: t("localAccessInterfaceCustom"),
+                        },
+                      ]}
+                      selected={selectedInterface ? [selectedInterface] : []}
+                      onChange={(values) => {
+                        const newInterface = values[0] ?? "";
+                        setSelectedInterface(newInterface);
+                        updateHasChanges({ iface: newInterface });
+                      }}
                     />
                   </SettingsItem>
-                  {(enablingAuth || changingPassword) && (
-                    <SettingsItem
-                      label={t("localAccessConfirmPasswordTitle")}
-                      className="settings-item-inline-field"
-                    >
-                      <input
-                        type="password"
-                        className={`settings-input ${
-                          feedback?.kind === "mismatch"
-                            ? styles.inputInvalid
-                            : feedback?.kind === "match"
-                              ? styles.inputValid
-                              : ""
-                        }`}
-                        aria-invalid={feedback?.kind === "mismatch"}
-                        aria-describedby="local-access-password-feedback"
-                        value={authPasswordConfirm}
-                        onChange={(e) => {
-                          setAuthPasswordConfirm(e.target.value);
-                          setPasswordError(null);
-                        }}
-                        autoComplete="new-password"
-                        placeholder={t("localAccessConfirmPasswordPlaceholder")}
-                      />
-                    </SettingsItem>
-                  )}
-                </>
-              )}
-              <HideInSettingsSearch>
-                <div className={styles.passwordActions}>
-                  <p
-                    id="local-access-password-feedback"
-                    className={`${styles.passwordFeedback} ${
-                      passwordError || feedback?.kind === "mismatch"
-                        ? styles.passwordFeedbackBad
-                        : feedback?.kind === "match"
-                          ? styles.passwordFeedbackGood
-                          : ""
-                    }`}
-                    aria-live="polite"
-                    data-local-access-password-feedback={
-                      passwordError ? "error" : (feedback?.kind ?? "none")
-                    }
-                  >
-                    {passwordError ??
-                      (feedback?.kind === "short"
-                        ? t("localAccessPasswordTooShortCount", {
-                            count: feedback.length,
-                            min: LOCAL_PASSWORD_MIN_LENGTH,
-                          })
-                        : feedback?.kind === "mismatch"
-                          ? t("localAccessErrorPasswordMismatch")
-                          : feedback?.kind === "match"
-                            ? t("localAccessPasswordMatch")
-                            : "")}
-                  </p>
-                  {(enablingAuth || changingPassword || disablingAuth) && (
-                    <button
-                      type="button"
-                      className={`settings-button ${
-                        disablingAuth
-                          ? "settings-button-danger"
-                          : styles.passwordApply
-                      }`}
-                      disabled={
-                        isApplying ||
-                        applying ||
-                        (!disablingAuth && passwordChoiceError() !== null)
-                      }
-                      onClick={() => void handleApplyPasswordChoice()}
-                    >
-                      {disablingAuth
-                        ? t("localAccessPasswordDisableAction")
-                        : enablingAuth
-                          ? t("localAccessPasswordEnableAction")
-                          : t("localAccessPasswordChangeAction")}
-                    </button>
-                  )}
-                </div>
-                {!auth.authEnabled && requirePassword && (
-                  <p className={styles.passwordHint}>
-                    {t("localAccessPasswordResetHint")}
-                  </p>
                 )}
-              </HideInSettingsSearch>
-            </div>
-          )}
 
-          {supportsAgentServerAccess &&
-            auth.authEnabled &&
-            renderAgentServerAccessSetting()}
+              {networkEnabled &&
+                !binding?.network.overriddenByCli &&
+                selectedInterface === "custom" && (
+                  <SettingsItem
+                    label={t("localAccessCustomIpTitle")}
+                    description={t("localAccessCustomIpDescription")}
+                    className="settings-item-inline-field"
+                    valueText={customIp}
+                  >
+                    <input
+                      type="text"
+                      className="settings-input"
+                      placeholder="192.168.1.100"
+                      value={customIp}
+                      onChange={(e) => setCustomIp(e.target.value)}
+                    />
+                  </SettingsItem>
+                )}
 
-          {/* Allow Localhost Access - shown in desktop mode when password auth is off */}
-          {auth.hasDesktopToken &&
-            !requirePassword &&
-            !auth.authDisabledByEnv && (
+              {/* Allowed Hosts — applies even on localhost (reverse proxy may use different hostname) */}
               <SettingsItem
-                label={t("localAccessLocalhostOpenTitle")}
-                description={t("localAccessLocalhostOpenDescription")}
+                label={t("localAccessAllowAllHostsTitle")}
+                description={t("localAccessAllowAllHostsDescription")}
+                valueText={onOff(allowAllHostsToggle)}
               >
-                <label className="toggle-switch">
+                <div className="settings-item-actions">
+                  {allowAllHostsToggle && (
+                    <Tag tone="err">{t("localAccessRiskTag")}</Tag>
+                  )}
+                  <label className="toggle-switch">
+                    <input
+                      type="checkbox"
+                      checked={allowAllHostsToggle}
+                      onChange={(e) => {
+                        setAllowAllHostsToggle(e.target.checked);
+                        updateHasChanges({ allowAll: e.target.checked });
+                      }}
+                    />
+                    <span className="toggle-slider" />
+                  </label>
+                </div>
+              </SettingsItem>
+              {!allowAllHostsToggle && (
+                <SettingsItem
+                  label={t("localAccessAllowedHostsTitle")}
+                  description={t("localAccessAllowedHostsDescription")}
+                  className="settings-item-inline-field"
+                  valueText={allowedHostsText}
+                >
                   <input
-                    type="checkbox"
-                    checked={localhostOpenToggle}
+                    type="text"
+                    className="settings-input"
+                    placeholder={t("localAccessAllowedHostsPlaceholder")}
+                    value={allowedHostsText}
                     onChange={(e) => {
-                      setLocalhostOpenToggle(e.target.checked);
-                      updateHasChanges({ localhostOpen: e.target.checked });
+                      setAllowedHostsText(e.target.value);
+                      updateHasChanges({ hostsText: e.target.value });
                     }}
                   />
-                  <span className="toggle-slider" />
-                </label>
-              </SettingsItem>
-            )}
-
-          {auth.authDisabledByEnv && (
+                </SettingsItem>
+              )}
+            </div>
             <HideInSettingsSearch>
-              <p className="form-warning">{t("localAccessAuthDisabled")}</p>
+              <p className={`form-hint ${styles.sectionHint}`}>
+                {t("localAccessAllowedHostsHint")}
+              </p>
             </HideInSettingsSearch>
-          )}
+          </SettingsSection>
 
-          {/* Apply button - always visible */}
+          <SettingsSection title={t("localAccessSectionSignIn")} scope="server">
+            {auth.authDisabledByEnv && (
+              <HideInSettingsSearch>
+                <Notice tone="warning">{t("localAccessAuthDisabled")}</Notice>
+              </HideInSettingsSearch>
+            )}
+            <div className="settings-group">
+              {/* Require Password toggle */}
+              {!auth.authDisabledByEnv && (
+                <SettingsItem
+                  label={t("localAccessRequirePasswordTitle")}
+                  description={t("localAccessRequirePasswordDescription")}
+                  valueText={onOff(requirePassword)}
+                >
+                  <label className="toggle-switch">
+                    <input
+                      type="checkbox"
+                      aria-label={t("localAccessRequirePasswordTitle")}
+                      checked={requirePassword}
+                      onChange={(e) => {
+                        setRequirePassword(e.target.checked);
+                        updateHasChanges({ requirePw: e.target.checked });
+                      }}
+                    />
+                    <span className="toggle-slider" />
+                  </label>
+                </SettingsItem>
+              )}
+
+              {/* The password choice, nested under the toggle that gates it and
+              applied from its own button beside the fields. */}
+              {!auth.authDisabledByEnv &&
+                (requirePassword || auth.authEnabled) && (
+                  <div
+                    className={styles.passwordBlock}
+                    data-local-access-password-block="true"
+                  >
+                    <HideInSettingsSearch>
+                      <p
+                        className={`${styles.passwordState} ${
+                          !requirePassword
+                            ? styles.passwordStateWarning
+                            : auth.authEnabled
+                              ? styles.passwordStateActive
+                              : styles.passwordStatePending
+                        }`}
+                        role="status"
+                      >
+                        {!requirePassword
+                          ? t("localAccessPasswordDisableWarning")
+                          : auth.authEnabled
+                            ? t("localAccessPasswordActive")
+                            : t("localAccessPasswordPending")}
+                      </p>
+                    </HideInSettingsSearch>
+                    {requirePassword && (
+                      <>
+                        {/* Hidden username field to prevent Chrome from using port as username */}
+                        <HideInSettingsSearch>
+                          <input
+                            type="text"
+                            name="username"
+                            autoComplete="username"
+                            style={{
+                              position: "absolute",
+                              visibility: "hidden",
+                              pointerEvents: "none",
+                            }}
+                            tabIndex={-1}
+                          />
+                        </HideInSettingsSearch>
+                        <SettingsItem
+                          label={
+                            auth.authEnabled
+                              ? t("localAccessPasswordNewTitle")
+                              : t("localAccessPasswordTitle")
+                          }
+                          description={
+                            auth.authEnabled
+                              ? t("localAccessPasswordKeepCurrent")
+                              : t("localAccessPasswordMinLength")
+                          }
+                          className="settings-item-inline-field"
+                        >
+                          <input
+                            type="password"
+                            className="settings-input"
+                            value={authPassword}
+                            onChange={(e) => {
+                              setAuthPassword(e.target.value);
+                              setPasswordError(null);
+                              updateHasChanges({ password: e.target.value });
+                            }}
+                            autoComplete="new-password"
+                            placeholder={
+                              auth.authEnabled
+                                ? t("localAccessPasswordNewPlaceholder")
+                                : t("localAccessPasswordPlaceholder")
+                            }
+                          />
+                        </SettingsItem>
+                        {(enablingAuth || changingPassword) && (
+                          <SettingsItem
+                            label={t("localAccessConfirmPasswordTitle")}
+                            className="settings-item-inline-field"
+                          >
+                            <input
+                              type="password"
+                              className={`settings-input ${
+                                feedback?.kind === "mismatch"
+                                  ? styles.inputInvalid
+                                  : feedback?.kind === "match"
+                                    ? styles.inputValid
+                                    : ""
+                              }`}
+                              aria-invalid={feedback?.kind === "mismatch"}
+                              aria-describedby="local-access-password-feedback"
+                              value={authPasswordConfirm}
+                              onChange={(e) => {
+                                setAuthPasswordConfirm(e.target.value);
+                                setPasswordError(null);
+                              }}
+                              autoComplete="new-password"
+                              placeholder={t(
+                                "localAccessConfirmPasswordPlaceholder",
+                              )}
+                            />
+                          </SettingsItem>
+                        )}
+                      </>
+                    )}
+                    <HideInSettingsSearch>
+                      <div className={styles.passwordActions}>
+                        <p
+                          id="local-access-password-feedback"
+                          className={`${styles.passwordFeedback} ${
+                            passwordError || feedback?.kind === "mismatch"
+                              ? styles.passwordFeedbackBad
+                              : feedback?.kind === "match"
+                                ? styles.passwordFeedbackGood
+                                : ""
+                          }`}
+                          aria-live="polite"
+                          data-local-access-password-feedback={
+                            passwordError ? "error" : (feedback?.kind ?? "none")
+                          }
+                        >
+                          {passwordError ??
+                            (feedback?.kind === "short"
+                              ? t("localAccessPasswordTooShortCount", {
+                                  count: feedback.length,
+                                  min: LOCAL_PASSWORD_MIN_LENGTH,
+                                })
+                              : feedback?.kind === "mismatch"
+                                ? t("localAccessErrorPasswordMismatch")
+                                : feedback?.kind === "match"
+                                  ? t("localAccessPasswordMatch")
+                                  : "")}
+                        </p>
+                        {(enablingAuth ||
+                          changingPassword ||
+                          disablingAuth) && (
+                          <button
+                            type="button"
+                            className={`settings-button ${
+                              disablingAuth
+                                ? "settings-button-danger"
+                                : styles.passwordApply
+                            }`}
+                            disabled={
+                              isApplying ||
+                              applying ||
+                              (!disablingAuth && passwordChoiceError() !== null)
+                            }
+                            onClick={() => void handleApplyPasswordChoice()}
+                          >
+                            {disablingAuth
+                              ? t("localAccessPasswordDisableAction")
+                              : enablingAuth
+                                ? t("localAccessPasswordEnableAction")
+                                : t("localAccessPasswordChangeAction")}
+                          </button>
+                        )}
+                      </div>
+                      {!auth.authEnabled && requirePassword && (
+                        <p className={styles.passwordHint}>
+                          {t("localAccessPasswordResetHint")}
+                        </p>
+                      )}
+                    </HideInSettingsSearch>
+                  </div>
+                )}
+
+              {/* Allow Localhost Access - shown in desktop mode when password auth is off */}
+              {auth.hasDesktopToken &&
+                !requirePassword &&
+                !auth.authDisabledByEnv && (
+                  <SettingsItem
+                    label={t("localAccessLocalhostOpenTitle")}
+                    description={t("localAccessLocalhostOpenDescription")}
+                    valueText={onOff(localhostOpenToggle)}
+                  >
+                    <label className="toggle-switch">
+                      <input
+                        type="checkbox"
+                        checked={localhostOpenToggle}
+                        onChange={(e) => {
+                          setLocalhostOpenToggle(e.target.checked);
+                          updateHasChanges({ localhostOpen: e.target.checked });
+                        }}
+                      />
+                      <span className="toggle-slider" />
+                    </label>
+                  </SettingsItem>
+                )}
+            </div>
+          </SettingsSection>
+
+          {/* Apply bar - always visible; names the pending state. */}
           <HideInSettingsSearch>
-            <div className="settings-item">
-              {formError && <p className="form-error">{formError}</p>}
+            <div className={styles.saveBar} data-pending={hasChanges}>
+              {hasChanges && <StatusDot state="attn" />}
+              <div className={styles.saveBarText}>
+                {hasChanges && (
+                  <strong>{t("localAccessPendingChanges")}</strong>
+                )}
+                {formError && <p className="form-error">{formError}</p>}
+              </div>
               <button
                 type="submit"
                 className="settings-button settings-button-primary"
@@ -1273,25 +1275,39 @@ export function LocalAccessSettings() {
           </HideInSettingsSearch>
         </form>
 
-        <div className="settings-group">{renderApprovalAuditSettings()}</div>
+        <SettingsSection title={t("localAccessSectionFiles")} scope="server">
+          <div className="settings-group">{renderFileAccessSettings()}</div>
+        </SettingsSection>
+
+        <SettingsSection title={t("localAccessSectionAudit")} scope="server">
+          <div className="settings-group">
+            {renderApprovalAuditSettings()}
+            {supportsAgentServerAccess &&
+              auth.authEnabled &&
+              renderAgentServerAccessSetting()}
+          </div>
+        </SettingsSection>
 
         {/* Logout - shown when auth is enabled */}
         {auth.authEnabled && auth.isAuthenticated && (
-          <div className="settings-group">
-            <SettingsItem
-              id="local-access-logout"
-              label={t("remoteAccessLogoutTitle")}
-              description={t("localAccessLogoutDescription")}
-            >
-              <button
-                type="button"
-                className="settings-button settings-button-danger"
-                onClick={auth.logout}
+          <SettingsSection title={t("localAccessSectionDevice")}>
+            <div className="settings-group">
+              <SettingsItem
+                id="local-access-logout"
+                label={t("remoteAccessLogoutTitle")}
+                description={t("localAccessLogoutDescription")}
+                scope={null}
               >
-                {t("remoteAccessLogout")}
-              </button>
-            </SettingsItem>
-          </div>
+                <button
+                  type="button"
+                  className="settings-button settings-button-danger-subtle"
+                  onClick={auth.logout}
+                >
+                  {t("remoteAccessLogout")}
+                </button>
+              </SettingsItem>
+            </div>
+          </SettingsSection>
         )}
         <AppsSettingsLink />
       </SettingsSection>
@@ -1304,38 +1320,44 @@ export function LocalAccessSettings() {
 
     return (
       <SettingsSection description={t("localAccessRemoteDescription")}>
-        {remoteFileAccessReady ? (
-          <div className="settings-group">{renderFileAccessSettings()}</div>
-        ) : (
-          <HideInSettingsSearch>
-            <div className="settings-group">
-              <div className="settings-item">
-                <div className="settings-item-info">
-                  <strong>{t("fileAccessTitle")}</strong>
-                  <p>{settingsError ?? t("localAccessLoading")}</p>
+        <SettingsSection title={t("localAccessSectionFiles")} scope="server">
+          {remoteFileAccessReady ? (
+            <div className="settings-group">{renderFileAccessSettings()}</div>
+          ) : (
+            <HideInSettingsSearch>
+              <div className="settings-group">
+                <div className="settings-item">
+                  <div className="settings-item-info">
+                    <strong>{t("fileAccessTitle")}</strong>
+                    <p>{settingsError ?? t("localAccessLoading")}</p>
+                  </div>
                 </div>
               </div>
-            </div>
-          </HideInSettingsSearch>
-        )}
+            </HideInSettingsSearch>
+          )}
+        </SettingsSection>
 
-        <div className="settings-group">{renderApprovalAuditSettings()}</div>
+        <SettingsSection title={t("localAccessSectionAudit")} scope="server">
+          <div className="settings-group">{renderApprovalAuditSettings()}</div>
+        </SettingsSection>
 
-        <div className="settings-group">
-          <SettingsItem
-            id="local-access-remote-logout"
-            label={t("remoteAccessLogoutTitle")}
-            description={t("localAccessRemoteLogoutDescription")}
-          >
-            <button
-              type="button"
-              className="settings-button settings-button-danger"
-              onClick={() => remoteConnection.disconnect()}
+        <SettingsSection title={t("localAccessSectionDevice")}>
+          <div className="settings-group">
+            <SettingsItem
+              id="local-access-remote-logout"
+              label={t("remoteAccessLogoutTitle")}
+              description={t("localAccessRemoteLogoutDescription")}
             >
-              {t("remoteAccessLogout")}
-            </button>
-          </SettingsItem>
-        </div>
+              <button
+                type="button"
+                className="settings-button settings-button-danger-subtle"
+                onClick={() => remoteConnection.disconnect()}
+              >
+                {t("remoteAccessLogout")}
+              </button>
+            </SettingsItem>
+          </div>
+        </SettingsSection>
         <AppsSettingsLink />
       </SettingsSection>
     );

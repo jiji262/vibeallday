@@ -34,3 +34,23 @@
     align-self: start;
   }
 }
+
+/* Storage scope tag after the row title (本机 / 服务器). */
+.scopeTag {
+  margin-left: var(--space-2);
+  vertical-align: 1px;
+}
+
+/* Search results show the current value beside the matched row. */
+.valueChip {
+  display: inline-block;
+  max-width: 100%;
+  margin: var(--space-1) var(--space-2) 0 0;
+  overflow: hidden;
+  color: var(--ink-2);
+  font-family: var(--font-mono);
+  font-size: var(--fs-meta);
+  text-overflow: ellipsis;
+  vertical-align: middle;
+  white-space: nowrap;
+}

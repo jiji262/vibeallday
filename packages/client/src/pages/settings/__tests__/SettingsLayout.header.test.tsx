@@ -72,3 +72,32 @@ it("titles the phone settings home Settings", () => {
     "pageTitleSettings",
   ]);
 });
+
+const DESKTOP_WIDTH = 1200;
+
+it("opens the overview at the desktop index instead of the first category", async () => {
+  const descriptor = Object.getOwnPropertyDescriptor(
+    HTMLElement.prototype,
+    "clientWidth",
+  );
+  Object.defineProperty(HTMLElement.prototype, "clientWidth", {
+    configurable: true,
+    get: () => DESKTOP_WIDTH,
+  });
+  try {
+    renderAt("/settings");
+    expect(await screen.findByText("settingsQuickTitle")).toBeTruthy();
+    expect(screen.queryByText("appearance pane")).toBeNull();
+    const crumbs = screen.getByRole("navigation", { name: "breadcrumbLabel" });
+    expect(within(crumbs).getByText("settingsOverviewTitle")).toBeTruthy();
+    const rail = screen.getByRole("complementary", {
+      name: "pageTitleSettings",
+    });
+    const back = within(rail).getByRole("link", { name: "shellNavBackToApp" });
+    expect(back.getAttribute("href")).toBe("/inbox");
+  } finally {
+    if (descriptor) {
+      Object.defineProperty(HTMLElement.prototype, "clientWidth", descriptor);
+    }
+  }
+});

@@ -1,8 +1,4 @@
 import { useEffect, useState } from "react";
-import {
-  FilterDropdown,
-  type FilterOption,
-} from "../../components/FilterDropdown";
 import { getChrome } from "../../extension/chrome";
 import { activeHosts, defaultHost } from "../../extension/savedHosts";
 import {
@@ -15,7 +11,8 @@ import {
 import { useI18n } from "../../i18n";
 import { loadSavedHosts } from "../../lib/hostStorage";
 import styles from "./BrowserExtensionSettings.module.css";
-import { SettingsItem } from "./SettingsItem";
+import { ChoiceRow } from "./BrowserExtensionSettings.rows";
+import { ToggleSettingRow } from "./PerformanceSettings.controls";
 import { SettingsSection } from "./SettingsSection";
 
 /** Granted optional host origins, as host names (`https://github.com/*` → `github.com`). */
@@ -67,33 +64,6 @@ function Toggle({
       />
       <span className="toggle-slider" />
     </span>
-  );
-}
-
-/** One choice from a few, in the dropdown the rest of the app uses. */
-function Choice<T extends string>({
-  label,
-  value,
-  options,
-  onChange,
-}: {
-  label: string;
-  value: T;
-  options: FilterOption<T>[];
-  onChange: (value: T) => void;
-}) {
-  return (
-    <FilterDropdown<T>
-      label={label}
-      triggerTitle={label}
-      multiSelect={false}
-      align="right"
-      options={options}
-      selected={[value]}
-      onChange={(values) => {
-        if (values[0]) onChange(values[0]);
-      }}
-    />
   );
 }
 
@@ -162,6 +132,7 @@ export function BrowserExtensionSettings() {
       <SettingsSection
         title={t("extensionSettingsHostsTitle")}
         description={t("extensionSettingsHostsDescription")}
+        scope="local"
       >
         {hosts.length === 0 ? (
           <p className={styles.hint}>{t("extensionSettingsNoHosts")}</p>
@@ -207,107 +178,100 @@ export function BrowserExtensionSettings() {
       <SettingsSection
         title={t("extensionSettingsLookupTitle")}
         description={t("extensionSettingsLookupDescription")}
+        scope="local"
       >
-        <SettingsItem
-          label={t("extensionSettingsAutomatic")}
-          description={t("extensionSettingsAutomaticDescription")}
-        >
-          <Toggle
+        <div className="settings-group">
+          <ToggleSettingRow
             label={t("extensionSettingsAutomatic")}
+            description={t("extensionSettingsAutomaticDescription")}
             checked={settings.automaticLookup}
             onChange={(automaticLookup) => update({ automaticLookup })}
           />
-        </SettingsItem>
-        <ul className={styles.siteList}>
-          {sites.length === 0 && (
-            <li className={styles.hint}>{t("extensionSettingsNoSites")}</li>
-          )}
-          {sites.map((site) => (
-            <li key={site}>
-              <span>
-                <strong>{site}</strong>
-                <span>{t("extensionSettingsSiteGranted")}</span>
-              </span>
-              <button
-                type="button"
-                onClick={() =>
-                  void getChrome()?.permissions.remove({
-                    origins: [`https://${site}/*`],
-                  })
-                }
-              >
-                {t("extensionSettingsRemoveAccess")}
-              </button>
-            </li>
-          ))}
-          <li className={styles.addSite}>
-            <input
-              aria-label={t("extensionSettingsAddSite")}
-              placeholder="github.com"
-              value={newSite}
-              onChange={(event) => setNewSite(event.target.value)}
-              onKeyDown={(event) => {
-                if (event.key === "Enter") grantSite();
-              }}
+          <div className={styles.block}>
+            <ul className={styles.siteList}>
+              {sites.length === 0 && (
+                <li className={styles.hint}>{t("extensionSettingsNoSites")}</li>
+              )}
+              {sites.map((site) => (
+                <li key={site}>
+                  <span>
+                    <strong>{site}</strong>
+                    <span>{t("extensionSettingsSiteGranted")}</span>
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      void getChrome()?.permissions.remove({
+                        origins: [`https://${site}/*`],
+                      })
+                    }
+                  >
+                    {t("extensionSettingsRemoveAccess")}
+                  </button>
+                </li>
+              ))}
+              <li className={styles.addSite}>
+                <input
+                  aria-label={t("extensionSettingsAddSite")}
+                  placeholder="github.com"
+                  value={newSite}
+                  onChange={(event) => setNewSite(event.target.value)}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter") grantSite();
+                  }}
+                />
+                <button
+                  type="button"
+                  disabled={!newSite.trim()}
+                  onClick={grantSite}
+                >
+                  {t("extensionSettingsGrantAccess")}
+                </button>
+              </li>
+            </ul>
+            {siteError && (
+              <p className={styles.error} role="alert">
+                {siteError}
+              </p>
+            )}
+          </div>
+          <label className={`${styles.block} ${styles.allowlist}`}>
+            <span>
+              <strong>{t("extensionSettingsAllowlist")}</strong>
+              <span>{t("extensionSettingsAllowlistDescription")}</span>
+            </span>
+            <textarea
+              rows={4}
+              value={allowlist}
+              onChange={(event) => setAllowlist(event.target.value)}
+              onBlur={() =>
+                update({
+                  lookupAllowlist: allowlist
+                    .split("\n")
+                    .map((line) => line.trim())
+                    .filter(Boolean),
+                })
+              }
             />
-            <button
-              type="button"
-              disabled={!newSite.trim()}
-              onClick={grantSite}
-            >
-              {t("extensionSettingsGrantAccess")}
-            </button>
-          </li>
-        </ul>
-        {siteError && (
-          <p className={styles.error} role="alert">
-            {siteError}
-          </p>
-        )}
-        <label className={styles.allowlist}>
-          <span>
-            <strong>{t("extensionSettingsAllowlist")}</strong>
-            <span>{t("extensionSettingsAllowlistDescription")}</span>
-          </span>
-          <textarea
-            rows={4}
-            value={allowlist}
-            onChange={(event) => setAllowlist(event.target.value)}
-            onBlur={() =>
-              update({
-                lookupAllowlist: allowlist
-                  .split("\n")
-                  .map((line) => line.trim())
-                  .filter(Boolean),
-              })
-            }
-          />
-        </label>
-        <SettingsItem
-          label={t("extensionSettingsCollapseMerged")}
-          description={t("extensionSettingsCollapseMergedHelp")}
-        >
-          <Toggle
+          </label>
+          <ToggleSettingRow
             label={t("extensionSettingsCollapseMerged")}
+            description={t("extensionSettingsCollapseMergedHelp")}
             checked={settings.collapseMergedPrs}
             onChange={(collapseMergedPrs) => update({ collapseMergedPrs })}
           />
-        </SettingsItem>
-        <SettingsItem
-          label={t("extensionSettingsIncludeDismissed")}
-          description={t("extensionSettingsIncludeDismissedDescription")}
-        >
-          <Toggle
+          <ToggleSettingRow
             label={t("extensionSettingsIncludeDismissed")}
+            description={t("extensionSettingsIncludeDismissedDescription")}
             checked={settings.includeDismissed}
             onChange={(includeDismissed) => update({ includeDismissed })}
           />
-        </SettingsItem>
+        </div>
       </SettingsSection>
 
-      <SettingsSection title={t("extensionSettingsToolbarTitle")}>
-        <SettingsItem label={t("extensionSettingsToolbarButton")}>
-          <Choice
+      <SettingsSection title={t("extensionSettingsToolbarTitle")} scope="local">
+        <div className="settings-group">
+          <ChoiceRow
             label={t("extensionSettingsToolbarButton")}
             value={settings.toolbarAction}
             options={[
@@ -319,13 +283,9 @@ export function BrowserExtensionSettings() {
             ]}
             onChange={(toolbarAction) => update({ toolbarAction })}
           />
-        </SettingsItem>
-        <SettingsItem
-          label={t("extensionSettingsBadge")}
-          description={t("extensionSettingsBadgeDescription")}
-        >
-          <Choice
+          <ChoiceRow
             label={t("extensionSettingsBadge")}
+            description={t("extensionSettingsBadgeDescription")}
             value={settings.badge}
             options={[
               { value: "page", label: t("extensionSettingsBadgePage") },
@@ -333,9 +293,7 @@ export function BrowserExtensionSettings() {
             ]}
             onChange={(badge) => update({ badge })}
           />
-        </SettingsItem>
-        <SettingsItem label={t("extensionSettingsFallback")}>
-          <Choice
+          <ChoiceRow
             label={t("extensionSettingsFallback")}
             value={settings.panelFallback}
             options={[
@@ -348,9 +306,7 @@ export function BrowserExtensionSettings() {
             ]}
             onChange={(panelFallback) => update({ panelFallback })}
           />
-        </SettingsItem>
-        <SettingsItem label={t("extensionSettingsOpenIn")}>
-          <Choice
+          <ChoiceRow
             label={t("extensionSettingsOpenIn")}
             value={settings.openSessionsIn}
             options={[
@@ -362,13 +318,9 @@ export function BrowserExtensionSettings() {
             ]}
             onChange={(openSessionsIn) => update({ openSessionsIn })}
           />
-        </SettingsItem>
-        <SettingsItem
-          label={t("extensionSettingsAppWindow")}
-          description={t("extensionSettingsAppWindowDescription")}
-        >
-          <Choice
+          <ChoiceRow
             label={t("extensionSettingsAppWindow")}
+            description={t("extensionSettingsAppWindowDescription")}
             value={settings.appWindow}
             options={[
               { value: "tab", label: t("extensionSettingsAppWindowTab") },
@@ -376,7 +328,7 @@ export function BrowserExtensionSettings() {
             ]}
             onChange={(appWindow) => update({ appWindow })}
           />
-        </SettingsItem>
+        </div>
       </SettingsSection>
     </>
   );

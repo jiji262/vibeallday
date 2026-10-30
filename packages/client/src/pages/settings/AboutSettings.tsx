@@ -17,42 +17,14 @@ import { SettingsItem } from "./SettingsItem";
 import { useSettingsPaneTitle } from "./SettingsPaneTitleContext";
 import { HideInSettingsSearch } from "./SettingsSearchContext";
 import { SettingsSection } from "./SettingsSection";
+import { getRemoteCompatibilityNotices } from "../../lib/remoteCompatibilityNotices";
+import { getDesktopRuntimeMetadata } from "../../lib/desktopRuntime";
+import { Button, ScopeTag, Status } from "../../components/garden";
 import {
-  formatRemoteServerVersion,
-  getRemoteCompatibilityNotices,
-  parseSemver,
-} from "../../lib/remoteCompatibilityNotices";
-import {
-  formatDesktopBuildVersion,
-  getDesktopRuntimeMetadata,
-} from "../../lib/desktopRuntime";
-
-/** A commit or file time in the reader's locale, to the minute. */
-function formatRevisionTime(iso: string): string {
-  return new Date(iso).toLocaleString(undefined, {
-    dateStyle: "medium",
-    timeStyle: "short",
-  });
-}
-
-type Translate = ReturnType<typeof useI18n>["t"];
-
-/** Server version for display, with the "unknown" fallbacks localized. */
-function serverVersionLabel(info: VersionInfo, t: Translate): string {
-  if (parseSemver(info.current)) {
-    return formatRemoteServerVersion(info.current, info.installSource);
-  }
-  return t(
-    info.installSource === "source"
-      ? "aboutServerVersionSourceUnknown"
-      : "aboutServerVersionUnknown",
-  );
-}
-
-/** Release builds read "v1.2.3"; a source build's version is a commit id. */
-function clientVersionLabel(version: string): string {
-  return parseSemver(version) ? `v${version.replace(/^v/, "")}` : version;
-}
+  AboutVersionCard,
+  type DesktopCheckStatus,
+} from "./AboutSettings.version";
+import styles from "./AboutSettings.module.css";
 
 export function AboutSettings() {
   const { t } = useI18n();
@@ -136,9 +108,8 @@ export function AboutSettings() {
     restoreRemoteCompatibilityNotices(remoteCompatibilityNotices);
   }, [remoteCompatibilityNotices, restoreRemoteCompatibilityNotices]);
 
-  const [desktopCheckStatus, setDesktopCheckStatus] = useState<
-    "opened" | "failed" | "menu" | null
-  >(null);
+  const [desktopCheckStatus, setDesktopCheckStatus] =
+    useState<DesktopCheckStatus>(null);
   // Only the desktop app updates itself; the server has no update check.
   const handleCheckUpdates = useCallback(async () => {
     if (!desktopRuntime) return;
@@ -158,187 +129,124 @@ export function AboutSettings() {
     }
   }, [desktopRuntime]);
 
+  const restartWarning =
+    interruptibleSessionCount > 0 && !restarting
+      ? t("developmentInterruptedWarning", {
+          count: interruptibleSessionCount,
+          suffix: interruptibleSessionCount !== 1 ? "s " : " ",
+        })
+      : null;
+
   return (
-    <SettingsSection>
-      <div className="settings-group">
-        {/* Only show Install option if install is possible or already installed */}
-        {(canInstall || isInstalled) && (
-          <SettingsItem
-            label={t("aboutInstallTitle")}
-            description={
-              isInstalled
-                ? t("aboutInstalledDescription")
-                : t("aboutInstallDescription")
-            }
-          >
-            {isInstalled ? (
-              <span className="settings-status-badge">
-                {t("aboutInstalled")}
-              </span>
-            ) : (
-              <button
-                type="button"
-                className="settings-button"
-                onClick={install}
-              >
-                {t("aboutInstall")}
-              </button>
-            )}
-          </SettingsItem>
-        )}
-        <HideInSettingsSearch>
-          <div className="settings-item settings-version-item">
-            <div className="settings-version-item__row">
-              <div className="settings-item-info">
-                <strong>{t("aboutVersionTitle")}</strong>
-                {desktopRuntime ? (
-                  <>
-                    <p>
-                      {t("aboutDesktopVersion")}{" "}
-                      {formatDesktopBuildVersion(desktopRuntime.desktopVersion)}
-                    </p>
-                    <p>
-                      {t("aboutBundledVibeAllDayVersion")}{" "}
-                      {formatDesktopBuildVersion(
-                        desktopRuntime.bundledVibeAllDayVersion ??
-                          __APP_VERSION__,
-                      )}
-                    </p>
-                  </>
-                ) : (
-                  <>
-                    <p>
-                      {t("aboutServerVersion")}{" "}
-                      {versionInfo
-                        ? serverVersionLabel(versionInfo, t)
-                        : t("loginLoading")}
-                    </p>
-                    {versionInfo?.sourceRevision && (
-                      <p>
-                        {t("aboutServerCommit")}{" "}
-                        <code title={versionInfo.sourceRevision.commit}>
-                          {versionInfo.sourceRevision.commit.slice(0, 12)}
-                        </code>{" "}
-                        {formatRevisionTime(
-                          versionInfo.sourceRevision.committedAt,
-                        )}
-                        {versionInfo.sourceRevision.modified && (
-                          <span className="settings-update-available">
-                            {" "}
-                            {versionInfo.sourceRevision.modifiedAt
-                              ? t("aboutServerModifiedAt", {
-                                  time: formatRevisionTime(
-                                    versionInfo.sourceRevision.modifiedAt,
-                                  ),
-                                })
-                              : t("aboutServerModified")}
-                          </span>
-                        )}
-                      </p>
-                    )}
-                    <p>
-                      {t("aboutClientVersion")}{" "}
-                      {clientVersionLabel(__APP_VERSION__)}
-                    </p>
-                  </>
-                )}
-                {desktopCheckStatus && (
-                  <p role="status">
-                    {t(
-                      desktopCheckStatus === "opened"
-                        ? "aboutDesktopUpdateOpened"
-                        : desktopCheckStatus === "menu"
-                          ? "aboutDesktopUpdateMenu"
-                          : "aboutDesktopUpdateFailed",
-                    )}
-                  </p>
-                )}
-                {versionError && (
-                  <p className="settings-warning">{t("aboutUnableRefresh")}</p>
-                )}
-              </div>
-              {desktopRuntime && (
-                <div className="settings-item-actions">
-                  <button
-                    type="button"
-                    className="settings-button"
-                    onClick={() => void handleCheckUpdates()}
-                    disabled={versionLoading}
-                  >
-                    {versionLoading
-                      ? t("aboutChecking")
-                      : t("aboutCheckUpdates")}
-                  </button>
-                </div>
-              )}
-            </div>
-            {inlineRemoteCompatibilityNotice && (
+    <>
+      <HideInSettingsSearch>
+        <AboutVersionCard
+          desktopRuntime={desktopRuntime}
+          versionInfo={versionInfo}
+          versionLoading={versionLoading}
+          versionError={!!versionError}
+          desktopCheckStatus={desktopCheckStatus}
+          onCheckUpdates={() => void handleCheckUpdates()}
+          notice={
+            inlineRemoteCompatibilityNotice && (
               <RemoteCompatibilityNoticeCard
                 notice={inlineRemoteCompatibilityNotice}
                 noticeCount={remoteCompatibilityNotices.length}
                 placement="inline"
                 onRestore={handleShowRemoteCompatibilityBanner}
               />
-            )}
-          </div>
-        </HideInSettingsSearch>
-        <SettingsItem
-          label={t("developmentRestartTitle")}
-          description={t("developmentRestartDescription")}
-          info={
-            <>
-              <strong>{t("developmentRestartTitle")}</strong>
-              <p>{t("developmentRestartDescription")}</p>
-              {interruptibleSessionCount > 0 && !restarting && (
-                <p className="settings-warning">
-                  {t("developmentInterruptedWarning", {
-                    count: interruptibleSessionCount,
-                    suffix: interruptibleSessionCount !== 1 ? "s " : " ",
-                  })}
-                </p>
-              )}
-            </>
+            )
           }
-        >
-          <button
-            type="button"
-            className={`settings-button ${interruptibleSessionCount > 0 ? "settings-button-danger" : ""}`}
-            onClick={handleRestart}
-            disabled={restarting}
+        />
+      </HideInSettingsSearch>
+      <SettingsSection title={t("aboutHelpTitle")}>
+        <div className="settings-group">
+          <SettingsItem
+            label={t("aboutReportBugTitle")}
+            description={t("aboutReportBugDescription")}
           >
-            {restarting
-              ? t("developmentRestarting")
-              : interruptibleSessionCount > 0
-                ? t("developmentRestartAnyway")
-                : t("developmentRestart")}
-          </button>
-        </SettingsItem>
-        <SettingsItem
-          label={t("aboutReportBugTitle")}
-          description={t("aboutReportBugDescription")}
-        >
-          <a
-            href="https://github.com/jiji262/vibeallday/issues"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="settings-button"
+            <a
+              href="https://github.com/jiji262/vibeallday/issues"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="settings-button"
+            >
+              {t("aboutReportBug")}
+            </a>
+          </SettingsItem>
+          <SettingsItem
+            label={t("aboutSetupWizardTitle")}
+            description={t("aboutSetupWizardDescription")}
           >
-            {t("aboutReportBug")}
-          </a>
-        </SettingsItem>
-        <SettingsItem
-          label={t("aboutSetupWizardTitle")}
-          description={t("aboutSetupWizardDescription")}
-        >
-          <button
-            type="button"
-            className="settings-button"
-            onClick={resetOnboarding}
+            <Button size="sm" onClick={resetOnboarding}>
+              {t("aboutLaunchWizard")}
+            </Button>
+          </SettingsItem>
+        </div>
+      </SettingsSection>
+      {/* Only show Install option if install is possible or already installed */}
+      {(canInstall || isInstalled) && (
+        <SettingsSection title={t("aboutAppTitle")}>
+          <div className="settings-group">
+            <SettingsItem
+              label={t("aboutInstallTitle")}
+              description={
+                isInstalled
+                  ? t("aboutInstalledDescription")
+                  : t("aboutInstallDescription")
+              }
+              valueText={isInstalled ? t("aboutInstalled") : undefined}
+            >
+              {isInstalled ? (
+                <Status state="ok">{t("aboutInstalled")}</Status>
+              ) : (
+                <Button size="sm" onClick={install}>
+                  {t("aboutInstall")}
+                </Button>
+              )}
+            </SettingsItem>
+          </div>
+        </SettingsSection>
+      )}
+      <SettingsSection
+        title={t("settingsMaintenanceTitle")}
+        description={t("aboutMaintenanceMeta")}
+      >
+        <div className="settings-group">
+          <SettingsItem
+            label={t("developmentRestartTitle")}
+            description={t("developmentRestartDescription")}
+            scope="server"
+            info={
+              <>
+                <strong>
+                  <span>{t("developmentRestartTitle")}</span>
+                  <span aria-hidden="true" className={styles.scopeTag}>
+                    <ScopeTag scope="server" />
+                  </span>
+                </strong>
+                <p>{t("developmentRestartDescription")}</p>
+                {restartWarning && (
+                  <p className="settings-warning">{restartWarning}</p>
+                )}
+              </>
+            }
           >
-            {t("aboutLaunchWizard")}
-          </button>
-        </SettingsItem>
-      </div>
-    </SettingsSection>
+            <Button
+              variant="danger-soft"
+              size="sm"
+              onClick={handleRestart}
+              disabled={restarting}
+            >
+              {restarting
+                ? t("developmentRestarting")
+                : interruptibleSessionCount > 0
+                  ? t("developmentRestartAnyway")
+                  : t("developmentRestart")}
+            </Button>
+          </SettingsItem>
+        </div>
+      </SettingsSection>
+    </>
   );
 }

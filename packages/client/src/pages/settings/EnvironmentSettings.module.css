@@ -7,29 +7,55 @@
   justify-content: space-between;
   gap: var(--space-2);
   margin-bottom: var(--space-3);
-  color: var(--text-muted);
-  font-size: var(--font-size-sm);
+  color: var(--ink-2);
+  font-size: var(--fs-small);
 }
 
-/* Tightens the shared `.settings-group` rhythm for this dense catalog. The
-   global class is compounded so the override does not depend on whether the
-   module or index.css is emitted last. */
-.group:global(.settings-group) {
-  gap: var(--space-2);
+.secretNote {
+  margin-bottom: var(--space-4);
+}
+
+.groupSection {
+  margin-bottom: var(--space-5);
+}
+
+.groupSection:last-child {
+  margin-bottom: 0;
 }
 
 .groupTitle {
-  margin: 0 0 var(--space-1);
-  font-size: var(--font-size-sm);
-  font-weight: 600;
-  color: var(--text-muted);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0 0 var(--space-2);
+  color: var(--ink);
+  font-family: var(--font-ui);
+  font-size: var(--fs-h3);
+  font-weight: var(--title-weight);
+}
+
+.groupMeta {
+  color: var(--ink-3);
+  font-family: var(--font-mono);
+  font-size: var(--fs-meta);
+  font-weight: 400;
+}
+
+/* Rows sit flush in the card; the global class is compounded so the override
+   does not depend on whether the module or index.css is emitted last. */
+.group:global(.settings-group) {
+  overflow: hidden;
 }
 
 .row {
-  padding: var(--space-2);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
-  background: var(--bg-surface);
+  min-width: 0;
+  padding: var(--space-3) var(--pad-card);
+  border-bottom: 1px solid var(--line);
+}
+
+.row:last-child {
+  border-bottom: 0;
 }
 
 .unset {
@@ -39,50 +65,78 @@
 .head {
   display: flex;
   flex-wrap: wrap;
-  align-items: baseline;
+  align-items: center;
   gap: var(--space-2);
+  min-width: 0;
 }
 
 .name {
-  font-family: var(--font-mono, ui-monospace, monospace);
-  font-size: var(--font-size-sm);
-  color: var(--text-primary);
+  overflow-wrap: anywhere;
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-size: var(--fs-code);
   font-weight: 600;
 }
 
-.secretBadge {
-  font-size: var(--font-size-xs);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: var(--text-muted);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
-  padding: 0 var(--space-1);
-}
-
 .value {
+  min-width: 0;
   margin-left: auto;
-  font-family: var(--font-mono, ui-monospace, monospace);
-  font-size: var(--font-size-sm);
-  color: var(--text-primary);
-  word-break: break-all;
+  overflow-wrap: anywhere;
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-size: var(--fs-code);
 }
 
 .valueUnset {
+  color: var(--ink-3);
   font-family: inherit;
-  color: var(--text-dimmed);
   font-style: italic;
+}
+
+.secretValue {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.mask {
+  color: var(--ink-2);
+  font-family: var(--font-mono);
+  letter-spacing: 0.08em;
+}
+
+/* Ghost small button (design .btn-ghost.btn-sm). */
+.reveal {
+  min-height: var(--btn-h-sm);
+  padding: 0 var(--space-2);
+  border: 0;
+  border-radius: var(--r-btn);
+  background: transparent;
+  color: var(--ink-2);
+  font-family: var(--font-ui);
+  font-size: var(--fs-btn);
+  cursor: pointer;
+}
+
+.reveal:hover {
+  background: var(--surface-3);
+  color: var(--ink);
+}
+
+.reveal:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 1px;
 }
 
 .description {
   margin: var(--space-1) 0 0;
-  font-size: var(--font-size-xs);
-  color: var(--text-muted);
+  color: var(--ink-3);
+  font-size: var(--fs-small);
 }
 
 /* Dynamic, runtime-computed caption (e.g. HOST's active listen addresses). */
 .note {
   margin: var(--space-1) 0 0;
-  font-size: var(--font-size-xs);
-  color: var(--text-secondary);
+  color: var(--ink-2);
+  font-size: var(--fs-small);
 }

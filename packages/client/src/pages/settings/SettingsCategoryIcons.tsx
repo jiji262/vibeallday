@@ -50,6 +50,8 @@ export const settingsCategoryEmojiIcons: Record<string, string> = {
   "browser-extension": "🧩",
   storage: "🗄️",
   "agent-context": "📋",
+  "agent-behavior": "🧭",
+  "import-export": "🔁",
   notifications: "🔔",
   webhooks: "🪝",
   devices: "📱",
@@ -194,6 +196,27 @@ export const settingsCategoryIcons: Record<string, ReactNode> = {
       <path d="M12 16h4" />
       <path d="M8 11h.01" />
       <path d="M8 16h.01" />
+    </Icon>
+  ),
+
+  "agent-behavior": (
+    <Icon>
+      {/* Git fork: one agent branching into subagents */}
+      <circle cx="6" cy="5" r="2" />
+      <circle cx="18" cy="5" r="2" />
+      <circle cx="12" cy="19" r="2" />
+      <path d="M6 7v2a3 3 0 0 0 3 3h6a3 3 0 0 0 3-3V7" />
+      <path d="M12 12v5" />
+    </Icon>
+  ),
+
+  "import-export": (
+    <Icon>
+      {/* Two opposing arrows: carry settings out and bring them in */}
+      <path d="M7 4v14" />
+      <path d="m3 14 4 4 4-4" />
+      <path d="M17 20V6" />
+      <path d="m21 10-4-4-4 4" />
     </Icon>
   ),
 

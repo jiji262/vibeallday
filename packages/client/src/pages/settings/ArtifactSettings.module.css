@@ -9,6 +9,35 @@
   min-width: 0;
 }
 
+/* One area of the Apps pane (design .card): addresses, sign-in, hosted apps. */
+.card {
+  min-width: 0;
+  margin: 0 0 var(--space-4);
+  padding: var(--pad-card);
+  border: 1px solid var(--card-line);
+  border-radius: var(--r-card);
+  background: var(--surface);
+  box-shadow: var(--shadow-card);
+}
+
+.cardTitle {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0 0 var(--space-3);
+  color: var(--ink);
+  font-family: var(--font-ui);
+  font-size: var(--fs-h3);
+  font-weight: var(--title-weight);
+}
+
+.autosave {
+  margin: 0 0 var(--space-3);
+  color: var(--ink-3);
+  font-size: var(--fs-meta);
+}
+
 .fields label {
   display: flex;
   flex-direction: column;
@@ -25,18 +54,20 @@
   width: 100%;
   box-sizing: border-box;
   min-width: 0;
-  padding: 8px;
-  color: var(--text-primary);
-  background: var(--bg-input);
-  border: 1px solid var(--border-color);
-  border-radius: 6px;
+  min-height: var(--input-h);
+  padding: var(--space-2) var(--space-3);
+  color: var(--ink);
+  background: var(--input-bg);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-input);
   font: inherit;
+  font-size: var(--fs-input);
 }
 
 .fields p {
   margin: -4px 0 4px;
-  color: var(--text-secondary);
-  font-size: 13px;
+  color: var(--ink-3);
+  font-size: var(--fs-small);
 }
 
 .expiry {
@@ -47,23 +78,33 @@
 
 .fields button {
   align-self: flex-start;
-  min-height: 36px;
-  padding: 6px 12px;
-  border: 1px solid var(--border-color);
-  border-radius: 6px;
-  color: var(--text-primary);
-  background: var(--bg-secondary);
+  min-height: var(--btn-h-sm);
+  padding: 0 var(--btn-px);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-btn);
+  color: var(--ink);
+  background: var(--surface);
   font: inherit;
+  font-size: var(--fs-btn);
   cursor: pointer;
 }
 
-.provider {
-  margin-block: 24px;
+/* Removing a host is destructive (design danger-soft). */
+.vhostRow .removeButton {
+  border-color: var(--err-line);
+  color: var(--err-ink);
+  background: var(--err-soft);
 }
 
 .provider > summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--ink);
+  font-size: var(--fs-h3);
+  font-weight: var(--title-weight);
   cursor: pointer;
-  font-weight: 600;
 }
 
 .provider[open] > summary {
@@ -75,12 +116,6 @@
   flex-direction: column;
   gap: 10px;
   min-width: 0;
-}
-
-.vhostHeading {
-  margin: 0;
-  font-size: 16px;
-  font-weight: 600;
 }
 
 .vhostHeader {
@@ -121,12 +156,12 @@
 }
 
 .vhostRow select {
-  min-height: 36px;
-  padding: 7px 8px;
-  color: var(--text-primary);
-  background: var(--bg-input);
-  border: 1px solid var(--border-color);
-  border-radius: 6px;
+  min-height: var(--input-h);
+  padding: var(--space-2);
+  color: var(--ink);
+  background: var(--input-bg);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-input);
   font: inherit;
 }
 
@@ -259,11 +294,11 @@
   }
 }
 .table .oauthBlocked > td {
-  background: color-mix(in srgb, var(--rose-ink) 12%, transparent);
+  background: var(--err-soft);
 }
 .table .oauthBlocked button,
 .table .oauthBlocked small {
-  color: var(--rose-ink);
+  color: var(--err-ink);
 }
 .table .oauthBlocked small {
   display: block;

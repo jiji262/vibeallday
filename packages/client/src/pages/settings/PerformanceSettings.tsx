@@ -10,6 +10,8 @@ import { useServerSettings } from "../../hooks/useServerSettings";
 import {
   getLastSessionTranscriptBytes,
   getSessionTranscriptMemoryStats,
+  DEFAULT_REVERSE_SEARCH_PAGES_PER_ATTEMPT,
+  DEFAULT_SESSION_INITIAL_HISTORY_COMPACTIONS,
   MAX_REVERSE_SEARCH_PAGES_PER_ATTEMPT,
   MAX_SESSION_INITIAL_HISTORY_COMPACTIONS,
   TRANSCRIPT_CACHE_BUDGET_MB_STOPS,
@@ -21,11 +23,17 @@ import { useStableToolPreviewRendering } from "../../hooks/useStableToolPreviewR
 import { useLiveToolOutputEnabled } from "../../hooks/useLiveToolOutputEnabled";
 import { useStreamingEnabled } from "../../hooks/useStreamingEnabled";
 import {
+  DEFAULT_SEARCH_CONCURRENCY,
   MAX_SEARCH_CONCURRENCY,
   useSearchConcurrency,
 } from "../../hooks/useSearchConcurrency";
 import { useVersion } from "../../hooks/useVersion";
 import { useI18n } from "../../i18n";
+import {
+  ScopedRowTitle,
+  ToggleSettingRow,
+  PerformanceValueControl,
+} from "./PerformanceSettings.controls";
 import { SettingsItem } from "./SettingsItem";
 import { useSettingsPaneTitle } from "./SettingsPaneTitleContext";
 import { SettingsSection } from "./SettingsSection";
@@ -42,6 +50,18 @@ function nearestStopIndex(stops: readonly number[], value: number): number {
     }
   });
   return bestIndex;
+}
+
+const HOURS_PER_DAY = 24;
+
+type Translate = ReturnType<typeof useI18n>["t"];
+
+function formatTtl(hours: number, t: Translate): string {
+  return hours < HOURS_PER_DAY
+    ? t("performanceTranscriptCacheTtlHoursValue", { count: hours })
+    : t("performanceTranscriptCacheTtlDaysValue", {
+        count: Math.round(hours / HOURS_PER_DAY),
+      });
 }
 
 function formatMemoryMb(bytes: number): string {
@@ -139,12 +159,7 @@ export function PerformanceSettings() {
     budgetMb === 0
       ? t("commonOff")
       : t("performanceTranscriptCacheMbValue", { count: budgetMb });
-  const ttlLabel =
-    ttlHours < 24
-      ? t("performanceTranscriptCacheTtlHoursValue", { count: ttlHours })
-      : t("performanceTranscriptCacheTtlDaysValue", {
-          count: Math.round(ttlHours / 24),
-        });
+  const ttlLabel = formatTtl(ttlHours, t);
 
   const budgetEquivalent = useMemo(() => {
     if (budgetMb === 0) {
@@ -315,248 +330,225 @@ export function PerformanceSettings() {
   );
   useSettingsUndoBaseline(undoState, restoreUndoState);
 
+  const historyHint = t("performanceHintHistory", {
+    max: MAX_SESSION_INITIAL_HISTORY_COMPACTIONS,
+    value: DEFAULT_SESSION_INITIAL_HISTORY_COMPACTIONS,
+  });
+  // Both stop lists start at their hook defaults (cache off, one hour).
+  const budgetHint = t("performanceHintRange", {
+    min: t("commonOff"),
+    max: t("performanceTranscriptCacheMbValue", {
+      count: TRANSCRIPT_CACHE_BUDGET_MB_STOPS.at(-1) ?? 0,
+    }),
+    value: t("commonOff"),
+  });
+  const ttlHint = t("performanceHintRange", {
+    min: formatTtl(TRANSCRIPT_CACHE_TTL_HOUR_STOPS[0], t),
+    max: formatTtl(TRANSCRIPT_CACHE_TTL_HOUR_STOPS.at(-1) ?? 1, t),
+    value: formatTtl(TRANSCRIPT_CACHE_TTL_HOUR_STOPS[0], t),
+  });
+
   return (
     <SettingsSection description={t("performanceSectionDescription")}>
-      <div className="settings-group">
-        <SettingsItem
-          label={t("performanceSearchConcurrencyTitle")}
-          description={t("performanceSearchConcurrencyDescription")}
-          valueText={t("performanceSearchConcurrencyValue", {
-            count: searchConcurrency,
-          })}
-          className="settings-item--wide-control"
-        >
-          <div className="settings-item-actions">
-            <CommittedRangeInput
-              min={1}
-              max={MAX_SEARCH_CONCURRENCY}
-              step={1}
-              value={searchConcurrency}
-              onCommit={setSearchConcurrency}
-              aria-label={t("performanceSearchConcurrencyTitle")}
-            />
-            <span className="settings-input-unit">{searchConcurrency}</span>
-          </div>
-        </SettingsItem>
-        <SettingsItem
-          label={t("appearanceStreamingTitle")}
-          description={t("appearanceStreamingDescription")}
-        >
-          <label className="toggle-switch">
-            <input
-              type="checkbox"
-              checked={streamingEnabled}
-              onChange={(event) => setStreamingEnabled(event.target.checked)}
-              aria-label={t("appearanceStreamingTitle")}
-            />
-            <span className="toggle-slider" />
-          </label>
-        </SettingsItem>
-        <SettingsItem
-          label={t("appearanceLiveToolOutputTitle")}
-          description={t("appearanceLiveToolOutputDescription")}
-        >
-          <label className="toggle-switch">
-            <input
-              type="checkbox"
-              checked={liveToolOutputEnabled}
-              onChange={(event) =>
-                setLiveToolOutputEnabled(event.target.checked)
-              }
-              aria-label={t("appearanceLiveToolOutputTitle")}
-            />
-            <span className="toggle-slider" />
-          </label>
-        </SettingsItem>
-        <SettingsItem
-          label={t("appearanceSessionLoadingProgressTitle")}
-          description={t("appearanceSessionLoadingProgressDescription")}
-        >
-          <label className="toggle-switch">
-            <input
-              type="checkbox"
-              checked={sessionLoadingProgressEnabled}
-              onChange={(event) =>
-                setSessionLoadingProgressEnabled(event.target.checked)
-              }
-              aria-label={t("appearanceSessionLoadingProgressTitle")}
-            />
-            <span className="toggle-slider" />
-          </label>
-        </SettingsItem>
-        <SettingsItem
-          label={t("performanceKeepRecentSessionMountedTitle")}
-          description={t("performanceKeepRecentSessionMountedDescription")}
-        >
-          <label className="toggle-switch">
-            <input
-              type="checkbox"
-              checked={sessionDomLingerEnabled}
-              onChange={(event) =>
-                setSessionDomLingerEnabled(event.target.checked)
-              }
-              aria-label={t("performanceKeepRecentSessionMountedTitle")}
-            />
-            <span className="toggle-slider" />
-          </label>
-        </SettingsItem>
-        <SettingsItem
-          label={t("performanceActiveWindowTrimTitle")}
-          description={t("performanceActiveWindowTrimDescription")}
-        >
-          <label className="toggle-switch">
-            <input
-              type="checkbox"
-              checked={sessionActiveWindowTrimEnabled}
-              onChange={(event) =>
-                setSessionActiveWindowTrimEnabled(event.target.checked)
-              }
-              aria-label={t("performanceActiveWindowTrimTitle")}
-            />
-            <span className="toggle-slider" />
-          </label>
-        </SettingsItem>
-        <SettingsItem
-          label={t("performanceInitialHistoryTitle")}
-          description={t("performanceInitialHistoryDescription")}
-          valueText={historyLabel}
-          className="settings-item--wide-control"
-        >
-          <div className="settings-item-actions">
-            <CommittedRangeInput
-              min={0}
-              max={MAX_SESSION_INITIAL_HISTORY_COMPACTIONS}
-              step={1}
-              value={historyIndex}
-              onDraftChange={setHistoryDraftIndex}
-              onCommit={commitHistory}
-              aria-label={t("performanceInitialHistoryTitle")}
-            />
-            <span className="settings-input-unit">{historyLabel}</span>
-          </div>
-        </SettingsItem>
-        <SettingsItem
-          label={t("performanceReverseSearchPageLimitTitle")}
-          description={t("performanceReverseSearchPageLimitDescription")}
-          descriptionLayout="full-width-on-narrow"
-          valueText={t("performanceReverseSearchPageLimitValue", {
-            count: reverseSearchMaxPagesPerAttempt,
-          })}
-        >
-          <span className="settings-input-unit">
-            <input
-              type="number"
-              className="settings-input-small"
-              min={1}
-              max={MAX_REVERSE_SEARCH_PAGES_PER_ATTEMPT}
-              step={1}
-              value={reverseSearchPageLimitDraft}
-              onChange={(event) =>
-                setReverseSearchPageLimitDraft(event.target.value)
-              }
-              onBlur={commitReverseSearchPageLimit}
-              onKeyDown={(event) => {
-                if (event.key === "Enter") {
-                  commitReverseSearchPageLimit();
-                  event.currentTarget.blur();
-                }
-              }}
-              aria-label={t("performanceReverseSearchPageLimitTitle")}
-            />
-            {t("performanceReverseSearchPageLimitUnit")}
-          </span>
-        </SettingsItem>
-        <SettingsItem
-          label={t("performanceTranscriptCacheTitle")}
-          description={t("performanceTranscriptCacheDescription")}
-          valueText={budgetLabel}
-          className="settings-item--wide-control"
-          info={
-            <>
-              <strong>{t("performanceTranscriptCacheTitle")}</strong>
-              <p>{t("performanceTranscriptCacheDescription")}</p>
-              {budgetEquivalent ? <p>{budgetEquivalent}</p> : null}
-              {cacheMemoryUsage ? <p>{cacheMemoryUsage}</p> : null}
-            </>
-          }
-        >
-          <div className="settings-item-actions">
-            <CommittedRangeInput
-              min={0}
-              max={TRANSCRIPT_CACHE_BUDGET_MB_STOPS.length - 1}
-              step={1}
-              value={budgetIndex}
-              onDraftChange={setBudgetDraftIndex}
-              onCommit={commitBudget}
-              aria-label={t("performanceTranscriptCacheTitle")}
-            />
-            <span className="settings-input-unit">{budgetLabel}</span>
-          </div>
-        </SettingsItem>
-        <SettingsItem
-          label={t("performanceTranscriptCacheTtlTitle")}
-          description={t("performanceTranscriptCacheTtlDescription")}
-          valueText={ttlLabel}
-          className="settings-item--wide-control"
-        >
-          <div className="settings-item-actions">
-            <CommittedRangeInput
-              min={0}
-              max={TRANSCRIPT_CACHE_TTL_HOUR_STOPS.length - 1}
-              step={1}
-              value={ttlIndex}
-              onDraftChange={setTtlDraftIndex}
-              onCommit={commitTtl}
-              disabled={budgetMb === 0}
-              aria-label={t("performanceTranscriptCacheTtlTitle")}
-            />
-            <span className="settings-input-unit">{ttlLabel}</span>
-          </div>
-        </SettingsItem>
-        <SettingsItem
-          label={t("appearanceStableToolPreviewTitle")}
-          description={t("appearanceStableToolPreviewDescription")}
-        >
-          <label className="toggle-switch">
-            <input
-              type="checkbox"
-              checked={stableToolPreviewRendering}
-              onChange={(event) =>
-                setStableToolPreviewRendering(event.target.checked)
-              }
-              aria-label={t("appearanceStableToolPreviewTitle")}
-            />
-            <span className="toggle-slider" />
-          </label>
-        </SettingsItem>
-        {hostProcessObservabilitySupported && (
+      <SettingsSection title={t("performanceSectionRendering")} scope="local">
+        <div className="settings-group">
+          <ToggleSettingRow
+            label={t("appearanceStreamingTitle")}
+            description={t("appearanceStreamingDescription")}
+            checked={streamingEnabled}
+            onChange={setStreamingEnabled}
+          />
+          <ToggleSettingRow
+            label={t("appearanceLiveToolOutputTitle")}
+            description={t("appearanceLiveToolOutputDescription")}
+            checked={liveToolOutputEnabled}
+            onChange={setLiveToolOutputEnabled}
+          />
+          <ToggleSettingRow
+            label={t("appearanceSessionLoadingProgressTitle")}
+            description={t("appearanceSessionLoadingProgressDescription")}
+            checked={sessionLoadingProgressEnabled}
+            onChange={setSessionLoadingProgressEnabled}
+          />
+          <ToggleSettingRow
+            label={t("appearanceStableToolPreviewTitle")}
+            description={t("appearanceStableToolPreviewDescription")}
+            checked={stableToolPreviewRendering}
+            onChange={setStableToolPreviewRendering}
+          />
+        </div>
+      </SettingsSection>
+
+      <SettingsSection title={t("performanceSectionMemory")} scope="local">
+        <div className="settings-group">
+          <ToggleSettingRow
+            label={t("performanceKeepRecentSessionMountedTitle")}
+            description={t("performanceKeepRecentSessionMountedDescription")}
+            checked={sessionDomLingerEnabled}
+            onChange={setSessionDomLingerEnabled}
+          />
+          <ToggleSettingRow
+            label={t("performanceActiveWindowTrimTitle")}
+            description={t("performanceActiveWindowTrimDescription")}
+            checked={sessionActiveWindowTrimEnabled}
+            onChange={setSessionActiveWindowTrimEnabled}
+          />
           <SettingsItem
-            label={t("performanceHostProcessObservabilityTitle")}
-            description={t("performanceHostProcessObservabilityDescription")}
-            keywords={["Agents", "CPU", "memory", "external processes"]}
-            after={
-              serverSettingsError ? (
-                <ErrorState inline message={serverSettingsError} />
-              ) : null
+            label={t("performanceInitialHistoryTitle")}
+            description={t("performanceInitialHistoryDescription")}
+            valueText={historyLabel}
+            className="settings-item--wide-control"
+          >
+            <PerformanceValueControl value={historyLabel} hint={historyHint}>
+              <CommittedRangeInput
+                min={0}
+                max={MAX_SESSION_INITIAL_HISTORY_COMPACTIONS}
+                step={1}
+                value={historyIndex}
+                onDraftChange={setHistoryDraftIndex}
+                onCommit={commitHistory}
+                aria-label={t("performanceInitialHistoryTitle")}
+              />
+            </PerformanceValueControl>
+          </SettingsItem>
+          <SettingsItem
+            label={t("performanceTranscriptCacheTitle")}
+            description={t("performanceTranscriptCacheDescription")}
+            valueText={budgetLabel}
+            className="settings-item--wide-control"
+            info={
+              <>
+                <ScopedRowTitle
+                  label={t("performanceTranscriptCacheTitle")}
+                  scope="local"
+                />
+                <p>{t("performanceTranscriptCacheDescription")}</p>
+                {budgetEquivalent ? <p>{budgetEquivalent}</p> : null}
+                {cacheMemoryUsage ? <p>{cacheMemoryUsage}</p> : null}
+              </>
             }
           >
-            <label className="toggle-switch">
-              <input
-                type="checkbox"
-                checked={hostProcessObservabilityEnabled}
-                disabled={
-                  serverSettingsLoading || savingHostProcessObservability
-                }
-                onChange={(event) =>
-                  void setHostProcessObservability(event.target.checked)
-                }
-                aria-label={t("performanceHostProcessObservabilityTitle")}
+            <PerformanceValueControl value={budgetLabel} hint={budgetHint}>
+              <CommittedRangeInput
+                min={0}
+                max={TRANSCRIPT_CACHE_BUDGET_MB_STOPS.length - 1}
+                step={1}
+                value={budgetIndex}
+                onDraftChange={setBudgetDraftIndex}
+                onCommit={commitBudget}
+                aria-label={t("performanceTranscriptCacheTitle")}
               />
-              <span className="toggle-slider" />
-            </label>
+            </PerformanceValueControl>
           </SettingsItem>
-        )}
-      </div>
+          <SettingsItem
+            label={t("performanceTranscriptCacheTtlTitle")}
+            description={t("performanceTranscriptCacheTtlDescription")}
+            valueText={ttlLabel}
+            className="settings-item--wide-control"
+          >
+            <PerformanceValueControl value={ttlLabel} hint={ttlHint}>
+              <CommittedRangeInput
+                min={0}
+                max={TRANSCRIPT_CACHE_TTL_HOUR_STOPS.length - 1}
+                step={1}
+                value={ttlIndex}
+                onDraftChange={setTtlDraftIndex}
+                onCommit={commitTtl}
+                disabled={budgetMb === 0}
+                aria-label={t("performanceTranscriptCacheTtlTitle")}
+              />
+            </PerformanceValueControl>
+          </SettingsItem>
+        </div>
+      </SettingsSection>
+
+      <SettingsSection title={t("performanceSectionSearch")} scope="local">
+        <div className="settings-group">
+          <SettingsItem
+            label={t("performanceSearchConcurrencyTitle")}
+            description={t("performanceSearchConcurrencyDescription")}
+            valueText={t("performanceSearchConcurrencyValue", {
+              count: searchConcurrency,
+            })}
+            className="settings-item--wide-control"
+          >
+            <PerformanceValueControl
+              value={t("performanceSearchConcurrencyValue", {
+                count: searchConcurrency,
+              })}
+              hint={t("performanceHintRange", {
+                min: 1,
+                max: MAX_SEARCH_CONCURRENCY,
+                value: DEFAULT_SEARCH_CONCURRENCY,
+              })}
+            >
+              <CommittedRangeInput
+                min={1}
+                max={MAX_SEARCH_CONCURRENCY}
+                step={1}
+                value={searchConcurrency}
+                onCommit={setSearchConcurrency}
+                aria-label={t("performanceSearchConcurrencyTitle")}
+              />
+            </PerformanceValueControl>
+          </SettingsItem>
+          <SettingsItem
+            label={t("performanceReverseSearchPageLimitTitle")}
+            description={t("performanceReverseSearchPageLimitDescription")}
+            descriptionLayout="full-width-on-narrow"
+            valueText={t("performanceReverseSearchPageLimitValue", {
+              count: reverseSearchMaxPagesPerAttempt,
+            })}
+          >
+            <PerformanceValueControl
+              hint={t("performanceHintRange", {
+                min: 1,
+                max: MAX_REVERSE_SEARCH_PAGES_PER_ATTEMPT,
+                value: DEFAULT_REVERSE_SEARCH_PAGES_PER_ATTEMPT,
+              })}
+            >
+              <span className="settings-input-unit">
+                <input
+                  type="number"
+                  className="settings-input-small"
+                  min={1}
+                  max={MAX_REVERSE_SEARCH_PAGES_PER_ATTEMPT}
+                  step={1}
+                  value={reverseSearchPageLimitDraft}
+                  onChange={(event) =>
+                    setReverseSearchPageLimitDraft(event.target.value)
+                  }
+                  onBlur={commitReverseSearchPageLimit}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter") {
+                      commitReverseSearchPageLimit();
+                      event.currentTarget.blur();
+                    }
+                  }}
+                  aria-label={t("performanceReverseSearchPageLimitTitle")}
+                />
+                {t("performanceReverseSearchPageLimitUnit")}
+              </span>
+            </PerformanceValueControl>
+          </SettingsItem>
+          {hostProcessObservabilitySupported && (
+            <ToggleSettingRow
+              label={t("performanceHostProcessObservabilityTitle")}
+              description={t("performanceHostProcessObservabilityDescription")}
+              scope="server"
+              keywords={["Agents", "CPU", "memory", "external processes"]}
+              checked={hostProcessObservabilityEnabled}
+              disabled={serverSettingsLoading || savingHostProcessObservability}
+              onChange={(enabled) => void setHostProcessObservability(enabled)}
+              after={
+                serverSettingsError ? (
+                  <ErrorState inline message={serverSettingsError} />
+                ) : null
+              }
+            />
+          )}
+        </div>
+      </SettingsSection>
     </SettingsSection>
   );
 }

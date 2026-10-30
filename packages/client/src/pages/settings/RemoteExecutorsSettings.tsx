@@ -3,14 +3,23 @@ import { ErrorState } from "../../components/garden/ErrorState";
 import { EmptyState } from "../../components/garden/EmptyState";
 import { LoadingState } from "../../components/garden/LoadingState";
 import type { RemoteExecutorTestResult } from "../../api/client";
+import type { MessageKey } from "../../i18n";
 import { useRemoteExecutors } from "../../hooks/useRemoteExecutors";
 import { useI18n } from "../../i18n";
+import { ExecutorCard } from "./RemoteExecutorsSettings.card";
 import styles from "./RemoteExecutorsSettings.module.css";
 import { SettingsItem } from "./SettingsItem";
 import { useSettingsPaneTitle } from "./SettingsPaneTitleContext";
 import { HideInSettingsSearch } from "./SettingsSearchContext";
 import { SettingsSection } from "./SettingsSection";
 import { useSettingsUndoBaseline } from "./SettingsUndoContext";
+
+const REQUIREMENT_KEYS = [
+  "remoteExecutorsRequirementSshConfig",
+  "remoteExecutorsRequirementKeyAuth",
+  "remoteExecutorsRequirementClaude",
+  "remoteExecutorsRequirementPaths",
+] as const satisfies readonly MessageKey[];
 
 interface ExecutorStatus {
   testing: boolean;
@@ -120,7 +129,10 @@ export function RemoteExecutorsSettings() {
   };
 
   return (
-    <SettingsSection description={t("remoteExecutorsDescription")}>
+    <SettingsSection
+      description={t("remoteExecutorsDescription")}
+      scope="server"
+    >
       {/* Add new executor */}
       <div className="settings-group">
         <SettingsItem
@@ -161,76 +173,41 @@ export function RemoteExecutorsSettings() {
             <EmptyState compact title={t("remoteExecutorsEmpty")} />
           ) : (
             <div className={styles.list}>
-              {executors.map((host) => {
-                const status = executorStatus[host];
-                return (
-                  <div key={host} className={styles.item}>
-                    <div className={styles.itemInfo}>
-                      <span className={styles.host}>{host}</span>
-                      {status?.result && (
-                        <span
-                          className={`settings-status-badge ${status.result.success ? "settings-status-detected" : "settings-status-not-detected"}`}
-                        >
-                          {status.result.success
-                            ? t("remoteExecutorsConnected")
-                            : t("remoteExecutorsFailed")}
-                        </span>
-                      )}
-                    </div>
-                    {status?.result && !status.result.success && (
-                      <p className={`settings-error ${styles.error}`}>
-                        {status.result.error}
-                      </p>
-                    )}
-                    {status?.result?.success && (
-                      <p className={styles.details}>
-                        {status.result.claudeAvailable
-                          ? status.result.claudeVersion
-                            ? t("remoteExecutorsClaudeVersion", {
-                                version: status.result.claudeVersion,
-                              })
-                            : t("remoteExecutorsClaudeAvailable")
-                          : t("remoteExecutorsClaudeMissing")}
-                      </p>
-                    )}
-                    <div className={styles.actions}>
-                      <button
-                        type="button"
-                        onClick={() => handleTestExecutor(host)}
-                        disabled={status?.testing}
-                        className={styles.testButton}
-                      >
-                        {status?.testing
-                          ? t("remoteExecutorsTesting")
-                          : t("remoteExecutorsTestConnection")}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveExecutor(host)}
-                        className={styles.removeButton}
-                      >
-                        {t("remoteExecutorsRemove")}
-                      </button>
-                    </div>
-                  </div>
-                );
-              })}
+              {executors.map((host) => (
+                <ExecutorCard
+                  key={host}
+                  host={host}
+                  testing={executorStatus[host]?.testing === true}
+                  result={executorStatus[host]?.result}
+                  onTest={() => void handleTestExecutor(host)}
+                  onRemove={() => void handleRemoveExecutor(host)}
+                />
+              ))}
             </div>
           )}
         </div>
       </HideInSettingsSearch>
 
-      {/* Help text */}
+      {/* Setup checklist: open until a host exists, then folded. */}
       <HideInSettingsSearch>
-        <div className="settings-group">
-          <h3>{t("remoteExecutorsSetupRequirements")}</h3>
+        <details
+          className={`settings-group ${styles.requirementsFold}`}
+          open={!loading && executors.length === 0}
+        >
+          <summary className={styles.requirementsSummary}>
+            <span>{t("remoteExecutorsSetupRequirements")}</span>
+            <span className={styles.requirementsCount}>
+              {t("settingsRemoteExecutorRequirementsCount", {
+                count: REQUIREMENT_KEYS.length,
+              })}
+            </span>
+          </summary>
           <ul className={styles.requirements}>
-            <li>{t("remoteExecutorsRequirementSshConfig")}</li>
-            <li>{t("remoteExecutorsRequirementKeyAuth")}</li>
-            <li>{t("remoteExecutorsRequirementClaude")}</li>
-            <li>{t("remoteExecutorsRequirementPaths")}</li>
+            {REQUIREMENT_KEYS.map((key) => (
+              <li key={key}>{t(key)}</li>
+            ))}
           </ul>
-        </div>
+        </details>
       </HideInSettingsSearch>
     </SettingsSection>
   );

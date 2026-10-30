@@ -24,9 +24,13 @@ import {
   SUBAGENT_MAX_DEPTH_SETTING_CAPABILITY,
   type ProviderInfo,
 } from "@vibeallday/shared";
+import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { ServerSettings } from "../../../api/client";
+import { getAllProviders } from "../../../providers/registry";
+import { AgentBehaviorSettings } from "../AgentBehaviorSettings";
 import { ProvidersSettings } from "../ProvidersSettings";
+import { SettingsJumpTargetProvider } from "../SettingsSearchContext";
 
 const {
   hookState,
@@ -107,6 +111,41 @@ vi.mock("../../../i18n", () => ({
   }),
 }));
 
+/** Providers at one route, the way Settings mounts the pane. */
+function ProvidersAt({ path }: { path: string }) {
+  return (
+    <MemoryRouter initialEntries={[path]}>
+      <Routes>
+        <Route path="/settings/:category" element={<ProvidersSettings />} />
+        <Route
+          path="/settings/:category/:itemId"
+          element={<ProvidersSettings />}
+        />
+      </Routes>
+    </MemoryRouter>
+  );
+}
+
+/**
+ * Every page that holds a provider row: Agent behavior plus each provider's
+ * detail page, so a row is found wherever the redesign placed it.
+ */
+function AllProviderPages() {
+  return (
+    <>
+      <MemoryRouter>
+        <AgentBehaviorSettings />
+      </MemoryRouter>
+      {getAllProviders().map((provider) => (
+        <ProvidersAt
+          key={provider.id}
+          path={`/settings/providers/${provider.id}`}
+        />
+      ))}
+    </>
+  );
+}
+
 describe("ProvidersSettings additional models", () => {
   beforeEach(() => {
     window.localStorage.clear();
@@ -146,7 +185,7 @@ describe("ProvidersSettings additional models", () => {
   });
 
   it("gates instruction restoration on the settings field and saves independent provider choices", async () => {
-    const view = render(<ProvidersSettings />);
+    const view = render(<AllProviderPages />);
     expect(screen.queryByText("instructionRestorationTitle")).toBeNull();
     hookState.settings.instructionRestoration = {
       providers: {},
@@ -154,7 +193,7 @@ describe("ProvidersSettings additional models", () => {
       pattern: "*.md",
       delayTurns: 2,
     };
-    view.rerender(<ProvidersSettings />);
+    view.rerender(<AllProviderPages />);
     const control = document.querySelector(
       '[data-settings-item="providers-instruction-restoration"]',
     ) as HTMLElement;
@@ -189,7 +228,7 @@ describe("ProvidersSettings additional models", () => {
       },
     ];
 
-    render(<ProvidersSettings />);
+    render(<AllProviderPages />);
 
     const claudeItem = document.querySelector(
       '[data-settings-item="provider-claude"]',
@@ -218,20 +257,20 @@ describe("ProvidersSettings additional models", () => {
   it("hides the setting when the connected server lacks the capability", () => {
     versionState.capabilities = [];
 
-    render(<ProvidersSettings />);
+    render(<AllProviderPages />);
 
     expect(screen.queryByText("providersAdditionalModelsTitle")).toBeNull();
   });
 
   it("hides idle harness lifetime from older servers", () => {
-    render(<ProvidersSettings />);
+    render(<AllProviderPages />);
 
     expect(screen.queryByText("providersIdleReapHoursLabel")).toBeNull();
     expect(screen.queryByText("providersSubagentMaxDepthLabel")).toBeNull();
   });
 
   it("hides Codex reasoning summaries from older servers", () => {
-    render(<ProvidersSettings />);
+    render(<AllProviderPages />);
 
     expect(
       screen.queryByText("providersCodexReasoningSummaryTitle"),
@@ -241,7 +280,7 @@ describe("ProvidersSettings additional models", () => {
 
   it("shows the default Codex reasoning-summary mode and saves exact values", async () => {
     versionState.capabilities = [CODEX_REASONING_SUMMARY_SETTING_CAPABILITY];
-    render(<ProvidersSettings />);
+    render(<AllProviderPages />);
     const select = screen.getByLabelText(
       "providersCodexReasoningSummaryAria",
     ) as HTMLSelectElement;
@@ -264,7 +303,7 @@ describe("ProvidersSettings additional models", () => {
     };
     versionState.capabilities = [CODEX_REASONING_SUMMARY_SETTING_CAPABILITY];
 
-    render(<ProvidersSettings />);
+    render(<AllProviderPages />);
 
     expect(
       (
@@ -276,14 +315,14 @@ describe("ProvidersSettings additional models", () => {
   });
 
   it("hides the Codex plan-tool setting from older servers", () => {
-    render(<ProvidersSettings />);
+    render(<AllProviderPages />);
 
     expect(screen.queryByText("providersCodexPlanToolTitle")).toBeNull();
   });
 
   it("inherits the Codex plan-tool fallback and saves exact overrides", async () => {
     versionState.capabilities = [CODEX_PLAN_TOOL_SETTING_CAPABILITY];
-    render(<ProvidersSettings />);
+    render(<AllProviderPages />);
     const select = screen.getByLabelText(
       "providersCodexPlanToolAria",
     ) as HTMLSelectElement;
@@ -310,14 +349,14 @@ describe("ProvidersSettings additional models", () => {
   });
 
   it("hides the Codex cyber access setting from older servers", () => {
-    render(<ProvidersSettings />);
+    render(<AllProviderPages />);
 
     expect(screen.queryByText("providersCodexCyberAccessTitle")).toBeNull();
   });
 
   it("inherits the Codex cyber access fallback and saves exact overrides", async () => {
     versionState.capabilities = [CODEX_CYBER_ACCESS_PROGRAM_SETTING_CAPABILITY];
-    render(<ProvidersSettings />);
+    render(<AllProviderPages />);
     const select = screen.getByLabelText(
       "providersCodexCyberAccessAria",
     ) as HTMLSelectElement;
@@ -355,7 +394,7 @@ describe("ProvidersSettings additional models", () => {
     };
     versionState.capabilities = [IDLE_REAP_HOURS_SETTING_CAPABILITY];
 
-    render(<ProvidersSettings />);
+    render(<AllProviderPages />);
 
     expect(screen.getByText("providersIdleReapHoursLabel")).toBeTruthy();
     expect(screen.getByText("providersIdleReapNeverHint")).toBeTruthy();
@@ -372,7 +411,7 @@ describe("ProvidersSettings additional models", () => {
       idleReapHours: 24,
     };
     versionState.capabilities = [IDLE_REAP_HOURS_SETTING_CAPABILITY];
-    render(<ProvidersSettings />);
+    render(<AllProviderPages />);
     const numberInput = document.querySelector<HTMLInputElement>(
       "#providers-idle-reap-hours-control-number",
     );
@@ -391,7 +430,7 @@ describe("ProvidersSettings additional models", () => {
   it("shows the default subagent limit and provider coverage", () => {
     versionState.capabilities = [SUBAGENT_MAX_DEPTH_SETTING_CAPABILITY];
 
-    render(<ProvidersSettings />);
+    render(<AllProviderPages />);
 
     expect(screen.getByText("providersSubagentMaxDepthLabel")).toBeTruthy();
     expect(screen.getByText("providersSubagentMaxDepthCoverage")).toBeTruthy();
@@ -409,7 +448,7 @@ describe("ProvidersSettings additional models", () => {
     };
     versionState.capabilities = [SUBAGENT_MAX_DEPTH_SETTING_CAPABILITY];
 
-    render(<ProvidersSettings />);
+    render(<AllProviderPages />);
 
     expect(
       document.querySelector<HTMLInputElement>(
@@ -429,7 +468,7 @@ describe("ProvidersSettings additional models", () => {
       subagentMaxDepth: 2,
     };
     versionState.capabilities = [SUBAGENT_MAX_DEPTH_SETTING_CAPABILITY];
-    render(<ProvidersSettings />);
+    render(<AllProviderPages />);
     const numberInput = document.querySelector<HTMLInputElement>(
       "#providers-subagent-max-depth-control-number",
     );
@@ -455,17 +494,87 @@ describe("ProvidersSettings additional models", () => {
     });
   });
 
-  it("shows Codex before Claude", () => {
-    render(<ProvidersSettings />);
-
-    const providerRows = Array.from(
-      document.querySelectorAll<HTMLElement>(
-        '[data-settings-item^="provider-"]',
-      ),
+  it("lists ready providers on the overview with Codex before Claude", () => {
+    hookState.providers = [
+      ...hookState.providers,
+      {
+        name: "codex",
+        displayName: "Codex",
+        installed: true,
+        authenticated: true,
+        enabled: true,
+        models: [],
+      },
+    ];
+    render(<ProvidersAt path="/settings/providers" />);
+    const cards = Array.from(
+      document.querySelectorAll<HTMLElement>("[data-provider-card]"),
     );
+    expect(cards.map((card) => card.dataset.providerCard)).toEqual([
+      "codex",
+      "claude",
+    ]);
     expect(
-      providerRows.slice(0, 2).map((row) => row.dataset.settingsItem),
-    ).toEqual(["provider-codex", "provider-claude"]);
+      document.querySelector('[data-settings-item^="provider-"]'),
+    ).toBeNull();
+  });
+
+  it("puts providers waiting on sign-in under Needs you with a sign-in link", () => {
+    hookState.providers = [
+      {
+        name: "codex",
+        displayName: "Codex",
+        installed: true,
+        authenticated: false,
+        enabled: false,
+        supportsInAppLogin: true,
+        models: [],
+      },
+    ];
+    render(<ProvidersAt path="/settings/providers" />);
+    const card = document.querySelector<HTMLElement>(
+      '[data-provider-card="codex"]',
+    );
+    expect(card).not.toBeNull();
+    expect(
+      within(card as HTMLElement)
+        .getByRole("link", { name: "providersSignIn" })
+        .getAttribute("href"),
+    ).toBe("/provider-sign-in/codex");
+    expect(screen.getByText("providersOverviewNeedsYou")).toBeDefined();
+  });
+
+  it("forwards a search jump for a provider row to that provider's page", async () => {
+    const consume = vi.fn();
+    // jsdom has no layout; the landed row scrolls itself into view.
+    Element.prototype.scrollIntoView = vi.fn();
+    versionState.capabilities = [CODEX_REASONING_SUMMARY_SETTING_CAPABILITY];
+    hookState.providers = [
+      {
+        name: "codex",
+        displayName: "Codex",
+        installed: true,
+        authenticated: true,
+        enabled: true,
+        models: [],
+      },
+    ];
+    render(
+      <SettingsJumpTargetProvider
+        value={{ target: "provider-codex-reasoning-summary", consume }}
+      >
+        <ProvidersAt path="/settings/providers" />
+      </SettingsJumpTargetProvider>,
+    );
+    await waitFor(() =>
+      expect(
+        document.querySelector(
+          '[data-settings-item="provider-codex-reasoning-summary"]',
+        ),
+      ).not.toBeNull(),
+    );
+    expect(document.querySelector("[data-provider-card]")).toBeNull();
+    await waitFor(() => expect(consume).toHaveBeenCalled());
   });
 
   it("refreshes the model catalog from the Codex provider card", async () => {
@@ -479,7 +588,7 @@ describe("ProvidersSettings additional models", () => {
         models: [{ id: "gpt-6-astra", name: "Astra" }],
       },
     ];
-    render(<ProvidersSettings />);
+    render(<AllProviderPages />);
 
     fireEvent.click(
       screen.getByRole("button", { name: "providersModelsRefresh" }),
@@ -503,7 +612,7 @@ describe("ProvidersSettings additional models", () => {
       RELOAD_SAFE_CODEX_RUNTIME_CAPABILITY,
     ];
 
-    render(<ProvidersSettings />);
+    render(<AllProviderPages />);
 
     expect(screen.queryByText("providersCodexReloadSafeTitle")).toBeNull();
   });
@@ -514,13 +623,13 @@ describe("ProvidersSettings additional models", () => {
       supportsLaunchCompactPercentOverride: undefined,
     }));
 
-    render(<ProvidersSettings />);
+    render(<AllProviderPages />);
 
     expect(screen.queryByText("providersClaudeAutoCompactTitle")).toBeNull();
   });
 
   it("saves and clears the global Claude auto-compaction setting", async () => {
-    const { unmount } = render(<ProvidersSettings />);
+    const { unmount } = render(<AllProviderPages />);
     const numberInput = screen
       .getAllByLabelText("providersClaudeAutoCompactTitle")
       .find((element) => element.getAttribute("type") === "number");
@@ -546,7 +655,7 @@ describe("ProvidersSettings additional models", () => {
       claudeAutoCompactPercentOverride: 60,
     };
 
-    render(<ProvidersSettings />);
+    render(<AllProviderPages />);
     const configuredInput = screen
       .getAllByLabelText("providersClaudeAutoCompactTitle")
       .find((element) => element.getAttribute("type") === "number");
@@ -564,7 +673,7 @@ describe("ProvidersSettings additional models", () => {
   });
 
   it("shows a compact empty summary and saves maintained opt-ins", async () => {
-    render(<ProvidersSettings />);
+    render(<AllProviderPages />);
 
     fireEvent.click(
       screen.getByRole("button", {
@@ -586,7 +695,7 @@ describe("ProvidersSettings additional models", () => {
   });
 
   it("adds a custom exact id from the advanced editor", async () => {
-    render(<ProvidersSettings />);
+    render(<AllProviderPages />);
 
     fireEvent.click(
       screen.getByRole("button", {
@@ -628,7 +737,7 @@ describe("ProvidersSettings additional models", () => {
       ],
     };
 
-    render(<ProvidersSettings />);
+    render(<AllProviderPages />);
     fireEvent.click(
       screen.getByRole("button", { name: /providersAdditionalModelsOne/u }),
     );
@@ -643,14 +752,14 @@ describe("ProvidersSettings additional models", () => {
   });
 
   it("hides Claude Gateway configuration from older servers", () => {
-    render(<ProvidersSettings />);
+    render(<AllProviderPages />);
 
     expect(screen.queryByText("providersClaudeGatewayTitle")).toBeNull();
   });
 
   it("saves isolated Claude Gateway configuration and reloads providers", async () => {
     versionState.capabilities = [CLAUDE_GATEWAY_CAPABILITY];
-    render(<ProvidersSettings />);
+    render(<AllProviderPages />);
 
     const gatewayCard = document.querySelector<HTMLElement>(
       '[data-settings-item="provider-claude-gateway"]',
@@ -681,7 +790,7 @@ describe("ProvidersSettings additional models", () => {
 
   it("submits Claude Gateway edits through its form", async () => {
     versionState.capabilities = [CLAUDE_GATEWAY_CAPABILITY];
-    render(<ProvidersSettings />);
+    render(<AllProviderPages />);
 
     const input = screen.getByRole("textbox", {
       name: "providersClaudeGatewayUrlAria",
@@ -703,7 +812,7 @@ describe("ProvidersSettings additional models", () => {
 
   it("materializes the Claude Gateway example URL on focus", () => {
     versionState.capabilities = [CLAUDE_GATEWAY_CAPABILITY];
-    render(<ProvidersSettings />);
+    render(<AllProviderPages />);
 
     const input = screen.getByRole("textbox", {
       name: "providersClaudeGatewayUrlAria",
@@ -739,7 +848,7 @@ describe("ProvidersSettings additional models", () => {
       ],
       defaultGatewayServiceId: "vllm",
     };
-    render(<ProvidersSettings />);
+    render(<AllProviderPages />);
 
     // The single-URL form belongs to older servers only.
     expect(
@@ -812,7 +921,7 @@ describe("ProvidersSettings additional models", () => {
       // what decides where its models sit in the list.
       defaultGatewayServiceId: "copilot",
     };
-    render(<ProvidersSettings />);
+    render(<AllProviderPages />);
 
     const moveUp = screen.getAllByRole("button", {
       name: "providersGatewayServiceMoveUp",
@@ -862,7 +971,7 @@ describe("ProvidersSettings additional models", () => {
       ],
       defaultGatewayServiceId: "vllm",
     };
-    render(<ProvidersSettings />);
+    render(<AllProviderPages />);
 
     expect(
       screen.getByText(
@@ -898,7 +1007,7 @@ describe("ProvidersSettings additional models", () => {
         },
       ],
     };
-    render(<ProvidersSettings />);
+    render(<AllProviderPages />);
 
     expect(screen.queryByText("codex -p vibeallday-vllm")).toBeNull();
 
@@ -918,7 +1027,7 @@ describe("ProvidersSettings additional models", () => {
       CLAUDE_GATEWAY_CAPABILITY,
       CLAUDE_GATEWAY_SERVICES_CAPABILITY,
     ];
-    render(<ProvidersSettings />);
+    render(<AllProviderPages />);
 
     fireEvent.click(
       screen.getByRole("button", { name: "providersGatewayServiceAdd" }),
@@ -950,7 +1059,7 @@ describe("ProvidersSettings additional models", () => {
 
   it("hides Gateway autostart from servers with only the base capability", () => {
     versionState.capabilities = [CLAUDE_GATEWAY_CAPABILITY];
-    render(<ProvidersSettings />);
+    render(<AllProviderPages />);
 
     expect(
       screen.queryByRole("textbox", {
@@ -974,7 +1083,7 @@ describe("ProvidersSettings additional models", () => {
       CLAUDE_GATEWAY_CAPABILITY,
       CLAUDE_GATEWAY_DISABLE_AGENT_CAPABILITY,
     ];
-    render(<ProvidersSettings />);
+    render(<AllProviderPages />);
 
     const checkbox = screen.getByRole("checkbox", {
       name: "providersClaudeGatewayDisableAgentTitle",
@@ -994,7 +1103,7 @@ describe("ProvidersSettings additional models", () => {
       CLAUDE_GATEWAY_CAPABILITY,
       CLAUDE_GATEWAY_DISABLE_PLAN_MODE_CAPABILITY,
     ];
-    render(<ProvidersSettings />);
+    render(<AllProviderPages />);
 
     const checkbox = screen.getByRole("checkbox", {
       name: "providersClaudeGatewayDisablePlanModeTitle",
@@ -1014,7 +1123,7 @@ describe("ProvidersSettings additional models", () => {
       CLAUDE_GATEWAY_CAPABILITY,
       CLAUDE_GATEWAY_AUTOSTART_CAPABILITY,
     ];
-    render(<ProvidersSettings />);
+    render(<AllProviderPages />);
 
     fireEvent.change(
       screen.getByRole("textbox", {
@@ -1046,7 +1155,7 @@ describe("ProvidersSettings additional models", () => {
   });
 
   it("hides legacy ClaudeOllama when the server has no configuration or use", () => {
-    render(<ProvidersSettings />);
+    render(<AllProviderPages />);
 
     expect(screen.queryByText("Claude + Ollama")).toBeNull();
   });
@@ -1064,9 +1173,11 @@ describe("ProvidersSettings additional models", () => {
       },
     ];
 
-    render(<ProvidersSettings />);
+    render(<AllProviderPages />);
 
-    expect(screen.getByText("Claude + Ollama")).toBeTruthy();
+    expect(
+      document.querySelector('[data-settings-item="provider-claude-ollama"]'),
+    ).not.toBeNull();
     expect(
       screen.getByText("providersClaudeOllamaDeprecationNotice"),
     ).toBeTruthy();
@@ -1085,7 +1196,7 @@ describe("ProvidersSettings additional models", () => {
       },
     ];
 
-    const { unmount } = render(<ProvidersSettings />);
+    const { unmount } = render(<AllProviderPages />);
     fireEvent.click(
       screen.getByRole("button", {
         name: "providersClaudeOllamaDeprecationDismissAria",
@@ -1096,14 +1207,14 @@ describe("ProvidersSettings additional models", () => {
     ).toBeNull();
 
     unmount();
-    render(<ProvidersSettings />);
+    render(<AllProviderPages />);
     expect(
       screen.queryByText("providersClaudeOllamaDeprecationNotice"),
     ).toBeNull();
   });
 
   it("hides post-compact continuation on older servers", () => {
-    render(<ProvidersSettings />);
+    render(<AllProviderPages />);
     expect(screen.queryByText("providersPostCompactReplayTitle")).toBeNull();
   });
 
@@ -1113,7 +1224,7 @@ describe("ProvidersSettings additional models", () => {
       postCompactReplay: { providers: {}, replayTurnCount: 0 },
     };
 
-    render(<ProvidersSettings />);
+    render(<AllProviderPages />);
 
     expect(screen.getByText("providersPostCompactReplayTitle")).toBeTruthy();
 

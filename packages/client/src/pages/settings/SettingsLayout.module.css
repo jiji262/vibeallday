@@ -1,41 +1,106 @@
-/* Desktop settings: the category rail beside a 960px content column, the
-   pair centred in the main column (license-hub settings archetype). */
+/* Desktop settings: the settings rail (design .side, it stands in for the app
+   sidebar) beside the pane column, each scrolling on its own. */
 .twoColumn {
-  --settings-rail-width: 256px;
-  --settings-pane-width: 960px;
-  --page-content-max-width: calc(
-    var(--settings-rail-width) +
-    var(--space-7) +
-    var(--settings-pane-width)
-  );
+  --settings-rail-width: 272px;
+  --page-content-max-width: 1040px;
 
   display: grid;
+  flex: 1;
   grid-template-columns: var(--settings-rail-width) minmax(0, 1fr);
-  gap: var(--space-7);
-  align-items: start;
   min-height: 0;
+  height: 100%;
 }
 
-/* The rail looks like the app sidebar: a sunken panel, mono group labels.
-   Fixed px width so the text-size setting cannot stretch it, and sticky so
-   the open category stays in reach while a pane scrolls. */
-.nav {
-  position: sticky;
-  top: var(--space-5);
+/* Fixed px width so the text-size setting cannot stretch it. */
+.rail {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  width: var(--settings-rail-width);
+  min-height: 0;
+  padding: 14px var(--space-3) 28px;
+  overflow-y: auto;
+  border-right: 1px solid var(--line);
+  background: var(--side-bg);
+  box-sizing: border-box;
+  scrollbar-width: thin;
+}
+
+/* Design .nav-item, muted: the way back to the app. */
+.back {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 36px;
+  padding: 0 10px;
+  border-radius: var(--r-btn);
+  color: var(--ink-3);
+  font-size: var(--fs-body);
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.back:hover {
+  background: var(--surface-3);
+  color: var(--ink);
+}
+
+.back:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: -2px;
+}
+
+.railHead {
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
-  width: var(--settings-rail-width);
-  max-height: calc(100dvh - var(--topbar-height) - var(--space-8) * 2);
-  overflow: hidden;
-  padding: var(--space-3) var(--space-2);
-  border: 1px solid var(--line);
-  border-radius: var(--radius-lg);
-  background: var(--bg-2);
-  box-sizing: border-box;
+  padding: 0 var(--space-1);
+}
+
+.railTitle {
+  margin: 0;
+  color: var(--ink);
+  font-size: var(--fs-h1);
+  font-stretch: var(--display-stretch);
+  font-weight: var(--title-weight);
+  letter-spacing: var(--display-tracking);
+}
+
+.nav {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.overviewEntry {
+  margin-bottom: 6px;
+}
+
+.overviewIcon {
+  display: grid;
+  place-items: center;
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
 }
 
 .panel {
   min-width: 0;
-  max-width: var(--settings-pane-width);
+}
+
+.savedNote {
+  color: var(--ink-3);
+  font-family: var(--font-mono);
+  font-size: var(--fs-meta);
+  white-space: nowrap;
+}
+
+@media (pointer: coarse) {
+  .back {
+    min-height: var(--tap-min);
+  }
 }

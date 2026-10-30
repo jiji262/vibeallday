@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import {
   CACHE_MISS_BILLING_EXPECTED_EXPIRY_CAPABILITY,
   CACHE_MISS_BILLING_IGNORE_AFTER_CAPABILITY,
@@ -67,6 +67,13 @@ vi.mock("../SettingsUndoContext", () => ({
   useSettingsUndoBaseline: vi.fn(),
 }));
 
+function renderSettingsTab() {
+  render(<CacheMissBillingSettings />);
+  fireEvent.click(
+    screen.getByRole("tab", { name: "settingsCacheTabSettings" }),
+  );
+}
+
 describe("CacheMissBillingSettings capability gate", () => {
   beforeEach(() => {
     state.capabilities = [];
@@ -75,7 +82,7 @@ describe("CacheMissBillingSettings capability gate", () => {
   afterEach(cleanup);
 
   it("shows only the legacy recent-activity control to older servers", () => {
-    render(<CacheMissBillingSettings />);
+    renderSettingsTab();
 
     expect(
       screen.getByRole("spinbutton", {
@@ -91,7 +98,7 @@ describe("CacheMissBillingSettings capability gate", () => {
 
   it("shows the additive ignore-after control to capable servers", () => {
     state.capabilities = [CACHE_MISS_BILLING_IGNORE_AFTER_CAPABILITY];
-    render(<CacheMissBillingSettings />);
+    renderSettingsTab();
 
     expect(
       screen.getByRole("spinbutton", {
@@ -108,6 +115,25 @@ describe("CacheMissBillingSettings capability gate", () => {
       screen.getByRole("checkbox", {
         name: "cacheMissExpectedExpiryToggleTitle",
       }),
+    ).toBeTruthy();
+  });
+
+  it("opens on analysis and keeps thresholds behind the settings tab", () => {
+    render(<CacheMissBillingSettings />);
+
+    expect(
+      screen
+        .getByRole("tab", { name: "settingsCacheTabAnalysis" })
+        .getAttribute("aria-selected"),
+    ).toBe("true");
+    expect(
+      screen.queryByRole("checkbox", { name: "cacheMissBillingEnableTitle" }),
+    ).toBeNull();
+    fireEvent.click(
+      screen.getByRole("button", { name: "settingsCacheAdjustThresholds" }),
+    );
+    expect(
+      screen.getByRole("checkbox", { name: "cacheMissBillingEnableTitle" }),
     ).toBeTruthy();
   });
 });

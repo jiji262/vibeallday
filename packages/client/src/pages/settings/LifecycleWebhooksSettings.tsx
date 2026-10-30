@@ -1,9 +1,12 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { Button, Status, Tag } from "../../components/garden";
 import { LoadingState } from "../../components/garden/LoadingState";
 import { useServerSettings } from "../../hooks/useServerSettings";
 import { useI18n } from "../../i18n";
 import { SettingsItem } from "./SettingsItem";
+import styles from "./LifecycleWebhooksSettings.module.css";
 import { useSettingsPaneTitle } from "./SettingsPaneTitleContext";
+import { HideInSettingsSearch } from "./SettingsSearchContext";
 import { SettingsSection } from "./SettingsSection";
 import { useSettingsUndoBaseline } from "./SettingsUndoContext";
 
@@ -111,9 +114,16 @@ export function LifecycleWebhooksSettings() {
     );
   }
 
+  const fieldChanged = (apply: () => void) => {
+    apply();
+    setHasDraftEdits(true);
+    setSaveError(null);
+  };
+
   return (
     <SettingsSection
       description={t("lifecycleWebhooksDescription")}
+      scope="server"
       onSubmit={(event) => {
         event.preventDefault();
         if (hasChanges && !isSaving) void handleSave();
@@ -131,126 +141,157 @@ export function LifecycleWebhooksSettings() {
     >
       <div className="settings-group">
         <SettingsItem
-          as="label"
           label={t("lifecycleWebhooksEnableTitle")}
           description={t("lifecycleWebhooksEnableDescription")}
-          layout="custom"
+          valueText={t(enabled ? "commonOn" : "commonOff")}
         >
-          <div className="settings-item-info">
-            <strong>{t("lifecycleWebhooksEnableTitle")}</strong>
-            <p>{t("lifecycleWebhooksEnableDescription")}</p>
-          </div>
-          <input
-            type="checkbox"
-            checked={enabled}
-            onChange={(e) => {
-              setEnabled(e.target.checked);
-              setHasDraftEdits(true);
-              setSaveError(null);
-            }}
-          />
+          <label className="toggle-switch">
+            <input
+              type="checkbox"
+              aria-label={t("lifecycleWebhooksEnableTitle")}
+              checked={enabled}
+              onChange={(e) => fieldChanged(() => setEnabled(e.target.checked))}
+            />
+            <span className="toggle-slider" />
+          </label>
         </SettingsItem>
-
-        <SettingsItem
-          label={t("lifecycleWebhooksUrlTitle")}
-          description={t("lifecycleWebhooksUrlDescription")}
-          layout="custom"
-          containerProps={{
-            style: { flexDirection: "column", alignItems: "stretch" },
-          }}
-        >
-          <div className="settings-item-info">
-            <strong>{t("lifecycleWebhooksUrlTitle")}</strong>
-            <p>{t("lifecycleWebhooksUrlDescription")}</p>
-          </div>
-          <input
-            aria-label={t("lifecycleWebhooksUrlTitle")}
-            autoComplete="off"
-            type="url"
-            className="settings-input"
-            id="lifecycle-webhook-url"
-            name="vibeallday-lifecycle-webhook-url"
-            value={url}
-            onChange={(e) => {
-              const value = e.target.value.slice(0, MAX_URL_LENGTH);
-              setUrl(value);
-              setHasDraftEdits(true);
-              setSaveError(null);
-            }}
-            placeholder="https://example.com/hooks/vibeallday"
-            spellCheck={false}
-          />
-        </SettingsItem>
-
-        <SettingsItem
-          label={t("lifecycleWebhooksTokenTitle")}
-          description={t("lifecycleWebhooksTokenDescription")}
-          layout="custom"
-          containerProps={{
-            style: { flexDirection: "column", alignItems: "stretch" },
-          }}
-        >
-          <div className="settings-item-info">
-            <strong>{t("lifecycleWebhooksTokenTitle")}</strong>
-            <p>{t("lifecycleWebhooksTokenDescription")}</p>
-          </div>
-          <input
-            aria-label={t("lifecycleWebhooksTokenTitle")}
-            autoComplete="new-password"
-            type="password"
-            className="settings-input"
-            id="lifecycle-webhook-token"
-            name="vibeallday-lifecycle-webhook-token"
-            value={token}
-            onChange={(e) => {
-              const value = e.target.value.slice(0, MAX_TOKEN_LENGTH);
-              setToken(value);
-              setHasDraftEdits(true);
-              setSaveError(null);
-            }}
-            placeholder={t("lifecycleWebhooksTokenPlaceholder")}
-            spellCheck={false}
-          />
-        </SettingsItem>
-
-        <SettingsItem
-          as="label"
-          label={t("lifecycleWebhooksDryRunTitle")}
-          description={t("lifecycleWebhooksDryRunDescription")}
-          layout="custom"
-        >
-          <div className="settings-item-info">
-            <strong>{t("lifecycleWebhooksDryRunTitle")}</strong>
-            <p>{t("lifecycleWebhooksDryRunDescription")}</p>
-          </div>
-          <input
-            type="checkbox"
-            checked={dryRun}
-            onChange={(e) => {
-              setDryRun(e.target.checked);
-              setHasDraftEdits(true);
-              setSaveError(null);
-            }}
-          />
-        </SettingsItem>
-
-        <div
-          className="settings-item"
-          style={{ justifyContent: "flex-end", gap: "var(--space-2)" }}
-        >
-          <button
-            type="submit"
-            className="settings-button settings-button-primary"
-            disabled={!hasChanges || isSaving}
-          >
-            {isSaving ? t("providersSaving") : t("providersSave")}
-          </button>
-        </div>
-
-        {(saveError || error) && (
-          <p className="settings-warning">{saveError || error}</p>
-        )}
       </div>
+
+      <SettingsSection title={t("lifecycleWebhooksEndpointTitle")}>
+        <div className="settings-group">
+          <HideInSettingsSearch>
+            <WebhookEndpointSummary
+              url={normalizedUrl}
+              hasToken={normalizedToken !== ""}
+              dryRun={dryRun}
+              delivering={serverEnabled && serverUrl !== ""}
+            />
+          </HideInSettingsSearch>
+          <SettingsItem
+            label={t("lifecycleWebhooksUrlTitle")}
+            description={t("lifecycleWebhooksUrlDescription")}
+            valueText={normalizedUrl || undefined}
+            className={styles.fieldRow}
+          >
+            <input
+              aria-label={t("lifecycleWebhooksUrlTitle")}
+              autoComplete="off"
+              type="url"
+              className={`settings-input ${styles.monoInput}`}
+              id="lifecycle-webhook-url"
+              name="vibeallday-lifecycle-webhook-url"
+              value={url}
+              onChange={(e) =>
+                fieldChanged(() =>
+                  setUrl(e.target.value.slice(0, MAX_URL_LENGTH)),
+                )
+              }
+              placeholder="https://example.com/hooks/vibeallday"
+              spellCheck={false}
+            />
+          </SettingsItem>
+
+          <SettingsItem
+            label={t("lifecycleWebhooksTokenTitle")}
+            description={t("lifecycleWebhooksTokenDescription")}
+            className={styles.fieldRow}
+          >
+            <input
+              aria-label={t("lifecycleWebhooksTokenTitle")}
+              autoComplete="new-password"
+              type="password"
+              className={`settings-input ${styles.monoInput}`}
+              id="lifecycle-webhook-token"
+              name="vibeallday-lifecycle-webhook-token"
+              value={token}
+              onChange={(e) =>
+                fieldChanged(() =>
+                  setToken(e.target.value.slice(0, MAX_TOKEN_LENGTH)),
+                )
+              }
+              placeholder={t("lifecycleWebhooksTokenPlaceholder")}
+              spellCheck={false}
+            />
+          </SettingsItem>
+
+          <SettingsItem
+            label={t("lifecycleWebhooksDryRunTitle")}
+            description={t("lifecycleWebhooksDryRunDescription")}
+            valueText={t(dryRun ? "commonOn" : "commonOff")}
+          >
+            <label className="toggle-switch">
+              <input
+                type="checkbox"
+                aria-label={t("lifecycleWebhooksDryRunTitle")}
+                checked={dryRun}
+                onChange={(e) =>
+                  fieldChanged(() => setDryRun(e.target.checked))
+                }
+              />
+              <span className="toggle-slider" />
+            </label>
+          </SettingsItem>
+
+          <div className={styles.footer}>
+            {hasChanges && (
+              <span className={styles.unsaved}>
+                {t("lifecycleWebhooksUnsaved")}
+              </span>
+            )}
+            <Button
+              type="submit"
+              variant="primary"
+              size="sm"
+              disabled={!hasChanges || isSaving}
+            >
+              {isSaving ? t("providersSaving") : t("providersSave")}
+            </Button>
+          </div>
+        </div>
+      </SettingsSection>
+
+      {(saveError || error) && (
+        <p className="settings-warning">{saveError || error}</p>
+      )}
     </SettingsSection>
+  );
+}
+
+/** Lifecycle event the service sends (LifecycleWebhookService). */
+const LIFECYCLE_EVENT_TYPE = "session-inactive";
+
+/** Endpoint header: address, event and option tags, and delivery state. */
+function WebhookEndpointSummary({
+  url,
+  hasToken,
+  dryRun,
+  delivering,
+}: {
+  url: string;
+  hasToken: boolean;
+  dryRun: boolean;
+  delivering: boolean;
+}) {
+  const { t } = useI18n();
+  return (
+    <div className={styles.endpoint}>
+      <div className={styles.endpointText}>
+        <span className={url ? styles.endpointUrl : styles.endpointEmpty}>
+          {url || t("lifecycleWebhooksNoEndpoint")}
+        </span>
+        <span className={styles.endpointTags}>
+          <Tag>{LIFECYCLE_EVENT_TYPE}</Tag>
+          {dryRun && <Tag tone="accent">{t("lifecycleWebhooksDryRunTag")}</Tag>}
+          {hasToken && <Tag>Bearer</Tag>}
+        </span>
+      </div>
+      <Status state={delivering ? "ok" : "idle"}>
+        {t(
+          delivering
+            ? "lifecycleWebhooksStatusActive"
+            : "lifecycleWebhooksStatusPaused",
+        )}
+      </Status>
+    </div>
   );
 }

@@ -275,7 +275,9 @@ describe("ToolbarSettings", () => {
 
     render(<ToolbarSettings />);
 
-    expect(screen.getByText("Project Queue")).toBeTruthy();
+    expect(
+      screen.getByText("Project Queue", { selector: "strong" }),
+    ).toBeTruthy();
     expect(screen.queryByText("Queue as New Session Shortcut")).toBe(null);
   });
 
@@ -406,7 +408,7 @@ describe("ToolbarSettings", () => {
     render(<ToolbarSettings />);
 
     const waveformRow = screen
-      .getByText("Live Microphone Waveform")
+      .getByText("Live Microphone Waveform", { selector: "strong" })
       .closest(".session-toolbar-control-row");
     expect(waveformRow).toBeTruthy();
     const slider = within(
@@ -513,6 +515,46 @@ describe("ToolbarSettings", () => {
     expect(
       within(hiddenZone as HTMLElement).queryByText("Mode Selector"),
     ).toBeNull();
+  });
+
+  it("says where each notch puts a control: session row vs + tray", () => {
+    render(<ToolbarSettings />);
+
+    const placement = screen.getByRole("region", {
+      name: "settingsToolbarPlacementHeading",
+    });
+    const [row, tray] = within(placement).getAllByRole("list") as [
+      HTMLElement,
+      HTMLElement,
+    ];
+    // Pinned tray-capable tools stay in the row; first/mid/last go to the tray.
+    expect(within(row).getByText('"Now" steering selector')).toBeTruthy();
+    expect(within(row).getByText("Mode Selector")).toBeTruthy();
+    expect(within(tray).getByText("Slash Menu")).toBeTruthy();
+    expect(within(tray).queryByText("Mode Selector")).toBeNull();
+
+    const slash = screen.getByRole<HTMLInputElement>("slider", {
+      name: "Slash Menu visibility",
+    });
+    expect(slash.getAttribute("aria-valuetext")).toBe(
+      "settingsToolbarCaptionTrayMid",
+    );
+    const mode = screen.getByRole<HTMLInputElement>("slider", {
+      name: "Mode Selector visibility",
+    });
+    expect(mode.getAttribute("aria-valuetext")).toBe(
+      "settingsToolbarCaptionRowFirst",
+    );
+
+    fireEvent.change(slash, { target: { value: "4" } });
+    fireEvent.pointerUp(slash);
+    expect(state.presence.slashMenu).toBe("pin");
+    const [rowAfter, trayAfter] = within(placement).getAllByRole("list") as [
+      HTMLElement,
+      HTMLElement,
+    ];
+    expect(within(rowAfter).getByText("Slash Menu")).toBeTruthy();
+    expect(within(trayAfter).queryByText("Slash Menu")).toBeNull();
   });
 
   it("hiding forgets the tier; sliding back out picks the landed notch", () => {

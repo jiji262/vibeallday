@@ -155,9 +155,19 @@ export function getSettingsCategories(
       description: t("settingsStorageDescription"),
     },
     {
+      id: "import-export",
+      label: t("settingsImportExportTitle"),
+      description: t("settingsImportExportDescription"),
+    },
+    {
       id: "agent-context",
       label: t("settingsAgentContextTitle"),
       description: t("settingsAgentContextDescription"),
+    },
+    {
+      id: "agent-behavior",
+      label: t("settingsAgentBehaviorTitle"),
+      description: t("settingsAgentBehaviorDescription"),
     },
     {
       id: "notifications",
@@ -219,7 +229,7 @@ export function getSettingsCategories(
     },
     {
       id: "speech",
-      label: t("settingsSpeechTitle"),
+      label: t("settingsSpeechCategoryTitle"),
       description: t("settingsSpeechDescription"),
     },
     {

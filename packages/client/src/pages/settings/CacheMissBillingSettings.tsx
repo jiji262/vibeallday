@@ -8,6 +8,9 @@ import {
   serverHasCapability,
 } from "@vibeallday/shared";
 import { LoadingState } from "../../components/garden/LoadingState";
+import { ScopeTag } from "../../components/garden/ScopeTag";
+import { Status } from "../../components/garden/StatusDot";
+import { Tabs } from "../../components/garden/Tabs";
 import { useCallback, useEffect, useState } from "react";
 import { api } from "../../api/client";
 import { useRelativeNow } from "../../hooks/useRelativeNow";
@@ -23,13 +26,20 @@ import {
   CacheMissProbabilityChart,
   CacheMissProviderChart,
 } from "./CacheMissInactivityChart";
+import { CacheMissDailyBars, CacheMissMetricStrip } from "./CacheMissSummary";
 import { SettingsItem } from "./SettingsItem";
 import { useSettingsPaneTitle } from "./SettingsPaneTitleContext";
-import { HideInSettingsSearch } from "./SettingsSearchContext";
+import {
+  HideInSettingsSearch,
+  useSettingsJumpTarget,
+  useSettingsSearchScope,
+} from "./SettingsSearchContext";
 import { SettingsSection } from "./SettingsSection";
 import { useSettingsUndoBaseline } from "./SettingsUndoContext";
 
 const MAX_EVENTS = 500;
+
+type CacheMissView = "analysis" | "settings";
 const MAX_RECENCY_HOURS = 96;
 const UNLIMITED_RECENCY_SLIDER_VALUE = MAX_RECENCY_HOURS + 1;
 
@@ -126,6 +136,17 @@ export function CacheMissBillingSettings() {
   const [recencyText, setRecencyText] = useState("");
   const [includeExpectedExpiry, setIncludeExpectedExpiry] = useState(false);
   const nowMs = useRelativeNow(60_000);
+  const searching = useSettingsSearchScope() !== null;
+  const jumpTarget = useSettingsJumpTarget()?.target;
+  const [view, setView] = useState<CacheMissView>(
+    jumpTarget ? "settings" : "analysis",
+  );
+  // A search jump lands on a settings row, so reveal that tab first.
+  useEffect(() => {
+    if (jumpTarget) setView("settings");
+  }, [jumpTarget]);
+  const showSettings = searching || view === "settings";
+  const showAnalysis = searching || view === "analysis";
 
   const effective = effectiveCacheMissBillingSettings(
     settings?.cacheMissBilling,
@@ -263,345 +284,444 @@ export function CacheMissBillingSettings() {
 
   return (
     <>
-      <SettingsSection description={t("cacheMissBillingDescription")}>
-        <div className="settings-group">
-          <SettingsItem
-            as="label"
-            label={t("cacheMissBillingEnableTitle")}
-            description={t("cacheMissBillingEnableDescription")}
-          >
-            <input
-              type="checkbox"
-              checked={effective.enabled}
-              onChange={(event) =>
-                void updateCacheMissBilling({
-                  enabled: event.currentTarget.checked,
-                })
-              }
-              aria-label={t("cacheMissBillingEnableTitle")}
-            />
-          </SettingsItem>
-
-          <SettingsItem
-            as="label"
-            label={t("cacheMissBillingToastTitle")}
-            description={t("cacheMissBillingToastDescription")}
-          >
-            <input
-              type="checkbox"
-              checked={effective.showToasts}
-              disabled={!effective.enabled}
-              onChange={(event) =>
-                void updateCacheMissBilling({
-                  showToasts: event.currentTarget.checked,
-                })
-              }
-              aria-label={t("cacheMissBillingToastTitle")}
-            />
-          </SettingsItem>
-
-          <SettingsItem
-            label={t("cacheMissBillingClaudeFreshWindowTitle")}
-            description={t("cacheMissBillingClaudeFreshWindowDescription")}
-            className="settings-item--wide-control"
-          >
-            <div className="settings-item-actions">
-              <span className="settings-input-unit">
-                <input
-                  key={`fresh-claude-${providerFreshWindowMinutes(effective, "claude")}`}
-                  type="number"
-                  className="settings-input-small"
-                  min={1}
-                  max={1440}
-                  defaultValue={providerFreshWindowMinutes(effective, "claude")}
-                  disabled={!effective.enabled}
-                  onBlur={(event) => {
-                    const currentValue = providerFreshWindowMinutes(
-                      effective,
-                      "claude",
-                    );
-                    const value = clampInteger(
-                      event.currentTarget.value,
-                      currentValue,
-                      1,
-                      1440,
-                    );
-                    event.currentTarget.value = String(value);
-                    if (value !== currentValue) {
-                      void updateCacheMissBilling({
-                        providerFreshWindowMinutes: { claude: value },
-                      });
-                    }
-                  }}
-                  aria-label={t("cacheMissBillingClaudeFreshWindowTitle")}
-                />
-                <span>{t("cacheMissBillingMinutesUnit")}</span>
-              </span>
-            </div>
-          </SettingsItem>
-
-          <SettingsItem
-            label={t("cacheMissBillingCodexFreshWindowTitle")}
-            description={t("cacheMissBillingCodexFreshWindowDescription")}
-            className="settings-item--wide-control"
-          >
-            <div className="settings-item-actions">
-              <span className="settings-input-unit">
-                <input
-                  key={`fresh-codex-${providerFreshWindowMinutes(effective, "codex")}`}
-                  type="number"
-                  className="settings-input-small"
-                  min={1}
-                  max={1440}
-                  defaultValue={providerFreshWindowMinutes(effective, "codex")}
-                  disabled={!effective.enabled}
-                  onBlur={(event) => {
-                    const currentValue = providerFreshWindowMinutes(
-                      effective,
-                      "codex",
-                    );
-                    const value = clampInteger(
-                      event.currentTarget.value,
-                      currentValue,
-                      1,
-                      1440,
-                    );
-                    event.currentTarget.value = String(value);
-                    if (value !== currentValue) {
-                      void updateCacheMissBilling({
-                        providerFreshWindowMinutes: { codex: value },
-                      });
-                    }
-                  }}
-                  aria-label={t("cacheMissBillingCodexFreshWindowTitle")}
-                />
-                <span>{t("cacheMissBillingMinutesUnit")}</span>
-              </span>
-            </div>
-          </SettingsItem>
-
-          <SettingsItem
-            label={t("cacheMissBillingMinimumTokensTitle")}
-            description={t("cacheMissBillingMinimumTokensDescription")}
-            className="settings-item--wide-control"
-          >
-            <div className="settings-item-actions">
-              <span className="settings-input-unit">
-                <input
-                  key={`minimum-${effective.minimumWastedTokens}`}
-                  type="number"
-                  className={`settings-input-small ${styles.tokenInput}`}
-                  min={1}
-                  max={5_000_000}
-                  step={1000}
-                  defaultValue={effective.minimumWastedTokens}
-                  disabled={!effective.enabled}
-                  onBlur={(event) => {
-                    const value = clampInteger(
-                      event.currentTarget.value,
-                      effective.minimumWastedTokens,
-                      1,
-                      5_000_000,
-                    );
-                    event.currentTarget.value = String(value);
-                    if (value !== effective.minimumWastedTokens) {
-                      void updateCacheMissBilling({
-                        minimumWastedTokens: value,
-                      });
-                    }
-                  }}
-                  aria-label={t("cacheMissBillingMinimumTokensTitle")}
-                />
-                <span>{t("cacheMissBillingTokensUnit")}</span>
-              </span>
-            </div>
-          </SettingsItem>
-
-          <SettingsItem
-            label={t("cacheMissBillingRecentActivityTitle")}
-            description={t("cacheMissBillingRecentActivityDescription")}
-            className="settings-item--wide-control"
-          >
-            <div className="settings-item-actions">
-              <span className="settings-input-unit">
-                <input
-                  key={`recent-${effective.recentActivityMinutes}`}
-                  type="number"
-                  className="settings-input-small"
-                  min={0}
-                  max={1440}
-                  defaultValue={effective.recentActivityMinutes}
-                  disabled={!effective.enabled}
-                  onBlur={(event) => {
-                    const value = clampInteger(
-                      event.currentTarget.value,
-                      effective.recentActivityMinutes,
-                      0,
-                      1440,
-                    );
-                    event.currentTarget.value = String(value);
-                    if (value !== effective.recentActivityMinutes) {
-                      void updateCacheMissBilling({
-                        recentActivityMinutes: value,
-                      });
-                    }
-                  }}
-                  aria-label={t("cacheMissBillingRecentActivityTitle")}
-                />
-                <span>{t("cacheMissBillingMinutesUnit")}</span>
-              </span>
-            </div>
-          </SettingsItem>
-
-          {supportsIgnoreAfter && (
+      <HideInSettingsSearch>
+        <CacheMissStatusNotice
+          enabled={effective.enabled}
+          claudeMinutes={providerFreshWindowMinutes(effective, "claude")}
+          codexMinutes={providerFreshWindowMinutes(effective, "codex")}
+          minTokens={effective.minimumWastedTokens}
+          onAdjust={() => setView("settings")}
+        />
+        <Tabs<CacheMissView>
+          label={t("settingsCacheTabsLabel")}
+          value={view}
+          onChange={setView}
+          items={[
+            { value: "analysis", label: t("settingsCacheTabAnalysis") },
+            { value: "settings", label: t("settingsCacheTabSettings") },
+          ]}
+        />
+      </HideInSettingsSearch>
+      {showSettings && (
+        <SettingsSection
+          description={t("cacheMissBillingDescription")}
+          scope="server"
+        >
+          <div className="settings-group">
             <SettingsItem
-              label={t("cacheMissBillingIgnoreAfterTitle")}
-              description={t("cacheMissBillingIgnoreAfterDescription")}
+              as="label"
+              label={t("cacheMissBillingEnableTitle")}
+              description={t("cacheMissBillingEnableDescription")}
+              valueText={
+                effective.enabled
+                  ? t("settingsAgentsValueOn")
+                  : t("settingsAgentsValueOff")
+              }
+            >
+              <input
+                type="checkbox"
+                checked={effective.enabled}
+                onChange={(event) =>
+                  void updateCacheMissBilling({
+                    enabled: event.currentTarget.checked,
+                  })
+                }
+                aria-label={t("cacheMissBillingEnableTitle")}
+              />
+            </SettingsItem>
+
+            <SettingsItem
+              as="label"
+              label={t("cacheMissBillingToastTitle")}
+              description={t("cacheMissBillingToastDescription")}
+              valueText={
+                effective.showToasts
+                  ? t("settingsAgentsValueOn")
+                  : t("settingsAgentsValueOff")
+              }
+            >
+              <input
+                type="checkbox"
+                checked={effective.showToasts}
+                disabled={!effective.enabled}
+                onChange={(event) =>
+                  void updateCacheMissBilling({
+                    showToasts: event.currentTarget.checked,
+                  })
+                }
+                aria-label={t("cacheMissBillingToastTitle")}
+              />
+            </SettingsItem>
+
+            <SettingsItem
+              label={t("cacheMissBillingClaudeFreshWindowTitle")}
+              description={t("cacheMissBillingClaudeFreshWindowDescription")}
               className="settings-item--wide-control"
+              valueText={String(
+                providerFreshWindowMinutes(effective, "claude"),
+              )}
             >
               <div className="settings-item-actions">
                 <span className="settings-input-unit">
                   <input
-                    key={`ignore-after-${effective.ignoreAfterMinutes}`}
+                    key={`fresh-claude-${providerFreshWindowMinutes(effective, "claude")}`}
                     type="number"
                     className="settings-input-small"
-                    min={0}
+                    min={1}
                     max={1440}
-                    defaultValue={effective.ignoreAfterMinutes}
+                    defaultValue={providerFreshWindowMinutes(
+                      effective,
+                      "claude",
+                    )}
                     disabled={!effective.enabled}
                     onBlur={(event) => {
+                      const currentValue = providerFreshWindowMinutes(
+                        effective,
+                        "claude",
+                      );
                       const value = clampInteger(
                         event.currentTarget.value,
-                        effective.ignoreAfterMinutes,
-                        0,
+                        currentValue,
+                        1,
                         1440,
                       );
                       event.currentTarget.value = String(value);
-                      if (value !== effective.ignoreAfterMinutes) {
+                      if (value !== currentValue) {
                         void updateCacheMissBilling({
-                          ignoreAfterMinutes: value,
+                          providerFreshWindowMinutes: { claude: value },
                         });
                       }
                     }}
-                    aria-label={t("cacheMissBillingIgnoreAfterTitle")}
+                    aria-label={t("cacheMissBillingClaudeFreshWindowTitle")}
                   />
                   <span>{t("cacheMissBillingMinutesUnit")}</span>
                 </span>
               </div>
             </SettingsItem>
-          )}
-        </div>
 
-        {error && <p className="settings-warning">{error}</p>}
-      </SettingsSection>
-
-      <SettingsSection
-        title={t("cacheMissEvidenceTitle")}
-        description={t("cacheMissEvidenceDescription")}
-      >
-        {eventsError && <p className="settings-warning">{eventsError}</p>}
-        <HideInSettingsSearch>
-          <div className={styles.evidence}>
-            <div className={styles.recencyControl}>
-              <div className={styles.recencyHeader}>
-                <div>
-                  <h3>{t("cacheMissRecencyTitle")}</h3>
-                  <p>{t("cacheMissRecencyDescription")}</p>
-                </div>
-                <span>
-                  {t("cacheMissRecencySummary", {
-                    shown: filteredEvents.length,
-                    total: events.length,
-                  })}
+            <SettingsItem
+              label={t("cacheMissBillingCodexFreshWindowTitle")}
+              description={t("cacheMissBillingCodexFreshWindowDescription")}
+              className="settings-item--wide-control"
+              valueText={String(providerFreshWindowMinutes(effective, "codex"))}
+            >
+              <div className="settings-item-actions">
+                <span className="settings-input-unit">
+                  <input
+                    key={`fresh-codex-${providerFreshWindowMinutes(effective, "codex")}`}
+                    type="number"
+                    className="settings-input-small"
+                    min={1}
+                    max={1440}
+                    defaultValue={providerFreshWindowMinutes(
+                      effective,
+                      "codex",
+                    )}
+                    disabled={!effective.enabled}
+                    onBlur={(event) => {
+                      const currentValue = providerFreshWindowMinutes(
+                        effective,
+                        "codex",
+                      );
+                      const value = clampInteger(
+                        event.currentTarget.value,
+                        currentValue,
+                        1,
+                        1440,
+                      );
+                      event.currentTarget.value = String(value);
+                      if (value !== currentValue) {
+                        void updateCacheMissBilling({
+                          providerFreshWindowMinutes: { codex: value },
+                        });
+                      }
+                    }}
+                    aria-label={t("cacheMissBillingCodexFreshWindowTitle")}
+                  />
+                  <span>{t("cacheMissBillingMinutesUnit")}</span>
                 </span>
               </div>
-              {supportsExpectedExpiry && (
-                <label className={styles.expectedExpiryToggle}>
+            </SettingsItem>
+
+            <SettingsItem
+              label={t("cacheMissBillingMinimumTokensTitle")}
+              description={t("cacheMissBillingMinimumTokensDescription")}
+              className="settings-item--wide-control"
+              valueText={String(effective.minimumWastedTokens)}
+            >
+              <div className="settings-item-actions">
+                <span className="settings-input-unit">
                   <input
-                    type="checkbox"
-                    checked={includeExpectedExpiry}
-                    onChange={(event) =>
-                      setIncludeExpectedExpiry(event.currentTarget.checked)
-                    }
-                    aria-label={t("cacheMissExpectedExpiryToggleTitle")}
-                  />
-                  <span>
-                    <strong>{t("cacheMissExpectedExpiryToggleTitle")}</strong>
-                    <span>{t("cacheMissExpectedExpiryToggleDescription")}</span>
-                  </span>
-                </label>
-              )}
-              <div className={styles.recencyInputs}>
-                <div className={styles.sliderStack}>
-                  <input
-                    type="range"
+                    key={`minimum-${effective.minimumWastedTokens}`}
+                    type="number"
+                    className={`settings-input-small ${styles.tokenInput}`}
                     min={1}
-                    max={UNLIMITED_RECENCY_SLIDER_VALUE}
-                    step={1}
-                    value={recencyHours ?? UNLIMITED_RECENCY_SLIDER_VALUE}
-                    onChange={(event) =>
-                      setRecencyFromSlider(
-                        Number.parseInt(event.currentTarget.value, 10),
-                      )
-                    }
-                    aria-label={t("cacheMissRecencySliderLabel")}
+                    max={5_000_000}
+                    step={1000}
+                    defaultValue={effective.minimumWastedTokens}
+                    disabled={!effective.enabled}
+                    onBlur={(event) => {
+                      const value = clampInteger(
+                        event.currentTarget.value,
+                        effective.minimumWastedTokens,
+                        1,
+                        5_000_000,
+                      );
+                      event.currentTarget.value = String(value);
+                      if (value !== effective.minimumWastedTokens) {
+                        void updateCacheMissBilling({
+                          minimumWastedTokens: value,
+                        });
+                      }
+                    }}
+                    aria-label={t("cacheMissBillingMinimumTokensTitle")}
                   />
-                  <div className={styles.sliderLabels} aria-hidden="true">
-                    <span>1h</span>
-                    <span>96h</span>
-                    <span>∞</span>
-                  </div>
-                </div>
-                <label className={styles.recencyTextInput}>
-                  <span>{t("cacheMissRecencyHoursLabel")}</span>
+                  <span>{t("cacheMissBillingTokensUnit")}</span>
+                </span>
+              </div>
+            </SettingsItem>
+
+            <SettingsItem
+              label={t("cacheMissBillingRecentActivityTitle")}
+              description={t("cacheMissBillingRecentActivityDescription")}
+              className="settings-item--wide-control"
+              valueText={String(effective.recentActivityMinutes)}
+            >
+              <div className="settings-item-actions">
+                <span className="settings-input-unit">
+                  <input
+                    key={`recent-${effective.recentActivityMinutes}`}
+                    type="number"
+                    className="settings-input-small"
+                    min={0}
+                    max={1440}
+                    defaultValue={effective.recentActivityMinutes}
+                    disabled={!effective.enabled}
+                    onBlur={(event) => {
+                      const value = clampInteger(
+                        event.currentTarget.value,
+                        effective.recentActivityMinutes,
+                        0,
+                        1440,
+                      );
+                      event.currentTarget.value = String(value);
+                      if (value !== effective.recentActivityMinutes) {
+                        void updateCacheMissBilling({
+                          recentActivityMinutes: value,
+                        });
+                      }
+                    }}
+                    aria-label={t("cacheMissBillingRecentActivityTitle")}
+                  />
+                  <span>{t("cacheMissBillingMinutesUnit")}</span>
+                </span>
+              </div>
+            </SettingsItem>
+
+            {supportsIgnoreAfter && (
+              <SettingsItem
+                label={t("cacheMissBillingIgnoreAfterTitle")}
+                description={t("cacheMissBillingIgnoreAfterDescription")}
+                className="settings-item--wide-control"
+                valueText={String(effective.ignoreAfterMinutes)}
+              >
+                <div className="settings-item-actions">
                   <span className="settings-input-unit">
                     <input
+                      key={`ignore-after-${effective.ignoreAfterMinutes}`}
                       type="number"
-                      min={1}
-                      max={MAX_RECENCY_HOURS}
-                      value={recencyText}
-                      placeholder="∞"
-                      onChange={(event) =>
-                        setRecencyFromText(event.currentTarget.value)
-                      }
-                      onBlur={normalizeRecencyText}
+                      className="settings-input-small"
+                      min={0}
+                      max={1440}
+                      defaultValue={effective.ignoreAfterMinutes}
+                      disabled={!effective.enabled}
+                      onBlur={(event) => {
+                        const value = clampInteger(
+                          event.currentTarget.value,
+                          effective.ignoreAfterMinutes,
+                          0,
+                          1440,
+                        );
+                        event.currentTarget.value = String(value);
+                        if (value !== effective.ignoreAfterMinutes) {
+                          void updateCacheMissBilling({
+                            ignoreAfterMinutes: value,
+                          });
+                        }
+                      }}
+                      aria-label={t("cacheMissBillingIgnoreAfterTitle")}
                     />
-                    <span>{t("cacheMissRecencyHoursUnit")}</span>
+                    <span>{t("cacheMissBillingMinutesUnit")}</span>
                   </span>
-                </label>
-              </div>
-            </div>
-
-            <div className={styles.chartGrid}>
-              <section className={styles.chartPanel}>
-                <h3>{t("cacheMissChartTitle")}</h3>
-                <p>{t("cacheMissChartDescription")}</p>
-                <CacheMissInactivityChart events={filteredEvents} />
-              </section>
-              <section className={styles.chartPanel}>
-                <h3>{t("cacheMissProbabilityTitle")}</h3>
-                <p>{t("cacheMissProbabilityDescription")}</p>
-                <CacheMissProbabilityChart events={filteredEvents} />
-              </section>
-              <section className={styles.chartPanel}>
-                <h3>{t("cacheMissProviderTitle")}</h3>
-                <p>{t("cacheMissProviderDescription")}</p>
-                <CacheMissProviderChart events={filteredEvents} />
-              </section>
-            </div>
-
-            <section className={styles.eventTableSection}>
-              <h3>{t("cacheMissEventsTitle")}</h3>
-              <p>{t("cacheMissBillingEventsDescription")}</p>
-              <CacheMissEventTable
-                events={filteredEvents}
-                basePath={basePath}
-                recencyHours={recencyHours}
-              />
-            </section>
+                </div>
+              </SettingsItem>
+            )}
           </div>
-        </HideInSettingsSearch>
-      </SettingsSection>
+
+          {error && <p className="settings-warning">{error}</p>}
+        </SettingsSection>
+      )}
+
+      {showAnalysis && (
+        <SettingsSection
+          title={t("cacheMissEvidenceTitle")}
+          description={t("cacheMissEvidenceDescription")}
+        >
+          {eventsError && <p className="settings-warning">{eventsError}</p>}
+          <HideInSettingsSearch>
+            <div className={styles.evidence}>
+              <CacheMissMetricStrip
+                events={filteredEvents}
+                totalStored={events.length}
+              />
+              <div className={styles.recencyControl}>
+                <div className={styles.recencyHeader}>
+                  <div>
+                    <h3>{t("cacheMissRecencyTitle")}</h3>
+                    <p>{t("cacheMissRecencyDescription")}</p>
+                  </div>
+                  <span>
+                    {t("cacheMissRecencySummary", {
+                      shown: filteredEvents.length,
+                      total: events.length,
+                    })}
+                  </span>
+                </div>
+                {supportsExpectedExpiry && (
+                  <label className={styles.expectedExpiryToggle}>
+                    <input
+                      type="checkbox"
+                      checked={includeExpectedExpiry}
+                      onChange={(event) =>
+                        setIncludeExpectedExpiry(event.currentTarget.checked)
+                      }
+                      aria-label={t("cacheMissExpectedExpiryToggleTitle")}
+                    />
+                    <span>
+                      <strong>{t("cacheMissExpectedExpiryToggleTitle")}</strong>
+                      <span>
+                        {t("cacheMissExpectedExpiryToggleDescription")}
+                      </span>
+                    </span>
+                  </label>
+                )}
+                <div className={styles.recencyInputs}>
+                  <div className={styles.sliderStack}>
+                    <input
+                      type="range"
+                      min={1}
+                      max={UNLIMITED_RECENCY_SLIDER_VALUE}
+                      step={1}
+                      value={recencyHours ?? UNLIMITED_RECENCY_SLIDER_VALUE}
+                      onChange={(event) =>
+                        setRecencyFromSlider(
+                          Number.parseInt(event.currentTarget.value, 10),
+                        )
+                      }
+                      aria-label={t("cacheMissRecencySliderLabel")}
+                    />
+                    <div className={styles.sliderLabels} aria-hidden="true">
+                      <span>1h</span>
+                      <span>96h</span>
+                      <span>∞</span>
+                    </div>
+                  </div>
+                  <label className={styles.recencyTextInput}>
+                    <span>{t("cacheMissRecencyHoursLabel")}</span>
+                    <span className="settings-input-unit">
+                      <input
+                        type="number"
+                        min={1}
+                        max={MAX_RECENCY_HOURS}
+                        value={recencyText}
+                        placeholder="∞"
+                        onChange={(event) =>
+                          setRecencyFromText(event.currentTarget.value)
+                        }
+                        onBlur={normalizeRecencyText}
+                      />
+                      <span>{t("cacheMissRecencyHoursUnit")}</span>
+                    </span>
+                  </label>
+                </div>
+              </div>
+
+              <CacheMissDailyBars
+                events={filteredEvents}
+                totalStored={events.length}
+                nowMs={nowMs}
+              />
+
+              <div className={styles.chartGrid}>
+                <section className={styles.chartPanel}>
+                  <h3>{t("cacheMissChartTitle")}</h3>
+                  <p>{t("cacheMissChartDescription")}</p>
+                  <CacheMissInactivityChart events={filteredEvents} />
+                </section>
+                <section className={styles.chartPanel}>
+                  <h3>{t("cacheMissProbabilityTitle")}</h3>
+                  <p>{t("cacheMissProbabilityDescription")}</p>
+                  <CacheMissProbabilityChart events={filteredEvents} />
+                </section>
+                <section className={styles.chartPanel}>
+                  <h3>{t("cacheMissProviderTitle")}</h3>
+                  <p>{t("cacheMissProviderDescription")}</p>
+                  <CacheMissProviderChart events={filteredEvents} />
+                </section>
+              </div>
+
+              <section className={styles.eventTableSection}>
+                <h3>{t("cacheMissEventsTitle")}</h3>
+                <p>{t("cacheMissBillingEventsDescription")}</p>
+                <CacheMissEventTable
+                  events={filteredEvents}
+                  basePath={basePath}
+                  recencyHours={recencyHours}
+                />
+              </section>
+            </div>
+          </HideInSettingsSearch>
+        </SettingsSection>
+      )}
     </>
+  );
+}
+
+interface CacheMissStatusNoticeProps {
+  enabled: boolean;
+  claudeMinutes: number;
+  codexMinutes: number;
+  minTokens: number;
+  onAdjust: () => void;
+}
+
+/** Tracking status and the thresholds in force (design notice row). */
+function CacheMissStatusNotice({
+  enabled,
+  claudeMinutes,
+  codexMinutes,
+  minTokens,
+  onAdjust,
+}: CacheMissStatusNoticeProps) {
+  const { t } = useI18n();
+  return (
+    <div className={styles.statusNotice}>
+      <Status state={enabled ? "ok" : "idle"}>
+        {enabled
+          ? t("settingsCacheStatusTracking")
+          : t("settingsCacheStatusOff")}
+      </Status>
+      <span className={styles.statusSummary}>
+        {t("settingsCacheNoticeSummary", {
+          claude: claudeMinutes,
+          codex: codexMinutes,
+          tokens: minTokens.toLocaleString(),
+        })}
+      </span>
+      <ScopeTag scope="server" />
+      <button type="button" className={styles.adjustButton} onClick={onAdjust}>
+        {t("settingsCacheAdjustThresholds")}
+      </button>
+    </div>
   );
 }

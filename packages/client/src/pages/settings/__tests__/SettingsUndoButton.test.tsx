@@ -2,7 +2,10 @@
 
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { ToastProvider } from "../../../contexts/ToastContext";
 import { SettingsUndoButton } from "../SettingsUndoButton";
+import type { SettingsUndoRegistration } from "../SettingsUndoContext";
+import { useSettingsUndoToast } from "../SettingsUndoToast";
 
 vi.mock("../../../i18n", () => ({
   useI18n: () => ({
@@ -73,5 +76,49 @@ describe("SettingsUndoButton", () => {
       ctrlKey: true,
     });
     expect(undo).toHaveBeenCalledTimes(1);
+  });
+});
+
+function ToastHarness({
+  registration,
+}: {
+  registration: SettingsUndoRegistration | null;
+}) {
+  useSettingsUndoToast(registration, "Appearance");
+  return null;
+}
+
+describe("useSettingsUndoToast", () => {
+  it("offers undo once per change run and reverts with the latest snapshot", () => {
+    const first = vi.fn();
+    const latest = vi.fn();
+    const { rerender } = render(
+      <ToastProvider>
+        <ToastHarness registration={null} />
+      </ToastProvider>,
+    );
+    expect(screen.queryByRole("button", { name: "settingsUndoChanges" })).toBe(
+      null,
+    );
+
+    rerender(
+      <ToastProvider>
+        <ToastHarness registration={{ canUndo: true, undo: first }} />
+      </ToastProvider>,
+    );
+    // A second change while still undoable must not stack another toast.
+    rerender(
+      <ToastProvider>
+        <ToastHarness registration={{ canUndo: true, undo: latest }} />
+      </ToastProvider>,
+    );
+    const actions = screen.getAllByRole("button", {
+      name: "settingsUndoChanges",
+    });
+    expect(actions).toHaveLength(1);
+
+    fireEvent.click(actions[0] as HTMLElement);
+    expect(latest).toHaveBeenCalledTimes(1);
+    expect(first).not.toHaveBeenCalled();
   });
 });

@@ -36,6 +36,22 @@ describe("AppearanceSettings", () => {
     invalidateLocalStorageValues();
   });
 
+  it("maps the skin cards to theme ids and reflects the pick with aria-pressed", () => {
+    localStorage.setItem(UI_KEYS.theme, "light");
+    renderAppearanceSettings();
+    const celadon = screen.getByRole("button", { name: "Celadon" });
+    const oled = screen.getByRole("button", { name: "Night · OLED" });
+    expect(celadon.getAttribute("aria-pressed")).toBe("true");
+    expect(oled.getAttribute("aria-pressed")).toBe("false");
+    act(() => fireEvent.click(oled));
+    expect(localStorage.getItem(UI_KEYS.theme)).toBe("verydark");
+    expect(document.documentElement.getAttribute("data-theme")).toBe(
+      "verydark",
+    );
+    expect(oled.getAttribute("aria-pressed")).toBe("true");
+    expect(celadon.getAttribute("aria-pressed")).toBe("false");
+  });
+
   it("keeps project-app composing off independently of the right pane", () => {
     localStorage.setItem(UI_KEYS.sessionRightPane, "true");
     renderAppearanceSettings();

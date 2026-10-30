@@ -1,4 +1,10 @@
-import { type ReactNode, Suspense } from "react";
+import {
+  createContext,
+  type ReactNode,
+  Suspense,
+  useContext,
+  useEffect,
+} from "react";
 import { ErrorBoundary } from "../../components/ErrorBoundary";
 import { LoadingState } from "../../components/garden/LoadingState";
 import { useI18n } from "../../i18n";
@@ -27,4 +33,37 @@ export function SettingsPane({
       </ErrorBoundary>
     </div>
   );
+}
+
+/**
+ * A pane's open item (`/settings/:category/:itemId`): the third breadcrumb
+ * segment, `设置 › 分类 › 项`, and where Back goes from it.
+ */
+export interface SettingsDetailCrumb {
+  label: string;
+  /** Route Back and the category crumb lead to, e.g. the category list. */
+  backTo: string;
+}
+
+const SettingsDetailCrumbContext = createContext<
+  ((crumb: SettingsDetailCrumb | null) => void) | null
+>(null);
+
+export const SettingsDetailCrumbProvider = SettingsDetailCrumbContext.Provider;
+
+/**
+ * Register the item a pane has open; pass null when none is. Panes mounted
+ * in search results get no provider, so the call is a no-op there.
+ */
+export function useSettingsDetailCrumb(
+  crumb: SettingsDetailCrumb | null,
+): void {
+  const register = useContext(SettingsDetailCrumbContext);
+  const label = crumb?.label;
+  const backTo = crumb?.backTo;
+  useEffect(() => {
+    if (!register) return;
+    register(label && backTo ? { label, backTo } : null);
+    return () => register(null);
+  }, [register, label, backTo]);
 }

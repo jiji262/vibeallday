@@ -1,0 +1,51 @@
+/* Performance rows: slider or stepper, value chip, and a range hint below. */
+
+.control:global(.settings-item-actions) {
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.controlRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.controlRow > input[type="range"] {
+  flex: 1 1 10rem;
+  min-width: 6rem;
+}
+
+/* Design .pf-val: the current value as an accent chip. */
+.value {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  min-width: 5.75rem;
+  height: var(--chip-h);
+  padding: 0 var(--space-2);
+  border: 1px solid var(--accent-line);
+  border-radius: var(--r-chip);
+  background: var(--accent-soft);
+  color: var(--accent-ink);
+  font-family: var(--font-mono);
+  font-size: var(--fs-meta);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.hint {
+  color: var(--ink-3);
+  font-family: var(--font-mono);
+  font-size: var(--fs-meta);
+  line-height: 1.4;
+}
+
+.scopeTag {
+  margin-left: var(--space-2);
+  vertical-align: 1px;
+}

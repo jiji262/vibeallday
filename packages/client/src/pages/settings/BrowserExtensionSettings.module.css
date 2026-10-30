@@ -1,15 +1,19 @@
 .lede,
 .hint {
   margin: 0 0 8px;
-  color: var(--text-muted);
-  font-size: 13px;
+  color: var(--ink-3);
+  font-size: var(--fs-small);
 }
 .error {
   margin: 0 0 8px;
-  color: var(--error-color);
-  font-size: 13px;
+  color: var(--err-ink);
+  font-size: var(--fs-small);
 }
-.hostList,
+/* Non-row blocks (site grants, allowlist) inside a settings card. */
+.block {
+  padding: 14px var(--pad-card);
+  border-bottom: 1px solid var(--line);
+}
 .siteList {
   margin: 0 0 8px;
   padding: 0;
@@ -18,14 +22,29 @@
   flex-direction: column;
   gap: 6px;
 }
+/* Saved hosts as one card of rows (design .sext-host). */
+.hostList {
+  display: flex;
+  flex-direction: column;
+  margin: 0 0 8px;
+  padding: 0;
+  list-style: none;
+  overflow: hidden;
+  border: 1px solid var(--card-line);
+  border-radius: var(--r-card);
+  background: var(--surface);
+  box-shadow: var(--shadow-card);
+}
 .hostRow {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 8px 16px;
-  padding: 8px 12px;
-  border: 1px solid var(--border-subtle);
-  border-radius: 8px;
+  padding: 10px var(--pad-card);
+  border-bottom: 1px solid var(--line);
+}
+.hostRow:last-child {
+  border-bottom: 0;
 }
 .hostName {
   flex: 1;
@@ -35,20 +54,20 @@
   gap: 8px;
 }
 .hostName span {
-  color: var(--text-muted);
-  font-size: 12px;
+  color: var(--ink-3);
+  font-family: var(--font-mono);
+  font-size: var(--fs-meta);
 }
 .inlineControl {
   min-height: 44px;
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  color: var(--text-secondary);
-  font-size: 13px;
+  color: var(--ink-2);
+  font-size: var(--fs-small);
   cursor: pointer;
 }
 .allowlist {
-  margin: 12px 0;
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -58,8 +77,8 @@
   flex-direction: column;
 }
 .allowlist > span span {
-  color: var(--text-muted);
-  font-size: 13px;
+  color: var(--ink-3);
+  font-size: var(--fs-small);
 }
 .siteList li {
   display: flex;
@@ -68,8 +87,8 @@
   justify-content: space-between;
   gap: 8px;
   padding: 8px 12px;
-  border: 1px solid var(--border-subtle);
-  border-radius: 8px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-input);
 }
 .siteList li > span {
   display: flex;
@@ -77,21 +96,22 @@
   min-width: 0;
 }
 .siteList li > span span {
-  color: var(--text-muted);
-  font-size: 12px;
+  color: var(--ink-3);
+  font-size: var(--fs-meta);
 }
 .siteList button,
 .addSite input {
-  min-height: 36px;
+  min-height: var(--btn-h-sm);
   padding: 6px 10px;
-  border: 1px solid var(--border-color);
-  border-radius: 6px;
-  background: var(--bg-input);
-  color: var(--text-primary);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-input);
+  background: var(--input-bg);
+  color: var(--ink);
   font: inherit;
 }
 .siteList button {
-  background: var(--bg-surface);
+  border-radius: var(--r-btn);
+  background: var(--surface);
   cursor: pointer;
 }
 .siteList button:disabled {
@@ -107,10 +127,10 @@
 }
 .allowlist textarea {
   padding: 8px 10px;
-  border: 1px solid var(--border-color);
-  border-radius: 6px;
-  background: var(--bg-input);
-  color: var(--text-primary);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-input);
+  background: var(--input-bg);
+  color: var(--ink);
   font-family: var(--font-mono);
   font-size: 13px;
   resize: vertical;

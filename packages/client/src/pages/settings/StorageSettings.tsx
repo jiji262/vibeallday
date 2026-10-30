@@ -3,6 +3,7 @@ import {
   TOOL_RESULT_MEDIA_PRESERVATION_POLICY_CAPABILITY,
   serverHasCapability,
 } from "@vibeallday/shared";
+import { Status, Tag } from "../../components/garden";
 import { LoadingState } from "../../components/garden/LoadingState";
 import { useCallback, useMemo } from "react";
 import { useServerSettings } from "../../hooks/useServerSettings";
@@ -22,6 +23,8 @@ interface StorageChoiceProps {
   checked: boolean;
   disabled: boolean;
   isDefault?: boolean;
+  /** What the choice does to disk: `ok` is harmless, `attn` needs care. */
+  impact: { state: "ok" | "attn"; label: string };
   onChange: () => void;
 }
 
@@ -33,6 +36,7 @@ function StorageChoice({
   checked,
   disabled,
   isDefault = false,
+  impact,
   onChange,
 }: StorageChoiceProps) {
   const { t } = useI18n();
@@ -52,13 +56,12 @@ function StorageChoice({
       <span className={styles.choiceText}>
         <span className={styles.choiceHeading}>
           <span>{label}</span>
-          {isDefault && (
-            <span className={styles.defaultBadge}>
-              {t("storageChoiceDefault")}
-            </span>
-          )}
+          {isDefault && <Tag>{t("storageChoiceDefault")}</Tag>}
         </span>
         <span className={styles.choiceDescription}>{description}</span>
+        <Status state={impact.state} className={styles.impact}>
+          {impact.label}
+        </Status>
       </span>
     </label>
   );
@@ -125,6 +128,7 @@ export function StorageSettings() {
   return (
     <SettingsSection
       description={t("storageSettingsDescription")}
+      scope="server"
       keywords={[".vibeallday", ".attachments", "VIBEALLDAY_DATA_DIR"]}
     >
       <div className="settings-group">
@@ -161,6 +165,10 @@ export function StorageSettings() {
               }
               disabled={!supportsProjectLocation}
               isDefault
+              impact={{
+                state: "ok",
+                label: t("storageImpactNoProjectWrites"),
+              }}
               onChange={() => {
                 void updateSettings({
                   projectDirectoryStorage: "app-data",
@@ -176,6 +184,10 @@ export function StorageSettings() {
               description={t("projectDataLocationProjectDescription")}
               checked={supportsProjectLocation && projectLocation === "project"}
               disabled={!supportsProjectLocation}
+              impact={{
+                state: "attn",
+                label: t("storageImpactProjectWrites"),
+              }}
               onChange={() => {
                 void updateSettings({
                   projectDirectoryStorage: "project",
@@ -220,6 +232,7 @@ export function StorageSettings() {
               }
               disabled={!supportsMediaPreservation}
               isDefault
+              impact={{ state: "ok", label: t("storageImpactNoExtraSpace") }}
               onChange={() => {
                 void updateSettings({
                   toolResultMediaPreservation: "on-demand",
@@ -237,6 +250,7 @@ export function StorageSettings() {
                 supportsMediaPreservation && mediaPreservation === "preserve"
               }
               disabled={!supportsMediaPreservation}
+              impact={{ state: "attn", label: t("storageImpactGrows") }}
               onChange={() => {
                 void updateSettings({
                   toolResultMediaPreservation: "preserve",

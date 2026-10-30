@@ -1,6 +1,12 @@
-/* Relay setup form framed as one settings card, padded like its rows. */
-.setupCard {
-  padding: var(--space-4) var(--space-5);
+/* The relay setup draws its own cards; keep the pane's section rhythm. */
+.setupBlock {
+  margin-bottom: var(--space-6);
+}
+
+/* Server scope tag on rows that render custom info. */
+.scopeTag {
+  margin-left: var(--space-2);
+  vertical-align: 1px;
 }
 
 /* Hosted-client facts read as row description text, not body copy. */
@@ -8,7 +14,7 @@
   display: grid;
   gap: var(--space-1);
   color: var(--ink-3);
-  font-size: var(--font-size-base);
+  font-size: var(--fs-small);
   line-height: 1.5;
 }
 

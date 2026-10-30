@@ -16,3 +16,178 @@
     gap: var(--space-1);
   }
 }
+
+/* Skin picker (design .sap-grid / .sap-card): four preview cards above the
+   section's settings card. Each thumbnail re-scopes the skin tokens with
+   data-theme, so the preview paints with the real palette. */
+.skinRow {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+}
+
+.skinHint {
+  margin: 0;
+  color: var(--ink-3);
+  font-size: var(--fs-meta);
+}
+
+.skinGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(10.5rem, 1fr));
+  gap: var(--space-3);
+}
+
+.skinCardButton {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+  padding: 10px 10px 12px;
+  border: 1px solid var(--card-line);
+  border-radius: var(--r-lg);
+  background: var(--surface);
+  box-shadow: var(--shadow-card);
+  color: var(--ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.skinCardButton:hover {
+  background: var(--surface-2);
+}
+
+.skinCardButton:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.skinCardButton[aria-pressed="true"] {
+  border-color: var(--accent);
+  box-shadow:
+    0 0 0 1px var(--accent),
+    var(--shadow-card);
+}
+
+.skinThumb {
+  display: flex;
+  height: 96px;
+  overflow: hidden;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-md);
+}
+
+.skinFrame {
+  display: flex;
+  flex: 1 1 0;
+  min-width: 0;
+  background: var(--canvas);
+  color: var(--ink);
+}
+
+.skinFrame + .skinFrame {
+  border-left: 1px solid var(--line-strong);
+}
+
+.skinSide {
+  display: flex;
+  flex: 0 0 30%;
+  flex-direction: column;
+  gap: 5px;
+  padding: 8px 6px;
+  border-right: 1px solid var(--line);
+  background: var(--side-bg);
+}
+
+.skinBar {
+  display: block;
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 5px;
+  border-radius: 3px;
+  background: var(--line-strong);
+}
+
+.skinSide > .skinBar {
+  flex: none;
+}
+
+.skinBarOn {
+  background: var(--accent);
+}
+
+.skinBarShort {
+  width: 70%;
+}
+
+.skinMain {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+  padding: 8px;
+}
+
+.skinCard {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+  padding: 5px 6px;
+  border: 1px solid var(--card-line);
+  border-radius: var(--r-sm);
+  background: var(--surface);
+}
+
+.skinButton {
+  display: block;
+  width: 46%;
+  height: 12px;
+  margin-top: auto;
+  border-radius: var(--r-btn);
+  background: var(--accent);
+}
+
+.skinText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.skinName {
+  font-size: var(--fs-small);
+  font-weight: 600;
+}
+
+.skinDescription {
+  overflow: hidden;
+  color: var(--ink-3);
+  font-size: var(--fs-meta);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Phone (design .sapp-*): two columns, shorter thumbs without the side rail. */
+@media (width < 768px) {
+  .skinGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .skinCardButton {
+    gap: 8px;
+    padding: 8px 8px 10px;
+  }
+
+  .skinThumb {
+    height: 76px;
+  }
+
+  .skinSide {
+    display: none;
+  }
+}

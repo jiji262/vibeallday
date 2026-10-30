@@ -17,7 +17,8 @@ import { type RelayStatus, useRemoteAccess } from "../hooks/useRemoteAccess";
 import { useI18n } from "../i18n";
 import { parseUserAgent } from "../lib/deviceDetection";
 import { selectClassName } from "./garden/Field";
-import { QRCode } from "./QRCode";
+import { RemoteAccessHero } from "./RemoteAccessSetupHero";
+import styles from "./RemoteAccessSetup.module.css";
 
 export interface RemoteAccessSetupProps {
   /** Custom title (default: "Remote Access") */
@@ -187,7 +188,6 @@ export function RemoteAccessSetup({
   const [hasChanges, setHasChanges] = useState(false);
   // Password for QR code generation (kept in memory after successful save)
   const [savedPassword, setSavedPassword] = useState<string | null>(null);
-  const [showQRCode, setShowQRCode] = useState(false);
 
   // Initialize form from existing config
   useEffect(() => {
@@ -504,227 +504,188 @@ export function RemoteAccessSetup({
   // Can toggle on if: has credentials OR has filled in required fields
   const canToggleOn = hasCredentials || (username && password);
 
+  const enableToggle = (
+    <label className="toggle-switch">
+      <input
+        type="checkbox"
+        aria-label={title}
+        checked={isEnabled}
+        onChange={(e) => handleToggle(e.target.checked)}
+        disabled={isSaving || (!isEnabled && !canToggleOn)}
+      />
+      <span className="toggle-slider" />
+    </label>
+  );
+
   return (
-    <div className="remote-access-setup">
-      <div className="remote-access-header">
-        <div>
-          <h3>{title}</h3>
-          <p>{description}</p>
-        </div>
-        <label className="toggle-switch">
-          <input
-            type="checkbox"
-            checked={isEnabled}
-            onChange={(e) => handleToggle(e.target.checked)}
-            disabled={isSaving || (!isEnabled && !canToggleOn)}
-          />
-          <span className="toggle-slider" />
-        </label>
-      </div>
+    <div className={`remote-access-setup ${styles.setup}`}>
+      <RemoteAccessHero
+        title={title}
+        description={description}
+        status={status}
+        toggle={enableToggle}
+        errorDetail={relayStatus?.error ?? undefined}
+        connectUrl={isEnabled && username ? connectUrl : null}
+        copied={copied}
+        onCopy={(url) => void handleCopyUrl(url)}
+        qrCodeUrl={canShowQRCode ? qrCodeUrl : null}
+      />
 
       <form onSubmit={handleSave} className="remote-access-form">
-        <div className="form-field">
-          <label htmlFor="remote-username">
-            {t("remoteSetupUsername" as never)}
-          </label>
-          <input
-            id="remote-username"
-            type="text"
-            value={username}
-            onChange={(e) => setUsername(e.target.value.toLowerCase())}
-            placeholder={t("remoteSetupUsernamePlaceholder" as never)}
-            minLength={3}
-            maxLength={32}
-            pattern="[a-z0-9][a-z0-9-]*[a-z0-9]|[a-z0-9]{1,2}"
-            title={t("remoteSetupUsernameHint" as never)}
-            autoComplete="username"
-            disabled={isSaving}
-          />
-        </div>
+        <section className={styles.section}>
+          <h3 className={styles.sectionTitle}>
+            {t("remoteSetupConnectionSection")}
+          </h3>
+          <div className={`settings-group ${styles.fields}`}>
+            <div className="form-field">
+              <label htmlFor="remote-username">
+                {t("remoteSetupUsername" as never)}
+              </label>
+              <input
+                id="remote-username"
+                type="text"
+                value={username}
+                onChange={(e) => setUsername(e.target.value.toLowerCase())}
+                placeholder={t("remoteSetupUsernamePlaceholder" as never)}
+                minLength={3}
+                maxLength={32}
+                pattern="[a-z0-9][a-z0-9-]*[a-z0-9]|[a-z0-9]{1,2}"
+                title={t("remoteSetupUsernameHint" as never)}
+                autoComplete="username"
+                disabled={isSaving}
+              />
+            </div>
 
-        <div className="form-field">
-          <label htmlFor="remote-password">
-            {hasCredentials
-              ? t("remoteSetupNewPassword" as never)
-              : t("remoteSetupPassword" as never)}
-          </label>
-          <input
-            id="remote-password"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder={hasCredentials ? "••••••••" : ""}
-            minLength={8}
-            autoComplete="new-password"
-            disabled={isSaving}
-          />
-        </div>
+            <div className="form-field">
+              <label htmlFor="remote-password">
+                {hasCredentials
+                  ? t("remoteSetupNewPassword" as never)
+                  : t("remoteSetupPassword" as never)}
+              </label>
+              <input
+                id="remote-password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder={hasCredentials ? "••••••••" : ""}
+                minLength={8}
+                autoComplete="new-password"
+                disabled={isSaving}
+              />
+            </div>
 
-        {password && (
-          <div className="form-field">
-            <label htmlFor="remote-confirm">
-              {t("remoteSetupConfirmPassword" as never)}
-            </label>
-            <input
-              id="remote-confirm"
-              type="password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              minLength={8}
-              autoComplete="new-password"
-              disabled={isSaving}
-            />
+            {password && (
+              <div className="form-field">
+                <label htmlFor="remote-confirm">
+                  {t("remoteSetupConfirmPassword" as never)}
+                </label>
+                <input
+                  id="remote-confirm"
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  minLength={8}
+                  autoComplete="new-password"
+                  disabled={isSaving}
+                />
+              </div>
+            )}
+
+            <div className="form-field">
+              <label htmlFor="relay-select">
+                {t("remoteSetupRelayServer" as never)}
+              </label>
+              <select
+                id="relay-select"
+                value={relayOption}
+                onChange={(e) => setRelayOption(e.target.value as RelayOption)}
+                disabled={isSaving}
+                className={selectClassName()}
+              >
+                <option value="default">
+                  {t("remoteSetupRelayDefault" as never)}
+                </option>
+                <option value="custom">
+                  {t("remoteSetupRelayCustom" as never)}
+                </option>
+              </select>
+            </div>
+
+            {relayOption === "custom" && (
+              <div className="form-field">
+                <label htmlFor="custom-relay-url">
+                  {t("remoteSetupCustomRelayUrl" as never)}
+                </label>
+                <input
+                  id="custom-relay-url"
+                  type="text"
+                  value={customRelayUrl}
+                  onChange={(e) => setCustomRelayUrl(e.target.value)}
+                  placeholder={t("remoteSetupCustomRelayPlaceholder" as never)}
+                  disabled={isSaving}
+                />
+              </div>
+            )}
+
+            <div className="form-field">
+              <label htmlFor="vibeallday-client-select">
+                {t("remoteSetupVibeAllDayClient" as never)}
+              </label>
+              <select
+                id="vibeallday-client-select"
+                value={vibeAllDayClientOption}
+                onChange={(e) =>
+                  setVibeAllDayClientOption(
+                    e.target.value as VibeAllDayClientOption,
+                  )
+                }
+                disabled={isSaving}
+                className={selectClassName()}
+              >
+                <option value="default">
+                  {t("remoteSetupVibeAllDayClientDefault" as never)}
+                </option>
+                <option value="custom">
+                  {t("remoteSetupVibeAllDayClientCustom" as never)}
+                </option>
+              </select>
+            </div>
+
+            {vibeAllDayClientOption === "custom" && (
+              <div className="form-field">
+                <label htmlFor="custom-vibeallday-client-url">
+                  {t("remoteSetupCustomVibeAllDayClientUrl" as never)}
+                </label>
+                <input
+                  id="custom-vibeallday-client-url"
+                  type="text"
+                  value={customVibeAllDayClientUrl}
+                  onChange={(e) => setCustomVibeAllDayClientUrl(e.target.value)}
+                  placeholder={t(
+                    "remoteSetupCustomVibeAllDayClientPlaceholder" as never,
+                  )}
+                  disabled={isSaving}
+                />
+              </div>
+            )}
+
+            {vibeAllDayClientInfo}
           </div>
-        )}
-
-        <div className="form-field">
-          <label htmlFor="relay-select">
-            {t("remoteSetupRelayServer" as never)}
-          </label>
-          <select
-            id="relay-select"
-            value={relayOption}
-            onChange={(e) => setRelayOption(e.target.value as RelayOption)}
-            disabled={isSaving}
-            className={selectClassName()}
-          >
-            <option value="default">
-              {t("remoteSetupRelayDefault" as never)}
-            </option>
-            <option value="custom">
-              {t("remoteSetupRelayCustom" as never)}
-            </option>
-          </select>
-        </div>
-
-        {relayOption === "custom" && (
-          <div className="form-field">
-            <label htmlFor="custom-relay-url">
-              {t("remoteSetupCustomRelayUrl" as never)}
-            </label>
-            <input
-              id="custom-relay-url"
-              type="text"
-              value={customRelayUrl}
-              onChange={(e) => setCustomRelayUrl(e.target.value)}
-              placeholder={t("remoteSetupCustomRelayPlaceholder" as never)}
-              disabled={isSaving}
-            />
-          </div>
-        )}
-
-        <div className="form-field">
-          <label htmlFor="vibeallday-client-select">
-            {t("remoteSetupVibeAllDayClient" as never)}
-          </label>
-          <select
-            id="vibeallday-client-select"
-            value={vibeAllDayClientOption}
-            onChange={(e) =>
-              setVibeAllDayClientOption(
-                e.target.value as VibeAllDayClientOption,
-              )
-            }
-            disabled={isSaving}
-            className={selectClassName()}
-          >
-            <option value="default">
-              {t("remoteSetupVibeAllDayClientDefault" as never)}
-            </option>
-            <option value="custom">
-              {t("remoteSetupVibeAllDayClientCustom" as never)}
-            </option>
-          </select>
-        </div>
-
-        {vibeAllDayClientOption === "custom" && (
-          <div className="form-field">
-            <label htmlFor="custom-vibeallday-client-url">
-              {t("remoteSetupCustomVibeAllDayClientUrl" as never)}
-            </label>
-            <input
-              id="custom-vibeallday-client-url"
-              type="text"
-              value={customVibeAllDayClientUrl}
-              onChange={(e) => setCustomVibeAllDayClientUrl(e.target.value)}
-              placeholder={t(
-                "remoteSetupCustomVibeAllDayClientPlaceholder" as never,
-              )}
-              disabled={isSaving}
-            />
-          </div>
-        )}
-
-        {vibeAllDayClientInfo}
-
-        <div className="remote-access-status">
-          <span className="status-label">
-            {t("remoteSetupStatus" as never)}
-          </span>
-          <span className={`status-indicator ${status.className}`}>
-            {status.text}
-          </span>
-          {relayStatus?.error && (
-            <span className="status-error-detail">{relayStatus.error}</span>
-          )}
-        </div>
+        </section>
 
         {(error || hookError) && (
           <p className="form-error">{error || hookError}</p>
         )}
 
-        {isEnabled && username && (
-          <div className="remote-access-connect">
-            <span className="connect-label">
-              {t("remoteSetupConnectFrom" as never)}
-            </span>
-            <div className="connect-url-row">
-              <code className="connect-url">{connectUrl}</code>
-              <button
-                type="button"
-                className="copy-button"
-                onClick={() => handleCopyUrl(connectUrl)}
-                title={t("remoteSetupCopyUrl" as never)}
-              >
-                {copied
-                  ? t("remoteSetupCopied" as never)
-                  : t("remoteSetupCopy" as never)}
-              </button>
-            </div>
-          </div>
-        )}
-
-        {canShowQRCode && (
-          <div className="remote-access-qr">
-            <button
-              type="button"
-              className="qr-toggle-button"
-              onClick={() => setShowQRCode(!showQRCode)}
-            >
-              {showQRCode
-                ? t("remoteSetupHideQr" as never)
-                : t("remoteSetupShowQr" as never)}
-            </button>
-            {showQRCode && qrCodeUrl && (
-              <div className="qr-code-container">
-                <QRCode value={qrCodeUrl} size={200} />
-                <p className="qr-code-hint">
-                  {t("remoteSetupQrHint" as never)}
-                </p>
-              </div>
-            )}
-          </div>
-        )}
-
-        <div className="remote-access-sessions">
-          <div className="sessions-header">
+        <section className={`remote-access-sessions ${styles.sessions}`}>
+          <div className={`sessions-header ${styles.sessionsHeader}`}>
             <span className="sessions-title">
               {t("remoteSetupSessions" as never, { count: sessions.length })}
             </span>
             {sessions.length > 0 && (
               <button
                 type="button"
-                className="revoke-all-button"
+                className="revoke-all-button settings-button settings-button-danger-subtle"
                 onClick={() => revokeAllSessions()}
                 disabled={isSaving}
                 title={t("remoteSetupRevokeEffect" as never)}
@@ -741,7 +702,9 @@ export function RemoteAccessSetup({
               {t("remoteSetupNoSessions" as never)}
             </p>
           ) : (
-            <ul className="sessions-list">
+            <ul
+              className={`sessions-list settings-group ${styles.sessionsList}`}
+            >
               {sessions.map((session) => {
                 const { browser, os } = session.userAgent
                   ? parseUserAgent(session.userAgent)
@@ -752,7 +715,10 @@ export function RemoteAccessSetup({
                 const hasDeviceInfo = session.userAgent || session.origin;
 
                 return (
-                  <li key={session.sessionId} className="session-item">
+                  <li
+                    key={session.sessionId}
+                    className={`session-item ${styles.sessionItem}`}
+                  >
                     <div className="session-info">
                       {hasDeviceInfo ? (
                         <>
@@ -795,7 +761,7 @@ export function RemoteAccessSetup({
                     </div>
                     <button
                       type="button"
-                      className="revoke-button"
+                      className="revoke-button settings-button"
                       onClick={() => revokeSession(session.sessionId)}
                       disabled={isSaving}
                       title={t("remoteSetupRevokeEffect" as never)}
@@ -807,7 +773,7 @@ export function RemoteAccessSetup({
               })}
             </ul>
           )}
-        </div>
+        </section>
 
         {hasChanges && (
           <div className="remote-access-actions">

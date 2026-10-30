@@ -27,10 +27,13 @@ import { getSettingsCategories } from "../../i18n-settings";
 import { MainContent, useNavigationLayout } from "../../layouts";
 import { SettingsBackupActions } from "./SettingsBackupActions";
 import { SettingsClipboardTransfer } from "./SettingsClipboardTransfer";
-import { SettingsGroupList } from "./SettingsGroupList";
-import { SettingsHome } from "./SettingsHome";
-import { SettingsHostCard } from "./SettingsHostCard";
-import { SettingsPane } from "./SettingsPane";
+import { SettingsHome, SettingsOverview } from "./SettingsHome";
+import { SettingsLayoutRail } from "./SettingsLayoutRail";
+import {
+  type SettingsDetailCrumb,
+  SettingsDetailCrumbProvider,
+  SettingsPane,
+} from "./SettingsPane";
 import {
   SettingsSearchBar,
   useSettingsSearchMatchValues,
@@ -46,14 +49,17 @@ import {
   useSettingsUndoRegistration,
 } from "./SettingsUndoContext";
 import { SettingsUndoButton } from "./SettingsUndoButton";
+import { useSettingsUndoToast } from "./SettingsUndoToast";
 import { CATEGORY_COMPONENTS } from "./settingsCategoryComponents";
 import { groupSettingsCategories } from "./settingsGroups";
 import type { SettingsCategory } from "./types";
 import styles from "./SettingsLayout.module.css";
 
-// Reserve the 256px category rail, 16px gap and responsive page insets;
-// detail controls wrap within the remaining pane's container width.
+// Reserve the 272px category rail and responsive page insets; detail
+// controls wrap within the remaining pane's container width.
 export const SETTINGS_TWO_COLUMN_MIN_WIDTH = 700;
+
+const IMPORT_EXPORT_CATEGORY_ID = "import-export";
 
 export function shouldUseSettingsTwoColumn(availableWidth: number): boolean {
   return availableWidth >= SETTINGS_TWO_COLUMN_MIN_WIDTH;
@@ -169,6 +175,9 @@ export function SettingsLayout() {
   } = useSettingsUndoRegistration();
   const { title: paneTitle, setTitle: setPaneTitle } =
     useSettingsPaneTitleRegistration();
+  const [detailCrumb, setDetailCrumb] = useState<SettingsDetailCrumb | null>(
+    null,
+  );
   const [searchQuery, setSearchQuery] = useState("");
   const [matchValues, setMatchValues] = useSettingsSearchMatchValues();
   const deferredSearchQuery = useDeferredValue(searchQuery.trim());
@@ -210,9 +219,9 @@ export function SettingsLayout() {
   const canBackUpBrowserSettings =
     serverBacksUpBrowserSettings && principalResolved && !actingAsLimitedUser;
 
-  // Two-column settings can fit before the persistent app sidebar can.
-  const effectiveCategory =
-    category || (useTwoColumnSettings ? visibleCategories[0]?.id : undefined);
+  // The settings index is the overview (desktop panel, phone home); no
+  // category is opened on the user's behalf.
+  const effectiveCategory = category;
 
   const setSettingsScrollContainerRef = useCallback(
     (element: HTMLElement | null) => {
@@ -234,7 +243,9 @@ export function SettingsLayout() {
   }, [location.key, scrollSettingsToTop]);
 
   const navigateToSettingsRoot = () => {
-    if (shouldPopSettingsDetailBack(location.state)) {
+    if (detailCrumb) {
+      navigate(detailCrumb.backTo);
+    } else if (shouldPopSettingsDetailBack(location.state)) {
       navigate(-1);
     } else {
       navigate(`${basePath}/settings`, { replace: !!category });
@@ -271,8 +282,20 @@ export function SettingsLayout() {
     />
   );
 
+  const handleOverviewClick = useCallback(() => {
+    setSearchQuery("");
+    navigate(`${basePath}/settings`, {
+      replace: useTwoColumnSettings && !!category,
+    });
+  }, [basePath, category, navigate, useTwoColumnSettings]);
+
   const groups = groupSettingsCategories(visibleCategories);
-  const transferTools = (
+  // Once an Import/Export category exists it owns backup and transfer, and
+  // the navigation stops carrying its own copies.
+  const hasImportExportCategory = visibleCategories.some(
+    (item) => item.id === IMPORT_EXPORT_CATEGORY_ID,
+  );
+  const transferTools = hasImportExportCategory ? null : (
     <>
       {canBackUpBrowserSettings && <SettingsBackupActions />}
       {principalResolved && <SettingsClipboardTransfer />}
@@ -346,14 +369,31 @@ export function SettingsLayout() {
       ? t("modelSettingsSessionDefaultsDescription")
       : activeCategory?.description;
   const settingsTitle = t("pageTitleSettings");
-  const paneCrumbs = [
-    { label: settingsTitle, to: `${basePath}/settings` },
-    { label: resolvedPaneTitle, title: resolvedPaneTitle },
-  ];
+  const settingsRoot = `${basePath}/settings`;
+  const paneCrumbs = !activeCategory
+    ? [
+        { label: settingsTitle, to: settingsRoot },
+        { label: t("settingsOverviewTitle") },
+      ]
+    : detailCrumb
+      ? [
+          { label: settingsTitle, to: settingsRoot },
+          {
+            label: resolvedPaneTitle,
+            to: detailCrumb.backTo,
+            title: resolvedPaneTitle,
+          },
+          { label: detailCrumb.label, title: detailCrumb.label },
+        ]
+      : [
+          { label: settingsTitle, to: settingsRoot },
+          { label: resolvedPaneTitle, title: resolvedPaneTitle },
+        ];
 
   // The single per-pane Undo affordance: panes register via useSettingsUndo.
   // Keep the button's header footprint even while hidden so settings rows do
   // not shift when a field first becomes undoable.
+  useSettingsUndoToast(undoRegistration, resolvedPaneTitle);
   const undoButton = (
     <SettingsUndoButton
       registration={undoRegistration}
@@ -366,7 +406,9 @@ export function SettingsLayout() {
     <SettingsJumpTargetProvider value={jumpTargetValue}>
       <SettingsPaneTitleProvider value={setPaneTitle}>
         <SettingsUndoProvider value={setUndoRegistration}>
-          <SettingsPane key={effectiveCategory}>{categoryPane}</SettingsPane>
+          <SettingsDetailCrumbProvider value={setDetailCrumb}>
+            <SettingsPane key={effectiveCategory}>{categoryPane}</SettingsPane>
+          </SettingsDetailCrumbProvider>
         </SettingsUndoProvider>
       </SettingsPaneTitleProvider>
     </SettingsJumpTargetProvider>
@@ -426,53 +468,68 @@ export function SettingsLayout() {
     );
   }
 
-  // Desktop: category rail on the left, the open pane on the right.
+  const panelBody = searchResults ? (
+    <>
+      <PageIntro title={settingsTitle} />
+      {searchResults}
+    </>
+  ) : activeCategory ? (
+    <>
+      {paneIntro}
+      {pane}
+    </>
+  ) : principalResolved ? (
+    <SettingsOverview groups={groups} onSelect={handleCategoryClick} />
+  ) : null;
+  const overviewOpen = !searchActive && !activeCategory;
+  const headerActions = overviewOpen ? (
+    <span className={styles.savedNote}>
+      {t("settingsOverviewSavedInstantly")}
+    </span>
+  ) : (
+    undoButton
+  );
+
+  // Desktop: the settings rail on the left (it stands in for the app
+  // sidebar), the open pane or the overview on the right.
   return (
     <MainContent isWideScreen={isWideScreen} innerRef={settingsContainerRef}>
-      <PageHeader
-        title={searchActive ? settingsTitle : resolvedPaneTitle}
-        intro="content"
-        breadcrumbs={searchActive ? undefined : paneCrumbs}
-        onOpenSidebar={openSidebar}
-        isWideScreen={isWideScreen}
-        actions={undoButton}
-      />
-      <main
-        ref={setSettingsScrollContainerRef}
-        className="page-scroll-container"
-      >
-        <div
-          className={`page-content-inner settings-two-column ${styles.twoColumn}`}
-        >
-          <nav
-            className={`settings-category-nav ${styles.nav}`}
-            aria-label={t("settingsCategoryNavLabel")}
+      <div className={`settings-two-column ${styles.twoColumn}`}>
+        <SettingsLayoutRail
+          searchBar={searchBar}
+          groups={groups}
+          activeId={effectiveCategory}
+          overviewActive={!category}
+          searchActive={searchActive}
+          onSelect={handleCategoryClick}
+          onOverview={handleOverviewClick}
+          extras={transferTools}
+        />
+        <div className={styles.column}>
+          <PageHeader
+            title={
+              searchActive || !activeCategory
+                ? settingsTitle
+                : resolvedPaneTitle
+            }
+            intro="content"
+            breadcrumbs={searchActive ? undefined : paneCrumbs}
+            onOpenSidebar={openSidebar}
+            isWideScreen={isWideScreen}
+            actions={headerActions}
+          />
+          <main
+            ref={setSettingsScrollContainerRef}
+            className="page-scroll-container"
           >
-            {searchBar}
-            <SettingsHostCard compact />
-            <SettingsGroupList
-              groups={groups}
-              activeId={searchActive ? undefined : effectiveCategory}
-              rail
-              onSelect={handleCategoryClick}
-              extras={transferTools}
-            />
-          </nav>
-          <div className={`settings-content-panel ${styles.panel}`}>
-            {searchResults ? (
-              <>
-                <PageIntro title={settingsTitle} />
-                {searchResults}
-              </>
-            ) : (
-              <>
-                {paneIntro}
-                {pane}
-              </>
-            )}
-          </div>
+            <div
+              className={`page-content-inner settings-content-panel ${styles.panel}`}
+            >
+              {panelBody}
+            </div>
+          </main>
         </div>
-      </main>
+      </div>
     </MainContent>
   );
 }

@@ -86,3 +86,57 @@
     min-height: 44px;
   }
 }
+
+/* Device rows (design .snt-dev): hairline-separated rows inside the card,
+   status as a dot + shape, current device as an accent tag. */
+.deviceList:global(.device-list) {
+  gap: 0;
+}
+
+.device:global(.device-list-item) {
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  padding: var(--space-3) var(--pad-card);
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.device + .device {
+  border-top: 1px solid var(--line);
+}
+
+.deviceDot {
+  flex: none;
+}
+
+.deviceInfo {
+  flex: 1 1 16rem;
+}
+
+.deviceName {
+  flex-wrap: wrap;
+  overflow-wrap: anywhere;
+}
+
+.currentTag:global(.device-current-badge) {
+  padding: 1px var(--space-2);
+  border-radius: var(--r-chip);
+  background: var(--accent-soft);
+  color: var(--accent-ink);
+  font-size: var(--fs-meta);
+  font-weight: 600;
+}
+
+.deviceMeta {
+  color: var(--ink-3);
+  font-size: var(--fs-meta);
+}
+
+.deviceMeta :global(.device-status)::before {
+  display: none;
+}
+
+.deviceActions {
+  margin-left: auto;
+}

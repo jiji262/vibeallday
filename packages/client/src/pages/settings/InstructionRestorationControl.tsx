@@ -26,12 +26,21 @@ export function InstructionRestorationControl({
   const [preview, setPreview] = useState<Awaited<
     ReturnType<typeof api.previewInstructionRestoration>
   > | null>(null);
+  // Saved provider opt-ins only; the path prefix is free text and stays out.
+  const enabledCount = providers.filter(
+    (provider) => value.providers[provider.id as ProviderName] === true,
+  ).length;
   return (
     <SettingsItem
       baseClassName={styles.row}
       id="providers-instruction-restoration"
       label={t("instructionRestorationTitle")}
       description={t("instructionRestorationDescription")}
+      valueText={
+        enabledCount === 0
+          ? t("instructionRestorationValueOff")
+          : t("instructionRestorationValueOn", { count: enabledCount })
+      }
     >
       <form
         className={styles.controls}

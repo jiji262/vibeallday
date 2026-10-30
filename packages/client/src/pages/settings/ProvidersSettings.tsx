@@ -1,8 +1,7 @@
 import { AgentAuthRouterSettings } from "../../components/AgentAuthRouterControls";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { useRemoteBasePath } from "../../hooks/useRemoteBasePath";
 import {
-  Fragment,
   useCallback,
   useEffect,
   useId,
@@ -23,39 +22,22 @@ import {
   CODEX_REASONING_SUMMARIES,
   CODEX_REASONING_SUMMARY_SETTING_CAPABILITY,
   DEFAULT_CODEX_REASONING_SUMMARY,
-  DEFAULT_IDLE_REAP_HOURS,
-  DEFAULT_LONG_CONTEXT_EFFORT_WARNING_TOKENS,
-  DEFAULT_SUBAGENT_MAX_DEPTH,
-  IDLE_REAP_HOURS_SETTING_CAPABILITY,
-  LONG_CONTEXT_EFFORT_WARNING_SLIDER_MAX_TOKENS,
-  LONG_CONTEXT_EFFORT_WARNING_SLIDER_STEP_TOKENS,
-  MAX_IDLE_REAP_HOURS,
-  MAX_POST_COMPACT_REPLAY_TURNS,
-  MAX_SUBAGENT_MAX_DEPTH,
-  MIN_SUBAGENT_MAX_DEPTH,
-  NEVER_IDLE_REAP_HOURS,
-  SUBAGENT_MAX_DEPTH_SETTING_CAPABILITY,
   MAX_CLAUDE_ADDITIONAL_MODEL_ID_LENGTH,
   isCodexReasoningSummary,
   isCodexPlanToolMode,
   isCodexCyberAccessProgram,
   isValidClaudeAdditionalModelId,
   isValidClaudeAdditionalModelLabel,
-  normalizeIdleReapHours,
   type ClaudeAdditionalModelSelection,
   type CodexCyberAccessProgram,
   type CodexPlanToolMode,
   type CodexReasoningSummary,
   type HelperTargetConfig,
-  type LongContextEffortWarningSettings,
   type ModelInfo,
-  type PostCompactReplaySettings,
   type ProviderInfo,
-  type ProviderName,
   serverHasCapability,
 } from "@vibeallday/shared";
 import { api, type ServerSettings } from "../../api/client";
-import { CommittedRangeNumberInput } from "../../components/ui/CommittedRangeNumberInput";
 import { Modal, type ModalAnchorRect } from "../../components/ui/Modal";
 import { useToastContext } from "../../contexts/ToastContext";
 import { useCodexUpdateStatus } from "../../hooks/useCodexUpdateStatus";
@@ -65,22 +47,31 @@ import { GatewayServicesSettings } from "./GatewayServicesSettings";
 import { useVersion } from "../../hooks/useVersion";
 import { useI18n } from "../../i18n";
 import { ProviderSignIn } from "./ProviderSignIn";
-import {
-  ClaudeAutoCompactPercentOverrideControl,
-  VibeAllDayCompactContextEarlyControl,
-} from "./compactSettingsControls";
+import { VibeAllDayCompactContextEarlyControl } from "./compactSettingsControls";
 import { SettingsItem } from "./SettingsItem";
-import { InstructionRestorationControl } from "./InstructionRestorationControl";
 import styles from "./ProvidersSettings.module.css";
+import { useSettingsDetailCrumb } from "./SettingsPane";
 import { useSettingsPaneTitle } from "./SettingsPaneTitleContext";
-import { HideInSettingsSearch } from "./SettingsSearchContext";
+import {
+  HideInSettingsSearch,
+  useSettingsSearchScope,
+} from "./SettingsSearchContext";
+import { Notice } from "../../components/garden";
+import { ProviderDetailHeader } from "./ProviderDetailHeader";
+import { ProvidersOverview } from "./ProvidersSettings.overview";
+import {
+  AUTH_ROUTER_ITEM_ID,
+  GATEWAY_SERVICES_ITEM_ID,
+  buildProviderDisplayList,
+  type ProviderDisplayEntry,
+  providerIsAuthenticated,
+} from "./ProvidersSettings.data";
 import { SettingsSection } from "./SettingsSection";
 import { getProviderSessionDefaults } from "../../lib/newSessionDefaults";
 import {
   helperTargetDescription,
   helperTargetValue,
 } from "../../lib/helperTargets";
-import { getAllProviders } from "../../providers/registry";
 
 const DEFAULT_OLLAMA_SYSTEM_PROMPT =
   "You are a helpful coding assistant. You help users with software engineering tasks. You have access to tools for reading files, editing files, running shell commands, and searching code. Use tools when needed to answer questions or make changes. Be concise and direct.";
@@ -90,7 +81,6 @@ const CLAUDE_OLLAMA_DEPRECATION_DISMISSAL_KEY =
   "vibeallday:claude-ollama-deprecation-v1";
 // Re-enable with topics/openai-compatible-helper-sessions.md.
 const SHOW_HELPER_TARGETS_SETTINGS = false;
-const PROVIDER_DEFAULT_SUBAGENT_MAX_DEPTH = -1;
 
 function shouldShowClaudeOllamaDeprecation(): boolean {
   try {
@@ -1484,277 +1474,62 @@ function ClaudeAdditionalModelsSettings({
   );
 }
 
-function PostCompactReplayControl({
-  value,
-  providers,
-  updateSetting,
-}: {
-  value: PostCompactReplaySettings;
-  providers: readonly { id: string; displayName: string }[];
-  updateSetting: UpdateServerSetting;
-}) {
-  const { t } = useI18n();
-  const { showToast } = useToastContext();
-  const replayTurnCount = value.replayTurnCount ?? 0;
+type ProvidersQuery = ReturnType<typeof useProviders>;
 
-  const save = useCallback(
-    async (next: PostCompactReplaySettings) => {
-      try {
-        await updateSetting("postCompactReplay", next);
-        showToast(t("providersPostCompactReplaySaved"), "success");
-      } catch (error) {
-        showToast(
-          error instanceof Error
-            ? error.message
-            : t("providersPostCompactReplaySaveError"),
-          "error",
-        );
-      }
-    },
-    [showToast, t, updateSetting],
-  );
-
-  return (
-    <SettingsItem
-      id="providers-post-compact-replay"
-      label={t("providersPostCompactReplayTitle")}
-      description={t("providersPostCompactReplayDescription")}
-      keywords={[
-        "compact",
-        "compaction",
-        "continue",
-        "replay",
-        "handoff",
-        "post-compact",
-      ]}
-      className="settings-item--wide-control"
-      valueText={
-        replayTurnCount === 0
-          ? t("providersPostCompactReplayNone")
-          : t("providersPostCompactReplayCountValue", {
-              count: String(replayTurnCount),
-            })
-      }
-    >
-      <div className={styles.limitControls}>
-        <CommittedRangeNumberInput
-          id="providers-post-compact-replay-count"
-          min={0}
-          max={MAX_POST_COMPACT_REPLAY_TURNS}
-          step={1}
-          value={replayTurnCount}
-          ariaLabel={t("providersPostCompactReplayCountAria")}
-          onCommit={(count) => {
-            void save({ ...value, replayTurnCount: count });
-          }}
-        />
-        <p className="settings-hint">
-          {t("providersPostCompactReplayCountHint")}
-        </p>
-        <div className={styles.providerToggles}>
-          {providers.map((provider) => {
-            const providerId = provider.id as ProviderName;
-            const enabled = value.providers?.[providerId] === true;
-            return (
-              <label key={provider.id} className={styles.providerToggle}>
-                <input
-                  type="checkbox"
-                  checked={enabled}
-                  onChange={(event) => {
-                    const providersMap = { ...value.providers };
-                    if (event.target.checked) {
-                      providersMap[providerId] = true;
-                    } else {
-                      delete providersMap[providerId];
-                    }
-                    void save({ ...value, providers: providersMap });
-                  }}
-                />
-                <span>{provider.displayName}</span>
-              </label>
-            );
-          })}
-        </div>
-      </div>
-    </SettingsItem>
-  );
+interface ProviderSupportFlags {
+  additionalModels: boolean;
+  codexReasoningSummary: boolean;
+  codexPlanTool: boolean;
+  codexCyberAccess: boolean;
+  claudeGateway: boolean;
+  claudeGatewayAutostart: boolean;
+  gatewayServices: boolean;
+  gatewayDisableAgent: boolean;
+  gatewayDisablePlanMode: boolean;
+  authRouter: boolean;
 }
 
-/**
- * Long-context effort-change warning: threshold slider plus per-provider
- * checkboxes. Contract: topics/mid-session-effort-change.md.
- */
-function LongContextEffortWarningControl({
-  value,
-  providers,
-  updateSetting,
-}: {
-  value: LongContextEffortWarningSettings;
-  providers: readonly { id: string; displayName: string }[];
+/** Everything a provider's rows read, gathered once per pane mount. */
+interface ProviderPaneState {
+  settings: ServerSettings | null;
   updateSetting: UpdateServerSetting;
-}) {
-  const { t } = useI18n();
-  const { showToast } = useToastContext();
-  const thresholdTokens =
-    value.thresholdTokens ?? DEFAULT_LONG_CONTEXT_EFFORT_WARNING_TOKENS;
-  const enabledCount = providers.filter(
-    (provider) => value.providers?.[provider.id as ProviderName] === true,
-  ).length;
-
-  const save = useCallback(
-    async (next: LongContextEffortWarningSettings) => {
-      try {
-        await updateSetting("longContextEffortWarning", next);
-        showToast(t("providersLongContextEffortWarningSaved"), "success");
-      } catch (error) {
-        showToast(
-          error instanceof Error
-            ? error.message
-            : t("providersLongContextEffortWarningSaveError"),
-          "error",
-        );
-      }
-    },
-    [showToast, t, updateSetting],
-  );
-
-  return (
-    <SettingsItem
-      id="providers-long-context-effort-warning"
-      label={t("providersLongContextEffortWarningTitle")}
-      description={t("providersLongContextEffortWarningDescription")}
-      keywords={[
-        "effort",
-        "reasoning",
-        "prompt cache",
-        "cache",
-        "long context",
-        "fork",
-        "warning",
-      ]}
-      className="settings-item--wide-control"
-      valueText={
-        enabledCount === 0
-          ? t("providersLongContextEffortWarningOff")
-          : t("providersLongContextEffortWarningValue", {
-              tokens: thresholdTokens.toLocaleString(),
-              count: String(enabledCount),
-            })
-      }
-    >
-      <div className={styles.limitControls}>
-        <CommittedRangeNumberInput
-          id="providers-long-context-effort-warning-threshold"
-          min={0}
-          max={LONG_CONTEXT_EFFORT_WARNING_SLIDER_MAX_TOKENS}
-          numberMax={Number.MAX_SAFE_INTEGER}
-          step={LONG_CONTEXT_EFFORT_WARNING_SLIDER_STEP_TOKENS}
-          snapTextToStep={false}
-          value={thresholdTokens}
-          unit="tokens"
-          ariaLabel={t("providersLongContextEffortWarningThresholdAria")}
-          onCommit={(tokens) => {
-            void save({ ...value, thresholdTokens: Math.round(tokens) });
-          }}
-        />
-        <p className="settings-hint">
-          {t("providersLongContextEffortWarningThresholdHint")}
-        </p>
-        <div className={styles.providerToggles}>
-          {providers.map((provider) => {
-            const providerId = provider.id as ProviderName;
-            const enabled = value.providers?.[providerId] === true;
-            return (
-              <label key={provider.id} className={styles.providerToggle}>
-                <input
-                  type="checkbox"
-                  checked={enabled}
-                  onChange={(event) => {
-                    const providersMap = { ...value.providers };
-                    if (event.target.checked) {
-                      providersMap[providerId] = true;
-                    } else {
-                      delete providersMap[providerId];
-                    }
-                    void save({ ...value, providers: providersMap });
-                  }}
-                />
-                <span>{provider.displayName}</span>
-              </label>
-            );
-          })}
-        </div>
-      </div>
-    </SettingsItem>
-  );
+  serverProviders: ProviderInfo[];
+  providersLoading: boolean;
+  providersError: ProvidersQuery["error"];
+  reloadProviders: () => Promise<void>;
+  supports: ProviderSupportFlags;
+  providers: ProviderDisplayEntry[];
+  showClaudeOllamaDeprecation: boolean;
+  dismissClaudeOllamaDeprecation: () => void;
+  copyLoginCommand: (command: string, provider: string) => Promise<void>;
 }
 
-export function ProvidersSettings() {
-  const signInBasePath = useRemoteBasePath();
+function useProviderSupportFlags(): ProviderSupportFlags {
+  const { version } = useVersion();
+  const has = (capability: string) => serverHasCapability(version, capability);
+  return {
+    additionalModels: has(CLAUDE_ADDITIONAL_MODELS_CAPABILITY),
+    codexReasoningSummary: has(CODEX_REASONING_SUMMARY_SETTING_CAPABILITY),
+    codexPlanTool: has(CODEX_PLAN_TOOL_SETTING_CAPABILITY),
+    codexCyberAccess: has(CODEX_CYBER_ACCESS_PROGRAM_SETTING_CAPABILITY),
+    claudeGateway: has(CLAUDE_GATEWAY_CAPABILITY),
+    claudeGatewayAutostart: has(CLAUDE_GATEWAY_AUTOSTART_CAPABILITY),
+    gatewayServices: has(CLAUDE_GATEWAY_SERVICES_CAPABILITY),
+    gatewayDisableAgent: has(CLAUDE_GATEWAY_DISABLE_AGENT_CAPABILITY),
+    gatewayDisablePlanMode: has(CLAUDE_GATEWAY_DISABLE_PLAN_MODE_CAPABILITY),
+    authRouter: has(SERVER_CAPABILITIES.agentAuthRouter.name),
+  };
+}
+
+function useProviderPaneState(): ProviderPaneState {
   const { t } = useI18n();
-  useSettingsPaneTitle(t("providersSectionTitle"));
+  const { showToast } = useToastContext();
   const [showClaudeOllamaDeprecation, setShowClaudeOllamaDeprecation] =
     useState(shouldShowClaudeOllamaDeprecation);
-  const { showToast } = useToastContext();
-  const {
-    providers: serverProviders,
-    loading: providersLoading,
-    error: providersError,
-    refetch: reloadProviders,
-  } = useProviders();
+  const query = useProviders();
   const { settings, updateSetting } = useServerSettings();
-  const { version } = useVersion();
-  const supportsAdditionalModels = serverHasCapability(
-    version,
-    CLAUDE_ADDITIONAL_MODELS_CAPABILITY,
-  );
-  const supportsCodexReasoningSummary = serverHasCapability(
-    version,
-    CODEX_REASONING_SUMMARY_SETTING_CAPABILITY,
-  );
-  const supportsCodexPlanToolSetting = serverHasCapability(
-    version,
-    CODEX_PLAN_TOOL_SETTING_CAPABILITY,
-  );
-  const supportsCodexCyberAccessProgram = serverHasCapability(
-    version,
-    CODEX_CYBER_ACCESS_PROGRAM_SETTING_CAPABILITY,
-  );
-  const supportsClaudeGateway = serverHasCapability(
-    version,
-    CLAUDE_GATEWAY_CAPABILITY,
-  );
-  const supportsClaudeGatewayAutostart = serverHasCapability(
-    version,
-    CLAUDE_GATEWAY_AUTOSTART_CAPABILITY,
-  );
-  const supportsGatewayServices = serverHasCapability(
-    version,
-    CLAUDE_GATEWAY_SERVICES_CAPABILITY,
-  );
-  const supportsClaudeGatewayDisableAgent = serverHasCapability(
-    version,
-    CLAUDE_GATEWAY_DISABLE_AGENT_CAPABILITY,
-  );
-  const supportsClaudeGatewayDisablePlanMode = serverHasCapability(
-    version,
-    CLAUDE_GATEWAY_DISABLE_PLAN_MODE_CAPABILITY,
-  );
-  const supportsIdleReapHours = serverHasCapability(
-    version,
-    IDLE_REAP_HOURS_SETTING_CAPABILITY,
-  );
-  const supportsSubagentMaxDepth = serverHasCapability(
-    version,
-    SUBAGENT_MAX_DEPTH_SETTING_CAPABILITY,
-  );
-  const idleReapHours = settings?.idleReapHours ?? DEFAULT_IDLE_REAP_HOURS;
-  const subagentMaxDepth =
-    settings?.subagentMaxDepth === undefined
-      ? DEFAULT_SUBAGENT_MAX_DEPTH
-      : settings.subagentMaxDepth;
-
-  const handleCopyProviderLoginCommand = useCallback(
+  const supports = useProviderSupportFlags();
+  const copyLoginCommand = useCallback(
     async (command: string, provider: string) => {
       try {
         await navigator.clipboard.writeText(command);
@@ -1765,71 +1540,356 @@ export function ProvidersSettings() {
     },
     [showToast, t],
   );
-
   const dismissClaudeOllamaDeprecation = useCallback(() => {
     setShowClaudeOllamaDeprecation(false);
     rememberClaudeOllamaDeprecationDismissal();
   }, []);
+  return {
+    settings,
+    updateSetting,
+    serverProviders: query.providers,
+    providersLoading: query.loading,
+    providersError: query.error,
+    reloadProviders: query.refetch,
+    supports,
+    providers: buildProviderDisplayList(
+      query.providers,
+      supports.claudeGateway,
+    ),
+    showClaudeOllamaDeprecation,
+    dismissClaudeOllamaDeprecation,
+    copyLoginCommand,
+  };
+}
 
-  // Merge server detection status with client-side metadata
-  const registeredProviders = getAllProviders();
-  const providerDisplayList = registeredProviders.flatMap((clientProvider) => {
-    const serverInfo = serverProviders.find(
-      (p) => p.name === clientProvider.id,
-    );
-    if (clientProvider.id === "claude-ollama" && !serverInfo) {
-      return [];
-    }
-    if (
-      clientProvider.id === "claude-gateway" &&
-      !serverInfo &&
-      !supportsClaudeGateway
-    ) {
-      return [];
-    }
-    return [
-      {
-        ...clientProvider,
-        installed: serverInfo?.installed ?? false,
-        applicationDetected: serverInfo?.applicationDetected,
-        authenticated: serverInfo?.authenticated ?? false,
-        enabled: serverInfo?.enabled ?? false,
-        loginCommand: serverInfo?.loginCommand,
-        supportsInAppLogin: serverInfo?.supportsInAppLogin === true,
-        supportsHostTerminalLogin:
-          serverInfo?.supportsHostTerminalLogin === true,
-        additionalModelOptions: serverInfo?.additionalModelOptions,
-        supportsLaunchCompactPercentOverride:
-          serverInfo?.supportsLaunchCompactPercentOverride === true,
-      },
-    ];
-  });
+interface ProviderRowProps {
+  provider: ProviderDisplayEntry;
+  pane: ProviderPaneState;
+}
 
+const GATEWAY_KEYWORDS = [
+  "gateway URL",
+  "start command",
+  "autostart",
+  "disable agent",
+  "disable plan mode",
+];
+
+function ProviderRowAfter({ provider, pane }: ProviderRowProps) {
+  const { t } = useI18n();
+  const { supports } = pane;
   return (
-    <SettingsSection description={t("providersSectionDescription")}>
-      <nav
-        className={styles.signInShortcuts}
-        aria-label={t("providerSignInShortcuts")}
-      >
-        {serverProviders
-          .filter(
-            (provider) =>
-              (provider.name === "claude" || provider.name === "codex") &&
-              provider.supportsInAppLogin,
-          )
-          .map((provider) => (
-            <Link
-              key={provider.name}
-              to={`${signInBasePath}/provider-sign-in/${provider.name}`}
-            >
-              {t("providersSignIn", { provider: provider.displayName })}
-            </Link>
+    <>
+      {provider.id === "claude-gateway" &&
+        supports.claudeGateway &&
+        supports.gatewayServices && (
+          <GatewayServicesSettings reloadProviders={pane.reloadProviders} />
+        )}
+      {provider.id === "claude-ollama" && pane.showClaudeOllamaDeprecation ? (
+        <div className="provider-deprecation-notice" role="status">
+          <span>{t("providersClaudeOllamaDeprecationNotice")}</span>
+          <button
+            type="button"
+            className="provider-deprecation-notice__dismiss"
+            aria-label={t("providersClaudeOllamaDeprecationDismissAria")}
+            onClick={pane.dismissClaudeOllamaDeprecation}
+          >
+            ×
+          </button>
+        </div>
+      ) : undefined}
+    </>
+  );
+}
+
+function isClaudeOrCodex(id: string): id is "claude" | "codex" {
+  return id === "claude" || id === "codex";
+}
+
+/** Runtime, desktop-application and authentication lines of a provider row. */
+function ProviderStatusLines({ provider }: { provider: ProviderDisplayEntry }) {
+  const { t } = useI18n();
+  return (
+    <>
+      <div className="settings-item-header">
+        <strong>{provider.displayName}</strong>
+        {provider.installed ? (
+          <span className="settings-status-badge settings-status-detected">
+            {t("providersRuntimeReady")}
+          </span>
+        ) : (
+          <span className="settings-status-badge settings-status-not-detected">
+            {t("providersRuntimeUnavailable")}
+          </span>
+        )}
+      </div>
+      <p>{provider.metadata.description}</p>
+      {isClaudeOrCodex(provider.id) &&
+        provider.applicationDetected !== undefined && (
+          <p className="settings-hint">
+            {t("providersDesktopApplicationStatus", {
+              status: provider.applicationDetected
+                ? t("providersDetected")
+                : t("providersNotDetected"),
+            })}
+          </p>
+        )}
+      {provider.installed && (
+        <p className="settings-hint">
+          {t("providersAuthenticationStatus", {
+            status: providerIsAuthenticated(provider)
+              ? t("providersAuthenticated")
+              : t("providersNotAuthenticated"),
+          })}
+        </p>
+      )}
+      {provider.metadata.limitations.length > 0 && (
+        <ul className="settings-limitations">
+          {provider.metadata.limitations.map((limitation) => (
+            <li key={limitation}>{limitation}</li>
           ))}
-      </nav>
-      {serverHasCapability(
-        version,
-        SERVER_CAPABILITIES.agentAuthRouter.name,
-      ) && (
+        </ul>
+      )}
+    </>
+  );
+}
+
+function ProviderLoginHelp({ provider, pane }: ProviderRowProps) {
+  const { t } = useI18n();
+  if (!isClaudeOrCodex(provider.id)) return null;
+  if (provider.installed && !provider.authenticated) {
+    return (
+      <div className={styles.loginHelp}>
+        <p className="settings-hint">
+          {t("providersLoginHint", { provider: provider.displayName })}
+        </p>
+        <ProviderLoginCommandPanel
+          command={
+            provider.loginCommand ??
+            (provider.id === "claude"
+              ? DEFAULT_CLAUDE_LOGIN_COMMAND
+              : DEFAULT_CODEX_LOGIN_COMMAND)
+          }
+          provider={provider.displayName}
+          onCopy={(command) =>
+            void pane.copyLoginCommand(command, provider.displayName)
+          }
+        />
+        {provider.supportsInAppLogin && (
+          <ProviderSignIn
+            provider={provider.id}
+            displayName={provider.displayName}
+            supportsHostTerminal={provider.supportsHostTerminalLogin}
+            onSignedIn={pane.reloadProviders}
+          />
+        )}
+      </div>
+    );
+  }
+  if (provider.applicationDetected === true && !provider.installed) {
+    return (
+      <p className="settings-hint">
+        {t("providersApplicationWithoutRuntimeHint", {
+          provider: provider.displayName,
+        })}
+      </p>
+    );
+  }
+  return null;
+}
+
+function ClaudeGatewayPanels({ pane }: { pane: ProviderPaneState }) {
+  const { t } = useI18n();
+  const { supports } = pane;
+  if (!supports.claudeGateway) return null;
+  return (
+    <>
+      {!supports.gatewayServices && (
+        <ClaudeGatewaySettings
+          reloadProviders={pane.reloadProviders}
+          supportsAutostart={supports.claudeGatewayAutostart}
+        />
+      )}
+      {supports.gatewayDisableAgent && (
+        <ClaudeGatewayToggleSetting
+          id="provider-claude-gateway-disable-agent"
+          setting="claudeGatewayDisableAgent"
+          title={t("providersClaudeGatewayDisableAgentTitle")}
+          description={t("providersClaudeGatewayDisableAgentDescription")}
+        />
+      )}
+      {supports.gatewayDisablePlanMode && (
+        <ClaudeGatewayToggleSetting
+          id="provider-claude-gateway-disable-plan-mode"
+          setting="claudeGatewayDisablePlanMode"
+          title={t("providersClaudeGatewayDisablePlanModeTitle")}
+          description={t("providersClaudeGatewayDisablePlanModeDescription")}
+        />
+      )}
+    </>
+  );
+}
+
+function CodexRefreshPanel({ pane }: { pane: ProviderPaneState }) {
+  const { t } = useI18n();
+  return (
+    <>
+      <div className={styles.loginHelp}>
+        <button
+          type="button"
+          className="settings-button"
+          disabled={pane.providersLoading}
+          onClick={() => void pane.reloadProviders()}
+        >
+          {pane.providersLoading
+            ? t("providersModelsRefreshing")
+            : t("providersModelsRefresh")}
+        </button>
+        {pane.providersError && (
+          <p className="settings-hint" role="alert">
+            {t("providersModelsRefreshFailed")}
+          </p>
+        )}
+      </div>
+      <CodexUpdatePanel />
+    </>
+  );
+}
+
+function ProviderRowInfo({ provider, pane }: ProviderRowProps) {
+  return (
+    <>
+      <ProviderStatusLines provider={provider} />
+      <ProviderLoginHelp provider={provider} pane={pane} />
+      {provider.id === "claude-ollama" && <OllamaSettings />}
+      {provider.id === "grok" && <GrokBuildApiKeySettings />}
+      {provider.id === "claude-gateway" && <ClaudeGatewayPanels pane={pane} />}
+      {provider.id === "codex" && provider.installed && (
+        <CodexRefreshPanel pane={pane} />
+      )}
+    </>
+  );
+}
+
+/** Codex- and Claude-only rows that follow the provider's own row. */
+function ProviderExtraRows({ provider, pane }: ProviderRowProps) {
+  const { settings, updateSetting, supports } = pane;
+  if (provider.id === "codex") {
+    return (
+      <>
+        {supports.codexReasoningSummary && (
+          <CodexReasoningSummarySetting
+            value={
+              settings?.codexReasoningSummary ?? DEFAULT_CODEX_REASONING_SUMMARY
+            }
+            updateSetting={updateSetting}
+          />
+        )}
+        {supports.codexPlanTool && (
+          <CodexPlanToolSetting
+            value={settings?.codexPlanToolMode ?? undefined}
+            updateSetting={updateSetting}
+          />
+        )}
+        {supports.codexCyberAccess && (
+          <CodexCyberAccessProgramSetting
+            value={settings?.codexCyberAccessProgram ?? undefined}
+            updateSetting={updateSetting}
+          />
+        )}
+      </>
+    );
+  }
+  if (provider.id !== "claude") return null;
+  return (
+    <>
+      <ClaudeVibeAllDayCompactEarlyMirror
+        serverProviders={pane.serverProviders}
+        settings={settings}
+        updateSetting={updateSetting}
+      />
+      {supports.additionalModels && (
+        <ClaudeAdditionalModelsSettings
+          modelOptions={provider.additionalModelOptions ?? []}
+          selections={settings?.claudeAdditionalModels ?? []}
+          updateSetting={updateSetting}
+          reloadProviders={pane.reloadProviders}
+        />
+      )}
+    </>
+  );
+}
+
+/** One provider's row plus its provider-only settings rows. */
+function ProviderRows({ provider, pane }: ProviderRowProps) {
+  const { t } = useI18n();
+  return (
+    <>
+      <SettingsItem
+        id={`provider-${provider.id}`}
+        label={provider.displayName}
+        description={provider.metadata.description}
+        keywords={
+          provider.id === "claude-gateway" ? GATEWAY_KEYWORDS : undefined
+        }
+        scope={null}
+        after={<ProviderRowAfter provider={provider} pane={pane} />}
+        info={<ProviderRowInfo provider={provider} pane={pane} />}
+      >
+        {provider.metadata.website && (
+          <a
+            href={provider.metadata.website}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="settings-link"
+          >
+            {t("providersWebsite")}
+          </a>
+        )}
+      </SettingsItem>
+      <ProviderExtraRows provider={provider} pane={pane} />
+    </>
+  );
+}
+
+function SignInShortcuts({ pane }: { pane: ProviderPaneState }) {
+  const { t } = useI18n();
+  const basePath = useRemoteBasePath();
+  return (
+    <nav
+      className={styles.signInShortcuts}
+      aria-label={t("providerSignInShortcuts")}
+    >
+      {pane.serverProviders
+        .filter(
+          (provider) =>
+            isClaudeOrCodex(provider.name) && provider.supportsInAppLogin,
+        )
+        .map((provider) => (
+          <Link
+            key={provider.name}
+            to={`${basePath}/provider-sign-in/${provider.name}`}
+          >
+            {t("providersSignIn", { provider: provider.displayName })}
+          </Link>
+        ))}
+    </nav>
+  );
+}
+
+/**
+ * Every provider's rows in one list. Settings search mounts this form, so
+ * each row stays searchable and operable in place whichever page owns it.
+ */
+function ProvidersFullList({ pane }: { pane: ProviderPaneState }) {
+  const { t } = useI18n();
+  return (
+    <SettingsSection
+      description={t("providersSectionDescription")}
+      scope="server"
+    >
+      <SignInShortcuts pane={pane} />
+      {pane.supports.authRouter && (
         <div className={styles.authRouter}>
           <AgentAuthRouterSettings />
         </div>
@@ -1837,380 +1897,120 @@ export function ProvidersSettings() {
       {SHOW_HELPER_TARGETS_SETTINGS && (
         <div className="settings-group">
           <HelperTargetsSettings
-            settings={settings}
-            updateSetting={updateSetting}
+            settings={pane.settings}
+            updateSetting={pane.updateSetting}
           />
         </div>
       )}
       <div className="settings-group">
-        {supportsSubagentMaxDepth && (
-          <SettingsItem
-            id="providers-subagent-max-depth"
-            label={t("providersSubagentMaxDepthLabel")}
-            description={t("providersSubagentMaxDepthDescription")}
-            className="settings-item--wide-control"
-            valueText={
-              subagentMaxDepth === null
-                ? t("providersSubagentMaxDepthProviderDefault")
-                : subagentMaxDepth === 0
-                  ? t("providersSubagentMaxDepthDisabled")
-                  : t("providersSubagentMaxDepthValue", {
-                      value: subagentMaxDepth,
-                    })
-            }
-          >
-            <div className={styles.limitControls}>
-              <CommittedRangeNumberInput
-                id="providers-subagent-max-depth-control"
-                min={PROVIDER_DEFAULT_SUBAGENT_MAX_DEPTH}
-                max={MAX_SUBAGENT_MAX_DEPTH}
-                numberMin={MIN_SUBAGENT_MAX_DEPTH}
-                numberMax={MAX_SUBAGENT_MAX_DEPTH}
-                step={1}
-                list="providers-subagent-max-depth-ticks"
-                value={subagentMaxDepth}
-                unsetSliderValue={PROVIDER_DEFAULT_SUBAGENT_MAX_DEPTH}
-                unit={t("providersSubagentMaxDepthUnit")}
-                ariaLabel={t("providersSubagentMaxDepthAria")}
-                onCommit={(value) => {
-                  void updateSetting("subagentMaxDepth", value);
-                }}
-              />
-              <datalist id="providers-subagent-max-depth-ticks">
-                <option
-                  value={PROVIDER_DEFAULT_SUBAGENT_MAX_DEPTH}
-                  label={t("providersSubagentMaxDepthProviderDefault")}
-                />
-                <option value={MIN_SUBAGENT_MAX_DEPTH} />
-                <option value="1" />
-                <option value="2" />
-                <option value="3" />
-                <option value={MAX_SUBAGENT_MAX_DEPTH} />
-              </datalist>
-              <p className="settings-hint">
-                {t("providersSubagentMaxDepthCoverage")}
-              </p>
-            </div>
-          </SettingsItem>
-        )}
-        {supportsIdleReapHours && (
-          <SettingsItem
-            id="providers-idle-reap-hours"
-            label={t("providersIdleReapHoursLabel")}
-            description={t("providersIdleReapHoursDescription")}
-            className="settings-item--wide-control"
-            valueText={
-              idleReapHours < 0
-                ? t("providersIdleReapNever")
-                : t("providersIdleReapHoursValue", {
-                    value: idleReapHours,
-                  })
-            }
-          >
-            <div className={styles.limitControls}>
-              <CommittedRangeNumberInput
-                id="providers-idle-reap-hours-control"
-                min={NEVER_IDLE_REAP_HOURS}
-                max={MAX_IDLE_REAP_HOURS}
-                numberMin={NEVER_IDLE_REAP_HOURS}
-                numberMax={MAX_IDLE_REAP_HOURS}
-                step={1}
-                list="providers-idle-reap-hours-ticks"
-                value={idleReapHours}
-                unit={t("providersIdleReapHoursUnit")}
-                ariaLabel={t("providersIdleReapHoursAria")}
-                snapTextToStep={false}
-                onCommit={(value) => {
-                  void updateSetting(
-                    "idleReapHours",
-                    normalizeIdleReapHours(value),
-                  );
-                }}
-              />
-              <datalist id="providers-idle-reap-hours-ticks">
-                <option
-                  value={NEVER_IDLE_REAP_HOURS}
-                  label={t("providersIdleReapNever")}
-                />
-                <option value="0" />
-                <option value="24" />
-                <option value="48" />
-                <option value={MAX_IDLE_REAP_HOURS} />
-              </datalist>
-              <p className="settings-hint">{t("providersIdleReapNeverHint")}</p>
-            </div>
-          </SettingsItem>
-        )}
-        {settings?.postCompactReplay !== undefined && (
-          <PostCompactReplayControl
-            value={settings.postCompactReplay}
-            providers={providerDisplayList}
-            updateSetting={updateSetting}
-          />
-        )}
-        {settings?.instructionRestoration !== undefined && (
-          <InstructionRestorationControl
-            value={settings.instructionRestoration}
-            providers={providerDisplayList}
-            save={(value) => updateSetting("instructionRestoration", value)}
-          />
-        )}
-        {settings?.longContextEffortWarning !== undefined && (
-          <LongContextEffortWarningControl
-            value={settings.longContextEffortWarning}
-            providers={providerDisplayList}
-            updateSetting={updateSetting}
-          />
-        )}
-        {providerDisplayList.map((provider) => (
-          <Fragment key={provider.id}>
-            <SettingsItem
-              id={`provider-${provider.id}`}
-              label={provider.displayName}
-              description={provider.metadata.description}
-              keywords={
-                provider.id === "claude-gateway"
-                  ? [
-                      "gateway URL",
-                      "start command",
-                      "autostart",
-                      "disable agent",
-                      "disable plan mode",
-                    ]
-                  : undefined
-              }
-              after={
-                <>
-                  {provider.id === "claude-gateway" &&
-                    supportsClaudeGateway &&
-                    supportsGatewayServices && (
-                      <GatewayServicesSettings
-                        reloadProviders={reloadProviders}
-                      />
-                    )}
-                  {provider.id === "claude-ollama" &&
-                  showClaudeOllamaDeprecation ? (
-                    <div className="provider-deprecation-notice" role="status">
-                      <span>{t("providersClaudeOllamaDeprecationNotice")}</span>
-                      <button
-                        type="button"
-                        className="provider-deprecation-notice__dismiss"
-                        aria-label={t(
-                          "providersClaudeOllamaDeprecationDismissAria",
-                        )}
-                        onClick={dismissClaudeOllamaDeprecation}
-                      >
-                        ×
-                      </button>
-                    </div>
-                  ) : undefined}
-                </>
-              }
-              info={
-                <>
-                  <div className="settings-item-header">
-                    <strong>{provider.displayName}</strong>
-                    {provider.installed ? (
-                      <span className="settings-status-badge settings-status-detected">
-                        {t("providersRuntimeReady")}
-                      </span>
-                    ) : (
-                      <span className="settings-status-badge settings-status-not-detected">
-                        {t("providersRuntimeUnavailable")}
-                      </span>
-                    )}
-                  </div>
-                  <p>{provider.metadata.description}</p>
-                  {(provider.id === "claude" || provider.id === "codex") &&
-                    provider.applicationDetected !== undefined && (
-                      <p className="settings-hint">
-                        {t("providersDesktopApplicationStatus", {
-                          status: provider.applicationDetected
-                            ? t("providersDetected")
-                            : t("providersNotDetected"),
-                        })}
-                      </p>
-                    )}
-                  {provider.installed && (
-                    <p className="settings-hint">
-                      {t("providersAuthenticationStatus", {
-                        status:
-                          provider.authenticated || provider.enabled
-                            ? t("providersAuthenticated")
-                            : t("providersNotAuthenticated"),
-                      })}
-                    </p>
-                  )}
-                  {provider.metadata.limitations.length > 0 && (
-                    <ul className="settings-limitations">
-                      {provider.metadata.limitations.map((limitation) => (
-                        <li key={limitation}>{limitation}</li>
-                      ))}
-                    </ul>
-                  )}
-                  {(provider.id === "claude" || provider.id === "codex") &&
-                    provider.installed &&
-                    !provider.authenticated && (
-                      <div style={{ marginTop: "var(--space-2)" }}>
-                        <p className="settings-hint">
-                          {t("providersLoginHint", {
-                            provider: provider.displayName,
-                          })}
-                        </p>
-                        <ProviderLoginCommandPanel
-                          command={
-                            provider.loginCommand ??
-                            (provider.id === "claude"
-                              ? DEFAULT_CLAUDE_LOGIN_COMMAND
-                              : DEFAULT_CODEX_LOGIN_COMMAND)
-                          }
-                          provider={provider.displayName}
-                          onCopy={(command) =>
-                            void handleCopyProviderLoginCommand(
-                              command,
-                              provider.displayName,
-                            )
-                          }
-                        />
-                        {provider.supportsInAppLogin && (
-                          <ProviderSignIn
-                            provider={provider.id}
-                            displayName={provider.displayName}
-                            supportsHostTerminal={
-                              provider.supportsHostTerminalLogin
-                            }
-                            onSignedIn={reloadProviders}
-                          />
-                        )}
-                      </div>
-                    )}
-                  {(provider.id === "claude" || provider.id === "codex") &&
-                    provider.applicationDetected === true &&
-                    !provider.installed && (
-                      <p className="settings-hint">
-                        {t("providersApplicationWithoutRuntimeHint", {
-                          provider: provider.displayName,
-                        })}
-                      </p>
-                    )}
-                  {provider.id === "claude-ollama" && <OllamaSettings />}
-                  {provider.id === "grok" && <GrokBuildApiKeySettings />}
-                  {provider.id === "claude-gateway" &&
-                    supportsClaudeGateway && (
-                      <>
-                        {!supportsGatewayServices && (
-                          <ClaudeGatewaySettings
-                            reloadProviders={reloadProviders}
-                            supportsAutostart={supportsClaudeGatewayAutostart}
-                          />
-                        )}
-                        {supportsClaudeGatewayDisableAgent && (
-                          <ClaudeGatewayToggleSetting
-                            id="provider-claude-gateway-disable-agent"
-                            setting="claudeGatewayDisableAgent"
-                            title={t("providersClaudeGatewayDisableAgentTitle")}
-                            description={t(
-                              "providersClaudeGatewayDisableAgentDescription",
-                            )}
-                          />
-                        )}
-                        {supportsClaudeGatewayDisablePlanMode && (
-                          <ClaudeGatewayToggleSetting
-                            id="provider-claude-gateway-disable-plan-mode"
-                            setting="claudeGatewayDisablePlanMode"
-                            title={t(
-                              "providersClaudeGatewayDisablePlanModeTitle",
-                            )}
-                            description={t(
-                              "providersClaudeGatewayDisablePlanModeDescription",
-                            )}
-                          />
-                        )}
-                      </>
-                    )}
-                  {provider.id === "codex" && provider.installed && (
-                    <>
-                      <div style={{ marginTop: "var(--space-2)" }}>
-                        <button
-                          type="button"
-                          className="settings-button"
-                          disabled={providersLoading}
-                          onClick={() => void reloadProviders()}
-                        >
-                          {providersLoading
-                            ? t("providersModelsRefreshing")
-                            : t("providersModelsRefresh")}
-                        </button>
-                        {providersError && (
-                          <p className="settings-hint" role="alert">
-                            {t("providersModelsRefreshFailed")}
-                          </p>
-                        )}
-                      </div>
-                      <CodexUpdatePanel />
-                    </>
-                  )}
-                </>
-              }
-            >
-              {provider.metadata.website && (
-                <a
-                  href={provider.metadata.website}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="settings-link"
-                >
-                  {t("providersWebsite")}
-                </a>
-              )}
-            </SettingsItem>
-            {provider.id === "codex" && supportsCodexReasoningSummary && (
-              <CodexReasoningSummarySetting
-                value={
-                  settings?.codexReasoningSummary ??
-                  DEFAULT_CODEX_REASONING_SUMMARY
-                }
-                updateSetting={updateSetting}
-              />
-            )}
-            {provider.id === "codex" && supportsCodexPlanToolSetting && (
-              <CodexPlanToolSetting
-                value={settings?.codexPlanToolMode ?? undefined}
-                updateSetting={updateSetting}
-              />
-            )}
-            {provider.id === "codex" && supportsCodexCyberAccessProgram && (
-              <CodexCyberAccessProgramSetting
-                value={settings?.codexCyberAccessProgram ?? undefined}
-                updateSetting={updateSetting}
-              />
-            )}
-            {provider.id === "claude" &&
-              provider.supportsLaunchCompactPercentOverride && (
-                <ClaudeAutoCompactPercentOverrideControl
-                  id="provider-claude-auto-compact"
-                  value={settings?.claudeAutoCompactPercentOverride}
-                  updateSetting={updateSetting}
-                />
-              )}
-            {provider.id === "claude" && (
-              <ClaudeVibeAllDayCompactEarlyMirror
-                serverProviders={serverProviders}
-                settings={settings}
-                updateSetting={updateSetting}
-              />
-            )}
-            {provider.id === "claude" && supportsAdditionalModels && (
-              <ClaudeAdditionalModelsSettings
-                modelOptions={provider.additionalModelOptions ?? []}
-                selections={settings?.claudeAdditionalModels ?? []}
-                updateSetting={updateSetting}
-                reloadProviders={reloadProviders}
-              />
-            )}
-          </Fragment>
+        {pane.providers.map((provider) => (
+          <ProviderRows key={provider.id} provider={provider} pane={pane} />
         ))}
       </div>
     </SettingsSection>
+  );
+}
+
+function ProviderDetailBody({
+  itemId,
+  pane,
+}: {
+  itemId: string;
+  pane: ProviderPaneState;
+}) {
+  const { supports } = pane;
+  if (itemId === GATEWAY_SERVICES_ITEM_ID) {
+    if (!supports.claudeGateway || !supports.gatewayServices) return null;
+    return (
+      <SettingsSection scope="server">
+        <GatewayServicesSettings reloadProviders={pane.reloadProviders} />
+      </SettingsSection>
+    );
+  }
+  if (itemId === AUTH_ROUTER_ITEM_ID) {
+    if (!supports.authRouter) return null;
+    return (
+      <div className={styles.authRouter}>
+        <AgentAuthRouterSettings />
+      </div>
+    );
+  }
+  const provider = pane.providers.find((entry) => entry.id === itemId);
+  if (!provider) return null;
+  return (
+    <>
+      <ProviderDetailHeader provider={provider} />
+      <SettingsSection scope="server">
+        <div className="settings-group">
+          <ProviderRows provider={provider} pane={pane} />
+        </div>
+      </SettingsSection>
+    </>
+  );
+}
+
+/** Label of a detail page, or null when this server does not have it. */
+function useProviderDetailLabel(
+  itemId: string | undefined,
+  pane: ProviderPaneState,
+): string | null {
+  const { t } = useI18n();
+  if (!itemId) return null;
+  if (itemId === GATEWAY_SERVICES_ITEM_ID) {
+    return t("providersGatewayServicesTitle");
+  }
+  if (itemId === AUTH_ROUTER_ITEM_ID) return t("routerTitle");
+  return (
+    pane.providers.find((entry) => entry.id === itemId)?.displayName ?? null
+  );
+}
+
+function ProviderDetailPage({
+  itemId,
+  pane,
+}: {
+  itemId: string;
+  pane: ProviderPaneState;
+}) {
+  const { t } = useI18n();
+  const basePath = useRemoteBasePath();
+  const listPath = `${basePath}/settings/providers`;
+  const label = useProviderDetailLabel(itemId, pane);
+  useSettingsDetailCrumb({ label: label ?? itemId, backTo: listPath });
+  const body = <ProviderDetailBody itemId={itemId} pane={pane} />;
+  if (label) return body;
+  return (
+    <Notice
+      tone="warning"
+      actions={<Link to={listPath}>{t("providersDetailBackToList")}</Link>}
+    >
+      {t("providersDetailNotFound")}
+    </Notice>
+  );
+}
+
+/**
+ * Providers: an overview of provider cards at `/settings/providers`, one
+ * provider's panels at `/settings/providers/:itemId`, and every row at once
+ * inside settings search.
+ */
+export function ProvidersSettings() {
+  const { t } = useI18n();
+  useSettingsPaneTitle(t("providersSectionTitle"));
+  const { itemId } = useParams<{ itemId?: string }>();
+  const searchScope = useSettingsSearchScope();
+  const pane = useProviderPaneState();
+  if (searchScope) return <ProvidersFullList pane={pane} />;
+  if (itemId) return <ProviderDetailPage itemId={itemId} pane={pane} />;
+  return (
+    <ProvidersOverview
+      providers={pane.providers}
+      loading={pane.providersLoading}
+      onRecheck={pane.reloadProviders}
+      showGatewayServices={
+        pane.supports.claudeGateway && pane.supports.gatewayServices
+      }
+      showAuthRouter={pane.supports.authRouter}
+    />
   );
 }

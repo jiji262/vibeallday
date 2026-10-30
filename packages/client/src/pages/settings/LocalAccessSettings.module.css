@@ -18,44 +18,50 @@
   flex: 0 0 7rem;
 }
 
-/* The password choice nested under Require Password (a .settings-subsection). */
+/* The password choice nested under Require Password: rows share the card;
+   the state, feedback and hint lines take the card's inline padding. */
 .passwordBlock {
-  margin-top: 0;
-  margin-bottom: var(--space-3);
+  border-bottom: 1px solid var(--line);
+}
+
+.passwordBlock:last-child {
+  border-bottom: 0;
 }
 
 .passwordState {
-  margin: var(--space-2) 0;
-  font-size: var(--font-size-sm);
+  margin: var(--space-3) 0 0;
+  padding-inline: var(--pad-card);
+  font-size: var(--fs-small);
 }
 
 .passwordStateActive {
-  color: var(--success-color);
+  color: var(--ok-ink);
 }
 
 .passwordStatePending,
 .passwordStateWarning {
-  color: var(--warning-color);
+  color: var(--attn-ink);
 }
 
 /* Validity outranks the shared `.settings-input:focus` ring, which also
    recolors the border; the element qualifier wins regardless of load order. */
 input.inputValid,
 input.inputValid:focus {
-  border-color: var(--success-color);
-  box-shadow: 0 0 0 1px var(--success-color);
+  border-color: var(--ok);
+  box-shadow: 0 0 0 1px var(--ok);
 }
 
 input.inputInvalid,
 input.inputInvalid:focus {
-  border-color: var(--error-color);
-  box-shadow: 0 0 0 1px var(--error-color);
+  border-color: var(--err);
+  box-shadow: 0 0 0 1px var(--err);
 }
 
 .passwordHint {
-  margin: var(--space-2) 0 0;
-  color: var(--text-muted);
-  font-size: var(--font-size-sm);
+  margin: 0;
+  padding: 0 var(--pad-card) var(--space-3);
+  color: var(--ink-3);
+  font-size: var(--fs-small);
 }
 
 .passwordActions {
@@ -64,28 +70,131 @@ input.inputInvalid:focus {
   justify-content: space-between;
   gap: var(--space-3);
   min-height: 2.25rem;
-  margin-top: var(--space-2);
+  padding: var(--space-2) var(--pad-card) var(--space-3);
 }
 
 .passwordFeedback {
   margin: 0;
-  color: var(--text-muted);
-  font-size: var(--font-size-sm);
+  color: var(--ink-3);
+  font-size: var(--fs-small);
 }
 
 .passwordFeedbackGood {
-  color: var(--success-color);
+  color: var(--ok-ink);
 }
 
 .passwordFeedbackBad {
-  color: var(--error-color);
+  color: var(--err-ink);
 }
 
 .passwordApply {
   flex: 0 0 auto;
-  border-color: var(--accent-color);
-  background: var(--accent-color);
-  color: var(--bg-primary);
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+/* Current state card (design .sla-risk): header line plus three insets. */
+.statusCard {
+  gap: var(--space-3);
+  padding: var(--pad-card);
+}
+
+.statusHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-1) var(--space-3);
+}
+
+.statusHead h3 {
+  margin: 0;
+  color: var(--ink);
+  font-size: var(--fs-h3);
+  font-weight: var(--title-weight);
+}
+
+.statusListening {
+  min-width: 0;
+  color: var(--ink-3);
+  font-size: var(--fs-meta);
+  overflow-wrap: anywhere;
+}
+
+.riskItems {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+  gap: 10px;
+}
+
+.riskItem {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  background: var(--surface-2);
+}
+
+.riskLabel {
+  color: var(--ink-3);
+  font-size: var(--fs-meta);
+}
+
+.riskStatus {
+  align-self: flex-start;
+  max-width: 100%;
+}
+
+.riskHint {
+  color: var(--ink-3);
+  font-size: var(--fs-small);
+}
+
+/* The apply form holds two titled sections and the save bar. */
+.applyForm {
+  margin-bottom: var(--space-6);
+}
+
+.sectionHint {
+  margin: var(--space-2) var(--space-1) 0;
+}
+
+/* A consequence notice under the row that causes it. */
+.rowNotice {
+  padding: var(--space-3) var(--pad-card);
+  border-bottom: 1px solid var(--line);
+}
+
+.rowNotice:last-child {
+  border-bottom: 0;
+}
+
+/* Design .sla-savebar: the pending state beside its one primary action. */
+.saveBar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  padding: 12px 14px 12px 18px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-lg);
+  background: var(--surface);
+  box-shadow: var(--shadow-card);
+}
+
+.saveBarText {
+  display: flex;
+  flex: 1 1 14rem;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.saveBarText :global(.form-error) {
+  margin: 0;
 }
 
 @media (width < 700px) {

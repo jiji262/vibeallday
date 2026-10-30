@@ -8,7 +8,7 @@ import {
   type IssueCredentialsResult,
   type IssueSettings as Settings,
 } from "@vibeallday/shared";
-import { useEffect, useRef, useState } from "react";
+import { type ReactNode, useEffect, useRef, useState } from "react";
 import { useCurrentSourceRuntime } from "../../contexts/SourceRuntimeContext";
 import { useVersion } from "../../hooks/useVersion";
 import { useServerSettings } from "../../hooks/useServerSettings";
@@ -87,114 +87,142 @@ function IssueSettingsControls() {
   };
   return (
     <div className={styles.settings}>
-      <SettingsItem
-        as="label"
-        id="issue-discovery-enabled"
-        label={t("issuesEnable")}
-        description={t("issuesRetention")}
-      >
-        <span className={`toggle-switch ${styles.toggle}`}>
-          <input
-            type="checkbox"
-            aria-label={t("issuesEnable")}
-            checked={settings?.enabled ?? false}
-            disabled={!settings || busy}
-            onChange={(e) =>
-              settings && void save({ ...settings, enabled: e.target.checked })
+      <SettingsSection title={t("issuesSectionDiscovery")} scope="server">
+        <div className="settings-group">
+          <SettingsItem
+            as="label"
+            id="issue-discovery-enabled"
+            label={t("issuesEnable")}
+            description={t("issuesRetention")}
+            valueText={settings?.enabled ? t("commonOn") : t("commonOff")}
+          >
+            <span className={`toggle-switch ${styles.toggle}`}>
+              <input
+                type="checkbox"
+                aria-label={t("issuesEnable")}
+                checked={settings?.enabled ?? false}
+                disabled={!settings || busy}
+                onChange={(e) =>
+                  settings &&
+                  void save({ ...settings, enabled: e.target.checked })
+                }
+              />
+              <span className="toggle-slider" />
+            </span>
+          </SettingsItem>
+          <SettingsItem
+            id="issue-discovery-scope"
+            label={t("issuesScope")}
+            className={styles.scopeRow}
+            valueText={
+              settings?.scope === "recent"
+                ? t("issuesRecent")
+                : t("issuesViewed")
             }
-          />
-          <span className="toggle-slider" />
-        </span>
-      </SettingsItem>
-      <SettingsItem
-        id="issue-discovery-scope"
-        label={t("issuesScope")}
-        className={styles.scopeRow}
-        description={
-          settings?.scope === "recent"
-            ? t("issuesRecentHelp")
-            : t("issuesViewedHelp")
-        }
-      >
-        <select
-          className={styles.control}
-          aria-label={t("issuesScope")}
-          value={settings?.scope ?? "viewed"}
-          disabled={!settings || busy}
-          onChange={(e) =>
-            settings &&
-            void save({
-              ...settings,
-              scope: e.target.value as Settings["scope"],
-            })
+            description={
+              settings?.scope === "recent"
+                ? t("issuesRecentHelp")
+                : t("issuesViewedHelp")
+            }
+          >
+            <select
+              className={styles.control}
+              aria-label={t("issuesScope")}
+              value={settings?.scope ?? "viewed"}
+              disabled={!settings || busy}
+              onChange={(e) =>
+                settings &&
+                void save({
+                  ...settings,
+                  scope: e.target.value as Settings["scope"],
+                })
+              }
+            >
+              <option value="viewed">{t("issuesViewed")}</option>
+              <option value="recent">{t("issuesRecent")}</option>
+            </select>
+          </SettingsItem>
+          {settings?.scope === "recent" && (
+            <SettingsItem
+              id="issue-discovery-days"
+              label={t("issuesDays")}
+              valueText={String(settings.recentDays)}
+            >
+              <input
+                className={styles.days}
+                type="number"
+                aria-label={t("issuesDays")}
+                min={1}
+                max={90}
+                defaultValue={settings.recentDays}
+                disabled={busy}
+                onBlur={(e) => {
+                  const days = Number(e.target.value);
+                  if (Number.isInteger(days) && days >= 1 && days <= 90)
+                    void save({ ...settings, recentDays: days });
+                  else e.target.value = String(settings.recentDays);
+                }}
+              />
+            </SettingsItem>
+          )}
+          <SettingsItem
+            as="label"
+            id="issue-aggressive-matching"
+            label={t("issuesAggressiveMatching")}
+            description={t("issuesAggressiveHelp")}
+            valueText={
+              settings?.aggressiveMatching ? t("commonOn") : t("commonOff")
+            }
+          >
+            <span className={`toggle-switch ${styles.toggle}`}>
+              <input
+                type="checkbox"
+                aria-label={t("issuesAggressiveMatching")}
+                checked={settings?.aggressiveMatching ?? false}
+                disabled={!settings || busy}
+                onChange={(e) =>
+                  settings &&
+                  void save({
+                    ...settings,
+                    aggressiveMatching: e.target.checked,
+                  })
+                }
+              />
+              <span className="toggle-slider" />
+            </span>
+          </SettingsItem>
+        </div>
+      </SettingsSection>
+      {settings && (
+        <ConfirmationControls
+          settings={settings}
+          busy={busy}
+          save={save}
+          jiraExtras={
+            <>
+              <SettingsItem
+                id="issue-known-projects"
+                className={styles.scopeRow}
+                label={t("issuesKnownProjects")}
+                description={t("issuesKnownProjectsHelp")}
+                valueText={projects.map((project) => project.prefix).join(" ")}
+              >
+                {projects.length ? (
+                  <ul className={styles.projects}>
+                    {projects.map((project) => (
+                      <li key={`${project.prefix}:${project.site}`}>
+                        <strong>{project.prefix}</strong> · {project.site}
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <span>{t("issuesNoKnownProjects")}</span>
+                )}
+              </SettingsItem>
+              <BlocklistControl settings={settings} busy={busy} save={save} />
+            </>
           }
-        >
-          <option value="viewed">{t("issuesViewed")}</option>
-          <option value="recent">{t("issuesRecent")}</option>
-        </select>
-      </SettingsItem>
-      {settings?.scope === "recent" && (
-        <SettingsItem id="issue-discovery-days" label={t("issuesDays")}>
-          <input
-            className={styles.days}
-            type="number"
-            aria-label={t("issuesDays")}
-            min={1}
-            max={90}
-            defaultValue={settings.recentDays}
-            disabled={busy}
-            onBlur={(e) => {
-              const days = Number(e.target.value);
-              if (Number.isInteger(days) && days >= 1 && days <= 90)
-                void save({ ...settings, recentDays: days });
-              else e.target.value = String(settings.recentDays);
-            }}
-          />
-        </SettingsItem>
-      )}
-      <SettingsItem
-        as="label"
-        id="issue-aggressive-matching"
-        label={t("issuesAggressiveMatching")}
-        description={t("issuesAggressiveHelp")}
-      >
-        <span className={`toggle-switch ${styles.toggle}`}>
-          <input
-            type="checkbox"
-            aria-label={t("issuesAggressiveMatching")}
-            checked={settings?.aggressiveMatching ?? false}
-            disabled={!settings || busy}
-            onChange={(e) =>
-              settings &&
-              void save({ ...settings, aggressiveMatching: e.target.checked })
-            }
-          />
-          <span className="toggle-slider" />
-        </span>
-      </SettingsItem>
-      <SettingsItem
-        id="issue-known-projects"
-        className={styles.scopeRow}
-        label={t("issuesKnownProjects")}
-        description={t("issuesKnownProjectsHelp")}
-      >
-        {projects.length ? (
-          <ul className={styles.projects}>
-            {projects.map((project) => (
-              <li key={`${project.prefix}:${project.site}`}>
-                <strong>{project.prefix}</strong> · {project.site}
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <span>{t("issuesNoKnownProjects")}</span>
-        )}
-      </SettingsItem>
-      {settings && (
-        <ConfirmationControls settings={settings} busy={busy} save={save} />
-      )}
-      {settings && (
-        <BlocklistControl settings={settings} busy={busy} save={save} />
+        />
       )}
       {error && <p role="alert">{error}</p>}
     </div>
@@ -220,7 +248,12 @@ const NO_CONFIRMATION: NonNullable<Settings["confirmation"]> = {
  * already have one: the pane says where a credential would come from and
  * whether it is there, without ever displaying it.
  */
-function ConfirmationControls({ settings, busy, save }: ControlProps) {
+function ConfirmationControls({
+  settings,
+  busy,
+  save,
+  jiraExtras,
+}: ControlProps & { jiraExtras: ReactNode }) {
   const { t } = useI18n();
   const { transport } = useCurrentSourceRuntime();
   const [credentials, setCredentials] = useState<IssueCredentialStatus[]>();
@@ -282,171 +315,193 @@ function ConfirmationControls({ settings, busy, save }: ControlProps) {
       setSaving("");
     }
   };
+  const shownCredentials = credentials?.filter((credential) =>
+    credential.provider === "github"
+      ? confirmation.enabled || (supported && statusEnabled)
+      : confirmation.enabled,
+  );
+  const credentialControl = (provider: string) =>
+    shownCredentials
+      ?.filter((credential) => credential.provider === provider)
+      .map((credential) => (
+        <CredentialControl
+          key={credential.provider}
+          credential={credential}
+          busy={saving === credential.provider}
+          store={storeKey}
+        />
+      ));
+  const githubCredential = credentialControl("github");
   return (
     <>
-      {supported && (
-        <>
+      {(supported || (githubCredential?.length ?? 0) > 0) && (
+        <SettingsSection title={t("issuesSectionGithub")} scope="server">
+          <div className="settings-group">
+            {supported && (
+              <>
+                <SettingsItem
+                  as="label"
+                  id="issue-github-status"
+                  valueText={statusEnabled ? t("commonOn") : t("commonOff")}
+                  label={t("issuesGithubStatusEnable")}
+                  description={t("issuesGithubStatusHelp")}
+                >
+                  <span className={`toggle-switch ${styles.toggle}`}>
+                    <input
+                      type="checkbox"
+                      aria-label={t("issuesGithubStatusEnable")}
+                      checked={statusEnabled}
+                      disabled={busy}
+                      onChange={(e) =>
+                        void save({
+                          ...settings,
+                          githubStatusEnabled: e.target.checked,
+                        })
+                      }
+                    />
+                    <span className="toggle-slider" />
+                  </span>
+                </SettingsItem>
+                <SettingsItem
+                  as="label"
+                  id="issue-github-cli"
+                  valueText={cli.enabled ? t("commonOn") : t("commonOff")}
+                  label={t("issuesGithubCliEnable")}
+                  description={t("issuesGithubCliHelp")}
+                >
+                  <span className={`toggle-switch ${styles.toggle}`}>
+                    <input
+                      type="checkbox"
+                      aria-label={t("issuesGithubCliEnable")}
+                      checked={cli.enabled}
+                      disabled={busy}
+                      onChange={(e) =>
+                        void save({
+                          ...settings,
+                          githubCli: { ...cli, enabled: e.target.checked },
+                        })
+                      }
+                    />
+                    <span className="toggle-slider" />
+                  </span>
+                </SettingsItem>
+                <SettingsItem
+                  id="issue-github-account"
+                  valueText={cli.account || t("issuesGithubActiveAccount")}
+                  className={styles.scopeRow}
+                  label={t("issuesGithubAccount")}
+                  description={t("issuesGithubAccountHelp")}
+                >
+                  <select
+                    className={styles.control}
+                    aria-label={t("issuesGithubAccount")}
+                    value={cli.account}
+                    disabled={busy || !cli.enabled}
+                    onChange={(e) =>
+                      void save({
+                        ...settings,
+                        githubCli: { ...cli, account: e.target.value },
+                      })
+                    }
+                  >
+                    <option value="">{t("issuesGithubActiveAccount")}</option>
+                    {[
+                      ...new Set([
+                        ...(github?.accounts ?? []),
+                        ...(cli.account ? [cli.account] : []),
+                      ]),
+                    ].map((account) => (
+                      <option key={account} value={account}>
+                        {account}
+                      </option>
+                    ))}
+                  </select>
+                </SettingsItem>
+                <SettingsItem
+                  id="issue-github-cache"
+                  className={styles.scopeRow}
+                  label={t("issuesGithubCache")}
+                  description={t("issuesGithubCacheHelp")}
+                >
+                  <button
+                    type="button"
+                    className={styles.action}
+                    disabled={busy || !!saving}
+                    onClick={() => {
+                      setSaving("cache");
+                      setActionError("");
+                      void transport
+                        .fetch("/issues/status", { method: "DELETE" })
+                        .catch(() => setActionError(t("issuesSaveError")))
+                        .finally(() => setSaving(""));
+                    }}
+                  >
+                    {t("issuesGithubCacheClear")}
+                  </button>
+                </SettingsItem>
+              </>
+            )}
+            {githubCredential}
+          </div>
+        </SettingsSection>
+      )}
+      <SettingsSection title={t("issuesSectionJira")} scope="server">
+        <div className="settings-group">
           <SettingsItem
             as="label"
-            id="issue-github-status"
-            label={t("issuesGithubStatusEnable")}
-            description={t("issuesGithubStatusHelp")}
+            id="issue-confirm-enabled"
+            label={t("issuesConfirmEnable")}
+            description={t("issuesConfirmHelp")}
+            valueText={confirmation.enabled ? t("commonOn") : t("commonOff")}
           >
             <span className={`toggle-switch ${styles.toggle}`}>
               <input
                 type="checkbox"
-                aria-label={t("issuesGithubStatusEnable")}
-                checked={statusEnabled}
+                aria-label={t("issuesConfirmEnable")}
+                checked={confirmation.enabled}
                 disabled={busy}
-                onChange={(e) =>
-                  void save({
-                    ...settings,
-                    githubStatusEnabled: e.target.checked,
-                  })
-                }
+                onChange={(e) => update({ enabled: e.target.checked })}
               />
               <span className="toggle-slider" />
             </span>
           </SettingsItem>
-          <SettingsItem
-            as="label"
-            id="issue-github-cli"
-            label={t("issuesGithubCliEnable")}
-            description={t("issuesGithubCliHelp")}
-          >
-            <span className={`toggle-switch ${styles.toggle}`}>
-              <input
-                type="checkbox"
-                aria-label={t("issuesGithubCliEnable")}
-                checked={cli.enabled}
-                disabled={busy}
-                onChange={(e) =>
-                  void save({
-                    ...settings,
-                    githubCli: { ...cli, enabled: e.target.checked },
-                  })
-                }
-              />
-              <span className="toggle-slider" />
-            </span>
-          </SettingsItem>
-          <SettingsItem
-            id="issue-github-account"
-            className={styles.scopeRow}
-            label={t("issuesGithubAccount")}
-            description={t("issuesGithubAccountHelp")}
-          >
-            <select
-              className={styles.control}
-              aria-label={t("issuesGithubAccount")}
-              value={cli.account}
-              disabled={busy || !cli.enabled}
-              onChange={(e) =>
-                void save({
-                  ...settings,
-                  githubCli: { ...cli, account: e.target.value },
-                })
-              }
-            >
-              <option value="">{t("issuesGithubActiveAccount")}</option>
-              {[
-                ...new Set([
-                  ...(github?.accounts ?? []),
-                  ...(cli.account ? [cli.account] : []),
-                ]),
-              ].map((account) => (
-                <option key={account} value={account}>
-                  {account}
-                </option>
-              ))}
-            </select>
-          </SettingsItem>
-          <SettingsItem
-            id="issue-github-cache"
-            className={styles.scopeRow}
-            label={t("issuesGithubCache")}
-            description={t("issuesGithubCacheHelp")}
-          >
-            <button
-              type="button"
-              className={styles.action}
-              disabled={busy || !!saving}
-              onClick={() => {
-                setSaving("cache");
-                setActionError("");
-                void transport
-                  .fetch("/issues/status", { method: "DELETE" })
-                  .catch(() => setActionError(t("issuesSaveError")))
-                  .finally(() => setSaving(""));
-              }}
-            >
-              {t("issuesGithubCacheClear")}
-            </button>
-          </SettingsItem>
-        </>
-      )}
-      <SettingsItem
-        as="label"
-        id="issue-confirm-enabled"
-        label={t("issuesConfirmEnable")}
-        description={t("issuesConfirmHelp")}
-      >
-        <span className={`toggle-switch ${styles.toggle}`}>
-          <input
-            type="checkbox"
-            aria-label={t("issuesConfirmEnable")}
-            checked={confirmation.enabled}
-            disabled={busy}
-            onChange={(e) => update({ enabled: e.target.checked })}
-          />
-          <span className="toggle-slider" />
-        </span>
-      </SettingsItem>
-      {confirmation.enabled && (
-        <>
-          <SettingsItem
-            id="issue-confirm-jira-site"
-            label={t("issuesJiraSite")}
-          >
-            <input
-              className={styles.control}
-              type="url"
-              aria-label={t("issuesJiraSite")}
-              placeholder="https://example.atlassian.net"
-              defaultValue={confirmation.jiraSite}
-              disabled={busy}
-              onBlur={(e) => update({ jiraSite: e.target.value.trim() })}
-            />
-          </SettingsItem>
-          <SettingsItem
-            id="issue-confirm-jira-email"
-            label={t("issuesJiraEmail")}
-          >
-            <input
-              className={styles.control}
-              type="email"
-              aria-label={t("issuesJiraEmail")}
-              defaultValue={confirmation.jiraEmail}
-              disabled={busy}
-              onBlur={(e) => update({ jiraEmail: e.target.value.trim() })}
-            />
-          </SettingsItem>
-        </>
-      )}
-      {credentials
-        ?.filter((credential) =>
-          credential.provider === "github"
-            ? confirmation.enabled || (supported && statusEnabled)
-            : confirmation.enabled,
-        )
-        .map((credential) => (
-          <CredentialControl
-            key={credential.provider}
-            credential={credential}
-            busy={saving === credential.provider}
-            store={storeKey}
-          />
-        ))}
+          {confirmation.enabled && (
+            <>
+              <SettingsItem
+                id="issue-confirm-jira-site"
+                label={t("issuesJiraSite")}
+                valueText={confirmation.jiraSite}
+              >
+                <input
+                  className={styles.control}
+                  type="url"
+                  aria-label={t("issuesJiraSite")}
+                  placeholder="https://example.atlassian.net"
+                  defaultValue={confirmation.jiraSite}
+                  disabled={busy}
+                  onBlur={(e) => update({ jiraSite: e.target.value.trim() })}
+                />
+              </SettingsItem>
+              <SettingsItem
+                id="issue-confirm-jira-email"
+                label={t("issuesJiraEmail")}
+                valueText={confirmation.jiraEmail}
+              >
+                <input
+                  className={styles.control}
+                  type="email"
+                  aria-label={t("issuesJiraEmail")}
+                  defaultValue={confirmation.jiraEmail}
+                  disabled={busy}
+                  onBlur={(e) => update({ jiraEmail: e.target.value.trim() })}
+                />
+              </SettingsItem>
+            </>
+          )}
+          {credentialControl("jira")}
+          {jiraExtras}
+        </div>
+      </SettingsSection>
       {actionError && <p role="alert">{actionError}</p>}
     </>
   );
@@ -505,6 +560,7 @@ function CredentialControl({
       </label>
       <button
         type="button"
+        className="settings-button settings-button-secondary"
         disabled={busy || !key.trim()}
         onClick={() => {
           void store(credential.provider, key.trim()).then(() => setKey(""));
@@ -515,6 +571,7 @@ function CredentialControl({
       {stored?.present && (
         <button
           type="button"
+          className="settings-button settings-button-danger-subtle"
           disabled={busy}
           onClick={() => void store(credential.provider, "")}
         >
@@ -530,7 +587,11 @@ function BlocklistControl({ settings, busy, save }: ControlProps) {
   const { t } = useI18n();
   const current = settings.jiraKeyBlocklist ?? [...DEFAULT_JIRA_KEY_BLOCKLIST];
   return (
-    <SettingsItem id="issue-jira-blocklist" label={t("issuesBlocklist")}>
+    <SettingsItem
+      id="issue-jira-blocklist"
+      label={t("issuesBlocklist")}
+      valueText={current.join(" ")}
+    >
       <input
         type="text"
         className={`${styles.control} ${styles.names}`}

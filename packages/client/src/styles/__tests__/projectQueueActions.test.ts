@@ -25,7 +25,8 @@ function getRuleDeclarations(css: string, selector: string): string {
 }
 
 function getHexCustomProperty(css: string, property: string): string {
-  const rootDeclarations = getRuleDeclarations(css, ":root");
+  // The Celadon token block is `:root, [data-theme="light"]`.
+  const rootDeclarations = getRuleDeclarations(css, '[data-theme="light"]');
   const match = new RegExp(
     `${escapeRegExp(property)}:\\s*(#[0-9a-fA-F]{6})\\s*;`,
   ).exec(rootDeclarations);

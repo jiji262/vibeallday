@@ -1,10 +1,26 @@
-import { type FormEventHandler, type ReactNode, useMemo } from "react";
+import {
+  createContext,
+  type FormEventHandler,
+  type ReactNode,
+  useContext,
+  useMemo,
+} from "react";
+import type { SettingScope } from "../../components/garden/ScopeTag";
 import {
   renderSettingsSearchHighlight,
   SettingsSearchScopeProvider,
   useSettingsSearchScope,
 } from "./SettingsSearchContext";
 import { settingsTextMatches } from "./settingsSearchMatch";
+
+const SettingsDefaultScopeContext = createContext<SettingScope | undefined>(
+  undefined,
+);
+
+/** Storage scope a SettingsItem inherits from its nearest scoped section. */
+export function useSettingsDefaultScope(): SettingScope | undefined {
+  return useContext(SettingsDefaultScopeContext);
+}
 
 export interface SettingsSectionProps {
   /** Section heading; searchable, rendered as the section `<h2>`. */
@@ -17,6 +33,8 @@ export interface SettingsSectionProps {
   className?: string;
   /** One explicit-save group; native Enter submission keeps actions with fields. */
   onSubmit?: FormEventHandler<HTMLElement>;
+  /** Default storage scope tag for the rows inside (a row may override it). */
+  scope?: SettingScope;
   children?: ReactNode;
 }
 
@@ -32,6 +50,7 @@ export function SettingsSection({
   keywords,
   className,
   onSubmit,
+  scope: defaultScope,
   children,
 }: SettingsSectionProps) {
   const scope = useSettingsSearchScope();
@@ -87,10 +106,17 @@ export function SettingsSection({
     </SectionElement>
   );
 
-  if (!childScope) return body;
+  const scoped = defaultScope ? (
+    <SettingsDefaultScopeContext.Provider value={defaultScope}>
+      {body}
+    </SettingsDefaultScopeContext.Provider>
+  ) : (
+    body
+  );
+  if (!childScope) return scoped;
   return (
     <SettingsSearchScopeProvider value={childScope}>
-      {body}
+      {scoped}
     </SettingsSearchScopeProvider>
   );
 }

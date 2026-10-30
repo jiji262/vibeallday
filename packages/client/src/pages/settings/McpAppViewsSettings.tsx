@@ -2,6 +2,7 @@ import { SERVER_CAPABILITIES, serverHasCapability } from "@vibeallday/shared";
 import { useServerSettings } from "../../hooks/useServerSettings";
 import { useVersion } from "../../hooks/useVersion";
 import { useI18n } from "../../i18n";
+import { ToggleSettingRow } from "./PerformanceSettings.controls";
 import { SettingsSection } from "./SettingsSection";
 
 /** Default-off MCP App hosting (topics/mcp-apps.md); absent on older servers. */
@@ -15,28 +16,16 @@ export function McpAppViewsSettings() {
   )
     return null;
   return (
-    <SettingsSection
-      title={t("mcpAppViewsSettingTitle")}
-      description={t("mcpAppViewsSettingDescription")}
-      keywords={["MCP", "MCP Apps", "Codex"]}
-    >
-      <label
-        style={{
-          display: "flex",
-          gap: "var(--space-2)",
-          alignItems: "center",
-          cursor: "pointer",
-        }}
-      >
-        <input
-          type="checkbox"
+    <SettingsSection title={t("mcpAppViewsSettingTitle")} scope="server">
+      <div className="settings-group">
+        <ToggleSettingRow
+          label={t("mcpAppViewsSettingTitle")}
+          description={t("mcpAppViewsSettingDescription")}
+          keywords={["MCP", "MCP Apps", "Codex"]}
           checked={settings.mcpAppViews === true}
-          onChange={(event) =>
-            updateSetting("mcpAppViews", event.target.checked)
-          }
+          onChange={(enabled) => updateSetting("mcpAppViews", enabled)}
         />
-        <span>{t("mcpAppViewsSettingTitle")}</span>
-      </label>
+      </div>
     </SettingsSection>
   );
 }

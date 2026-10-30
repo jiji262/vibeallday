@@ -30,6 +30,7 @@ export const SETTINGS_GROUPS: readonly SettingsGroupDefinition[] = [
       "providers",
       "model",
       "agent-context",
+      "agent-behavior",
       "message-delivery",
       "cache-miss-billing",
       "remote-executors",
@@ -65,7 +66,7 @@ export const SETTINGS_GROUPS: readonly SettingsGroupDefinition[] = [
   {
     id: "data",
     titleKey: "settingsGroupData",
-    categoryIds: ["storage", "about"],
+    categoryIds: ["storage", "import-export", "about"],
   },
   {
     id: "advanced",

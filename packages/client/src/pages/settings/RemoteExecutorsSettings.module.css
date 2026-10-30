@@ -42,57 +42,129 @@
 .list {
   display: flex;
   flex-direction: column;
-  gap: var(--space-2);
+  gap: var(--space-3);
 }
 
+/* Device card (design S-RemoteExecutors). */
 .item {
-  padding: var(--space-3);
-  background: var(--bg-code);
-  border-radius: var(--radius-md);
+  overflow: hidden;
+  border: 1px solid var(--card-line);
+  border-radius: var(--r-card);
+  background: var(--surface);
+}
+
+.itemHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  padding: 14px var(--pad-card);
+}
+
+.mark {
+  flex: none;
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-input);
+  background: var(--surface-2);
+}
+
+.item[data-executor-state="ok"] .mark {
+  border-color: var(--accent-line);
+  background: var(--ok-soft);
+}
+
+.item[data-executor-state="err"] .mark {
+  border-color: var(--err-line);
+  background: var(--err-soft);
 }
 
 .itemInfo {
   display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  margin-bottom: var(--space-2);
+  flex: 1 1 12rem;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
 }
 
 .host {
-  font-weight: 500;
+  overflow: hidden;
+  color: var(--ink);
   font-family: var(--font-mono);
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sshLine {
+  overflow: hidden;
+  color: var(--ink-3);
+  font-family: var(--font-mono);
+  font-size: var(--fs-meta);
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .error {
-  margin: var(--space-2) 0;
+  margin: 0;
+  padding: 0 var(--pad-card) 12px;
+  overflow-wrap: anywhere;
+}
+
+.facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  margin: 0;
+  border-top: 1px solid var(--line);
+}
+
+.fact {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  padding: 12px var(--pad-card);
+}
+
+.fact dt {
+  color: var(--ink-3);
+  font-family: var(--font-mono);
+  font-size: var(--fs-meta);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 
 .details {
-  font-size: var(--font-size-sm);
-  color: var(--text-muted);
-  margin: var(--space-2) 0;
+  margin: 0;
+  color: var(--ink);
+  font-size: var(--fs-small);
+  font-weight: 600;
 }
 
 .actions {
   display: flex;
   gap: var(--space-2);
+  margin-left: auto;
 }
 
 .testButton,
 .removeButton {
-  padding: var(--space-1) var(--space-2);
-  background: var(--bg-hover);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-sm);
-  color: var(--text-primary);
-  font-size: var(--font-size-xs);
+  height: var(--btn-h-sm);
+  padding: 0 var(--space-3);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-btn);
+  background: var(--surface);
+  color: var(--ink);
+  font-size: var(--fs-small);
+  font-weight: 600;
   cursor: pointer;
   transition: background 0.15s;
 }
 
 .testButton:hover:not(:disabled),
 .removeButton:hover:not(:disabled) {
-  background: var(--border-color);
+  background: var(--surface-3);
 }
 
 .testButton:disabled,
@@ -102,14 +174,33 @@
 }
 
 .removeButton {
-  color: var(--error-color);
+  color: var(--err-ink);
+}
+
+.requirementsFold:global(.settings-group) {
+  padding: 0;
+}
+
+.requirementsSummary {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: 14px var(--pad-card);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.requirementsCount {
+  color: var(--ink-3);
+  font-size: var(--fs-meta);
+  font-weight: 400;
 }
 
 .requirements {
   margin: 0;
-  padding-left: var(--space-4);
-  font-size: var(--font-size-sm);
-  color: var(--text-muted);
+  padding: 0 var(--pad-card) 14px calc(var(--pad-card) + var(--space-4));
+  font-size: var(--fs-small);
+  color: var(--ink-2);
 }
 
 .requirements li {

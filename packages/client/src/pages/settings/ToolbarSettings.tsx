@@ -2,7 +2,6 @@ import type {
   BusyComposerDefaultAction,
   CollapsedComposerButtonPreference,
   ToolbarControlPresence,
-  ToolbarNarrowingPriority,
 } from "@vibeallday/shared";
 import {
   PATIENT_TOPIC_SHIFT_CAPABILITY,
@@ -35,7 +34,7 @@ import {
 } from "../../hooks/useWaveformButtonBackgroundOpacity";
 import { useServerSettings } from "../../hooks/useServerSettings";
 import { useVersion } from "../../hooks/useVersion";
-import { useI18n } from "../../i18n";
+import { type MessageKey, useI18n } from "../../i18n";
 import {
   useAttachmentAction,
   type AttachmentAction,
@@ -54,6 +53,11 @@ import { useSettingsPaneTitle } from "./SettingsPaneTitleContext";
 import { SettingsSection } from "./SettingsSection";
 import { useSettingsUndoBaseline } from "./SettingsUndoContext";
 import toolbarSettingsStyles from "./ToolbarSettings.module.css";
+import {
+  PRESENCE_SLIDER_PRIORITIES,
+  presenceCaptionKey,
+  SessionPlacementSummary,
+} from "./ToolbarSettings.placement";
 
 const BUSY_COMPOSER_DEFAULT_ACTIONS: BusyComposerDefaultAction[] = [
   "steer",
@@ -65,6 +69,19 @@ const COLLAPSED_COMPOSER_BUTTON_OPTIONS: CollapsedComposerButtonPreference[] = [
   "alternate",
   "microphone",
 ];
+
+const ATTACHMENT_ACTION_LABEL_KEYS = {
+  auto: "audioMemoDefaultAuto",
+  menu: "audioMemoShareMenu",
+  files: "toolbarAttachFiles",
+  memo: "audioMemoRecord",
+} as const satisfies Record<AttachmentAction, MessageKey>;
+
+const COLLAPSED_BUTTON_LABEL_KEYS = {
+  primary: "appearanceToolbarCollapsedButtonPrimary",
+  alternate: "appearanceToolbarCollapsedButtonAlternate",
+  microphone: "appearanceToolbarCollapsedButtonMicrophone",
+} as const satisfies Record<CollapsedComposerButtonPreference, MessageKey>;
 
 type ToolbarSide = "left" | "right";
 
@@ -109,42 +126,8 @@ const PRIORITY_EDITABLE_CONTROLS = new Set<SessionToolbarVisibilityKey>([
   "projectQueueNewSessionShortcut",
 ]);
 
-// Enabled presence-slider notches run from hidden through increasingly durable
-// narrowing priorities. Controls that can be disabled add an Off notch first.
-const PRESENCE_SLIDER_PRIORITIES: readonly ToolbarNarrowingPriority[] = [
-  "first",
-  "mid",
-  "last",
-  "pin",
-];
-
 function presenceSliderId(key: SessionToolbarVisibilityKey): string {
   return `session-toolbar-presence-${key}`;
-}
-
-function presenceCaptionKey(
-  canSetPriority: boolean,
-  canDisable: boolean,
-  notch: number,
-) {
-  if (canDisable && notch <= 0) {
-    return "appearanceToolbarPresenceOffCaption" as const;
-  }
-  const enabledNotch = notch - (canDisable ? 1 : 0);
-  if (enabledNotch <= 0) {
-    return "appearanceToolbarPresenceHiddenCaption" as const;
-  }
-  if (!canSetPriority) return "appearanceToolbarPresenceShownCaption" as const;
-  switch (PRESENCE_SLIDER_PRIORITIES[enabledNotch - 1]) {
-    case "first":
-      return "appearanceToolbarPresenceFirstCaption" as const;
-    case "mid":
-      return "appearanceToolbarPresenceMidCaption" as const;
-    case "last":
-      return "appearanceToolbarPresenceLastCaption" as const;
-    default:
-      return "appearanceToolbarPresencePinCaption" as const;
-  }
 }
 
 interface ControlPresenceSliderProps {
@@ -180,7 +163,12 @@ function ControlPresenceSlider({
           : disabledOffset + 1;
   const shownNotch = draftNotch ?? notch;
   const caption = t(
-    presenceCaptionKey(control.canSetPriority, control.canDisable, shownNotch),
+    presenceCaptionKey({
+      key: control.key,
+      canSetPriority: control.canSetPriority,
+      canDisable: control.canDisable,
+      notch: shownNotch,
+    }),
   );
   const inputId = presenceSliderId(control.key);
   const captionId = `${inputId}-caption`;
@@ -621,6 +609,8 @@ export function ToolbarSettings() {
         <SettingsItem
           label={t("audioMemoDefaultAction")}
           description={t("audioMemoDefaultActionDescription")}
+          scope="local"
+          valueText={t(ATTACHMENT_ACTION_LABEL_KEYS[attachmentAction])}
         >
           <select
             className="settings-select"
@@ -639,6 +629,12 @@ export function ToolbarSettings() {
         <SettingsItem
           label={t("appearanceToolbarDefaultActionTitle")}
           description={t("appearanceToolbarDefaultActionDescription")}
+          scope="server"
+          valueText={t(
+            busyComposerDefaultAction === "queue"
+              ? "appearanceToolbarDefaultActionQueue"
+              : "appearanceToolbarDefaultActionSteer",
+          )}
         >
           <select
             className="settings-select"
@@ -666,6 +662,8 @@ export function ToolbarSettings() {
         <SettingsItem
           label={t("appearanceToolbarCollapsedButtonTitle")}
           description={t("appearanceToolbarCollapsedButtonDescription")}
+          scope="server"
+          valueText={t(COLLAPSED_BUTTON_LABEL_KEYS[collapsedComposerButton])}
         >
           <select
             className="settings-select"
@@ -699,6 +697,8 @@ export function ToolbarSettings() {
           description={t(
             "appearanceToolbarConversationViewTurnLimitDescription",
           )}
+          scope="local"
+          valueText={String(conversationViewTurnLimit)}
           className="settings-item--wide-control"
         >
           <CommittedRangeNumberInput
@@ -732,6 +732,8 @@ export function ToolbarSettings() {
             "hide",
             "overflow",
           ]}
+          scope="local"
+          valueText={String(questionReminderTurns)}
           className="settings-item--wide-control"
         >
           <CommittedRangeNumberInput
@@ -760,12 +762,19 @@ export function ToolbarSettings() {
           layout="custom"
           className={toolbarSettingsStyles.settings}
         >
+          <SessionPlacementSummary
+            controls={toolbarControls}
+            presence={toolbarPresence}
+          />
+          <p className={toolbarSettingsStyles.previewCaption}>
+            {t("settingsToolbarPreviewCaption")}
+          </p>
           <SessionToolbarPreview />
 
           <div className="session-toolbar-zone">
             <div className="session-toolbar-zone-heading">
               <strong>{t("appearanceToolbarHiddenHeading")}</strong>
-              <span>{t("appearanceToolbarHiddenDescription")}</span>
+              <span>{t("settingsToolbarHiddenDescription")}</span>
             </div>
             <div className={toolbarSettingsStyles.sideGroups}>
               {renderSideGroup(
@@ -786,7 +795,7 @@ export function ToolbarSettings() {
           <div className="session-toolbar-zone">
             <div className="session-toolbar-zone-heading">
               <strong>{t("appearanceToolbarShownHeading")}</strong>
-              <span>{t("appearanceToolbarShownDescription")}</span>
+              <span>{t("settingsToolbarShownDescription")}</span>
             </div>
             <div className={toolbarSettingsStyles.sideGroups}>
               {renderSideGroup(

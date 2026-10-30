@@ -15,6 +15,7 @@ import { useEffect, useState } from "react";
 import type { PublicShareStatusResponse } from "../../api/client";
 import { PublicShareManagerModal } from "../../components/PublicShareManagerModal";
 import { RemoteAccessSetup } from "../../components/RemoteAccessSetup";
+import { ScopeTag } from "../../components/garden/ScopeTag";
 import { useHostIdentity } from "../../contexts/HostIdentityContext";
 import { useOptionalRemoteConnection } from "../../contexts/RemoteConnectionContext";
 import { usePublicShareStatus } from "../../hooks/usePublicShareStatus";
@@ -45,6 +46,18 @@ const HOST_IDENTITY_PRESETS = [
   "⭐",
   "🔵",
 ] as const;
+
+/** Custom-info row title with the server scope tag SettingsItem would draw. */
+function ServerInfoTitle({ children }: { children: string }) {
+  return (
+    <strong>
+      <span>{children}</span>
+      <span aria-hidden="true" className={styles.scopeTag}>
+        <ScopeTag scope="server" />
+      </span>
+    </strong>
+  );
+}
 
 interface HostIdentitySettingsProps {
   currentIcon: string;
@@ -81,6 +94,7 @@ function HostIdentitySettings({
     <SettingsItem
       label={t("hostIdentityTitle")}
       description={t("hostIdentityDescription")}
+      valueText={currentIcon}
       className="settings-item--wide-control host-identity-settings"
     >
       <div className="host-identity-controls">
@@ -239,9 +253,10 @@ function HostAwakeSettings({
       <SettingsItem
         label={t("hostAwakeTitle")}
         description={t("hostAwakeDescription")}
+        valueText={statusText}
         info={
           <>
-            <strong>{t("hostAwakeTitle")}</strong>
+            <ServerInfoTitle>{t("hostAwakeTitle")}</ServerInfoTitle>
             <p>{t("hostAwakeDescription")}</p>
             <p
               className={
@@ -302,6 +317,7 @@ function HostAwakeSettings({
           <SettingsItem
             label={t("hostAwakeBatteryFloorTitle")}
             description={t("hostAwakeBatteryFloorDescription")}
+            valueText={`${batteryFloorPercent}%`}
             className="settings-item--wide-control"
           >
             <form
@@ -485,9 +501,10 @@ export function RemoteAccessSettings() {
       <SettingsItem
         label={t("advancedPublicShareTitle")}
         description={t("advancedPublicShareDescription")}
+        valueText={publicSharesEnabled ? t("commonOn") : t("commonOff")}
         info={
           <>
-            <strong>{t("advancedPublicShareTitle")}</strong>
+            <ServerInfoTitle>{t("advancedPublicShareTitle")}</ServerInfoTitle>
             <p>{t("advancedPublicShareDescription")}</p>
             <p>{t("advancedPublicSharePrivacyWarning")}</p>
             <p>{t("advancedPublicShareExistingManagement")}</p>
@@ -585,9 +602,16 @@ export function RemoteAccessSettings() {
         <SettingsItem
           label={t("developmentPersistRemoteTitle")}
           description={`${t("developmentPersistRemoteDescriptionPrefix")} remote-sessions.json ${t("developmentPersistRemoteDescriptionSuffix")}`}
+          valueText={
+            settings?.persistRemoteSessionsToDisk
+              ? t("commonOn")
+              : t("commonOff")
+          }
           info={
             <>
-              <strong>{t("developmentPersistRemoteTitle")}</strong>
+              <ServerInfoTitle>
+                {t("developmentPersistRemoteTitle")}
+              </ServerInfoTitle>
               <p>
                 {t("developmentPersistRemoteDescriptionPrefix")}{" "}
                 <code>remote-sessions.json</code>{" "}
@@ -629,63 +653,69 @@ export function RemoteAccessSettings() {
       t("remoteAccessDefaultHost");
 
     return (
-      <SettingsSection description={t("remoteAccessConnectedDescription")}>
-        <AppsSettingsLink />
-        {hostAwakeConfig}
-        {publicShareConfig}
-        {vibeAllDayClientInfo}
-        <div className="settings-group">
-          <SettingsItem
-            label={t("remoteAccessCurrentHostTitle")}
-            description={displayName}
-          >
-            <div className="settings-item-actions">
+      <SettingsSection
+        description={t("remoteAccessConnectedDescription")}
+        scope="server"
+      >
+        <SettingsSection title={t("remoteAccessConnectionSection")}>
+          <div className="settings-group">
+            <SettingsItem
+              label={t("remoteAccessCurrentHostTitle")}
+              description={displayName}
+              valueText={displayName}
+              scope="local"
+            >
+              <div className="settings-item-actions">
+                <button
+                  type="button"
+                  className="settings-button"
+                  onClick={handleSwitchHost}
+                >
+                  {t("sidebarSwitchHost")}
+                </button>
+              </div>
+            </SettingsItem>
+            {hostIdentityItem}
+            {currentHost?.relayUrl && (
+              <SettingsItem
+                label={t("remoteAccessRelayUrlTitle")}
+                description={currentHost.relayUrl}
+                valueText={currentHost.relayUrl}
+                scope="local"
+              />
+            )}
+            <SettingsItem
+              label={t("remoteAccessLogoutTitle")}
+              description={t("remoteAccessLogoutDescription")}
+              scope={null}
+            >
               <button
                 type="button"
-                className="settings-button"
-                onClick={handleSwitchHost}
+                className="settings-button settings-button-danger-subtle"
+                onClick={() => remoteConnection.disconnect()}
               >
-                {t("sidebarSwitchHost")}
+                {t("remoteAccessLogout")}
               </button>
-            </div>
-          </SettingsItem>
-          {hostIdentityItem}
-          {currentHost?.relayUrl && (
-            <SettingsItem
-              label={t("remoteAccessRelayUrlTitle")}
-              description={currentHost.relayUrl}
-            />
-          )}
-          <SettingsItem
-            label={t("remoteAccessLogoutTitle")}
-            description={t("remoteAccessLogoutDescription")}
-          >
-            <button
-              type="button"
-              className="settings-button settings-button-danger"
-              onClick={() => remoteConnection.disconnect()}
-            >
-              {t("remoteAccessLogout")}
-            </button>
-          </SettingsItem>
-        </div>
+            </SettingsItem>
+          </div>
+        </SettingsSection>
         {persistSessionsToggle}
+        <SettingsSection title={t("remoteAccessHostSection")}>
+          {hostAwakeConfig}
+          {publicShareConfig}
+          {vibeAllDayClientInfo}
+        </SettingsSection>
+        <AppsSettingsLink />
       </SettingsSection>
     );
   }
 
   // Server-side: show relay configuration
   return (
-    <SettingsSection>
-      <AppsSettingsLink />
-      {hostIdentityItem && (
-        <div className="settings-group">{hostIdentityItem}</div>
-      )}
-      {hostAwakeConfig}
-      {publicShareConfig}
+    <SettingsSection scope="server">
       <HideInSettingsSearch>
-        {/* Same card frame as the settings groups above it. */}
-        <div className={`settings-group ${styles.setupCard}`}>
+        {/* Relay connection card, its config card and signed-in browsers. */}
+        <div className={styles.setupBlock}>
           <RemoteAccessSetup
             title={t("remoteAccessConnectedTitle")}
             description={t("remoteAccessSetupDescription")}
@@ -694,6 +724,14 @@ export function RemoteAccessSettings() {
         </div>
       </HideInSettingsSearch>
       {persistSessionsToggle}
+      <SettingsSection title={t("remoteAccessHostSection")}>
+        {hostIdentityItem && (
+          <div className="settings-group">{hostIdentityItem}</div>
+        )}
+        {hostAwakeConfig}
+        {publicShareConfig}
+      </SettingsSection>
+      <AppsSettingsLink />
     </SettingsSection>
   );
 }

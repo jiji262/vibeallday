@@ -49,6 +49,16 @@ export const CATEGORY_COMPONENTS: Record<string, React.ComponentType> = {
       default: m.AgentContextSettings,
     })),
   ),
+  "agent-behavior": lazy(() =>
+    import("./AgentBehaviorSettings").then((m) => ({
+      default: m.AgentBehaviorSettings,
+    })),
+  ),
+  "import-export": lazy(() =>
+    import("./ImportExportSettings").then((m) => ({
+      default: m.ImportExportSettings,
+    })),
+  ),
   notifications: lazy(() =>
     import("./NotificationsSettings").then((m) => ({
       default: m.NotificationsSettings,

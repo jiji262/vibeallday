@@ -6,6 +6,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { ScopeTag, type SettingScope } from "../../components/garden/ScopeTag";
 import { useI18n } from "../../i18n";
 import {
   renderSettingsSearchHighlight,
@@ -14,6 +15,7 @@ import {
   useSettingsSearchScope,
 } from "./SettingsSearchContext";
 import styles from "./SettingsItem.module.css";
+import { useSettingsDefaultScope } from "./SettingsSection";
 import { settingsItemSlug, settingsTextMatches } from "./settingsSearchMatch";
 
 export interface SettingsItemProps {
@@ -41,9 +43,15 @@ export interface SettingsItemProps {
   /**
    * Current value as display text (e.g. the selected option's label).
    * Matched only when the user enables the search "match values" toggle;
-   * never rendered by this component.
+   * shown as a value chip on the row in search results only.
    */
   valueText?: string;
+  /**
+   * Where the value is stored: this browser (`local`) or the server
+   * (`server`), drawn as a tag after the title. Defaults to the enclosing
+   * SettingsSection's `scope`; `null` opts this row out.
+   */
+  scope?: SettingScope | null;
   /** Extra classes appended to `settings-item` (e.g. width modifiers). */
   className?: string;
   /**
@@ -106,6 +114,7 @@ export function SettingsItem({
   descriptionLayout = "default",
   keywords,
   valueText,
+  scope: scopeProp,
   className,
   baseClassName = "settings-item",
   layout = "standard",
@@ -117,6 +126,8 @@ export function SettingsItem({
 }: SettingsItemProps) {
   const { t } = useI18n();
   const scope = useSettingsSearchScope();
+  const defaultScope = useSettingsDefaultScope();
+  const storageScope = scopeProp === undefined ? defaultScope : scopeProp;
   const jump = useSettingsJumpTarget();
   const resolvedId = id ?? settingsItemSlug(label);
   const ref = useRef<HTMLElement | null>(null);
@@ -157,18 +168,37 @@ export function SettingsItem({
     : false;
   if (scope && !matched) return null;
 
+  // The tag stays out of the row's accessible name (label rows name their
+  // control), so existing names and text queries keep matching the title.
+  const withScopeTag = (title: ReactNode) =>
+    storageScope ? (
+      <>
+        <span>{title}</span>
+        <span aria-hidden="true" className={styles.scopeTag}>
+          <ScopeTag scope={storageScope} />
+        </span>
+      </>
+    ) : (
+      title
+    );
+  const valueChip =
+    scope && valueText ? (
+      <span className={styles.valueChip}>{valueText}</span>
+    ) : null;
   const infoBody =
     info ??
     (scope ? (
       <>
-        <strong>{renderSettingsSearchHighlight(label, scope.query)}</strong>
+        <strong>
+          {withScopeTag(renderSettingsSearchHighlight(label, scope.query))}
+        </strong>
         {description && (
           <p>{renderSettingsSearchHighlight(description, scope.query)}</p>
         )}
       </>
     ) : (
       <>
-        <strong>{label}</strong>
+        <strong>{withScopeTag(label)}</strong>
         {description && <p>{description}</p>}
       </>
     ));
@@ -246,6 +276,7 @@ export function SettingsItem({
           <>
             <div className="settings-item-info">
               {infoBody}
+              {valueChip}
               {RowElement !== "label" && origin}
             </div>
             {children}

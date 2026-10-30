@@ -351,6 +351,38 @@ describe("SpeechSettings", () => {
     );
   });
 
+  it("picks a backend from the category cards and marks the one in use", () => {
+    versionState.voiceBackendStatuses = [
+      {
+        id: "vibeallday-grok",
+        label: "Grok",
+        enabled: true,
+        validationStatus: "enabled",
+      },
+      {
+        id: "vibeallday-nemo",
+        label: "NeMo",
+        enabled: false,
+        validationStatus: "pending",
+      },
+    ];
+    render(<SpeechSettings />);
+
+    const local = screen.getByRole("button", { name: "speechCardLocalTitle" });
+    const cloud = screen.getByRole("button", { name: "speechCardCloudTitle" });
+    expect(local.getAttribute("aria-pressed")).toBe("false");
+    expect(cloud.getAttribute("aria-pressed")).toBe("false");
+    expect(cloud.textContent).toContain("speechCardStatusAvailable");
+    expect(local.textContent).toContain("speechCardStatusValidating");
+    expect((local as HTMLButtonElement).disabled).toBe(true);
+
+    // The card takes the first available cloud method in product order.
+    fireEvent.click(cloud);
+    expect(modelSettings.setSpeechMethod).toHaveBeenCalledWith(
+      "xai-grok-direct-streaming",
+    );
+  });
+
   it("shows a validating backend immediately but does not allow selection", () => {
     versionState.voiceBackends = ["vibeallday-grok"];
     versionState.voiceBackendStatuses = [

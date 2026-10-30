@@ -326,6 +326,7 @@ function ProviderEditor({
       {id && id !== "default" && status.secretConfigured && (
         <button
           type="button"
+          className={styles.dangerButton}
           disabled={busy}
           onClick={async () => {
             setBusy(true);

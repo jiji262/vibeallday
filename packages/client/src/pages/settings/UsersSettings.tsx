@@ -38,6 +38,12 @@ import {
   PerUserInstructions,
 } from "./LimitedUserInstructions";
 import { LimitedUserBrowserDefaults } from "./LimitedUserBrowserDefaults";
+import {
+  LimitedUserList,
+  LimitedUserVisibleCategories,
+  useLimitedUserVisibleCategories,
+} from "./LimitedUserDirectory";
+import { Notice } from "../../components/garden/Notice";
 
 /**
  * Settings → Users: the superuser's user-management surface.
@@ -215,6 +221,7 @@ export function UsersSettings() {
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [usage, setUsage] = useState<UsageReport | null>(null);
+  const visibleCategories = useLimitedUserVisibleCategories();
 
   // Acting as a limited user, every /api/users call but /me and /logout is
   // refused, which is the point: they manage nobody.
@@ -344,136 +351,135 @@ export function UsersSettings() {
         supportsInstructions ? undefined : t("settingsUsersDescription")
       }
       keywords={["limited users", "accounts", "guest", "sandbox", "grants"]}
+      scope="server"
     >
       {/* First, because it is the decision the rest of the pane depends on.
           Turning it off keeps the records and refuses their logins. */}
       {selection === null && (
-        <details
-          className={styles.account}
-          open={!supportsInstructions || !enabled}
-        >
-          <summary>{t("usersAccessSettings")}</summary>
-          <SettingsItem
-            label={t("advancedLimitedUsersTitle")}
-            description={t("advancedLimitedUsersDescription")}
-            keywords={["limited users", "accounts", "enable", "disable"]}
+        <div className={`settings-group ${styles.trustCard}`}>
+          <details
+            className={styles.account}
+            open={!supportsInstructions || !enabled}
           >
-            <label className="toggle-switch">
-              <input
-                type="checkbox"
-                checked={enabled}
-                disabled={settingsLoading || busy}
-                onChange={(event) =>
-                  void updateSetting(
-                    "limitedUsersEnabled",
-                    event.target.checked,
-                  )
-                }
-              />
-              <span className="toggle-slider" />
-            </label>
-          </SettingsItem>
-          <p className="settings-hint">{t("usersTrustWarning")}</p>
-        </details>
-      )}
-
-      <div className="settings-group">
-        {loaded && users.length === 0 && (
-          <p className="settings-hint">{t("usersEmpty")}</p>
-        )}
-        <div
-          className={styles.userBar}
-          role="group"
-          aria-label={t("usersListLabel")}
-        >
-          {users.map((user) => {
-            const selected =
-              selection?.kind === "edit" &&
-              selection.username === user.username;
-            return (
-              <button
-                key={user.username}
-                type="button"
-                className={`settings-button ${styles.userChip} ${user.disabled ? styles.userChipDisabled : ""}`}
-                aria-pressed={selected}
-                title={user.disabled ? t("usersDisabledTitle") : undefined}
-                onClick={() =>
-                  setSelection(
-                    selected ? null : { kind: "edit", username: user.username },
-                  )
-                }
-              >
-                {user.username}
-              </button>
-            );
-          })}
-          <button
-            type="button"
-            className={`settings-button ${styles.userChip}`}
-            aria-pressed={selection?.kind === "create"}
-            disabled={busy}
-            onClick={() =>
-              setSelection(
-                selection?.kind === "create" ? null : { kind: "create" },
-              )
-            }
-          >
-            + {t("usersAddUser")}
-          </button>
+            <summary>{t("usersAccessSettings")}</summary>
+            <SettingsItem
+              label={t("advancedLimitedUsersTitle")}
+              description={t("advancedLimitedUsersDescription")}
+              keywords={["limited users", "accounts", "enable", "disable"]}
+              valueText={enabled ? t("commonOn") : t("commonOff")}
+            >
+              <label className="toggle-switch">
+                <input
+                  type="checkbox"
+                  checked={enabled}
+                  disabled={settingsLoading || busy}
+                  onChange={(event) =>
+                    void updateSetting(
+                      "limitedUsersEnabled",
+                      event.target.checked,
+                    )
+                  }
+                />
+                <span className="toggle-slider" />
+              </label>
+            </SettingsItem>
+            <div className={styles.trustNotice}>
+              <Notice tone="warning">{t("usersTrustWarning")}</Notice>
+            </div>
+          </details>
         </div>
-      </div>
-
-      {selection?.kind === "create" && (
-        <CreateUserForm
-          busy={busy}
-          error={error}
-          onCreate={(username, password) => void create(username, password)}
-          onCancel={() => {
-            setSelection(null);
-            setError(null);
-          }}
-        />
       )}
 
-      {editing && (
-        <UserEditor
-          key={editing.username}
-          user={editing}
-          users={users}
-          support={support}
-          sharedInstructions={settings?.limitedUserInstructions}
-          busy={busy}
-          onSaved={(saved) =>
-            setUsers((current) =>
-              current.map((user) =>
-                user.username === saved.username ? saved : user,
-              ),
-            )
-          }
-          onActAs={() => void switchTo(editing.username)}
-          onDelete={() => void remove(editing.username)}
-        />
-      )}
-
-      {supportsInstructions &&
-        selection === null &&
-        !settingsLoading &&
-        settings && (
-          <div className="settings-group">
-            <SharedLimitedUserInstructions
-              value={settings.limitedUserInstructions}
-              onSave={(limitedUserInstructions) =>
-                updateSettings({ limitedUserInstructions })
+      <div className={styles.directoryHost}>
+        <div className={styles.directory}>
+          <div className={styles.directoryList}>
+            {loaded && users.length === 0 && (
+              <p className="settings-hint">{t("usersEmpty")}</p>
+            )}
+            {loaded && users.length > 0 && (
+              <p className={styles.listCount}>
+                {t("usersListCount", { count: users.length })}
+              </p>
+            )}
+            <LimitedUserList
+              users={users}
+              selected={selection?.kind === "edit" ? selection.username : null}
+              creating={selection?.kind === "create"}
+              busy={busy}
+              visibleCategoryCount={visibleCategories.length}
+              onToggleUser={(username) =>
+                setSelection(
+                  selection?.kind === "edit" && selection.username === username
+                    ? null
+                    : { kind: "edit", username },
+                )
+              }
+              onToggleCreate={() =>
+                setSelection(
+                  selection?.kind === "create" ? null : { kind: "create" },
+                )
               }
             />
+            <LimitedUserVisibleCategories categories={visibleCategories} />
           </div>
-        )}
 
-      {supportsBrowserDefaults && selection === null && (
-        <div className="settings-group">
-          <LimitedUserBrowserDefaults />
+          <div className={styles.directoryDetail}>
+            {selection?.kind === "create" && (
+              <CreateUserForm
+                busy={busy}
+                error={error}
+                onCreate={(username, password) =>
+                  void create(username, password)
+                }
+                onCancel={() => {
+                  setSelection(null);
+                  setError(null);
+                }}
+              />
+            )}
+
+            {editing && (
+              <UserEditor
+                key={editing.username}
+                user={editing}
+                users={users}
+                support={support}
+                sharedInstructions={settings?.limitedUserInstructions}
+                busy={busy}
+                onSaved={(saved) =>
+                  setUsers((current) =>
+                    current.map((user) =>
+                      user.username === saved.username ? saved : user,
+                    ),
+                  )
+                }
+                onActAs={() => void switchTo(editing.username)}
+                onDelete={() => void remove(editing.username)}
+              />
+            )}
+
+            {supportsInstructions &&
+              selection === null &&
+              !settingsLoading &&
+              settings && (
+                <div className={`settings-group ${styles.cardBody}`}>
+                  <SharedLimitedUserInstructions
+                    value={settings.limitedUserInstructions}
+                    onSave={(limitedUserInstructions) =>
+                      updateSettings({ limitedUserInstructions })
+                    }
+                  />
+                </div>
+              )}
+
+            {supportsBrowserDefaults && selection === null && (
+              <div className={`settings-group ${styles.cardBody}`}>
+                <LimitedUserBrowserDefaults />
+              </div>
+            )}
+          </div>
         </div>
-      )}
+      </div>
 
       {error && selection?.kind !== "create" && (
         <p className="form-error">{error}</p>
@@ -506,7 +512,7 @@ function LimitedUserView({
       title={t("settingsUsersTitle")}
       description={t("usersOwnAccountDescription")}
     >
-      <div className="settings-group">
+      <div className={`settings-group ${styles.cardBody}`}>
         <dl className={styles.grants}>
           <dt>{t("usersSignedInAs")}</dt>
           <dd>{principal.username}</dd>

@@ -18,8 +18,6 @@ import {
   isSettingsPathname,
   isTabBarRootPathname,
 } from "../components/sidebar/shellRoutes";
-import { ChevronLeftIcon } from "../components/garden/icons";
-import { useRemoteBasePath } from "../hooks/useRemoteBasePath";
 import { GlossaryProjectProvider } from "../contexts/GlossaryContext";
 import { hasCoarsePointer } from "../lib/deviceDetection";
 import { MOBILE_KEYBOARD_OPEN_VIEWPORT_RATIO } from "../lib/mobileKeyboardViewport";
@@ -60,7 +58,6 @@ export interface NavigationLayoutContext {
 }
 
 const NOOP = () => {};
-const BACK_ICON_SIZE = 18;
 const TAB_BAR_MEDIA_QUERY = "(width < 768px), (pointer: coarse)";
 const NON_TEXT_INPUT_TYPES = new Set([
   "button",
@@ -462,7 +459,6 @@ function NavigationLayoutFrame({ sessionElement }: NavigationLayoutProps) {
               >
                 {/* Desktop sidebar - always visible on wide screens; the minimized mode
           renders the floating restore toggle in its place */}
-                {settingsReplacesSidebar && <BackToAppLink />}
                 {isWideScreen &&
                   !isContentFrameRoute &&
                   !settingsReplacesSidebar &&
@@ -551,22 +547,6 @@ function NavigationLayoutFrame({ sessionElement }: NavigationLayoutProps) {
         </SidebarSessionFeedsProvider>
       )}
     </SessionDomLingerHost>
-  );
-}
-
-/** Settings hide the app sidebar on desktop; this floating link leaves them. */
-function BackToAppLink() {
-  const { t } = useI18n();
-  const basePath = useRemoteBasePath();
-  return (
-    <Link
-      to={`${basePath}/inbox`}
-      className="sidebar-toggle sidebar-floating-restore"
-      title={t("shellNavBackToApp")}
-      aria-label={t("shellNavBackToApp")}
-    >
-      <ChevronLeftIcon size={BACK_ICON_SIZE} />
-    </Link>
   );
 }
 

@@ -12,6 +12,11 @@ import { generateUUID } from "../../lib/uuid";
 import { SettingsSection } from "./SettingsSection";
 import { useSettingsPaneTitle } from "./SettingsPaneTitleContext";
 import styles from "./ProjectTemplatesSettings.module.css";
+import {
+  DiscoveredTemplates,
+  TemplatesFetchStatus,
+} from "./ProjectTemplatesSettings.discovered";
+import { ScopeTag } from "../../components/garden/ScopeTag";
 
 function editConfig(config: ProjectTemplateSourcesConfig) {
   return {
@@ -196,6 +201,7 @@ export function ProjectTemplatesSettings() {
     <SettingsSection
       title={t("settingsProjectTemplatesTitle")}
       description={t("settingsProjectTemplatesDescription")}
+      scope="server"
     >
       <form
         className={styles.form}
@@ -204,134 +210,20 @@ export function ProjectTemplatesSettings() {
           void save();
         }}
       >
-        <label className={styles.enabled}>
-          <input
-            type="checkbox"
-            disabled={!state}
-            checked={draft.enabled}
-            onChange={(event) =>
-              setDraft({ ...draft, enabled: event.target.checked })
-            }
-          />
-          {t("templatesEnable")}
-        </label>
-        <p>{t("templatesLayerHelp")}</p>
-        {draft.sources.map((source, index) => (
-          <fieldset className={styles.source} key={source.id} disabled={!state}>
-            <legend>
-              {source.location
-                ? source.location.replace("https://github.com/", "")
-                : t("templatesNewSource")}
-            </legend>
-            {(isLocalLocation(source.location)
-              ? (["location"] as const)
-              : (["location", "revision"] as const)
-            ).map((field) => (
-              <label className={styles.field} key={field}>
-                {t(
-                  field === "location"
-                    ? "templatesRepository"
-                    : "templatesRevision",
-                )}
-                <input
-                  className="settings-input"
-                  value={source[field]}
-                  onBlur={
-                    field === "location"
-                      ? () =>
-                          setDraft((previous) => ({
-                            ...previous,
-                            sources: previous.sources.map((entry) =>
-                              entry.id === source.id && locationEdited(entry)
-                                ? splitGitHubRefUrl(entry)
-                                : entry,
-                            ),
-                          }))
-                      : undefined
-                  }
-                  onChange={(event) =>
-                    setDraft((previous) => ({
-                      ...previous,
-                      sources: previous.sources.map((entry) =>
-                        entry.id === source.id
-                          ? { ...entry, [field]: event.target.value }
-                          : entry,
-                      ),
-                    }))
-                  }
-                />
-              </label>
-            ))}
-            <div className={styles.actions}>
-              <button
-                className="settings-button"
-                type="button"
-                disabled={index === 0 || busy}
-                onClick={() =>
-                  setDraft((previous) => {
-                    const sources = [...previous.sources];
-                    const earlier = sources[index - 1];
-                    if (!earlier) return previous;
-                    sources[index - 1] = source;
-                    sources[index] = earlier;
-                    return { ...previous, sources };
-                  })
-                }
-              >
-                {t("templatesMoveUp")}
-              </button>
-              <button
-                className="settings-button"
-                type="button"
-                disabled={draft.sources.length === 1 || busy}
-                onClick={() =>
-                  setDraft((previous) => ({
-                    ...previous,
-                    sources: previous.sources.filter(
-                      (entry) => entry.id !== source.id,
-                    ),
-                  }))
-                }
-              >
-                {t("templatesRemoveSource")}
-              </button>
-              {draft.enabled && !isLocalLocation(source.location) && (
-                <button
-                  className="settings-button"
-                  type="button"
-                  disabled={busy || !state}
-                  onClick={() => void save(source.id)}
-                >
-                  {t("templatesUpdateHead")}
-                </button>
-              )}
-            </div>
-          </fieldset>
-        ))}
-        <button
-          className="settings-button"
-          type="button"
-          disabled={!state || busy || draft.sources.length >= 20}
-          onClick={() =>
-            setDraft((previous) => ({
-              ...previous,
-              sources: [
-                ...previous.sources,
-                {
-                  ...DEFAULT_PROJECT_TEMPLATE_SOURCE,
-                  id: `source-${generateUUID()}`,
-                  repository: "",
-                  contentPath: "",
-                  location: "",
-                },
-              ],
-            }))
-          }
-        >
-          {t("templatesAddSource")}
-        </button>
-        <p>{t("templatesFetchHelp")}</p>
-        <div className={styles.actions}>
+        <div className={`settings-group ${styles.headerCard}`}>
+          <label className={styles.enabled}>
+            <input
+              type="checkbox"
+              disabled={!state}
+              checked={draft.enabled}
+              onChange={(event) =>
+                setDraft({ ...draft, enabled: event.target.checked })
+              }
+            />
+            {t("templatesEnable")}
+          </label>
+          <ScopeTag scope="server" />
+          <TemplatesFetchStatus state={state} />
           <button
             className="settings-button settings-button-primary"
             type="submit"
@@ -340,58 +232,143 @@ export function ProjectTemplatesSettings() {
             {draft.enabled ? t("templatesFetch") : t("templatesSave")}
           </button>
         </div>
-      </form>
-      <div className={styles.status} role="status">
-        {state?.phase === "fetching" && t("templatesFetching")}
-        {state?.phase === "disabled" && t("templatesDisabled")}
-        {state?.phase === "ready" && (
-          <p>
-            {state.result === "up-to-date"
-              ? t("templatesUpToDate")
-              : t("templatesFetched")}
-          </p>
-        )}
-        {state?.snapshot && (
-          <>
-            {state.snapshot.sources.map((source) => (
-              <div key={source.id}>
-                <p>
-                  {source.repository.replace("https://github.com/", "")}
-                  {source.commit && (
-                    <>
-                      {" — "}
+        <div className={styles.split}>
+          <section className={styles.sourcesColumn}>
+            <h3 className={styles.sectionTitle}>
+              {t("templatesSectionSources")}
+            </h3>
+            <p className={styles.help}>{t("templatesLayerHelp")}</p>
+            <div className={`settings-group ${styles.sources}`}>
+              {draft.sources.map((source, index) => (
+                <fieldset
+                  className={styles.source}
+                  key={source.id}
+                  disabled={!state}
+                >
+                  <legend>
+                    <span className={styles.sourceNumber}>
+                      {t("templatesSourceNumber", { number: index + 1 })}
+                    </span>
+                    <span className={styles.sourceName}>
+                      {source.location
+                        ? source.location.replace("https://github.com/", "")
+                        : t("templatesNewSource")}
+                    </span>
+                  </legend>
+                  {(isLocalLocation(source.location)
+                    ? (["location"] as const)
+                    : (["location", "revision"] as const)
+                  ).map((field) => (
+                    <label className={styles.field} key={field}>
                       {t(
-                        source.local ? "templatesLocalHead" : "templatesCommit",
-                      )}{" "}
-                      <code>{source.commit}</code>
-                    </>
-                  )}
-                </p>
-                <p>
-                  {source.local
-                    ? t("templatesLocalDirect")
-                    : t("templatesRewritten", { count: source.rewrittenFiles })}
-                </p>
-              </div>
-            ))}
-            <ul>
-              {state.snapshot.templates.map((template) => (
-                <li key={template.id}>
-                  <strong>{template.title}</strong> —{" "}
-                  {state.snapshot?.sources
-                    .find((source) => source.id === template.sourceId)
-                    ?.repository.replace("https://github.com/", "")}{" "}
-                  — {template.description} (
-                  {template.status === "draft"
-                    ? t("templatesDraft")
-                    : t("templatesReady")}
-                  )
-                </li>
+                        field === "location"
+                          ? "templatesRepository"
+                          : "templatesRevision",
+                      )}
+                      <input
+                        className="settings-input"
+                        value={source[field]}
+                        onBlur={
+                          field === "location"
+                            ? () =>
+                                setDraft((previous) => ({
+                                  ...previous,
+                                  sources: previous.sources.map((entry) =>
+                                    entry.id === source.id &&
+                                    locationEdited(entry)
+                                      ? splitGitHubRefUrl(entry)
+                                      : entry,
+                                  ),
+                                }))
+                            : undefined
+                        }
+                        onChange={(event) =>
+                          setDraft((previous) => ({
+                            ...previous,
+                            sources: previous.sources.map((entry) =>
+                              entry.id === source.id
+                                ? { ...entry, [field]: event.target.value }
+                                : entry,
+                            ),
+                          }))
+                        }
+                      />
+                    </label>
+                  ))}
+                  <div className={styles.actions}>
+                    <button
+                      className="settings-button"
+                      type="button"
+                      disabled={index === 0 || busy}
+                      onClick={() =>
+                        setDraft((previous) => {
+                          const sources = [...previous.sources];
+                          const earlier = sources[index - 1];
+                          if (!earlier) return previous;
+                          sources[index - 1] = source;
+                          sources[index] = earlier;
+                          return { ...previous, sources };
+                        })
+                      }
+                    >
+                      {t("templatesMoveUp")}
+                    </button>
+                    <button
+                      className="settings-button"
+                      type="button"
+                      disabled={draft.sources.length === 1 || busy}
+                      onClick={() =>
+                        setDraft((previous) => ({
+                          ...previous,
+                          sources: previous.sources.filter(
+                            (entry) => entry.id !== source.id,
+                          ),
+                        }))
+                      }
+                    >
+                      {t("templatesRemoveSource")}
+                    </button>
+                    {draft.enabled && !isLocalLocation(source.location) && (
+                      <button
+                        className="settings-button"
+                        type="button"
+                        disabled={busy || !state}
+                        onClick={() => void save(source.id)}
+                      >
+                        {t("templatesUpdateHead")}
+                      </button>
+                    )}
+                  </div>
+                </fieldset>
               ))}
-            </ul>
-          </>
-        )}
-      </div>
+            </div>
+            <button
+              className="settings-button"
+              type="button"
+              disabled={!state || busy || draft.sources.length >= 20}
+              onClick={() =>
+                setDraft((previous) => ({
+                  ...previous,
+                  sources: [
+                    ...previous.sources,
+                    {
+                      ...DEFAULT_PROJECT_TEMPLATE_SOURCE,
+                      id: `source-${generateUUID()}`,
+                      repository: "",
+                      contentPath: "",
+                      location: "",
+                    },
+                  ],
+                }))
+              }
+            >
+              {t("templatesAddSource")}
+            </button>
+            <p className={styles.help}>{t("templatesFetchHelp")}</p>
+          </section>
+          <DiscoveredTemplates state={state} />
+        </div>
+      </form>
       {(error || state?.error) && <p role="alert">{error || state?.error}</p>}
     </SettingsSection>
   );

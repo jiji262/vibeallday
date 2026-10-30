@@ -478,7 +478,7 @@ describe("NavigationLayout", () => {
     }
   });
 
-  it("replaces the desktop sidebar on Settings with a way back", () => {
+  it("leaves the desktop sidebar's place to the Settings rail", () => {
     Object.defineProperty(window, "innerWidth", {
       configurable: true,
       value: 1400,
@@ -489,9 +489,8 @@ describe("NavigationLayout", () => {
     expect(
       screen.getByTestId("sidebar-session-feeds-provider").dataset.enabled,
     ).toBe("false");
-    expect(
-      screen.getByRole("link", { name: "Back to app" }).getAttribute("href"),
-    ).toBe("/inbox");
+    // The Settings rail carries the way back; the layout adds no floater.
+    expect(document.querySelector(".sidebar-floating-restore")).toBeNull();
   });
 
   it("does not reserve keyboard space for non-text controls", () => {

@@ -2,6 +2,7 @@ import { useCallback, useMemo, useState } from "react";
 import { EmptyState } from "../../components/garden/EmptyState";
 import { LoadingState } from "../../components/garden/LoadingState";
 import { Notice } from "../../components/garden/Notice";
+import { StatusDot } from "../../components/garden/StatusDot";
 import { NativeNotificationStatus } from "../../components/NativeNotificationStatus";
 import { PushNotificationToggle } from "../../components/PushNotificationToggle";
 import { useConnectedDevices } from "../../hooks/useConnectedDevices";
@@ -485,6 +486,7 @@ export function NotificationsSettings() {
             ? t("notificationsThisAppDescription")
             : t("notificationsThisBrowserDescription")
         }
+        scope="local"
       >
         <div className="settings-group">
           {inApp ? <NativeNotificationStatus /> : <PushNotificationToggle />}
@@ -494,6 +496,7 @@ export function NotificationsSettings() {
       <SettingsSection
         title={t("notificationsEventsTitle")}
         description={t("notificationsEventsDescription")}
+        scope="server"
       >
         <HideInSettingsSearch>
           {serverTogglesGated && !devicesLoading && (
@@ -510,6 +513,11 @@ export function NotificationsSettings() {
               title={gatedTooltip}
               label={t(row.titleKey)}
               description={t(row.descriptionKey)}
+              valueText={t(
+                (settings?.[row.key] ?? row.defaultValue)
+                  ? "commonOn"
+                  : "commonOff",
+              )}
             >
               <label className="toggle-switch" title={gatedTooltip}>
                 <input
@@ -539,23 +547,29 @@ export function NotificationsSettings() {
             ) : unifiedDevices.length === 0 ? (
               <EmptyState compact title={t("notificationsNoDevices")} />
             ) : (
-              <div className="device-list">
+              <div className={`device-list ${styles.deviceList}`}>
                 {unifiedDevices.map((device) => (
                   <div
                     key={device.browserProfileId}
-                    className="device-list-item"
+                    className={`device-list-item ${styles.device}`}
                   >
-                    <div className="device-list-info">
-                      <strong>
+                    <StatusDot
+                      state={device.isConnected ? "ok" : "idle"}
+                      className={styles.deviceDot}
+                    />
+                    <div className={`device-list-info ${styles.deviceInfo}`}>
+                      <strong className={styles.deviceName}>
                         {device.displayName}
                         {device.browserType && ` ${device.browserType}`}
                         {device.isCurrentDevice && (
-                          <span className="device-current-badge">
+                          <span
+                            className={`device-current-badge ${styles.currentTag}`}
+                          >
                             {t("notificationsThisDevice")}
                           </span>
                         )}
                       </strong>
-                      <p>
+                      <p className={styles.deviceMeta}>
                         {/* Status indicator */}
                         {device.isConnected ? (
                           <span className="device-status device-status-online">
@@ -588,7 +602,9 @@ export function NotificationsSettings() {
                     </div>
                     {/* Only show remove button for subscribed devices */}
                     {device.isSubscribed && (
-                      <div className="device-list-actions">
+                      <div
+                        className={`device-list-actions ${styles.deviceActions}`}
+                      >
                         <button
                           type="button"
                           className="settings-button"

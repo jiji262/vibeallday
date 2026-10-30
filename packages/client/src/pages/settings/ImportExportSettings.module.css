@@ -1,0 +1,21 @@
+.lede {
+  margin: 0 0 var(--space-5);
+  max-width: 40rem;
+  color: var(--ink-2);
+  font-size: var(--fs-body);
+}
+
+.meta {
+  margin: 0 0 var(--space-3);
+  color: var(--ink-3);
+  font-size: var(--fs-meta);
+}
+
+.tabs {
+  margin-bottom: var(--space-4);
+}
+
+/* The transfer cards keep their own frame; the panel only bounds width. */
+.panel {
+  max-width: 40rem;
+}

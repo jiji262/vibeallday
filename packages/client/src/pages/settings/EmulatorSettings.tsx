@@ -1,14 +1,8 @@
 import { useCallback, useMemo, useState } from "react";
 import { ErrorState } from "../../components/garden/ErrorState";
 import { EmptyState } from "../../components/garden/EmptyState";
-import { LoadingState } from "../../components/garden/LoadingState";
-import {
-  EMULATOR_FPS_OPTIONS,
-  EMULATOR_WIDTH_OPTIONS,
-  type EmulatorQuality,
-  getQualityLabel,
-  useEmulatorSettings,
-} from "../../hooks/useEmulatorSettings";
+import { Notice } from "../../components/garden/Notice";
+import { useEmulatorSettings } from "../../hooks/useEmulatorSettings";
 import { useEmulators } from "../../hooks/useEmulators";
 import { useServerSettings } from "../../hooks/useServerSettings";
 import { useI18n } from "../../i18n";
@@ -17,18 +11,11 @@ import { useSettingsPaneTitle } from "./SettingsPaneTitleContext";
 import { HideInSettingsSearch } from "./SettingsSearchContext";
 import { SettingsSection } from "./SettingsSection";
 import { useSettingsUndoBaseline } from "./SettingsUndoContext";
-
-const QUALITY_OPTIONS: EmulatorQuality[] = ["high", "medium", "low"];
-
-function canStartDevice(type: string, state: string, actions?: string[]) {
-  if (actions?.length) return actions.includes("start");
-  return type === "emulator" && state === "stopped";
-}
-
-function canStopDevice(type: string, state: string, actions?: string[]) {
-  if (actions?.length) return actions.includes("stop");
-  return type === "emulator" && state !== "stopped";
-}
+import {
+  EmulatorDeviceCards,
+  EmulatorStreamQuality,
+} from "./EmulatorSettings.sections";
+import styles from "./EmulatorSettings.module.css";
 
 /**
  * Settings section for the device bridge.
@@ -134,235 +121,134 @@ export function EmulatorSettings() {
   const deviceBridgeEnabled = settings?.deviceBridgeEnabled ?? false;
 
   return (
-    <SettingsSection>
-      <p className="settings-description">{t("emulatorSectionDescription")}</p>
-
-      <div className="settings-group">
-        <SettingsItem
-          label={t("emulatorEnableTitle")}
-          description={t("emulatorEnableDescription")}
+    <>
+      <SettingsSection description={t("emulatorSectionDescription")}>
+        <Notice
+          tone="warning"
+          tag={t("emulatorExperimentalTag")}
+          className={styles.notice}
         >
-          <label className="toggle-switch">
-            <input
-              type="checkbox"
-              checked={deviceBridgeEnabled}
-              onChange={(e) => {
-                void updateSetting("deviceBridgeEnabled", e.target.checked);
-              }}
-              disabled={settingsLoading}
-            />
-            <span className="toggle-slider" />
-          </label>
-        </SettingsItem>
-      </div>
-
-      {!deviceBridgeEnabled ? null : (
-        <>
-          <div className="settings-group">
-            <h3>{t("emulatorStreamQualityTitle")}</h3>
-            <p className="settings-description">
-              {t("emulatorStreamQualityDescription")}
-            </p>
-
-            <SettingsItem
-              label={t("emulatorFrameRateTitle")}
-              description={t("emulatorFrameRateDescription")}
-            >
-              <div className="font-size-selector">
-                {EMULATOR_FPS_OPTIONS.map((fps) => (
-                  <button
-                    key={fps}
-                    type="button"
-                    className={`font-size-option ${maxFps === fps ? "active" : ""}`}
-                    onClick={() => setMaxFps(fps)}
-                  >
-                    {fps} fps
-                  </button>
-                ))}
-              </div>
-            </SettingsItem>
-
-            <SettingsItem
-              label={t("emulatorResolutionTitle")}
-              description={t("emulatorResolutionDescription")}
-            >
-              <div className="font-size-selector">
-                {EMULATOR_WIDTH_OPTIONS.map((w) => (
-                  <button
-                    key={w}
-                    type="button"
-                    className={`font-size-option ${maxWidth === w ? "active" : ""}`}
-                    onClick={() => setMaxWidth(w)}
-                  >
-                    {w}p
-                  </button>
-                ))}
-              </div>
-            </SettingsItem>
-
-            <SettingsItem
-              label={t("emulatorQualityTitle")}
-              description={t("emulatorQualityDescription")}
-              valueText={getQualityLabel(quality)}
-            >
-              <div className="font-size-selector">
-                {QUALITY_OPTIONS.map((q) => (
-                  <button
-                    key={q}
-                    type="button"
-                    className={`font-size-option ${quality === q ? "active" : ""}`}
-                    onClick={() => setQuality(q)}
-                  >
-                    {getQualityLabel(q)}
-                  </button>
-                ))}
-              </div>
-            </SettingsItem>
-
-            <SettingsItem
-              label={t("emulatorAdaptiveFpsTitle")}
-              description={t("emulatorAdaptiveFpsDescription")}
-            >
-              <label className="toggle-switch">
-                <input
-                  type="checkbox"
-                  checked={adaptiveFps}
-                  onChange={(e) => setAdaptiveFps(e.target.checked)}
-                />
-                <span className="toggle-slider" />
-              </label>
-            </SettingsItem>
-          </div>
-
-          <div className="settings-group">
-            <h3>{t("emulatorChromeOsHostsTitle")}</h3>
-            <p className="settings-description">
-              {t("emulatorChromeOsHostsDescription")}
-              <code> chromeroot</code>
-              {t("emulatorChromeOsHostsDescriptionSuffix")}
-            </p>
-
-            <SettingsItem
-              label={t("emulatorAddHostAliasTitle")}
-              description={t("emulatorAddHostAliasDescription")}
-            >
-              <form
-                className="settings-item-actions"
-                onSubmit={(event) => {
-                  event.preventDefault();
-                  void addHost();
+          {t("emulatorExperimentalNotice")}
+        </Notice>
+        <div className="settings-group">
+          <SettingsItem
+            label={t("emulatorEnableTitle")}
+            description={t("emulatorEnableDescription")}
+            scope="server"
+            valueText={t(deviceBridgeEnabled ? "commonOn" : "commonOff")}
+          >
+            <label className="toggle-switch">
+              <input
+                type="checkbox"
+                checked={deviceBridgeEnabled}
+                onChange={(e) => {
+                  void updateSetting("deviceBridgeEnabled", e.target.checked);
                 }}
-              >
-                <input
-                  type="text"
-                  name="chromeosHost"
-                  placeholder={t("emulatorHostAliasPlaceholder")}
-                  className="settings-select"
-                  autoComplete="off"
-                  value={hostInput}
-                  onChange={(event) => setHostInput(event.target.value)}
-                />
-                <button
-                  type="submit"
-                  className="settings-button settings-button-primary"
-                  disabled={settingsLoading}
-                >
-                  {t("projectsAddConfirm")}
-                </button>
-              </form>
-            </SettingsItem>
+                disabled={settingsLoading}
+              />
+              <span className="toggle-slider" />
+            </label>
+          </SettingsItem>
+        </div>
+      </SettingsSection>
 
-            <HideInSettingsSearch>
-              {chromeOsHostError && (
-                <ErrorState inline message={chromeOsHostError} />
-              )}
-              {settingsError && <ErrorState inline message={settingsError} />}
-
-              {chromeOsHosts.length === 0 ? (
-                <EmptyState compact title={t("emulatorNoChromeOsHosts")} />
-              ) : (
-                chromeOsHosts.map((host) => (
-                  <div key={host} className="settings-item">
-                    <div className="settings-item-info">
-                      <span className="settings-item-label">{host}</span>
-                      <span className="settings-item-description">
-                        Device ID: chromeos:{host}
-                      </span>
-                    </div>
-                    <div className="settings-item-action">
-                      <button
-                        type="button"
-                        className="settings-button"
-                        onClick={() => {
-                          void removeHost(host);
-                        }}
-                        disabled={settingsLoading}
-                      >
-                        {t("emulatorRemove")}
-                      </button>
-                    </div>
-                  </div>
-                ))
-              )}
-            </HideInSettingsSearch>
-          </div>
-
-          <HideInSettingsSearch>
+      {deviceBridgeEnabled && (
+        <>
+          <EmulatorDeviceCards
+            devices={emulators}
+            loading={loading}
+            error={error}
+            onStart={startEmulator}
+            onStop={stopEmulator}
+          />
+          <EmulatorStreamQuality
+            maxFps={maxFps}
+            setMaxFps={setMaxFps}
+            maxWidth={maxWidth}
+            setMaxWidth={setMaxWidth}
+            quality={quality}
+            setQuality={setQuality}
+            adaptiveFps={adaptiveFps}
+            setAdaptiveFps={setAdaptiveFps}
+          />
+          <SettingsSection
+            title={t("emulatorChromeOsHostsTitle")}
+            description={`${t("emulatorChromeOsHostsDescription")} chromeroot${t(
+              "emulatorChromeOsHostsDescriptionSuffix",
+            )}`}
+            scope="server"
+          >
             <div className="settings-group">
-              <h3>{t("emulatorDiscoveredDevicesTitle")}</h3>
+              <SettingsItem
+                label={t("emulatorAddHostAliasTitle")}
+                description={t("emulatorAddHostAliasDescription")}
+                valueText={chromeOsHosts.join(", ")}
+              >
+                <form
+                  className="settings-item-actions"
+                  onSubmit={(event) => {
+                    event.preventDefault();
+                    void addHost();
+                  }}
+                >
+                  <input
+                    type="text"
+                    name="chromeosHost"
+                    placeholder={t("emulatorHostAliasPlaceholder")}
+                    className="settings-select"
+                    autoComplete="off"
+                    value={hostInput}
+                    onChange={(event) => setHostInput(event.target.value)}
+                  />
+                  <button
+                    type="submit"
+                    className="settings-button settings-button-primary"
+                    disabled={settingsLoading}
+                  >
+                    {t("projectsAddConfirm")}
+                  </button>
+                </form>
+              </SettingsItem>
 
-              {loading && (
-                <LoadingState label={t("projectsLoading")} variant="compact" />
-              )}
-              {error && <ErrorState inline message={error} />}
+              <HideInSettingsSearch>
+                {chromeOsHostError && (
+                  <ErrorState inline message={chromeOsHostError} />
+                )}
+                {settingsError && <ErrorState inline message={settingsError} />}
 
-              {!loading && emulators.length === 0 && (
-                <EmptyState compact title={t("emulatorNoDevicesFound")} />
-              )}
-
-              {emulators.map((device) => (
-                <div key={device.id} className="settings-item">
-                  <div className="settings-item-info">
-                    <span className="settings-item-label">
-                      {device.label || device.avd || device.id}
-                    </span>
-                    <span className="settings-item-description">
-                      {device.type} - {device.id} - {device.state}
-                    </span>
-                  </div>
-                  <div className="settings-item-action">
-                    {canStopDevice(
-                      device.type,
-                      device.state,
-                      device.actions,
-                    ) ? (
-                      <button
-                        type="button"
-                        className="settings-button"
-                        onClick={() => stopEmulator(device.id)}
-                      >
-                        {t("emulatorStop")}
-                      </button>
-                    ) : canStartDevice(
-                        device.type,
-                        device.state,
-                        device.actions,
-                      ) ? (
-                      <button
-                        type="button"
-                        className="settings-button"
-                        onClick={() => startEmulator(device.id)}
-                      >
-                        {t("emulatorStart")}
-                      </button>
-                    ) : null}
-                  </div>
-                </div>
-              ))}
+                {chromeOsHosts.length === 0 ? (
+                  <EmptyState compact title={t("emulatorNoChromeOsHosts")} />
+                ) : (
+                  chromeOsHosts.map((host) => (
+                    <div key={host} className="settings-item">
+                      <div className="settings-item-info">
+                        <span className="settings-item-label">{host}</span>
+                        <span className="settings-item-description">
+                          {t("emulatorChromeOsDeviceId", {
+                            id: `chromeos:${host}`,
+                          })}
+                        </span>
+                      </div>
+                      <div className="settings-item-action">
+                        <button
+                          type="button"
+                          className="settings-button"
+                          onClick={() => {
+                            void removeHost(host);
+                          }}
+                          disabled={settingsLoading}
+                        >
+                          {t("emulatorRemove")}
+                        </button>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </HideInSettingsSearch>
             </div>
-          </HideInSettingsSearch>
+          </SettingsSection>
         </>
       )}
-    </SettingsSection>
+    </>
   );
 }

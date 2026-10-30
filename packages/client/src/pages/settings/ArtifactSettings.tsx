@@ -11,6 +11,7 @@ import { CommittedRangeNumberInput } from "../../components/ui/CommittedRangeNum
 import { useCurrentSourceRuntime } from "../../contexts/SourceRuntimeContext";
 import { useVersion } from "../../hooks/useVersion";
 import { useI18n } from "../../i18n";
+import { ScopeTag } from "../../components/garden/ScopeTag";
 import { SettingsSection } from "./SettingsSection";
 import styles from "./ArtifactSettings.module.css";
 import { useVhostAccess } from "../../hooks/useVhostAccess";
@@ -434,130 +435,139 @@ function ArtifactSettingsForm({
         void save();
       }}
     >
-      <p>{t("appsSettingsAutosave")}</p>
-      <fieldset className={styles.fields} disabled={status.locked}>
-        <label className={styles.toggle}>
-          <input
-            type="checkbox"
-            checked={localEnabled}
-            onChange={(e) => {
-              setLocalEnabled(e.target.checked);
-              void save({ localEnabled: e.target.checked });
-            }}
-          />
-          {t("artifactLocalEnabled")}
-        </label>
-        {localEnabled && (
+      <p className={styles.autosave}>{t("appsSettingsAutosave")}</p>
+      <div className={styles.card}>
+        <h3 className={styles.cardTitle}>
+          {t("appsAddressesTitle")}
+          <ScopeTag scope="server" />
+        </h3>
+        <fieldset className={styles.fields} disabled={status.locked}>
+          <label className={styles.toggle}>
+            <input
+              type="checkbox"
+              checked={localEnabled}
+              onChange={(e) => {
+                setLocalEnabled(e.target.checked);
+                void save({ localEnabled: e.target.checked });
+              }}
+            />
+            {t("artifactLocalEnabled")}
+          </label>
+          {localEnabled && (
+            <label>
+              {t("artifactLocalOrigin")}
+              <input
+                type="url"
+                value={localOrigin}
+                onBlur={() => void save()}
+                onChange={(e) => setLocalOrigin(e.target.value)}
+              />
+            </label>
+          )}
           <label>
-            {t("artifactLocalOrigin")}
+            {t("artifactPublicOrigin")}
             <input
               type="url"
-              value={localOrigin}
+              value={publicOrigin}
               onBlur={() => void save()}
-              onChange={(e) => setLocalOrigin(e.target.value)}
+              onChange={(e) => setPublicOrigin(e.target.value)}
             />
           </label>
-        )}
-        <label>
-          {t("artifactPublicOrigin")}
-          <input
-            type="url"
-            value={publicOrigin}
-            onBlur={() => void save()}
-            onChange={(e) => setPublicOrigin(e.target.value)}
-          />
-        </label>
-        <p>{t("artifactPublicHint")}</p>
-        <label>
-          {t("artifactPort")}
-          <input
-            type="number"
-            min={1}
-            max={65535}
-            value={port}
-            onBlur={() => void save()}
-            onChange={(e) => setPort(e.target.value)}
-          />
-        </label>
-        <p>{t("artifactPortHint")}</p>
-        {expiryDays !== undefined ? (
-          <>
-            <div className={styles.expiry}>
-              <label htmlFor={expiryId}>{t("artifactExpiryDaysLabel")}</label>
-              <CommittedRangeNumberInput
-                id={expiryId}
-                min={1}
-                max={30}
-                step={1}
-                value={expiryDays}
-                ariaLabel={t("artifactExpiryDaysLabel")}
-                onCommit={(value) => {
-                  setExpiryDays(value);
-                  void save({ expiryDays: value });
-                }}
-              />
-            </div>
-            <p>{t("artifactExpiryDaysHint")}</p>
-            {/* No control: expiry deletion is what a capture asks for when it
-                creates its link, so there is nothing here to set. */}
-            <p>{t("artifactDeleteOnExpiryHint")}</p>
-          </>
-        ) : (
-          expiryHours !== undefined && (
+          <p>{t("artifactPublicHint")}</p>
+          <label>
+            {t("artifactPort")}
+            <input
+              type="number"
+              min={1}
+              max={65535}
+              value={port}
+              onBlur={() => void save()}
+              onChange={(e) => setPort(e.target.value)}
+            />
+          </label>
+          <p>{t("artifactPortHint")}</p>
+          {expiryDays !== undefined ? (
             <>
               <div className={styles.expiry}>
-                <label htmlFor={expiryId}>{t("artifactExpiryLabel")}</label>
+                <label htmlFor={expiryId}>{t("artifactExpiryDaysLabel")}</label>
                 <CommittedRangeNumberInput
                   id={expiryId}
                   min={1}
-                  max={168}
+                  max={30}
                   step={1}
-                  value={expiryHours}
-                  ariaLabel={t("artifactExpiryLabel")}
+                  value={expiryDays}
+                  ariaLabel={t("artifactExpiryDaysLabel")}
                   onCommit={(value) => {
-                    setExpiryHours(value);
-                    void save({ expiryHours: value });
+                    setExpiryDays(value);
+                    void save({ expiryDays: value });
                   }}
                 />
               </div>
-              <p>{t("artifactExpiryHint")}</p>
+              <p>{t("artifactExpiryDaysHint")}</p>
+              {/* No control: expiry deletion is what a capture asks for when it
+                creates its link, so there is nothing here to set. */}
+              <p>{t("artifactDeleteOnExpiryHint")}</p>
             </>
-          )
-        )}
-        {vhostsSupported && (
-          <>
-            <label>
-              {t("artifactVhostPublicRoot")}
-              <input
-                type="text"
-                value={vhostPublicRoot}
-                onBlur={() => void save()}
-                autoComplete="off"
-                spellCheck={false}
-                onChange={(e) => setVhostPublicRoot(e.target.value)}
-              />
-            </label>
-            <p>{t("artifactVhostPublicRootHint", { port })}</p>
-            <label className={styles.toggle}>
-              <input
-                type="checkbox"
-                checked={alwaysRewriteVhostLinks}
-                onChange={(event) => {
-                  setAlwaysRewriteVhostLinks(event.target.checked);
-                  void save({
-                    alwaysRewriteVhostLinks: event.target.checked,
-                  });
-                }}
-              />
-              {t("artifactAlwaysRewriteVhostLinks")}
-            </label>
-            <p>{t("artifactAlwaysRewriteVhostLinksHint")}</p>
-          </>
-        )}
-      </fieldset>
+          ) : (
+            expiryHours !== undefined && (
+              <>
+                <div className={styles.expiry}>
+                  <label htmlFor={expiryId}>{t("artifactExpiryLabel")}</label>
+                  <CommittedRangeNumberInput
+                    id={expiryId}
+                    min={1}
+                    max={168}
+                    step={1}
+                    value={expiryHours}
+                    ariaLabel={t("artifactExpiryLabel")}
+                    onCommit={(value) => {
+                      setExpiryHours(value);
+                      void save({ expiryHours: value });
+                    }}
+                  />
+                </div>
+                <p>{t("artifactExpiryHint")}</p>
+              </>
+            )
+          )}
+          {vhostsSupported && (
+            <>
+              <label>
+                {t("artifactVhostPublicRoot")}
+                <input
+                  type="text"
+                  value={vhostPublicRoot}
+                  onBlur={() => void save()}
+                  autoComplete="off"
+                  spellCheck={false}
+                  onChange={(e) => setVhostPublicRoot(e.target.value)}
+                />
+              </label>
+              <p>{t("artifactVhostPublicRootHint", { port })}</p>
+              <label className={styles.toggle}>
+                <input
+                  type="checkbox"
+                  checked={alwaysRewriteVhostLinks}
+                  onChange={(event) => {
+                    setAlwaysRewriteVhostLinks(event.target.checked);
+                    void save({
+                      alwaysRewriteVhostLinks: event.target.checked,
+                    });
+                  }}
+                />
+                {t("artifactAlwaysRewriteVhostLinks")}
+              </label>
+              <p>{t("artifactAlwaysRewriteVhostLinksHint")}</p>
+            </>
+          )}
+        </fieldset>
+      </div>
       {oauth.supported && oauth.status && (
-        <details className={styles.provider}>
-          <summary>{t("vhostOauthProvider")}</summary>
+        <details className={`${styles.card} ${styles.provider}`}>
+          <summary>
+            {t("vhostOauthProvider")}
+            <ScopeTag scope="server" />
+          </summary>
           <VhostOauthProviderSettings
             status={oauth.status}
             update={oauth.update}
@@ -573,11 +583,12 @@ function ArtifactSettingsForm({
         />
       )}
       {vhostsSupported && (
-        <div className={styles.fields}>
+        <div className={`${styles.card} ${styles.fields}`}>
           <div className={styles.vhosts}>
             <div className={styles.vhostHeader}>
-              <h3 className={styles.vhostHeading}>
+              <h3 className={styles.cardTitle}>
                 {t("artifactVhostTableTitle")}
+                <ScopeTag scope="server" />
               </h3>
               {oauth.status && (
                 <button type="button" onClick={() => setLogHost("")}>
@@ -738,6 +749,7 @@ function ArtifactSettingsForm({
                       )}
                       <button
                         type="button"
+                        className={styles.removeButton}
                         onClick={() => {
                           const next = vhosts.filter((_, i) => i !== index);
                           setVhosts(next);

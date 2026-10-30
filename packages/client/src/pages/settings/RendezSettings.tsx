@@ -1,5 +1,6 @@
 import { useState } from "react";
 import type { ServerSettings } from "../../api/client";
+import { Tag } from "../../components/garden/Badge";
 import { useI18n } from "../../i18n";
 import { shortenPath } from "../../lib/text";
 import { SettingsItem } from "./SettingsItem";
@@ -104,6 +105,11 @@ export function RendezSettings({
           "upload",
           "watch",
         ]}
+        valueText={
+          value.enabled
+            ? t("settingsAgentsValueOn")
+            : t("settingsAgentsValueOff")
+        }
       >
         <input
           type="checkbox"
@@ -195,6 +201,11 @@ export function RendezSettings({
             ? t("rendezShowOverrides")
             : t("rendezShowAll", { count: rows.length })}
         </button>
+        <Tag tone={overrideCount === 0 ? "idle" : "accent"}>
+          {overrideCount === 0
+            ? t("settingsRendezSummaryAllInherited")
+            : t("settingsRendezSummaryOverrides", { count: overrideCount })}
+        </Tag>
         <span className={styles.count}>
           {t("rendezWatchedCount", {
             watched: watchedCount,

@@ -35,6 +35,16 @@ describe("settings home groups", () => {
     expect(groups.at(-1)?.id).toBe("advanced");
   });
 
+  it("places Agent behavior after Agent context and Import/Export in Data", () => {
+    const ids = (groupId: string) =>
+      SETTINGS_GROUPS.find((group) => group.id === groupId)?.categoryIds ?? [];
+    const agents = ids("agents");
+    expect(agents.indexOf("agent-behavior")).toBe(
+      agents.indexOf("agent-context") + 1,
+    );
+    expect(ids("data")).toEqual(["storage", "import-export", "about"]);
+  });
+
   it("drops groups a limited user or older server leaves empty", () => {
     const only = categories.filter((category) => category.id === "about");
     expect(groupSettingsCategories(only).map((group) => group.id)).toEqual([

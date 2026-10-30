@@ -107,6 +107,7 @@ export const UI_KEYS = {
   sessionThinkingVisible: "vibeallday-session-thinking-visible",
   cacheMissEventOutcomeFilter: "vibeallday-cache-miss-event-outcome-filter",
   settingsSearchMatchValues: "vibeallday-settings-search-match-values",
+  settingsRailCollapsedGroups: "vibeallday-settings-rail-collapsed-groups",
   newProjectGitInit: "vibeallday-new-project-git-init",
   sessionThinkingLatestOnly: "vibeallday-session-thinking-latest-only",
   sessionLoadingProgress: "vibeallday-session-loading-progress-enabled",
