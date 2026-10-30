@@ -784,20 +784,6 @@ export async function harnessIdentity(repository, options, config, ratchets) {
   };
 }
 
-export async function gitIsAncestor(checkout, ancestor, descendant) {
-  const child = spawn(
-    "git",
-    ["merge-base", "--is-ancestor", ancestor, descendant],
-    { cwd: checkout, stdio: "ignore" },
-  );
-  const code = await new Promise((resolve) => child.once("exit", resolve));
-  if (code === 0) return true;
-  if (code === 1) return false;
-  throw new Error(
-    `git merge-base --is-ancestor ${ancestor} ${descendant} exited ${code}`,
-  );
-}
-
 export async function startServer({
   checkout,
   driver,

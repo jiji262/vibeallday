@@ -22,6 +22,10 @@ overrides:
   "postcss": "^8.5.23"
   "jsdom>ws": "^8.21.3"
   "mermaid>katex": "^0.18.6"
+  # qs <= 6.16.0 carries GHSA-6pq8-jhm2-2vcw. Its only production path is
+  # @modelcontextprotocol/sdk > express, whose own range is already ^6.14.0,
+  # so this pulls the patched release forward without breaking that range.
+  "express>qs": "^6.16.1"
 
 onlyBuiltDependencies:
   - bcrypt
@@ -36,6 +40,7 @@ ignoredBuiltDependencies:
 auditConfig:
   ignoreGhsas:
     - GHSA-qwww-vcr4-c8h2
+    - GHSA-rmxm-3fg6-px4f
     - GHSA-w5hq-g745-h8pq
 
 patchedDependencies:

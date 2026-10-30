@@ -152,7 +152,7 @@ there is no silent WASM fallback), `@firebase/util` (bakes
 Advisories triaged as unreachable are suppressed via
 `auditConfig.ignoreGhsas` in `pnpm-workspace.yaml`; that list and this
 table must stay in sync — every ignored GHSA needs a row here, and removing a
-row means removing the ignore. As of 2026-09-26 two advisories are triaged as
+row means removing the ignore. As of 2026-10-30 three advisories are triaged as
 unreachable with no fix compatible with VIBEALLDAY's current dependency and runtime
 constraints. Re-check when the listed trigger fires rather than re-deriving the
 analysis:
@@ -160,6 +160,7 @@ analysis:
 | Advisory | Why unreachable | Revisit when |
 |---|---|---|
 | `react-router` RSC-mode CSRF (GHSA-qwww-vcr4-c8h2) | Client is SPA-only — `BrowserRouter`/`Routes`, no `createBrowserRouter`, RSC, or server actions | Migrating to react-router v8. The fix lands in 8.3.0 and `react-router-dom` never reaches it (v8 consolidated into `react-router`) |
+| `@hono/node-server` `serveStatic` double-decode (GHSA-rmxm-3fg6-px4f) | Nothing in the workspace imports `serveStatic`; the whole surface used is `serve`, `getRequestListener`, `HttpBindings` and `utils/response`. `packages/relay` and `packages/push-broker` run the patched `2.1.5`. `packages/server` cannot follow: its WebSocket upgrade path needs `@hono/node-ws`, whose latest release (1.3.1) still declares peer `@hono/node-server: ^1.19.11` | `@hono/node-ws` declares a `^2` peer, or the fix is backported to a 1.x release |
 | `uuid` buffer bounds (GHSA-w5hq-g745-h8pq) | Only path is `firebase-admin -> @google-cloud/storage -> gaxios@6`, which calls `uuid.v4()` with no arguments; the defect needs v3/v5/v6 with a caller-supplied `buf`. Patched only in `>=11.1.1`, outside gaxios 6's `^9` range | `firebase-admin`/`gaxios` declare uuid `>=11`, or a 9.x patch release appears |
 
 Anything not on this list is untriaged — treat a new advisory as actionable.

@@ -11,7 +11,6 @@ import {
   aggregateRuns,
 } from "./aggregation.mjs";
 import {
-  GENERALIZED_PROJECT_PATHS_BASE,
   PERF_RUN_MARKER_PREFIX,
   SUITE_VERSION,
   parseArgs,
@@ -27,7 +26,6 @@ import {
 } from "./host-profile.mjs";
 import {
   assertLiveCohortParent,
-  gitIsAncestor,
   gitRevision,
   harnessIdentity,
   installSignalSweep,
@@ -129,11 +127,13 @@ async function main() {
     config,
     ratchets,
   );
-  const generalizedProjectPathsSupported = await gitIsAncestor(
-    checkout,
-    GENERALIZED_PROJECT_PATHS_BASE,
-    revision,
-  );
+  // Every commit in this repository postdates the arc that generalized project
+  // paths: its history begins at the 2026-10-27 standalone-app commit, while
+  // that arc closed in the pre-fork repository this suite was written against.
+  // The era marker used to be a `git merge-base --is-ancestor` check against a
+  // sha from that older history, which this repository does not contain, so it
+  // could only ever fail with git's exit 128.
+  const generalizedProjectPathsSupported = true;
   const preparation =
     options.driver === "built-client"
       ? await prepareBuiltClientCheckout(checkout, revision)

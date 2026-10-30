@@ -59,6 +59,9 @@ for (const { label, project, turns } of sessions) {
       page,
       baseURL,
     }) => {
+      // Room for the 30s landing budget below plus the rest of the case; the
+      // suite default of 15s cannot hold it.
+      test.setTimeout(60_000);
       const projectId = Buffer.from(join(e2ePaths.tempDir, project)).toString(
         "base64url",
       );
@@ -95,9 +98,18 @@ for (const { label, project, turns } of sessions) {
       });
       await expect(follow).toBeVisible();
 
+      // The landing mounts the whole history in chunks, so its cost scales
+      // with `turns` and with how much CPU the machine has left. Locally each
+      // variant finishes in under 4s, but on a contended two-worker CI shard
+      // the default 5s expect budget expired at weight 38 of 180 and the case
+      // failed as a wrong value rather than as the slow landing it was. The
+      // subject here is whether the reader keeps their place once the history
+      // lands; how fast it lands belongs to the perf suite, so this waits for
+      // the condition with a budget sized for the work.
       await expect(list).toHaveAttribute(
         "data-transcript-render-weight",
         String(turns * 2),
+        { timeout: 30_000 },
       );
       // Rows mounted by the landing are measured over the following frames;
       // a scroll event from that work must not hand the reader back to Follow.

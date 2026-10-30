@@ -3,8 +3,6 @@ import process from "node:process";
 
 export const SUITE_VERSION = 9;
 export const PERF_RUN_MARKER_PREFIX = "vibeallday-perf-suite-";
-export const GENERALIZED_PROJECT_PATHS_BASE =
-  "61cb5f358b9ccb56549d0515ded703ec534996a6";
 const DEFAULT_CONFIG_PATH = new URL("./config.json", import.meta.url);
 const DEFAULT_RATCHETS_PATH = new URL("./ratchets.json", import.meta.url);
 
