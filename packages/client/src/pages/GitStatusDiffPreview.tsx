@@ -26,7 +26,7 @@ import { renderFixedFontRichContent } from "../components/ui/FixedFontMathToggle
 import { Modal } from "../components/ui/Modal";
 import { useDiffViewMode } from "../hooks/useDiffViewMode";
 import { isEditableKeyboardTarget } from "../hooks/useSourceKeyboard";
-import { type DiffViewMode, resolveDiffViewMode } from "../lib/diffSideBySide";
+import { resolveDiffViewMode } from "../lib/diffSideBySide";
 import { isMarkdownLikeFile } from "../lib/markdownFiles";
 import {
   captureScrollPositionAnchor,
@@ -34,9 +34,10 @@ import {
   type ScrollPositionAnchor,
 } from "../lib/scrollAnchor";
 import { DiffCommentController } from "./DiffCommentLayer";
+import { DiffLayoutBar } from "./DiffLayoutBar";
 import { SideBySideDiff } from "./SideBySideDiff";
 import { CHANGED_DIFF_LINE_SELECTOR, UnifiedDiff } from "./UnifiedDiff";
-import type { MessageKey, TranslationFn } from "../i18n";
+import type { TranslationFn } from "../i18n";
 import styles from "./GitStatusDiffPreview.module.css";
 import headerStyles from "../components/ViewerHeader.module.css";
 import { SourceDiffLoading, SourcePaneError } from "./SourcePaneStates";
@@ -839,16 +840,6 @@ function GitDiffContent({
     return () => observer.disconnect();
   }, []);
 
-  const cycleViewMode = useCallback(() => {
-    setViewMode(
-      viewMode === "auto"
-        ? "unified"
-        : viewMode === "unified"
-          ? "side-by-side"
-          : "auto",
-    );
-  }, [viewMode, setViewMode]);
-
   const isMarkdown = isMarkdownLikeFile(file.path);
   const diffOnlyRendered = useMemo(
     () =>
@@ -1307,21 +1298,6 @@ function GitDiffContent({
         }
         icon="content"
       />
-      {!showingMarkdownPreview && !plainDiff && !hideRemovedLines && (
-        <button
-          type="button"
-          className="diff-context-toggle diff-toolbar-icon-button"
-          onClick={cycleViewMode}
-          title={`${t("diffViewModeTitle")}: ${t(
-            diffViewModeLabelKey(viewMode),
-          )}`}
-          aria-label={`${t("diffViewModeTitle")}: ${t(
-            diffViewModeLabelKey(viewMode),
-          )}`}
-        >
-          <DiffViewModeIcon mode={viewMode} />
-        </button>
-      )}
     </>
   );
 
@@ -1380,6 +1356,9 @@ function GitDiffContent({
           <span className="diff-context-path">{file.path}</span>
           <div className="diff-context-buttons">{toolbarButtons}</div>
         </div>
+      )}
+      {!showingMarkdownPreview && !plainDiff && !hideRemovedLines && (
+        <DiffLayoutBar mode={viewMode} onChange={setViewMode} t={t} />
       )}
       {contextError && <div className="diff-context-error">{contextError}</div>}
       <div
@@ -1543,45 +1522,6 @@ function MarkdownModeIcon({ showDiff }: { showDiff: boolean }) {
       <circle cx="12" cy="12" r="2.5" />
     </svg>
   );
-}
-
-function DiffViewModeIcon({ mode }: { mode: DiffViewMode }) {
-  return (
-    <svg
-      width="15"
-      height="15"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      aria-hidden="true"
-    >
-      {mode === "side-by-side" ? (
-        <>
-          <path d="M3 7h7M14 7h7" />
-          <path d="M3 12h7M14 12h7" />
-          <path d="M3 17h7M14 17h7" />
-        </>
-      ) : (
-        <>
-          <path d="M4 7h16M4 12h16M4 17h16" />
-          {mode === "auto" && <path d="M5 4h4M5 4v3M19 20h-4M19 20v-3" />}
-        </>
-      )}
-    </svg>
-  );
-}
-
-function diffViewModeLabelKey(mode: DiffViewMode): MessageKey {
-  switch (mode) {
-    case "unified":
-      return "diffViewModeUnified";
-    case "side-by-side":
-      return "diffViewModeSideBySide";
-    default:
-      return "diffViewModeAuto";
-  }
 }
 
 function GitDiffPreviewSkippedState({

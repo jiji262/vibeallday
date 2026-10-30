@@ -215,6 +215,11 @@ export const ArrowUpIcon = createIcon(
   <path d="M12 19V5M5 12l7-7 7 7" />,
 );
 
+export const CommentIcon = createIcon(
+  "CommentIcon",
+  <path d="M4 5h16v11H9l-5 4z" />,
+);
+
 export const TerminalIcon = createIcon(
   "TerminalIcon",
   <>

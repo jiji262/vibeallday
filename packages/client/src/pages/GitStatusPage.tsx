@@ -82,6 +82,7 @@ import { BlameBrowser } from "./BlameBrowser";
 import { CommitBrowser } from "./CommitBrowser";
 import styles from "./GitStatusPage.module.css";
 import { ReviewTabPanel } from "./ReviewTabPanel";
+import { PendingReviewAction } from "./PendingReviewAction";
 import { ReviewSubmitModal } from "./ReviewSubmitModal";
 import { SourceHeaderControls } from "./SourceActionControls";
 import { SourceControlIntro } from "./SourceControlIntro";
@@ -882,6 +883,14 @@ function GitStatusContent({
           t={t}
         />
       ) : null}
+
+      {tab !== "comments" && tab !== "reviews" && !showReviewModal && (
+        <PendingReviewAction
+          pending={reviewComments.pending}
+          onSubmit={onOpenReview}
+          t={t}
+        />
+      )}
 
       {showReviewModal && (
         <ReviewSubmitModal

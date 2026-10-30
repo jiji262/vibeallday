@@ -2390,7 +2390,7 @@
   "diffViewModeAuto": "Auto",
   "diffViewModeUnified": "Unified",
   "diffViewModeSideBySide": "Side-by-side",
-  "diffViewModeTitle": "Diff layout: auto, unified, or side-by-side",
+  "diffViewModeLabel": "Diff layout",
   "cancel": "Cancel",
   "loading": "Loading…",
   "retry": "Retry",

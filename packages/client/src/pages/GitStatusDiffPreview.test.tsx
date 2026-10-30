@@ -12,6 +12,7 @@ import {
   render,
   screen,
   waitFor,
+  within,
 } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -499,11 +500,15 @@ describe("GitDiffBody", () => {
     expect(
       screen.getByRole("button", { name: "gitStatusFullContext" }).textContent,
     ).toBe("");
+    const layout = screen.getByRole("radiogroup", {
+      name: "diffViewModeLabel",
+    });
     expect(
-      screen.getByRole("button", {
-        name: "diffViewModeTitle: diffViewModeAuto",
-      }).textContent,
-    ).toBe("");
+      within(layout)
+        .getByRole("radio", { name: "diffViewModeAuto" })
+        .getAttribute("aria-checked"),
+    ).toBe("true");
+    expect(layout.closest(".git-diff-pane-toolbar")).toBeNull();
     await waitFor(() =>
       expect(document.querySelector(".diff-hunk-indicator")?.textContent).toBe(
         "1/1",
@@ -578,9 +583,7 @@ describe("GitDiffBody", () => {
       screen.getByRole("button", { name: "sourceNextHunkShortcut" }),
     ).toBeTruthy();
     expect(
-      screen.queryByRole("button", {
-        name: "diffViewModeTitle: diffViewModeAuto",
-      }),
+      screen.queryByRole("radiogroup", { name: "diffViewModeLabel" }),
     ).toBeNull();
     expect(screen.queryByText("gitStatusDiffPreviewSkipped")).toBeNull();
   });

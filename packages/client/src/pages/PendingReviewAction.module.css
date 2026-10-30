@@ -1,0 +1,81 @@
+/* Phones: a card in the page flow (design Git-Phone). */
+.root {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-top: var(--space-4);
+  padding: 14px var(--pad-card);
+  border: 1px solid var(--card-line);
+  border-radius: var(--r-card);
+  background: var(--surface);
+  box-shadow: var(--shadow-card);
+}
+
+.icon {
+  flex: none;
+  color: var(--accent-ink);
+}
+
+/* Long translations push the button to its own row instead of wrapping the
+   title word by word. */
+.summary {
+  display: flex;
+  flex: 1 1 10rem;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.title {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.meta {
+  overflow: hidden;
+  color: var(--ink-3);
+  font-size: var(--fs-small);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.submit {
+  flex: none;
+  margin-inline-start: auto;
+}
+
+.buttonIcon,
+.count {
+  display: none;
+}
+
+/* Wide layouts: only the button, floating over the page corner (design
+   .gitd-fab). */
+@media (width >= 768px) {
+  .root {
+    position: fixed;
+    right: 28px;
+    bottom: 24px;
+    z-index: 4;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: none;
+    box-shadow: none;
+  }
+
+  .icon,
+  .summary {
+    display: none;
+  }
+
+  .submit {
+    box-shadow: var(--shadow-pop);
+  }
+
+  .buttonIcon,
+  .count {
+    display: inline-flex;
+  }
+}

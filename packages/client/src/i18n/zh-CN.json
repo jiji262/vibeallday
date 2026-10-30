@@ -2460,7 +2460,7 @@
   "diffViewModeAuto": "自动",
   "diffViewModeUnified": "统一视图",
   "diffViewModeSideBySide": "并排视图",
-  "diffViewModeTitle": "差异布局：自动、统一或并排",
+  "diffViewModeLabel": "差异布局",
   "cancel": "取消",
   "loading": "正在加载…",
   "retry": "重试",
