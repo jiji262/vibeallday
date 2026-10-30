@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { memo, useCallback, useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { api } from "../api/client";
 import {
@@ -120,8 +120,13 @@ function DayHeading({ day, id }: { day: BangHistoryDay; id: string }) {
   );
 }
 
-/** Day sections, each a vertical timeline of time, status node and card. */
-export function BangHistoryTimeline({
+/**
+ * Day sections, each a vertical timeline of time, status node and card.
+ * Memoized: the search field's state lives in the page, so every keystroke
+ * re-renders the page with the same `entries` until the deferred filter
+ * catches up; re-rendering 400 rows on that urgent pass is what delayed keys.
+ */
+export const BangHistoryTimeline = memo(function BangHistoryTimeline({
   entries,
   basePath,
   expandedEntryKey,
@@ -152,10 +157,9 @@ export function BangHistoryTimeline({
                     key={entryKey}
                     entry={entry}
                     basePath={basePath}
+                    entryKey={entryKey}
                     expanded={expandedEntryKey === entryKey}
-                    onExpandedChange={(expanded) =>
-                      onExpandedEntryKeyChange(expanded ? entryKey : null)
-                    }
+                    onExpandedEntryKeyChange={onExpandedEntryKeyChange}
                   />
                 );
               })}
@@ -165,20 +169,29 @@ export function BangHistoryTimeline({
       })}
     </div>
   );
-}
+});
 
-/** Time and status node beside a card: cwd, session link, actions, block. */
-function BangHistoryRow({
+/**
+ * Time and status node beside a card: cwd, session link, actions, block.
+ * Memoized with stable props so a filter that keeps a row skips it.
+ */
+const BangHistoryRow = memo(function BangHistoryRow({
   entry,
   basePath,
+  entryKey,
   expanded,
-  onExpandedChange,
+  onExpandedEntryKeyChange,
 }: {
   entry: BangHistoryEntry;
   basePath: string;
+  entryKey: string;
   expanded: boolean;
-  onExpandedChange: (expanded: boolean) => void;
+  onExpandedEntryKeyChange: (key: string | null) => void;
 }) {
+  const onExpandedChange = useCallback(
+    (next: boolean) => onExpandedEntryKeyChange(next ? entryKey : null),
+    [entryKey, onExpandedEntryKeyChange],
+  );
   const { t } = useI18n();
   const { projectId, sessionId, object } = entry;
   const created = new Date(object.createdAt);
@@ -246,4 +259,4 @@ function BangHistoryRow({
       </Card>
     </li>
   );
-}
+});
