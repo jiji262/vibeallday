@@ -44,7 +44,7 @@
 }
 
 .link:focus-visible {
-  box-shadow: 0 0 0 3px var(--indigo-soft);
+  box-shadow: 0 0 0 3px var(--accent-soft);
 }
 
 .current {

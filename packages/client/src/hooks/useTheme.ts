@@ -7,9 +7,9 @@ export const THEMES: Theme[] = ["auto", "light", "dark", "verydark"];
 
 /** Browser chrome (status bar, PWA title bar) matches the page surface. */
 const THEME_CHROME_COLORS = {
-  light: "#fbf8f2",
-  dark: "#14131a",
-  verydark: "#0b0a0f",
+  light: "#F3F5F3",
+  dark: "#0C0F14",
+  verydark: "#000000",
 } as const;
 
 const DARK_SCHEME_QUERY = "(prefers-color-scheme: dark)";

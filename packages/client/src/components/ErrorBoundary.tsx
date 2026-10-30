@@ -399,11 +399,11 @@ export class ErrorBoundary extends Component<Props, State> {
 }
 
 // Inline styles keep the fallback readable even if a stylesheet fails to load;
-// colors come from the Garden tokens, with Paper values as the last resort.
-const INK = "var(--text-primary, #1f2433)";
-const INK_MUTED = "var(--text-muted, #5a6377)";
-const LINE = "var(--line-strong, #d5cdb7)";
-const SUNKEN = "var(--bg-sunken, #f7f2e5)";
+// colors come from the design tokens, with Celadon values as the last resort.
+const INK = "var(--ink, #102019)";
+const INK_MUTED = "var(--ink-3, #57665F)";
+const LINE = "var(--line-strong, #C5CEC9)";
+const SUNKEN = "var(--surface-2, #F7F9F8)";
 const TAP_MIN = "var(--tap-min, 44px)";
 
 const styles: Record<string, React.CSSProperties> = {
@@ -413,22 +413,22 @@ const styles: Record<string, React.CSSProperties> = {
     justifyContent: "center",
     minHeight: "100dvh",
     padding: "20px",
-    backgroundColor: "var(--bg-surface, #fbf8f2)",
+    backgroundColor: "var(--canvas, #F3F5F3)",
     color: INK,
-    fontFamily: 'var(--font-ui, "Geist", system-ui, sans-serif)',
+    fontFamily: "var(--font-ui, system-ui, sans-serif)",
   },
   card: {
     maxWidth: "500px",
     width: "100%",
     padding: "var(--space-6, 24px)",
-    backgroundColor: "var(--bg-card, #fff)",
+    backgroundColor: "var(--surface, #FFFFFF)",
     borderRadius: "var(--radius-lg, 12px)",
     border: `1px solid ${LINE}`,
-    boxShadow: "var(--shadow-md, none)",
+    boxShadow: "var(--shadow-card, none)",
   },
   title: {
     margin: "0 0 20px 0",
-    fontFamily: 'var(--font-display, "Fraunces", serif)',
+    fontFamily: "var(--font-display, system-ui, sans-serif)",
     fontSize: "26px",
     fontWeight: 600,
     color: INK,
@@ -436,27 +436,27 @@ const styles: Record<string, React.CSSProperties> = {
   versionWarning: {
     padding: "16px",
     marginBottom: "20px",
-    backgroundColor: "var(--sand-soft, rgba(217, 164, 65, 0.17))",
-    border: "1px solid var(--sand, #d9a441)",
+    backgroundColor: "var(--attn-soft, #FBEFD9)",
+    border: "1px solid var(--attn-line, #EBC98C)",
     borderRadius: "var(--radius-md, 8px)",
-    color: "var(--sand-ink, #8e6c1f)",
+    color: "var(--attn-ink, #8A5A00)",
   },
   versionHint: {
     margin: "8px 0 0 0",
     fontSize: "14px",
-    color: "var(--sand-ink, #8e6c1f)",
+    color: "var(--attn-ink, #8A5A00)",
   },
   errorBox: {
     padding: "12px 16px",
     marginBottom: "20px",
-    backgroundColor: "var(--rose-soft, rgba(227, 122, 136, 0.14))",
+    backgroundColor: "var(--err-soft, #F8E3DE)",
     borderRadius: "var(--radius-md, 8px)",
     overflow: "auto",
   },
   errorText: {
     fontFamily: "var(--font-mono, monospace)",
     fontSize: "13px",
-    color: "var(--rose-ink, #b85067)",
+    color: "var(--err-ink, #A3311C)",
     whiteSpace: "pre-wrap",
     wordBreak: "break-word",
   },
@@ -499,7 +499,7 @@ const styles: Record<string, React.CSSProperties> = {
     lineHeight: TAP_MIN,
     cursor: "pointer",
     fontSize: "14px",
-    color: "var(--text-secondary, #3d4459)",
+    color: "var(--ink-2, #3A4A43)",
   },
   diagnosticCopyButton: {
     position: "absolute",
@@ -511,7 +511,7 @@ const styles: Record<string, React.CSSProperties> = {
     width: TAP_MIN,
     height: TAP_MIN,
     padding: 0,
-    color: "var(--text-secondary, #3d4459)",
+    color: "var(--ink-2, #3A4A43)",
     backgroundColor: "transparent",
     border: `1px solid ${LINE}`,
     borderRadius: "var(--radius-md, 8px)",
@@ -525,7 +525,7 @@ const styles: Record<string, React.CSSProperties> = {
     wordBreak: "break-word",
     fontFamily: "var(--font-mono, monospace)",
     fontSize: "12px",
-    color: "var(--text-secondary, #3d4459)",
+    color: "var(--ink-2, #3A4A43)",
   },
   actions: {
     display: "flex",
@@ -542,8 +542,8 @@ const styles: Record<string, React.CSSProperties> = {
     padding: "0 24px",
     fontSize: "15px",
     fontWeight: 550,
-    color: "var(--ink-on, #fff)",
-    backgroundColor: "var(--indigo, #4f46b8)",
+    color: "var(--on-accent, #FFFFFF)",
+    backgroundColor: "var(--accent, #0E7A66)",
     border: "none",
     borderRadius: "var(--radius-md, 8px)",
     cursor: "pointer",
@@ -559,7 +559,7 @@ const styles: Record<string, React.CSSProperties> = {
     fontSize: "15px",
     fontWeight: 550,
     color: INK,
-    backgroundColor: "var(--bg-card, #fff)",
+    backgroundColor: "var(--surface, #FFFFFF)",
     border: `1px solid ${LINE}`,
     borderRadius: "var(--radius-md, 8px)",
     cursor: "pointer",
@@ -576,7 +576,7 @@ const styles: Record<string, React.CSSProperties> = {
     fontWeight: 550,
     color: INK_MUTED,
     backgroundColor: "transparent",
-    border: "1px solid var(--border-color, #e8e2d2)",
+    border: "1px solid var(--line, #DDE3DF)",
     borderRadius: "var(--radius-md, 8px)",
     textAlign: "center",
     textDecoration: "none",

@@ -1,0 +1,71 @@
+/* Design .seg: a track with raised "on" option. */
+.seg {
+  display: inline-flex;
+  gap: 3px;
+  max-width: 100%;
+  padding: 3px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-seg);
+  background: var(--seg-track);
+}
+
+.block {
+  display: flex;
+}
+
+.option {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-width: 0;
+  height: var(--seg-h);
+  padding: 0 14px;
+  border: 0;
+  border-radius: var(--r-seg-item);
+  background: transparent;
+  color: var(--ink-2);
+  font: inherit;
+  font-size: var(--fs-small);
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.block .option {
+  flex: 1 1 0;
+}
+
+.option:hover {
+  color: var(--ink);
+}
+
+.option[aria-checked="true"] {
+  background: var(--seg-on);
+  box-shadow: var(--seg-shadow);
+  color: var(--ink);
+}
+
+.option:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 1px;
+}
+
+.option:disabled {
+  color: var(--ink-4);
+  cursor: not-allowed;
+}
+
+/* Visual height stays; a transparent layer widens the touch target. */
+@media (pointer: coarse) {
+  .option::after {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: max(100%, var(--tap-min));
+    height: max(100%, var(--tap-min));
+    content: "";
+    transform: translate(-50%, -50%);
+  }
+}

@@ -14,9 +14,9 @@
 .th {
   padding: var(--space-3) var(--space-4);
   border-bottom: 1px solid var(--line);
-  background: var(--bg-2);
+  background: var(--surface-2);
   color: var(--ink-3);
-  font-family: var(--label-font);
+  font-family: var(--font-mono);
   font-size: var(--eyebrow-size);
   font-weight: 500;
   letter-spacing: var(--eyebrow-tracking);
@@ -28,7 +28,7 @@
 
 .td {
   padding: 14px var(--space-4);
-  border-bottom: 1px dashed var(--dash);
+  border-bottom: 1px dashed var(--line);
   color: var(--ink);
   vertical-align: middle;
 }
@@ -42,17 +42,17 @@
 }
 
 .dangerRow {
-  background: var(--rose-soft);
+  background: var(--err-soft);
 }
 
 .row:hover,
 .selected {
-  background: var(--bg-2);
+  background: var(--surface-2);
 }
 
 .mono {
   color: var(--ink-2);
-  font-family: var(--label-font);
+  font-family: var(--font-mono);
   font-size: 13px;
 }
 
@@ -100,11 +100,11 @@
 }
 
 .rowAction:hover {
-  background: var(--bg-soft);
+  background: var(--surface-3);
 }
 
 .rowAction:focus-visible {
-  box-shadow: 0 0 0 3px var(--indigo-soft);
+  box-shadow: 0 0 0 3px var(--accent-soft);
 }
 
 .rowAction:disabled {
@@ -113,15 +113,15 @@
 }
 
 .peachAction {
-  color: var(--peach-ink);
+  color: var(--attn-ink);
 }
 
 .roseAction {
-  color: var(--rose-ink);
+  color: var(--err-ink);
 }
 
 .indigoAction {
-  color: var(--indigo);
+  color: var(--accent);
 }
 
 @media (width < 1024px) {

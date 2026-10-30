@@ -1,10 +1,19 @@
 import type { ReactNode } from "react";
 import styles from "./Badge.module.css";
 
-/** Semantic map: mint running/ok, rose needs you/error, peach attention,
- *  sand pending/unread, indigo selected/info, grey idle/stopped, outline
- *  archived/inert. */
+/**
+ * Design families: attn (needs you), run (working), err, ok (done), accent
+ * (selected/info), idle. The older names stay valid and map onto them:
+ * mint = ok, rose = err, peach and sand = attn, indigo = accent, grey = idle;
+ * outline is the dashed archived/inert look.
+ */
 export type BadgeTone =
+  | "attn"
+  | "run"
+  | "err"
+  | "ok"
+  | "accent"
+  | "idle"
   | "mint"
   | "rose"
   | "peach"
@@ -14,12 +23,18 @@ export type BadgeTone =
   | "outline";
 
 const TONE_CLASS: Record<BadgeTone, string | undefined> = {
-  mint: styles.mint,
-  rose: styles.rose,
-  peach: styles.peach,
-  sand: styles.sand,
-  indigo: styles.indigo,
-  grey: styles.grey,
+  attn: styles.attn,
+  run: styles.run,
+  err: styles.err,
+  ok: styles.ok,
+  accent: styles.accent,
+  idle: styles.idle,
+  mint: styles.ok,
+  rose: styles.err,
+  peach: styles.attn,
+  sand: styles.attn,
+  indigo: styles.accent,
+  grey: styles.idle,
   outline: styles.outline,
 };
 
@@ -38,9 +53,9 @@ function join(...classes: Array<string | undefined | false>): string {
   return classes.filter(Boolean).join(" ");
 }
 
-/** State pill: mono 12px on a soft tone fill. Text keeps its case. */
+/** State pill: 12px semibold on a soft tone fill. Prefer `Status` for the six session states. */
 export function Badge({
-  tone = "grey",
+  tone = "idle",
   size = "sm",
   dot = false,
   children,
@@ -75,8 +90,8 @@ interface TagProps {
   title?: string;
 }
 
-/** Event chip: 6px radius, mono 11px UPPERCASE, same tones as Badge. */
-export function Tag({ tone = "grey", children, className, title }: TagProps) {
+/** Event tag: mono 11px, hairline outline, same tones as Badge. */
+export function Tag({ tone = "idle", children, className, title }: TagProps) {
   return (
     <span
       className={join(styles.tag, TONE_CLASS[tone], className)}

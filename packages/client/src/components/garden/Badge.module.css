@@ -1,18 +1,18 @@
-/* Status badge (pill) and event tag share the semantic tone fills. */
+/* Status pill (design .status) and event tag (design .tag) share the
+   semantic families: attn, run, err, ok, accent, idle. Legacy tone names
+   map onto them. */
 .badge {
   display: inline-flex;
   align-items: center;
   flex-shrink: 0;
-  gap: var(--space-1);
+  gap: 6px;
   height: 22px;
-  padding: 0 var(--space-2);
+  padding: 0 8px;
   border: 1px solid transparent;
-  border-radius: var(--radius-pill);
-  font-family: var(--label-font);
+  border-radius: var(--r-chip);
   font-size: 12px;
-  font-weight: 500;
+  font-weight: 600;
   line-height: 1;
-  letter-spacing: var(--badge-tracking);
   white-space: nowrap;
 }
 
@@ -24,63 +24,88 @@
   display: inline-flex;
   align-items: center;
   flex-shrink: 0;
-  gap: 6px;
-  padding: 2px var(--space-2);
-  border: 1px solid transparent;
-  border-radius: var(--radius-sm);
-  font-family: var(--label-font);
-  font-size: 11px;
-  line-height: 1.5;
-  letter-spacing: var(--badge-tracking);
-  text-transform: uppercase;
+  gap: 4px;
+  height: 20px;
+  padding: 0 7px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-xs);
+  color: var(--ink-3);
+  font: 500 11px / 1 var(--font-mono);
   white-space: nowrap;
 }
 
 .dot {
-  width: 6px;
-  height: 6px;
+  width: 7px;
+  height: 7px;
   flex-shrink: 0;
   border-radius: 50%;
   background: currentcolor;
 }
 
+/* Pulses only while an ancestor's shared activity observer runs it. */
 .pulse {
   animation: badge-pulse 1.6s ease-in-out infinite;
+  animation-play-state: var(--activity-play, paused);
 }
 
-.mint {
-  background: var(--mint-soft);
-  color: var(--mint-ink);
+.ok {
+  border-color: transparent;
+  background: var(--ok-soft);
+  color: var(--ok-ink);
 }
 
-.rose {
-  background: var(--rose-soft);
-  color: var(--rose-ink);
+.err {
+  border-color: transparent;
+  background: var(--err-soft);
+  color: var(--err-ink);
 }
 
-.peach {
-  background: var(--peach-soft);
-  color: var(--peach-ink);
+.attn {
+  border-color: transparent;
+  background: var(--attn-soft);
+  color: var(--attn-ink);
 }
 
-.sand {
-  background: var(--sand-soft);
-  color: var(--sand-ink);
+.run {
+  border-color: transparent;
+  background: var(--run-soft);
+  color: var(--run-ink);
 }
 
-.indigo {
-  background: var(--indigo-soft);
-  color: var(--indigo);
+.accent {
+  border-color: transparent;
+  background: var(--accent-soft);
+  color: var(--accent-ink);
 }
 
-.grey {
-  background: var(--grey-soft);
+.idle {
+  border-color: transparent;
+  background: var(--idle-soft);
+  color: var(--ink-2);
+}
+
+.tag.ok,
+.tag.accent {
+  border-color: var(--accent-line);
+}
+
+.tag.err {
+  border-color: var(--err-line);
+}
+
+.tag.attn {
+  border-color: var(--attn-line);
+}
+
+.tag.idle {
+  border-color: var(--line-strong);
+  background: transparent;
   color: var(--ink-3);
 }
 
 .outline {
-  border: 1px dashed var(--dash);
-  background: var(--bg-soft);
+  border: 1px dashed var(--line-strong);
+  background: transparent;
   color: var(--ink-3);
 }
 

@@ -5,7 +5,7 @@
       "reason": "Device stream video vocabulary produced by EmulatorStream."
     },
     "packages/client/src/styles/index.css": {
-      "maxLines": 12153,
+      "maxLines": 12108,
       "reason": "Legacy application shell and page styles; tokens and themes live in theme.css."
     },
     "packages/client/src/styles/provider-colors.css": {
@@ -17,14 +17,14 @@
       "reason": "Legacy generated-content and renderer class vocabulary."
     },
     "packages/client/src/styles/theme.css": {
-      "maxLines": 938,
-      "reason": "Garden design tokens, themes, self-hosted font faces and base element rules; the single global source of design values. Raised 913 -> 938 for the Garden Console alias, label-recipe and page-frame tokens (one alias block, no per-theme copies)."
+      "maxLines": 1300,
+      "reason": "Garden design tokens, themes, self-hosted font faces and base element rules; the single global source of design values. Raised 938 -> 1300 for the redesign skins: per-skin design tokens (Celadon, Night, OLED, auto-dark copy), phone sizes and the skin font faces."
     },
     "packages/client/src/styles/tool-rows.css": {
       "maxLines": 777,
       "reason": "Shared tool-row state and generated renderer composition."
     }
   },
-  "updated": "2026-10-29",
+  "updated": "2026-10-30",
   "note": "Chapter 11 containment baseline for authored non-module CSS under packages/client/src. Limits may only ratchet downward. New client stylesheets must be CSS Modules unless a reviewed generated-content or truly global exception is added here with a reason."
 }

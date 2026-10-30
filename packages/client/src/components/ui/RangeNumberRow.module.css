@@ -3,24 +3,32 @@
   grid-template-columns: minmax(4rem, auto) minmax(0, 1fr) max-content;
   align-items: center;
   gap: 0.3rem;
-  color: var(--text-muted);
+  color: var(--ink-3);
   font-size: var(--font-size-sm);
 }
 
 .row input[type="range"] {
   min-width: 0;
-  accent-color: var(--app-accent);
+  accent-color: var(--accent);
 }
 
 .row input[type="number"] {
   width: 4.4rem;
   min-width: 0;
   padding: 0.18rem 0.3rem;
-  border: 1px solid var(--border-input);
-  border-radius: var(--radius-sm);
-  color: var(--text-primary);
-  background: var(--bg-primary);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-xs);
+  color: var(--ink);
+  background: var(--input-bg);
+  font-family: var(--font-mono);
   font-size: var(--font-size-sm);
+  font-variant-numeric: tabular-nums;
+}
+
+.row input[type="number"]:focus-visible {
+  border-color: var(--accent);
+  outline: none;
+  box-shadow: 0 0 0 3px var(--accent-soft);
 }
 
 .numberWrap {
@@ -30,7 +38,7 @@
 }
 
 .unit {
-  color: var(--text-muted);
+  color: var(--ink-3);
   font-size: var(--font-size-sm);
   line-height: 1;
 }
@@ -42,7 +50,7 @@
 .hint {
   grid-column: 2 / -1;
   margin-top: -0.1rem;
-  color: var(--text-muted);
+  color: var(--ink-3);
   font-size: var(--font-size-sm);
   line-height: 1.3;
 }

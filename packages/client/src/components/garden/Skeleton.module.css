@@ -5,9 +5,9 @@
   border-radius: var(--skeleton-radius, var(--radius-sm));
   background: linear-gradient(
     90deg,
-    var(--bg-soft) 0%,
-    var(--bg-2) 50%,
-    var(--bg-soft) 100%
+    var(--surface-3) 0%,
+    var(--surface-2) 50%,
+    var(--surface-3) 100%
   );
   background-size: 200% 100%;
   animation: garden-shimmer 1.4s ease-in-out infinite;
@@ -31,7 +31,7 @@
 
 @media (prefers-reduced-motion: reduce) {
   .skeleton {
-    background: var(--bg-soft);
+    background: var(--surface-3);
     animation: none;
   }
 }

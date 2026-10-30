@@ -207,6 +207,32 @@
 }
 
 @font-face {
+  font-family: "VIBEALLDAY IBM Plex Mono";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("../assets/fonts/ibm-plex-mono/ibm-plex-mono-latin-500-normal.woff2")
+    format("woff2");
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6,
+    U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122,
+    U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: "VIBEALLDAY IBM Plex Mono";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("../assets/fonts/ibm-plex-mono/ibm-plex-mono-latin-600-normal.woff2")
+    format("woff2");
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6,
+    U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122,
+    U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
   font-family: "VIBEALLDAY Fraunces";
   font-style: normal;
   font-weight: 100 900;
@@ -245,15 +271,211 @@
     U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 
+/* Skin faces: Celadon sets Instrument Sans + DM Mono; Night and OLED set
+   Archivo (titles widen through --display-stretch) + IBM Plex Mono. */
+@font-face {
+  font-family: "VIBEALLDAY Instrument Sans";
+  font-style: normal;
+  font-weight: 400 700;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url("../assets/fonts/instrument-sans/instrument-sans-latin-wght-normal.woff2")
+    format("woff2");
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6,
+    U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122,
+    U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: "VIBEALLDAY Archivo";
+  font-style: normal;
+  font-weight: 100 900;
+  font-stretch: 62% 125%;
+  font-display: swap;
+  src: url("../assets/fonts/archivo/archivo-latin-wdth-normal.woff2")
+    format("woff2");
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6,
+    U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122,
+    U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: "VIBEALLDAY DM Mono";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("../assets/fonts/dm-mono/dm-mono-latin-400-normal.woff2")
+    format("woff2");
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6,
+    U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122,
+    U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: "VIBEALLDAY DM Mono";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("../assets/fonts/dm-mono/dm-mono-latin-500-normal.woff2")
+    format("woff2");
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6,
+    U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122,
+    U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
 /* ==========================================================================
-   Garden design tokens (see topics/garden-design-system.md)
-   Paper (light) is the default; Night (dark) and OLED (verydark) override it.
-   `auto` follows the OS: it inherits Paper and takes Night under a dark OS.
-   Existing token names keep their meaning so untouched components recolor.
+   Design tokens. Skins map to theme ids: Celadon = light (:root, also auto
+   under a light OS), Night = dark, Night OLED = verydark (surfaces only),
+   auto under a dark OS repeats Night. Design names (--canvas, --ink, --accent,
+   --r-*, --fs-*) hold the values; legacy names alias them in :root so older
+   components recolor. data-theme sits on <html>, so a :root alias resolves
+   against the active skin and needs no per-theme copy.
    ========================================================================== */
 
 :root {
   color-scheme: light;
+
+  /* Celadon (light) design tokens */
+  --canvas: #f3f5f3;
+  --surface: #ffffff;
+  --surface-2: #f7f9f8;
+  --surface-3: #edf1ee;
+  --side-bg: #f3f5f3;
+  --line: #dde3df;
+  --line-strong: #c5cec9;
+  --card-line: #e3e8e5;
+  --ink: #102019;
+  --ink-2: #3a4a43;
+  --ink-3: #57665f;
+  --ink-4: #8d9a94;
+  --accent: #0e7a66;
+  --accent-hover: #0b6a58;
+  --on-accent: #ffffff;
+  --accent-soft: #ddefea;
+  --accent-line: #9fd0c3;
+  --accent-ink: #0b5f50;
+  --link: #0b6a58;
+  --attn: #d08a12;
+  --attn-ink: #8a5a00;
+  --attn-soft: #fbefd9;
+  --attn-line: #ebc98c;
+  --on-attn: #2a1c00;
+  --run: #2d6cb5;
+  --run-ink: #1f5797;
+  --run-soft: #e2ecf7;
+  --run-halo: rgba(45, 108, 181, 0.22);
+  --err: #c8412a;
+  --err-ink: #a3311c;
+  --err-soft: #f8e3de;
+  --err-line: #edb5a8;
+  --on-err: #ffffff;
+  --idle: #8d9a94;
+  --idle-soft: #e9edea;
+  --queue-soft: #eef1ef;
+  --code-bg: #f6f8f7;
+  --code-inline-bg: #eef2ef;
+  --user-bubble: #e7eeea;
+  --user-bubble-line: #e7eeea;
+  --input-bg: #ffffff;
+  --switch-off: #d3dbd6;
+  --switch-knob: #ffffff;
+  --seg-track: #e6ebe8;
+  --seg-on: #ffffff;
+  --seg-shadow:
+    0 1px 2px rgba(16, 32, 25, 0.08), 0 2px 8px rgba(16, 32, 25, 0.06);
+  --nav-on-bg: #ffffff;
+  --nav-on-shadow:
+    0 1px 2px rgba(16, 32, 25, 0.06), 0 4px 14px rgba(16, 32, 25, 0.06);
+  --tabbar-bg: rgba(255, 255, 255, 0.94);
+  --phead-bg: rgba(243, 245, 243, 0.92);
+  --phead-line: rgba(16, 32, 25, 0.06);
+  --toast-bg: #102019;
+  --toast-ink: #f3f5f3;
+  --shadow-card:
+    0 1px 2px rgba(16, 32, 25, 0.06), 0 8px 24px rgba(16, 32, 25, 0.05);
+  --shadow-pop:
+    0 2px 6px rgba(16, 32, 25, 0.08), 0 18px 48px rgba(16, 32, 25, 0.16);
+  --shadow-composer:
+    0 1px 2px rgba(16, 32, 25, 0.06), 0 12px 32px rgba(16, 32, 25, 0.08);
+  --scrim: rgba(16, 32, 25, 0.34);
+  --ask-line: #ebc98c;
+  --ask-head: #fbefd9;
+  --font-ui:
+    "VIBEALLDAY Instrument Sans", "PingFang SC", "Noto Sans SC", system-ui,
+    sans-serif;
+  --font-mono:
+    "VIBEALLDAY DM Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --title-weight: 600;
+  --display-stretch: 100%;
+  --display-tracking: -0.015em;
+  --fs-display: 34px;
+  --fs-h1: 24px;
+  --fs-h2: 18px;
+  --fs-h3: 16px;
+  --fs-body: 15px;
+  --fs-small: 13.5px;
+  --fs-meta: 12px;
+  --fs-btn: 14.5px;
+  --fs-input: 15px;
+  --fs-code: 12.5px;
+  --fs-prose: 15.5px;
+  --fs-body-phone: 16px;
+  --fs-prose-phone: 16px;
+  --r-xs: 6px;
+  --r-sm: 8px;
+  --r-md: 12px;
+  --r-lg: 16px;
+  --r-card: 20px;
+  --r-btn: 999px;
+  --r-chip: 999px;
+  --r-seg: 999px;
+  --r-seg-item: 999px;
+  --r-input: 12px;
+  --r-sheet: 26px;
+  --r-dialog: 24px;
+  --r-bubble: 18px;
+  --r-composer: 22px;
+  --r-send: 999px;
+  --r-fab: 999px;
+  --r-icon-btn: 999px;
+  --r-toast: 999px;
+  --btn-h: 40px;
+  --btn-h-sm: 32px;
+  --btn-h-lg: 48px;
+  --btn-px: 18px;
+  --icon-btn: 38px;
+  --input-h: 42px;
+  --chip-h: 32px;
+  --seg-h: 34px;
+  --row-h: 48px;
+  --pad-card: 20px;
+  --sw-w: 40px;
+  --sw-h: 24px;
+  --err-marker-radius: 2px;
+  --err-marker-transform: none;
+
+  /* Design tokens that equal another token in every skin */
+  --ok: var(--accent);
+  --ok-ink: var(--accent-ink);
+  --ok-soft: var(--accent-soft);
+  --focus: var(--accent);
+  --tab-on: var(--accent);
+  --nav-on-ink: var(--ink);
+  --switch-knob-on: var(--on-accent);
+  --diff-add-bg: var(--bg-diff-added);
+  --diff-add-ink: var(--diff-gutter-added-foreground);
+  --diff-del-bg: var(--bg-diff-removed);
+  --diff-del-ink: var(--diff-gutter-removed-foreground);
+  --prov-claude: var(--provider-claude);
+  --prov-codex: var(--provider-codex);
+  --prov-gemini: var(--provider-gemini);
+  --prov-opencode: var(--provider-opencode);
+  --prov-grok: var(--provider-grok);
+  --prov-ollama: var(--provider-ollama);
 
   /* Typography */
   /* OS sans: the font settings' "System" choice. CJK falls back here. */
@@ -263,13 +485,10 @@
     sans-serif;
   --font-geist: "VIBEALLDAY Geist", var(--font-system-sans);
   --font-sans: var(--font-geist);
-  /* UI chrome font (composer, titles, captions). Defaults to Geist;
-     the Output Typography "UI font" control overrides it. */
-  --font-ui: var(--font-sans);
-  /* Display serif for titles, names and large counts; never controls. */
-  --font-display:
-    "VIBEALLDAY Fraunces", "Songti SC", "Noto Serif CJK SC",
-    "Source Han Serif SC", Georgia, ui-serif, serif;
+  /* --font-ui and --font-mono come from the skin; an explicit Output
+     Typography choice sets them inline on <html> and wins. Titles and
+     brand use the UI font. */
+  --font-display: var(--font-ui);
   --font-brand: var(--font-display);
   --font-output-serif: "Source Serif 4", Georgia, ui-serif, serif;
   --font-output-inter: "VIBEALLDAY Inter", var(--font-sans);
@@ -282,7 +501,6 @@
   --font-mono-iosevka: "VIBEALLDAY Iosevka", var(--font-mono-system);
   --font-mono-ibm-plex: "VIBEALLDAY IBM Plex Mono", var(--font-mono-system);
   --font-mono-fira: "VIBEALLDAY Fira Mono", var(--font-mono-system);
-  --font-mono: var(--font-mono-jetbrains);
   --font-size-xs: 10px;
   --font-size-sm: 12px;
   --font-size-base: 13px;
@@ -403,84 +621,82 @@
   --z-sheet: 9999;
   --z-menu: 10000;
 
-  /* Surfaces */
-  --bg-surface: #fbf8f2;
-  --bg-sunken: #f7f2e5;
-  --bg-card: #ffffff;
-  --bg-secondary: #ffffff;
-  --bg-tertiary: #f4efe0;
-  --bg-hover: #efe9da;
-  --bg-code: #f5f0e3;
-  --bg-input: #ffffff;
-  --bg-overlay: rgba(31, 36, 51, 0.4);
-  --bg-user-message: #edebf8;
-
-  /* Ink */
-  --text-primary: #1f2433;
-  --text-secondary: #3d4459;
-  --text-muted: #5a6377;
-  --text-dimmed: #8a92a4;
-  --ink-on: #ffffff;
+  /* Legacy surfaces, ink and lines alias the design tokens. Never rename or
+     remove one: thousands of var() uses depend on them. */
+  --bg-surface: var(--canvas);
+  --bg-sunken: var(--surface-2);
+  --bg-card: var(--surface);
+  --bg-secondary: var(--surface);
+  --bg-tertiary: var(--surface-3);
+  --bg-hover: var(--surface-3);
+  --bg-code: var(--code-bg);
+  --bg-input: var(--input-bg);
+  --bg-overlay: var(--scrim);
+  --bg-user-message: var(--user-bubble);
+  --text-primary: var(--ink);
+  --text-secondary: var(--ink-2);
+  --text-muted: var(--ink-3);
+  --text-dimmed: var(--ink-4);
+  --ink-on: var(--on-accent);
   --blame-author-color-lightness: 0.43;
   --blame-author-color-chroma: 0.12;
+  --border-color: var(--line);
+  --border-subtle: var(--card-line);
+  --border-input: var(--line-strong);
+  --dash: var(--line-strong);
 
-  /* Lines */
-  --border-color: #e8e2d2;
-  --border-subtle: #efeadd;
-  --border-input: #d5cdb7;
-  --line-strong: #d5cdb7;
-  --dash: #d9d2bf;
-
-  /* Brand and accents: base / ink (text on soft) / soft fill */
-  --indigo: #4f46b8;
-  --indigo-2: #6258d6;
-  --indigo-ink: #2e2680;
-  --indigo-soft: rgba(79, 70, 184, 0.08);
-  --indigo-soft-2: rgba(79, 70, 184, 0.14);
-  --rose: #e37a88;
-  --rose-ink: #b85067;
-  --rose-soft: rgba(227, 122, 136, 0.12);
-  --mint: #84c5a8;
-  --mint-ink: #3f8868;
-  --mint-soft: rgba(132, 197, 168, 0.18);
+  /* Legacy accent families: indigo = accent, rose = err, mint = ok,
+     sand = attn. Peach has no design role and keeps its own hue. */
+  --indigo: var(--accent);
+  --indigo-2: var(--accent-hover);
+  --indigo-ink: var(--accent-ink);
+  --indigo-soft: var(--accent-soft);
+  --indigo-soft-2: color-mix(in srgb, var(--accent) 22%, transparent);
+  --rose: var(--err);
+  --rose-ink: var(--err-ink);
+  --rose-soft: var(--err-soft);
+  --mint: var(--ok);
+  --mint-ink: var(--ok-ink);
+  --mint-soft: var(--ok-soft);
   --peach: #d97751;
   --peach-ink: #a04e2a;
   --peach-soft: rgba(217, 119, 81, 0.12);
-  --sand: #d9a441;
-  --sand-ink: #8e6c1f;
-  --sand-soft: rgba(217, 164, 65, 0.16);
-  --grey-soft: rgba(138, 146, 164, 0.16);
+  --sand: var(--attn);
+  --sand-ink: var(--attn-ink);
+  --sand-soft: var(--attn-soft);
+  --grey-soft: var(--idle-soft);
 
   /* Semantic colors (legacy names) */
   --app-accent: var(--indigo);
   --app-accent-dark: var(--indigo-ink);
   --app-vibeallday-yellow: var(--sand);
-  --app-claude-ivory: #fbf8f2;
-  --app-claude-slate: #1f2433;
+  --app-claude-ivory: #f3f5f3;
+  --app-claude-slate: #102019;
   --app-claude-orange: var(--peach);
-  --project-queue-action-bg: #6258d6;
-  --project-queue-new-session-action-bg: #2e2680;
-  --link-color: var(--indigo);
+  /* Queue actions carry white text; the new-session variant stays darker. */
+  --project-queue-action-bg: #2d6cb5;
+  --project-queue-new-session-action-bg: #1f5797;
+  --link-color: var(--link);
   --error-color: var(--rose-ink);
   --success-color: var(--mint-ink);
   --warning-color: var(--sand-ink);
   --warning-badge-bg: var(--peach-ink);
   --patient-queue-action-bg: var(--sand-ink);
   --attention-color: var(--indigo);
-  --focus-border: var(--indigo);
+  --focus-border: var(--focus);
   --primary-color: var(--indigo);
   --accent-color: var(--primary-color);
   --accent-primary: var(--primary-color);
   --accent-contrast: var(--ink-on);
-  --thinking-color: var(--mint-ink);
+  --thinking-color: var(--run-ink);
   --app-spinner-foreground: var(--thinking-color);
-  --tooltip-background: #1f2433;
-  --tooltip-foreground: #fbf8f2;
-  --tooltip-border: #1f2433;
+  --tooltip-background: var(--toast-bg);
+  --tooltip-foreground: var(--toast-ink);
+  --tooltip-border: var(--toast-bg);
 
   /* Aliases for names components used without a definition */
   --bg: var(--bg-surface);
-  --bg-primary: var(--bg-surface);
+  --bg-primary: var(--canvas);
   --bg-elevated: var(--bg-card);
   --bg-muted: var(--bg-tertiary);
   --bg-subtle: var(--bg-tertiary);
@@ -525,58 +741,53 @@
     var(--error-color) 85%,
     var(--text-primary)
   );
-  --info-color: var(--indigo);
+  --info-color: var(--run-ink);
   --focus-color: var(--focus-border);
   --focus-ring: var(--focus-border);
   --button-text: var(--accent-contrast);
 
   /* Timeline */
-  --timeline-dot-default: #8a92a4;
+  --timeline-dot-default: var(--idle);
   --timeline-dot-tool: var(--mint-ink);
   --timeline-dot-error: var(--rose-ink);
   --timeline-dot-warning: var(--sand-ink);
-  --timeline-dot-working: var(--peach);
-  --timeline-line-color: #e3dccb;
+  --timeline-dot-working: var(--run);
+  --timeline-line-color: var(--line);
 
-  /* Status badges */
+  /* Status badges: needs-input = attn, running = run */
   --status-badge-external-bg: var(--sand-soft);
-  --status-badge-external-text: #7a5c17;
-  --status-badge-running-bg: var(--peach-soft);
-  --status-badge-running-text: var(--peach-ink);
-  --status-badge-input-bg: var(--rose-soft);
-  --status-badge-input-text: var(--rose-ink);
+  --status-badge-external-text: var(--sand-ink);
+  --status-badge-running-bg: var(--run-soft);
+  --status-badge-running-text: var(--run-ink);
+  --status-badge-input-bg: var(--attn-soft);
+  --status-badge-input-text: var(--attn-ink);
 
-  /* Depth: paper edges rather than floating cards */
-  --shadow-xs: 0 1px 0 #f0ebd9;
-  --shadow-sm: 0 1px 2px rgba(31, 36, 51, 0.05), 0 1px 0 #f0ebd9;
-  --shadow-md: 0 4px 16px -8px rgba(31, 36, 51, 0.16);
-  --shadow-lg: 0 16px 40px -20px rgba(31, 36, 51, 0.24);
+  /* Legacy depth scale */
+  --shadow-xs: 0 1px 0 #e3e8e5;
+  --shadow-sm: 0 1px 2px rgba(16, 32, 25, 0.05), 0 1px 0 #e3e8e5;
+  --shadow-md: 0 4px 16px -8px rgba(16, 32, 25, 0.16);
+  --shadow-lg: 0 16px 40px -20px rgba(16, 32, 25, 0.24);
 
   /* Syntax highlighting */
-  --shiki-foreground: #24283a;
+  --shiki-foreground: #102019;
   --shiki-background: transparent;
-  --shiki-token-constant: #4f46b8;
-  --shiki-token-string: #2f6e52;
-  --shiki-token-comment: #646b7e;
-  --shiki-token-keyword: #a8435c;
-  --shiki-token-parameter: #9a4a26;
-  --shiki-token-function: #6a3fb5;
-  --shiki-token-string-expression: #2f6e52;
-  --shiki-token-punctuation: #3d4459;
-  --shiki-token-link: #4f46b8;
-  --shiki-token-deleted: #a8435c;
-  --shiki-token-inserted: #2f6e52;
+  --shiki-token-constant: #1f5797;
+  --shiki-token-string: #0b6a58;
+  --shiki-token-comment: #5a6862;
+  --shiki-token-keyword: #a3311c;
+  --shiki-token-parameter: #7a4f00;
+  --shiki-token-function: #6b4fa8;
+  --shiki-token-string-expression: #0b6a58;
+  --shiki-token-punctuation: #3a4a43;
+  --shiki-token-link: #0b6a58;
+  --shiki-token-deleted: #a3311c;
+  --shiki-token-inserted: #0b5f50;
 
   /* Garden Console (license-hub) names over the semantic tokens above, so
      every theme follows. Labels: mono UPPERCASE, tracked by role. */
   --bg-2: var(--bg-sunken);
   --bg-soft: var(--bg-tertiary);
   --card: var(--bg-card);
-  --ink: var(--text-primary);
-  --ink-2: var(--text-secondary);
-  --ink-3: var(--text-muted);
-  --ink-4: var(--text-dimmed);
-  --line: var(--border-color);
   --label-font: var(--font-mono);
   --eyebrow-size: 11px;
   --eyebrow-tracking: 0.08em;
@@ -592,278 +803,429 @@
   --z-topbar: 10;
 }
 
-@media (width < 768px) {
-  :root {
-    --topbar-height: 52px;
-    --page-gutter: 16px;
-  }
-}
-
-/* Night: warm ink surfaces, lifted indigo. Shared by dark, verydark and an
-   auto page under a dark OS (the media block below repeats these values). */
+/* Night: blue-black surfaces, lime accent only on primary actions and focus,
+   sky-blue links. Shared by dark, verydark and an auto page under a dark OS
+   (the media block below repeats these values). */
 [data-theme="dark"],
 [data-theme="verydark"] {
   color-scheme: dark;
-  --bg-surface: #14131a;
-  --bg-sunken: #1a1922;
-  --bg-card: #1e1d27;
-  --bg-secondary: #1e1d27;
-  --bg-tertiary: #26242f;
-  --bg-hover: #2c2a37;
-  --bg-code: #18171f;
-  --bg-input: #1e1d27;
-  --bg-overlay: rgba(6, 5, 10, 0.6);
-  --bg-user-message: #25223f;
-  --text-primary: #f1ede4;
-  --text-secondary: #d2cdc1;
-  --text-muted: #a29eae;
-  --text-dimmed: #7a7789;
-  --ink-on: #14131a;
+  --canvas: #0c0f14;
+  --surface: #12161d;
+  --surface-2: #181d26;
+  --surface-3: #1f2530;
+  --side-bg: #0f131a;
+  --line: #252c38;
+  --line-strong: #333c4a;
+  --card-line: #252c38;
+  --ink: #e9eef5;
+  --ink-2: #b3bcc9;
+  --ink-3: #95a0af;
+  --ink-4: #5e6878;
+  --accent: #c8f25a;
+  --accent-hover: #d6f77a;
+  --on-accent: #0c0f14;
+  --accent-soft: rgba(200, 242, 90, 0.12);
+  --accent-line: rgba(200, 242, 90, 0.45);
+  --accent-ink: #c8f25a;
+  --link: #7ccfff;
+  --attn: #ffb648;
+  --attn-ink: #ffc46b;
+  --attn-soft: rgba(255, 182, 72, 0.13);
+  --attn-line: rgba(255, 182, 72, 0.45);
+  --on-attn: #1a1205;
+  --run: #62c6ff;
+  --run-ink: #7ccfff;
+  --run-soft: rgba(98, 198, 255, 0.12);
+  --run-halo: rgba(98, 198, 255, 0.28);
+  --err: #ff6a5c;
+  --err-ink: #ff8e83;
+  --err-soft: rgba(255, 106, 92, 0.13);
+  --err-line: rgba(255, 106, 92, 0.45);
+  --on-err: #170605;
+  --idle: #8590a0;
+  --idle-soft: rgba(133, 144, 160, 0.14);
+  --queue-soft: rgba(133, 144, 160, 0.1);
+  --code-bg: #0a0d11;
+  --code-inline-bg: #1a202a;
+  --user-bubble: #181d26;
+  --user-bubble-line: #2a3240;
+  --input-bg: #0f131a;
+  --switch-off: #2a3240;
+  --switch-knob: #b3bcc9;
+  --seg-track: #0f131a;
+  --seg-on: #232a36;
+  --seg-shadow: none;
+  --nav-on-bg: #1a2029;
+  --nav-on-shadow: inset 3px 0 0 #c8f25a;
+  --tabbar-bg: rgba(12, 15, 20, 0.94);
+  --phead-bg: rgba(12, 15, 20, 0.92);
+  --phead-line: #1c222c;
+  --toast-bg: #e9eef5;
+  --toast-ink: #0c0f14;
+  --shadow-card: none;
+  --shadow-pop: 0 16px 40px rgba(0, 0, 0, 0.55), 0 0 0 1px #333c4a;
+  --shadow-composer: 0 -8px 24px rgba(0, 0, 0, 0.35);
+  --scrim: rgba(3, 5, 8, 0.62);
+  --ask-line: #c8f25a;
+  --ask-head: rgba(255, 182, 72, 0.1);
+  --font-ui:
+    "VIBEALLDAY Archivo", "PingFang SC", "Noto Sans SC", system-ui, sans-serif;
+  --font-mono:
+    "VIBEALLDAY IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --title-weight: 700;
+  --display-stretch: 110%;
+  --display-tracking: -0.01em;
+  --fs-display: 32px;
+  --fs-h1: 22px;
+  --fs-h2: 17px;
+  --fs-h3: 15px;
+  --fs-body: 14px;
+  --fs-small: 13px;
+  --fs-meta: 12px;
+  --fs-btn: 14px;
+  --fs-input: 14px;
+  --fs-code: 12.5px;
+  --fs-prose: 14.5px;
+  --fs-body-phone: 15px;
+  --fs-prose-phone: 15.5px;
+  --r-xs: 4px;
+  --r-sm: 6px;
+  --r-md: 8px;
+  --r-lg: 12px;
+  --r-card: 12px;
+  --r-btn: 8px;
+  --r-chip: 6px;
+  --r-seg: 9px;
+  --r-seg-item: 7px;
+  --r-input: 8px;
+  --r-sheet: 16px;
+  --r-dialog: 14px;
+  --r-bubble: 10px;
+  --r-composer: 12px;
+  --r-send: 8px;
+  --r-fab: 10px;
+  --r-icon-btn: 8px;
+  --r-toast: 10px;
+  --btn-h: 36px;
+  --btn-h-sm: 30px;
+  --btn-h-lg: 44px;
+  --btn-px: 16px;
+  --icon-btn: 34px;
+  --input-h: 36px;
+  --chip-h: 28px;
+  --seg-h: 30px;
+  --row-h: 40px;
+  --pad-card: 16px;
+  --sw-w: 36px;
+  --sw-h: 20px;
+  --err-marker-radius: 1px;
+  --err-marker-transform: rotate(45deg) scale(0.86);
   --blame-author-color-lightness: 0.78;
   --blame-author-color-chroma: 0.13;
-  --border-color: #2e2c39;
-  --border-subtle: #25232f;
-  --border-input: #3d3a4b;
-  --line-strong: #3d3a4b;
-  --dash: #363344;
-  --indigo: #8b83f0;
-  --indigo-2: #a59ff5;
-  --indigo-ink: #c9c5fa;
-  --indigo-soft: rgba(139, 131, 240, 0.14);
-  --indigo-soft-2: rgba(139, 131, 240, 0.22);
-  --rose: #ee8e9b;
-  --rose-ink: #f4a7b1;
-  --rose-soft: rgba(238, 142, 155, 0.16);
-  --mint: #7fcba9;
-  --mint-ink: #8edbb9;
-  --mint-soft: rgba(127, 203, 169, 0.16);
   --peach: #e8895f;
   --peach-ink: #f2a27e;
   --peach-soft: rgba(232, 137, 95, 0.16);
-  --sand: #e0b04f;
-  --sand-ink: #ebc673;
-  --sand-soft: rgba(224, 176, 79, 0.16);
-  --grey-soft: rgba(162, 158, 174, 0.14);
-  --link-color: var(--indigo-2);
-  --attention-color: var(--indigo-2);
   --warning-badge-bg: #c9683f;
   --patient-queue-action-bg: #a9812b;
-  --project-queue-action-bg: #7a71e6;
-  --project-queue-new-session-action-bg: #5b52c9;
-  --app-accent-dark: var(--indigo-2);
-  --app-claude-ivory: #f1ede4;
-  --app-claude-slate: #14131a;
-  --tooltip-background: #f1ede4;
-  --tooltip-foreground: #14131a;
-  --tooltip-border: #f1ede4;
-  --timeline-dot-default: #6f6c7d;
-  --timeline-line-color: #2e2c39;
-  --status-badge-external-text: var(--sand-ink);
-  --status-badge-input-text: var(--rose-ink);
+  --project-queue-action-bg: #2f6fb8;
+  --project-queue-new-session-action-bg: #22548e;
+  --app-claude-ivory: #e9eef5;
+  --app-claude-slate: #0c0f14;
   --shadow-xs: inset 0 1px 0 rgba(255, 255, 255, 0.04);
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
   --shadow-md: 0 6px 20px -8px rgba(0, 0, 0, 0.6);
   --shadow-lg: 0 20px 48px -20px rgba(0, 0, 0, 0.7);
-  --shiki-foreground: #e8e4da;
-  --shiki-token-constant: #a59ff5;
-  --shiki-token-string: #9ad6b8;
-  --shiki-token-comment: #8d899c;
-  --shiki-token-keyword: #f4a7b1;
-  --shiki-token-parameter: #f2a27e;
-  --shiki-token-function: #c9c5fa;
-  --shiki-token-string-expression: #8edbb9;
-  --shiki-token-punctuation: #c9c4b8;
-  --shiki-token-link: #a59ff5;
-  --shiki-token-deleted: #f4a7b1;
-  --shiki-token-inserted: #8edbb9;
+  --shiki-foreground: #e9eef5;
+  --shiki-token-constant: #7ccfff;
+  --shiki-token-string: #ddf5a8;
+  --shiki-token-comment: #8e99a9;
+  --shiki-token-keyword: #ff8e83;
+  --shiki-token-parameter: #ffc46b;
+  --shiki-token-function: #c9b6ff;
+  --shiki-token-string-expression: #7fdcb4;
+  --shiki-token-punctuation: #b3bcc9;
+  --shiki-token-link: #7ccfff;
+  --shiki-token-deleted: #ffb4ac;
+  --shiki-token-inserted: #ddf5a8;
 }
 
-/* OLED: Night ink and accents over near-black surfaces. */
+/* Night OLED: Night ink and accents over pure-black surfaces. */
 :root[data-theme="verydark"] {
-  --bg-surface: #0b0a0f;
-  --bg-sunken: #100f15;
-  --bg-card: #15141b;
-  --bg-secondary: #15141b;
-  --bg-tertiary: #1c1b23;
-  --bg-hover: #23212c;
-  --bg-code: #111016;
-  --bg-input: #15141b;
-  --bg-user-message: #1d1a31;
-  --ink-on: #0b0a0f;
-  --border-color: #24222d;
-  --border-subtle: #1b1a22;
-  --border-input: #34313f;
-  --line-strong: #34313f;
-  --dash: #2c2a36;
-  --timeline-line-color: #24222d;
+  --canvas: #000000;
+  --surface: #0a0c10;
+  --surface-2: #11141a;
+  --surface-3: #181c23;
+  --side-bg: #000000;
+  --line: #1d232c;
+  --line-strong: #2a313c;
+  --card-line: #1d232c;
+  --input-bg: #05070a;
+  --seg-track: #05070a;
+  --seg-on: #1a1f27;
+  --tabbar-bg: rgba(0, 0, 0, 0.94);
+  --phead-bg: rgba(0, 0, 0, 0.92);
+  --phead-line: #14181f;
+  --code-bg: #05070a;
+  --user-bubble: #11141a;
 }
 
 @media (prefers-color-scheme: dark) {
   [data-theme="auto"] {
     color-scheme: dark;
-    --bg-surface: #14131a;
-    --bg-sunken: #1a1922;
-    --bg-card: #1e1d27;
-    --bg-secondary: #1e1d27;
-    --bg-tertiary: #26242f;
-    --bg-hover: #2c2a37;
-    --bg-code: #18171f;
-    --bg-input: #1e1d27;
-    --bg-overlay: rgba(6, 5, 10, 0.6);
-    --bg-user-message: #25223f;
-    --text-primary: #f1ede4;
-    --text-secondary: #d2cdc1;
-    --text-muted: #a29eae;
-    --text-dimmed: #7a7789;
-    --ink-on: #14131a;
+    --canvas: #0c0f14;
+    --surface: #12161d;
+    --surface-2: #181d26;
+    --surface-3: #1f2530;
+    --side-bg: #0f131a;
+    --line: #252c38;
+    --line-strong: #333c4a;
+    --card-line: #252c38;
+    --ink: #e9eef5;
+    --ink-2: #b3bcc9;
+    --ink-3: #95a0af;
+    --ink-4: #5e6878;
+    --accent: #c8f25a;
+    --accent-hover: #d6f77a;
+    --on-accent: #0c0f14;
+    --accent-soft: rgba(200, 242, 90, 0.12);
+    --accent-line: rgba(200, 242, 90, 0.45);
+    --accent-ink: #c8f25a;
+    --link: #7ccfff;
+    --attn: #ffb648;
+    --attn-ink: #ffc46b;
+    --attn-soft: rgba(255, 182, 72, 0.13);
+    --attn-line: rgba(255, 182, 72, 0.45);
+    --on-attn: #1a1205;
+    --run: #62c6ff;
+    --run-ink: #7ccfff;
+    --run-soft: rgba(98, 198, 255, 0.12);
+    --run-halo: rgba(98, 198, 255, 0.28);
+    --err: #ff6a5c;
+    --err-ink: #ff8e83;
+    --err-soft: rgba(255, 106, 92, 0.13);
+    --err-line: rgba(255, 106, 92, 0.45);
+    --on-err: #170605;
+    --idle: #8590a0;
+    --idle-soft: rgba(133, 144, 160, 0.14);
+    --queue-soft: rgba(133, 144, 160, 0.1);
+    --code-bg: #0a0d11;
+    --code-inline-bg: #1a202a;
+    --user-bubble: #181d26;
+    --user-bubble-line: #2a3240;
+    --input-bg: #0f131a;
+    --switch-off: #2a3240;
+    --switch-knob: #b3bcc9;
+    --seg-track: #0f131a;
+    --seg-on: #232a36;
+    --seg-shadow: none;
+    --nav-on-bg: #1a2029;
+    --nav-on-shadow: inset 3px 0 0 #c8f25a;
+    --tabbar-bg: rgba(12, 15, 20, 0.94);
+    --phead-bg: rgba(12, 15, 20, 0.92);
+    --phead-line: #1c222c;
+    --toast-bg: #e9eef5;
+    --toast-ink: #0c0f14;
+    --shadow-card: none;
+    --shadow-pop: 0 16px 40px rgba(0, 0, 0, 0.55), 0 0 0 1px #333c4a;
+    --shadow-composer: 0 -8px 24px rgba(0, 0, 0, 0.35);
+    --scrim: rgba(3, 5, 8, 0.62);
+    --ask-line: #c8f25a;
+    --ask-head: rgba(255, 182, 72, 0.1);
+    --font-ui:
+      "VIBEALLDAY Archivo", "PingFang SC", "Noto Sans SC", system-ui, sans-serif;
+    --font-mono:
+      "VIBEALLDAY IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo,
+      monospace;
+    --title-weight: 700;
+    --display-stretch: 110%;
+    --display-tracking: -0.01em;
+    --fs-display: 32px;
+    --fs-h1: 22px;
+    --fs-h2: 17px;
+    --fs-h3: 15px;
+    --fs-body: 14px;
+    --fs-small: 13px;
+    --fs-meta: 12px;
+    --fs-btn: 14px;
+    --fs-input: 14px;
+    --fs-code: 12.5px;
+    --fs-prose: 14.5px;
+    --fs-body-phone: 15px;
+    --fs-prose-phone: 15.5px;
+    --r-xs: 4px;
+    --r-sm: 6px;
+    --r-md: 8px;
+    --r-lg: 12px;
+    --r-card: 12px;
+    --r-btn: 8px;
+    --r-chip: 6px;
+    --r-seg: 9px;
+    --r-seg-item: 7px;
+    --r-input: 8px;
+    --r-sheet: 16px;
+    --r-dialog: 14px;
+    --r-bubble: 10px;
+    --r-composer: 12px;
+    --r-send: 8px;
+    --r-fab: 10px;
+    --r-icon-btn: 8px;
+    --r-toast: 10px;
+    --btn-h: 36px;
+    --btn-h-sm: 30px;
+    --btn-h-lg: 44px;
+    --btn-px: 16px;
+    --icon-btn: 34px;
+    --input-h: 36px;
+    --chip-h: 28px;
+    --seg-h: 30px;
+    --row-h: 40px;
+    --pad-card: 16px;
+    --sw-w: 36px;
+    --sw-h: 20px;
+    --err-marker-radius: 1px;
+    --err-marker-transform: rotate(45deg) scale(0.86);
     --blame-author-color-lightness: 0.78;
     --blame-author-color-chroma: 0.13;
-    --border-color: #2e2c39;
-    --border-subtle: #25232f;
-    --border-input: #3d3a4b;
-    --line-strong: #3d3a4b;
-    --dash: #363344;
-    --indigo: #8b83f0;
-    --indigo-2: #a59ff5;
-    --indigo-ink: #c9c5fa;
-    --indigo-soft: rgba(139, 131, 240, 0.14);
-    --indigo-soft-2: rgba(139, 131, 240, 0.22);
-    --rose: #ee8e9b;
-    --rose-ink: #f4a7b1;
-    --rose-soft: rgba(238, 142, 155, 0.16);
-    --mint: #7fcba9;
-    --mint-ink: #8edbb9;
-    --mint-soft: rgba(127, 203, 169, 0.16);
     --peach: #e8895f;
     --peach-ink: #f2a27e;
     --peach-soft: rgba(232, 137, 95, 0.16);
-    --sand: #e0b04f;
-    --sand-ink: #ebc673;
-    --sand-soft: rgba(224, 176, 79, 0.16);
-    --grey-soft: rgba(162, 158, 174, 0.14);
-    --link-color: var(--indigo-2);
-    --attention-color: var(--indigo-2);
     --warning-badge-bg: #c9683f;
     --patient-queue-action-bg: #a9812b;
-    --project-queue-action-bg: #7a71e6;
-    --project-queue-new-session-action-bg: #5b52c9;
-    --app-accent-dark: var(--indigo-2);
-    --app-claude-ivory: #f1ede4;
-    --app-claude-slate: #14131a;
-    --tooltip-background: #f1ede4;
-    --tooltip-foreground: #14131a;
-    --tooltip-border: #f1ede4;
-    --timeline-dot-default: #6f6c7d;
-    --timeline-line-color: #2e2c39;
-    --status-badge-external-text: var(--sand-ink);
-    --status-badge-input-text: var(--rose-ink);
+    --project-queue-action-bg: #2f6fb8;
+    --project-queue-new-session-action-bg: #22548e;
+    --app-claude-ivory: #e9eef5;
+    --app-claude-slate: #0c0f14;
     --shadow-xs: inset 0 1px 0 rgba(255, 255, 255, 0.04);
     --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
     --shadow-md: 0 6px 20px -8px rgba(0, 0, 0, 0.6);
     --shadow-lg: 0 20px 48px -20px rgba(0, 0, 0, 0.7);
-    --shiki-foreground: #e8e4da;
-    --shiki-token-constant: #a59ff5;
-    --shiki-token-string: #9ad6b8;
-    --shiki-token-comment: #8d899c;
-    --shiki-token-keyword: #f4a7b1;
-    --shiki-token-parameter: #f2a27e;
-    --shiki-token-function: #c9c5fa;
-    --shiki-token-string-expression: #8edbb9;
-    --shiki-token-punctuation: #c9c4b8;
-    --shiki-token-link: #a59ff5;
-    --shiki-token-deleted: #f4a7b1;
-    --shiki-token-inserted: #8edbb9;
+    --shiki-foreground: #e9eef5;
+    --shiki-token-constant: #7ccfff;
+    --shiki-token-string: #ddf5a8;
+    --shiki-token-comment: #8e99a9;
+    --shiki-token-keyword: #ff8e83;
+    --shiki-token-parameter: #ffc46b;
+    --shiki-token-function: #c9b6ff;
+    --shiki-token-string-expression: #7fdcb4;
+    --shiki-token-punctuation: #b3bcc9;
+    --shiki-token-link: #7ccfff;
+    --shiki-token-deleted: #ffb4ac;
+    --shiki-token-inserted: #ddf5a8;
+  }
+}
+
+/* Phone: larger touch sizes for every skin. After the theme blocks, which
+   share its specificity; before the diff palettes, which must stay last. */
+@media (width < 768px) {
+  :root {
+    --btn-h: 44px;
+    --btn-h-sm: 36px;
+    --btn-h-lg: 50px;
+    --icon-btn: 44px;
+    --input-h: 48px;
+    --fs-input: 16px;
+    --chip-h: 36px;
+    --seg-h: 38px;
+    --row-h: 52px;
+    --pad-card: 16px;
+    --sw-w: 48px;
+    --sw-h: 28px;
+    --fs-body: var(--fs-body-phone);
+    --fs-prose: var(--fs-prose-phone);
+    --topbar-height: 52px;
+    --page-gutter: 16px;
   }
 }
 
 /* Diff palettes are audited against the uniform added/removed line fills at
    3.5:1. Keep these opaque: every diff block for a theme must present syntax
-   colors against the same two known backgrounds. They own every --bg-diff-*
-   token and stay grouped here rather than in the theme blocks above. */
+   colors against the same two known backgrounds. Design tints are
+   pre-blended over each skin's --surface. They own every --bg-diff-* token
+   and stay grouped here, after every other theme rule. */
 /* eslint-disable cssicorn/no-duplicate-selectors -- palettes grouped by design */
 :root {
-  --bg-diff-added: #e1f0e6;
-  --bg-diff-removed: #f8e3e5;
-  --bg-diff-gutter-added: #c9e4d3;
-  --bg-diff-gutter-removed: #f1ccd2;
-  --diff-gutter-added-foreground: #24603f;
-  --diff-gutter-removed-foreground: #9b3550;
-  --diff-shiki-foreground: #24283a;
-  --diff-shiki-token-constant: #4338a8;
-  --diff-shiki-token-string: #23573d;
-  --diff-shiki-token-comment: #5f6679;
-  --diff-shiki-token-keyword: #9b3550;
-  --diff-shiki-token-parameter: #8a3f1d;
-  --diff-shiki-token-function: #5e35a8;
-  --diff-shiki-token-string-expression: #23573d;
-  --diff-shiki-token-punctuation: #2e3346;
-  --diff-shiki-token-link: #4338a8;
-  --diff-shiki-token-deleted: #9b3550;
-  --diff-shiki-token-inserted: #23573d;
+  --bg-diff-added: #e3f2ec;
+  --bg-diff-removed: #fbe9e4;
+  --bg-diff-gutter-added: #cde7dc;
+  --bg-diff-gutter-removed: #f4d3ca;
+  --diff-gutter-added-foreground: #0b5f50;
+  --diff-gutter-removed-foreground: #a3311c;
+  --diff-shiki-foreground: #102019;
+  --diff-shiki-token-constant: #1a4c85;
+  --diff-shiki-token-string: #0a5a4b;
+  --diff-shiki-token-comment: #4f5c56;
+  --diff-shiki-token-keyword: #952c18;
+  --diff-shiki-token-parameter: #6b4500;
+  --diff-shiki-token-function: #5e439a;
+  --diff-shiki-token-string-expression: #0a5a4b;
+  --diff-shiki-token-punctuation: #33413b;
+  --diff-shiki-token-link: #0a5a4b;
+  --diff-shiki-token-deleted: #952c18;
+  --diff-shiki-token-inserted: #0a5a4b;
 }
 
 [data-theme="dark"] {
-  --bg-diff-added: #1c2924;
-  --bg-diff-removed: #2d1c23;
-  --bg-diff-gutter-added: #263d33;
-  --bg-diff-gutter-removed: #472833;
-  --diff-gutter-added-foreground: #8edbb9;
-  --diff-gutter-removed-foreground: #f4a7b1;
-  --diff-shiki-foreground: #e8e4da;
-  --diff-shiki-token-constant: #a59ff5;
-  --diff-shiki-token-string: #9ad6b8;
-  --diff-shiki-token-comment: #8f8b9e;
-  --diff-shiki-token-keyword: #f4a7b1;
-  --diff-shiki-token-parameter: #f2a27e;
-  --diff-shiki-token-function: #c9c5fa;
-  --diff-shiki-token-string-expression: #8edbb9;
-  --diff-shiki-token-punctuation: #d2cdc1;
-  --diff-shiki-token-link: #a59ff5;
-  --diff-shiki-token-deleted: #f4a7b1;
-  --diff-shiki-token-inserted: #8edbb9;
+  --bg-diff-added: #222a22;
+  --bg-diff-removed: #2c1f24;
+  --bg-diff-gutter-added: #364229;
+  --bg-diff-gutter-removed: #46282b;
+  --diff-gutter-added-foreground: #ddf5a8;
+  --diff-gutter-removed-foreground: #ffb4ac;
+  --diff-shiki-foreground: #e9eef5;
+  --diff-shiki-token-constant: #7ccfff;
+  --diff-shiki-token-string: #ddf5a8;
+  --diff-shiki-token-comment: #8e99a9;
+  --diff-shiki-token-keyword: #ff8e83;
+  --diff-shiki-token-parameter: #ffc46b;
+  --diff-shiki-token-function: #c9b6ff;
+  --diff-shiki-token-string-expression: #7fdcb4;
+  --diff-shiki-token-punctuation: #b3bcc9;
+  --diff-shiki-token-link: #7ccfff;
+  --diff-shiki-token-deleted: #ffb4ac;
+  --diff-shiki-token-inserted: #ddf5a8;
 }
 
 [data-theme="verydark"] {
-  --bg-diff-added: #16201c;
-  --bg-diff-removed: #241820;
-  --bg-diff-gutter-added: #1f332a;
-  --bg-diff-gutter-removed: #3a2029;
-  --diff-gutter-added-foreground: #8edbb9;
-  --diff-gutter-removed-foreground: #f4a7b1;
-  --diff-shiki-foreground: #e8e4da;
-  --diff-shiki-token-constant: #a59ff5;
-  --diff-shiki-token-string: #9ad6b8;
-  --diff-shiki-token-comment: #8a869a;
-  --diff-shiki-token-keyword: #f4a7b1;
-  --diff-shiki-token-parameter: #f2a27e;
-  --diff-shiki-token-function: #c9c5fa;
-  --diff-shiki-token-string-expression: #8edbb9;
-  --diff-shiki-token-punctuation: #d2cdc1;
-  --diff-shiki-token-link: #a59ff5;
-  --diff-shiki-token-deleted: #f4a7b1;
-  --diff-shiki-token-inserted: #8edbb9;
+  --bg-diff-added: #1b2117;
+  --bg-diff-removed: #251618;
+  --bg-diff-gutter-added: #303a1f;
+  --bg-diff-gutter-removed: #402121;
+  --diff-gutter-added-foreground: #ddf5a8;
+  --diff-gutter-removed-foreground: #ffb4ac;
+  --diff-shiki-foreground: #e9eef5;
+  --diff-shiki-token-constant: #7ccfff;
+  --diff-shiki-token-string: #ddf5a8;
+  --diff-shiki-token-comment: #8e99a9;
+  --diff-shiki-token-keyword: #ff8e83;
+  --diff-shiki-token-parameter: #ffc46b;
+  --diff-shiki-token-function: #c9b6ff;
+  --diff-shiki-token-string-expression: #7fdcb4;
+  --diff-shiki-token-punctuation: #b3bcc9;
+  --diff-shiki-token-link: #7ccfff;
+  --diff-shiki-token-deleted: #ffb4ac;
+  --diff-shiki-token-inserted: #ddf5a8;
 }
 
 @media (prefers-color-scheme: dark) {
   [data-theme="auto"] {
-    --bg-diff-added: #1c2924;
-    --bg-diff-removed: #2d1c23;
-    --bg-diff-gutter-added: #263d33;
-    --bg-diff-gutter-removed: #472833;
-    --diff-gutter-added-foreground: #8edbb9;
-    --diff-gutter-removed-foreground: #f4a7b1;
-    --diff-shiki-foreground: #e8e4da;
-    --diff-shiki-token-constant: #a59ff5;
-    --diff-shiki-token-string: #9ad6b8;
-    --diff-shiki-token-comment: #8f8b9e;
-    --diff-shiki-token-keyword: #f4a7b1;
-    --diff-shiki-token-parameter: #f2a27e;
-    --diff-shiki-token-function: #c9c5fa;
-    --diff-shiki-token-string-expression: #8edbb9;
-    --diff-shiki-token-punctuation: #d2cdc1;
-    --diff-shiki-token-link: #a59ff5;
-    --diff-shiki-token-deleted: #f4a7b1;
-    --diff-shiki-token-inserted: #8edbb9;
+    --bg-diff-added: #222a22;
+    --bg-diff-removed: #2c1f24;
+    --bg-diff-gutter-added: #364229;
+    --bg-diff-gutter-removed: #46282b;
+    --diff-gutter-added-foreground: #ddf5a8;
+    --diff-gutter-removed-foreground: #ffb4ac;
+    --diff-shiki-foreground: #e9eef5;
+    --diff-shiki-token-constant: #7ccfff;
+    --diff-shiki-token-string: #ddf5a8;
+    --diff-shiki-token-comment: #8e99a9;
+    --diff-shiki-token-keyword: #ff8e83;
+    --diff-shiki-token-parameter: #ffc46b;
+    --diff-shiki-token-function: #c9b6ff;
+    --diff-shiki-token-string-expression: #7fdcb4;
+    --diff-shiki-token-punctuation: #b3bcc9;
+    --diff-shiki-token-link: #7ccfff;
+    --diff-shiki-token-deleted: #ffb4ac;
+    --diff-shiki-token-inserted: #ddf5a8;
   }
 }
 /* eslint-enable cssicorn/no-duplicate-selectors */

@@ -1,35 +1,35 @@
-/*
- * Garden provider hues: Claude = peach, Codex = mint, Gemini = indigo.
- * Each keeps >= 4.5:1 against its theme's page (--bg-surface); a single
- * mid-gray for every provider is not the contract.
- */
+/* Provider hues per skin. Each keeps >= 4.5:1 against its theme's page
+   (--canvas); a single mid-gray for every provider is not the contract. */
 
 :root {
-  --provider-claude: #a04e2a;
-  --provider-codex: #2f6e52;
-  --provider-gemini: #4f46b8;
-  --provider-grok: #1f2433;
-  --provider-opencode: #7a3fa8;
+  --provider-claude: #b4532a;
+  --provider-codex: #1f6f8b;
+  --provider-gemini: #3d5bc9;
+  --provider-grok: #3a4a43;
+  --provider-ollama: #6b4fa8;
+  --provider-opencode: #8a6210;
   --provider-pi: #1f6f6a;
 }
 
 [data-theme="dark"],
 [data-theme="verydark"] {
-  --provider-claude: #f2a27e;
-  --provider-codex: #8edbb9;
-  --provider-gemini: #a59ff5;
-  --provider-grok: #e8e4da;
-  --provider-opencode: #cfa6f0;
+  --provider-claude: #ffa46e;
+  --provider-codex: #7fdcb4;
+  --provider-gemini: #8eb6ff;
+  --provider-grok: #d0d6df;
+  --provider-ollama: #c9b6ff;
+  --provider-opencode: #e3c46b;
   --provider-pi: #7fd3cb;
 }
 
 @media (prefers-color-scheme: dark) {
   [data-theme="auto"] {
-    --provider-claude: #f2a27e;
-    --provider-codex: #8edbb9;
-    --provider-gemini: #a59ff5;
-    --provider-grok: #e8e4da;
-    --provider-opencode: #cfa6f0;
+    --provider-claude: #ffa46e;
+    --provider-codex: #7fdcb4;
+    --provider-gemini: #8eb6ff;
+    --provider-grok: #d0d6df;
+    --provider-ollama: #c9b6ff;
+    --provider-opencode: #e3c46b;
     --provider-pi: #7fd3cb;
   }
 }

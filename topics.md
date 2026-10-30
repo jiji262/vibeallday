@@ -466,3 +466,5 @@
 - android-host — experimental on-device VIBEALLDAY host, shared Alpine payload and lifecycle.
 
 - rendezvous — project file uploads, live-session routing, attachment previews, and held burst overflow.
+
+- vad-ui-redesign — 清瓷/夜航 visual redesign of every client page: tokens, fonts, shell, pages and settings.

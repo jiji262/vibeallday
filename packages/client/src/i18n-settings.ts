@@ -19,13 +19,13 @@ import type { SettingsCategory } from "./pages/settings/types";
 export function getThemeLabel(theme: Theme, t: TranslationFn): string {
   switch (theme) {
     case "auto":
-      return t("themeAuto");
+      return t("settingsAppearanceThemeSystem");
     case "light":
-      return t("themeLight");
+      return t("settingsAppearanceThemeCeladon");
     case "dark":
-      return t("themeDark");
+      return t("settingsAppearanceThemeNight");
     case "verydark":
-      return t("themeVerydark");
+      return t("settingsAppearanceThemeNightOled");
   }
 }
 

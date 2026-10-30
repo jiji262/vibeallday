@@ -6,6 +6,8 @@ import {
   normalizeEffortLevelForProvider,
 } from "../lib/effortLevels";
 import { useI18n } from "../i18n";
+import { ProviderMark } from "./garden/ProviderMark";
+import { StatusDot } from "./garden/StatusDot";
 import styles from "./ProviderBadge.module.css";
 
 const PROVIDER_COLORS: Record<ProviderName, string> = {
@@ -63,7 +65,8 @@ interface ProviderBadgeProps {
 }
 
 /**
- * Badge showing which AI provider is running a session.
+ * Badge showing which AI provider is running a session: the provider letter
+ * tile, the model, and a run marker while the session is thinking.
  * Use compact mode for sidebar lists, full mode for session headers.
  */
 export function ProviderBadge({
@@ -153,7 +156,6 @@ export function ProviderBadge({
     );
   }
 
-  const dotClass = `${styles.dot} ${isThinking ? styles.thinking : ""}`;
   const effortToneClass = effortTone
     ? {
         off: styles.off,
@@ -165,19 +167,18 @@ export function ProviderBadge({
         max: styles.max,
       }[effortTone]
     : "";
-  const dotStyle = isThinking
-    ? { backgroundColor: "var(--thinking-color)" }
-    : { backgroundColor: color };
 
   return (
     <span
       className={`provider-badge ${styles.badge} ${condensed ? styles.condensed : ""} ${flat ? styles.flat : ""} ${className}`}
-      style={flat ? undefined : { borderColor: color, color }}
       title={accessibleTitle}
       role="img"
       aria-label={accessibleTitle}
     >
-      <span className={dotClass} style={dotStyle} />
+      <ProviderMark provider={provider} size="sm" className={styles.mark} />
+      {isThinking ? (
+        <StatusDot state="run" className={styles.thinking} />
+      ) : null}
       <span className={`provider-badge-label ${styles.model}`}>
         {condensed ? (
           <span style={modelColorStyle}>{condensedModel}</span>

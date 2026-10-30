@@ -8,7 +8,7 @@
   min-height: 56px;
   margin: 0;
   padding: var(--space-3) var(--space-5);
-  border-bottom: 1px dashed var(--dash);
+  border-bottom: 1px dashed var(--line);
 }
 
 .title {
@@ -31,7 +31,7 @@
   height: 22px;
   padding: 0 var(--space-2);
   border-radius: var(--radius-pill);
-  font-family: var(--label-font);
+  font-family: var(--font-mono);
   font-size: 12px;
   font-weight: 500;
   letter-spacing: var(--badge-tracking);
@@ -39,23 +39,23 @@
 }
 
 .default {
-  background: var(--bg-soft);
+  background: var(--surface-3);
   color: var(--ink-3);
 }
 
 .rose {
-  background: var(--rose-soft);
-  color: var(--rose-ink);
+  background: var(--err-soft);
+  color: var(--err-ink);
 }
 
 .mint {
-  background: var(--mint-soft);
-  color: var(--mint-ink);
+  background: var(--ok-soft);
+  color: var(--ok-ink);
 }
 
 .sand {
-  background: var(--sand-soft);
-  color: var(--sand-ink);
+  background: var(--attn-soft);
+  color: var(--attn-ink);
 }
 
 .action {

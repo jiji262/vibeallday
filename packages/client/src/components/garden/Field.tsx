@@ -1,4 +1,4 @@
-import { forwardRef, type InputHTMLAttributes } from "react";
+import { forwardRef, type InputHTMLAttributes, type ReactNode } from "react";
 import styles from "./Field.module.css";
 import { SearchIcon } from "./icons";
 
@@ -14,6 +14,39 @@ export function inputClassName(className?: string): string {
 /** Native `<select>` with the garden trigger look: chevron and shadow-xs. */
 export function selectClassName(className?: string): string {
   return join(styles.control, styles.select, className);
+}
+
+/** Multi-line text recipe: the input look with a 96px minimum and resize. */
+export function textareaClassName(className?: string): string {
+  return join(styles.control, styles.textarea, className);
+}
+
+interface FieldProps {
+  label: ReactNode;
+  /** id of the control the label names. */
+  htmlFor: string;
+  hint?: ReactNode;
+  children: ReactNode;
+  className?: string;
+}
+
+/** Label, control and optional hint stacked (design .field). */
+export function Field({
+  label,
+  htmlFor,
+  hint,
+  children,
+  className,
+}: FieldProps) {
+  return (
+    <div className={join(styles.field, className)}>
+      <label className={styles.label} htmlFor={htmlFor}>
+        {label}
+      </label>
+      {children}
+      {hint ? <p className={styles.hint}>{hint}</p> : null}
+    </div>
+  );
 }
 
 interface SearchFieldProps

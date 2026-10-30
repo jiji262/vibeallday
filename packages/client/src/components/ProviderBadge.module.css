@@ -1,35 +1,27 @@
-/* Provider identity as a Garden badge: mono pill tinted by the provider. */
+/* Provider identity: a neutral mono chip led by the provider letter tile. */
 .badge {
   display: inline-flex;
   align-items: center;
-  gap: var(--space-1);
-  min-height: 22px;
-  padding: 0 var(--space-2);
-  border: 1px solid;
-  border-radius: var(--radius-pill);
-  background: color-mix(in srgb, currentcolor 8%, transparent);
-  font-family: var(--label-font);
+  gap: 6px;
+  min-height: 24px;
+  padding: 0 8px 0 3px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-chip);
+  background: var(--surface);
+  color: var(--ink-2);
+  font-family: var(--font-mono);
   font-size: 12px;
   font-weight: 500;
   line-height: 1;
-  letter-spacing: var(--badge-tracking);
   white-space: nowrap;
 }
 
-.dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
+.mark {
+  flex-shrink: 0;
 }
 
-.dot.thinking {
-  animation: pulse 1.5s ease-in-out infinite;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .dot.thinking {
-    animation: none;
-  }
+.thinking {
+  flex-shrink: 0;
 }
 
 .effort {
@@ -50,31 +42,31 @@
 }
 
 .effortDot.off {
-  background: var(--text-muted);
+  background: var(--ink-4);
 }
 
 .effortDot.auto {
-  background: var(--link-color);
+  background: var(--link);
 }
 
 .effortDot.low {
-  background: var(--mint-ink);
+  background: var(--ok);
 }
 
 .effortDot.medium {
-  background: var(--sand);
+  background: var(--run);
 }
 
 .effortDot.high {
-  background: var(--peach);
+  background: var(--attn);
 }
 
 .effortDot.xhigh {
-  background: var(--rose);
+  background: var(--err);
 }
 
 .effortDot.max {
-  background: var(--rose-ink);
+  background: var(--err-ink);
 }
 
 .effortLabel {
@@ -84,22 +76,14 @@
   opacity: 0.82;
 }
 
-/* On mobile, hide the dot - the label already shows a compact model glyph */
+/* On mobile, hide the tile - the label already shows a compact model glyph */
 @media (width <= 600px) {
-  .dot {
+  .mark {
     display: none;
   }
-}
 
-@keyframes pulse {
-  0%,
-  100% {
-    opacity: 0.4;
-    transform: scale(0.9);
-  }
-  50% {
-    opacity: 1;
-    transform: scale(1);
+  .badge {
+    padding-left: 8px;
   }
 }
 
@@ -128,13 +112,8 @@
   display: none;
 }
 
-.condensed .dot.thinking {
-  display: inline-block;
-  flex-shrink: 0;
-}
-
 /* Flat: the session header's meta line, where the model reads as mono text
-   with its provider dot instead of a bordered badge. */
+   with its provider tile instead of a bordered badge. */
 .flat {
   gap: 6px;
   min-height: 0;
@@ -148,8 +127,8 @@
   letter-spacing: 0;
 }
 
-.flat .dot {
-  display: inline-block;
+.flat .mark {
+  display: inline-grid;
 }
 
 .flat .effort {

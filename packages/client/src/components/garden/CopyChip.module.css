@@ -5,11 +5,11 @@
   gap: 6px;
   min-height: 28px;
   padding: var(--space-1) var(--space-2);
-  border: 1px dashed var(--dash);
+  border: 1px dashed var(--line);
   border-radius: var(--radius-xs);
   background: transparent;
   color: var(--ink-3);
-  font-family: var(--label-font);
+  font-family: var(--font-mono);
   font-size: 11px;
   line-height: 1.4;
   cursor: pointer;
@@ -17,16 +17,16 @@
 }
 
 .chip:hover {
-  background: var(--bg-soft);
+  background: var(--surface-3);
 }
 
 .chip:focus-visible {
-  border-color: var(--indigo);
-  box-shadow: 0 0 0 3px var(--indigo-soft);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
 }
 
 .copied {
-  color: var(--mint-ink);
+  color: var(--ok-ink);
 }
 
 .text {

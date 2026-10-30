@@ -1,9 +1,11 @@
 import type { AriaRole, ReactNode } from "react";
 import styles from "./Notice.module.css";
 
-export type NoticeTone = "info" | "warning" | "danger" | "success";
+/** `neutral` is the plain design notice; the others use a semantic family. */
+export type NoticeTone = "neutral" | "info" | "warning" | "danger" | "success";
 
 const TONE_CLASS: Record<NoticeTone, string | undefined> = {
+  neutral: undefined,
   info: styles.info,
   warning: styles.warning,
   danger: styles.danger,

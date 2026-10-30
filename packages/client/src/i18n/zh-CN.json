@@ -5109,5 +5109,15 @@
   "issuesSort_number": "议题编号 ↑",
   "issuesSessionActiveAge": "会话活跃于 {age}前",
   "issuesRecentlyMentionedAge": "{age}前被提及",
-  "issuesMentionTimeUnknown": "提及时间不可用"
+  "issuesMentionTimeUnknown": "提及时间不可用",
+  "settingsAppearanceThemeCeladon": "清瓷",
+  "settingsAppearanceThemeNight": "夜航",
+  "settingsAppearanceThemeNightOled": "夜航·纯黑",
+  "settingsAppearanceThemeSystem": "跟随系统",
+  "settingsAppearanceFontMatchTheme": "跟随风格",
+  "gardenScopeLocal": "本机",
+  "gardenScopeServer": "服务器",
+  "gardenScopeLocalHint": "只保存在这个浏览器",
+  "gardenScopeServerHint": "保存在服务器，所有设备共用",
+  "gardenSplitButtonMore": "更多选项"
 }

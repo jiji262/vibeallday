@@ -1,0 +1,121 @@
+/* Status = colour + shape (design .status / .dot). */
+.status {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 6px;
+  width: fit-content;
+  height: 22px;
+  padding: 0 8px;
+  border-radius: var(--r-chip);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.marker {
+  display: inline-block;
+  flex: none;
+  box-sizing: border-box;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.status .marker {
+  width: 7px;
+  height: 7px;
+}
+
+.status.attn {
+  background: var(--attn-soft);
+  color: var(--attn-ink);
+}
+
+.status.run {
+  background: var(--run-soft);
+  color: var(--run-ink);
+}
+
+.status.idle {
+  background: var(--idle-soft);
+  color: var(--ink-2);
+}
+
+.status.err {
+  background: var(--err-soft);
+  color: var(--err-ink);
+}
+
+.status.queued {
+  background: var(--queue-soft);
+  color: var(--ink-2);
+}
+
+.status.ok {
+  background: var(--ok-soft);
+  color: var(--ok-ink);
+}
+
+.status.plain {
+  padding: 0;
+  background: transparent;
+}
+
+.marker.attn {
+  background: var(--attn);
+}
+
+/* The halo breathes only while an ancestor's shared activity observer sets
+   --activity-play; otherwise it rests at full size. */
+.marker.run {
+  background: var(--run);
+  box-shadow: 0 0 0 3px var(--run-halo);
+  animation: status-halo 1.6s ease-in-out infinite;
+  animation-play-state: var(--activity-play, paused);
+}
+
+.marker.idle {
+  border: 1.5px solid var(--idle);
+  background: transparent;
+}
+
+.marker.err {
+  border-radius: var(--err-marker-radius);
+  background: var(--err);
+  transform: var(--err-marker-transform);
+}
+
+.marker.queued {
+  border: 1.5px dashed var(--ink-3);
+  background: transparent;
+}
+
+.marker.ok {
+  width: 4px;
+  height: 8px;
+  margin-inline: 2px;
+  border: solid var(--ok);
+  border-width: 0 2px 2px 0;
+  border-radius: 0;
+  background: transparent;
+  transform: rotate(45deg) translate(-1px, -1px);
+}
+
+.status .marker.ok {
+  width: 4px;
+  height: 8px;
+}
+
+@keyframes status-halo {
+  50% {
+    box-shadow: 0 0 0 1px var(--run-halo);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marker.run {
+    animation: none;
+  }
+}

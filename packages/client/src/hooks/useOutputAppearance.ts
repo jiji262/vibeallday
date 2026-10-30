@@ -14,6 +14,11 @@ export type OutputFixedFont =
   | "ibm-plex-mono"
   | "fira-mono";
 
+/** Follow the active skin's font: no inline override is set. */
+export const OUTPUT_FONT_THEME = "theme";
+export type OutputUiFont = typeof OUTPUT_FONT_THEME | OutputProseFont;
+export type OutputFixedFontChoice = typeof OUTPUT_FONT_THEME | OutputFixedFont;
+
 export const OUTPUT_APPEARANCE_CHANGE_EVENT =
   "vibeallday-output-appearance-change";
 
@@ -31,6 +36,16 @@ export const OUTPUT_FIXED_FONTS: OutputFixedFont[] = [
   "ibm-plex-mono",
   "fira-mono",
   "iosevka",
+];
+
+export const OUTPUT_UI_FONT_CHOICES: OutputUiFont[] = [
+  OUTPUT_FONT_THEME,
+  ...OUTPUT_PROSE_FONTS,
+];
+
+export const OUTPUT_FIXED_FONT_CHOICES: OutputFixedFontChoice[] = [
+  OUTPUT_FONT_THEME,
+  ...OUTPUT_FIXED_FONTS,
 ];
 
 export const OUTPUT_FONT_SIZE_MIN_PX = 11;
@@ -89,11 +104,11 @@ const SOURCE_SERIF_4_OUTPUT_OPSZ_MAX = 20;
 
 interface OutputAppearance {
   font: OutputProseFont;
-  uiFont: OutputProseFont;
+  uiFont: OutputUiFont;
   userTurnFontSizeOffsetPx: number;
   tooltipFontSizeOffsetPx: number;
   fontSizePx: number;
-  fixedFont: OutputFixedFont;
+  fixedFont: OutputFixedFontChoice;
   fixedFontSizeOffsetPx: number;
   thinkingFontSizeOffsetPx: number;
   mathFontSizeOffsetPx: number;
@@ -104,11 +119,11 @@ interface OutputAppearance {
 
 const DEFAULT_OUTPUT_APPEARANCE: OutputAppearance = {
   font: "geist",
-  uiFont: "geist",
+  uiFont: OUTPUT_FONT_THEME,
   userTurnFontSizeOffsetPx: DEFAULT_USER_TURN_FONT_SIZE_OFFSET_PX,
   tooltipFontSizeOffsetPx: DEFAULT_TOOLTIP_FONT_SIZE_OFFSET_PX,
   fontSizePx: DEFAULT_OUTPUT_FONT_SIZE_PX,
-  fixedFont: "jetbrains-mono",
+  fixedFont: OUTPUT_FONT_THEME,
   fixedFontSizeOffsetPx: DEFAULT_OUTPUT_FIXED_FONT_SIZE_OFFSET_PX,
   thinkingFontSizeOffsetPx: DEFAULT_OUTPUT_THINKING_FONT_SIZE_OFFSET_PX,
   mathFontSizeOffsetPx: DEFAULT_OUTPUT_MATH_FONT_SIZE_OFFSET_PX,
@@ -147,10 +162,30 @@ function normalizeOutputFont(value: string | null): OutputProseFont {
     : DEFAULT_OUTPUT_APPEARANCE.font;
 }
 
-function normalizeOutputFixedFont(value: string | null): OutputFixedFont {
-  return value && OUTPUT_FIXED_FONTS.includes(value as OutputFixedFont)
-    ? (value as OutputFixedFont)
+function normalizeOutputUiFont(value: string | null): OutputUiFont {
+  return value && OUTPUT_UI_FONT_CHOICES.includes(value as OutputUiFont)
+    ? (value as OutputUiFont)
+    : DEFAULT_OUTPUT_APPEARANCE.uiFont;
+}
+
+function normalizeOutputFixedFont(value: string | null): OutputFixedFontChoice {
+  return value &&
+    OUTPUT_FIXED_FONT_CHOICES.includes(value as OutputFixedFontChoice)
+    ? (value as OutputFixedFontChoice)
     : DEFAULT_OUTPUT_APPEARANCE.fixedFont;
+}
+
+/** A skin-following choice clears the inline override so theme.css wins. */
+function applyFontOverride(
+  property: "--font-ui" | "--font-mono",
+  stack: string | null,
+): void {
+  const rootStyle = document.documentElement.style;
+  if (stack === null) {
+    rootStyle.removeProperty(property);
+    return;
+  }
+  rootStyle.setProperty(property, stack);
 }
 
 function normalizeFontSize(value: number): number {
@@ -322,7 +357,7 @@ function loadOutputAppearance(): OutputAppearance {
 
   return {
     font: normalizeOutputFont(localStorage.getItem(UI_KEYS.outputProseFont)),
-    uiFont: normalizeOutputFont(localStorage.getItem(UI_KEYS.outputUiFont)),
+    uiFont: normalizeOutputUiFont(localStorage.getItem(UI_KEYS.outputUiFont)),
     userTurnFontSizeOffsetPx: normalizeUserTurnFontSizeOffset(
       readStoredNumber(
         UI_KEYS.userTurnFontSizeOffset,
@@ -387,7 +422,12 @@ function applyOutputAppearance(appearance: OutputAppearance) {
     "--output-prose-font-family",
     outputFontStacks[appearance.font],
   );
-  root.style.setProperty("--font-ui", outputFontStacks[appearance.uiFont]);
+  applyFontOverride(
+    "--font-ui",
+    appearance.uiFont === OUTPUT_FONT_THEME
+      ? null
+      : outputFontStacks[appearance.uiFont],
+  );
   root.style.setProperty(
     "--user-turn-font-size-offset",
     `${appearance.userTurnFontSizeOffsetPx}px`,
@@ -400,9 +440,11 @@ function applyOutputAppearance(appearance: OutputAppearance) {
     "--output-prose-font-size",
     `${appearance.fontSizePx}px`,
   );
-  root.style.setProperty(
+  applyFontOverride(
     "--font-mono",
-    outputFixedFontStacks[appearance.fixedFont],
+    appearance.fixedFont === OUTPUT_FONT_THEME
+      ? null
+      : outputFixedFontStacks[appearance.fixedFont],
   );
   root.style.setProperty(
     "--fixed-font-size-offset",
@@ -487,8 +529,8 @@ export function useOutputAppearance() {
     setAppearance((current) => ({ ...current, font: normalized }));
   }, []);
 
-  const setOutputUiFont = useCallback((font: OutputProseFont) => {
-    const normalized = normalizeOutputFont(font);
+  const setOutputUiFont = useCallback((font: OutputUiFont) => {
+    const normalized = normalizeOutputUiFont(font);
     localStorage.setItem(UI_KEYS.outputUiFont, normalized);
     setAppearance((current) => ({ ...current, uiFont: normalized }));
   }, []);
@@ -517,7 +559,7 @@ export function useOutputAppearance() {
     setAppearance((current) => ({ ...current, fontSizePx: normalized }));
   }, []);
 
-  const setOutputFixedFont = useCallback((font: OutputFixedFont) => {
+  const setOutputFixedFont = useCallback((font: OutputFixedFontChoice) => {
     const normalized = normalizeOutputFixedFont(font);
     localStorage.setItem(UI_KEYS.outputFixedFont, normalized);
     setAppearance((current) => ({ ...current, fixedFont: normalized }));

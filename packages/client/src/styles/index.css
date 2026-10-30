@@ -26,6 +26,16 @@
   font-size: var(--font-size-sm);
 }
 
+/* Native checkbox, radio and range take the design accent (zero specificity,
+   so component rules still win); links default to the design link ink. */
+:where(input[type="checkbox"], input[type="radio"], input[type="range"]) {
+  accent-color: var(--accent);
+}
+
+:where(a) {
+  color: var(--link);
+}
+
 @keyframes delayed-fade-in {
   0%,
   99% {
@@ -3202,7 +3212,7 @@ body.session-transcript-selection-active .reload-banner * {
   border: 0;
   border-radius: var(--radius-md);
   background: var(--app-accent);
-  color: white;
+  color: var(--on-accent);
   font: inherit;
   font-weight: 600;
   cursor: pointer;
@@ -3293,7 +3303,7 @@ body.session-transcript-selection-active .reload-banner * {
   flex-shrink: 0;
   padding: 0;
   background: var(--app-accent);
-  color: white;
+  color: var(--on-accent);
   position: relative;
 }
 
@@ -3313,7 +3323,7 @@ body.session-transcript-selection-active .reload-banner * {
 
 .send-button.queue-button {
   background: var(--attention-color);
-  color: white;
+  color: var(--on-accent);
 }
 
 .send-button.project-queue-button {
@@ -3583,7 +3593,7 @@ body.session-transcript-selection-active .reload-banner * {
 
 .stop-button {
   background: var(--error-color);
-  color: white;
+  color: var(--on-err);
 }
 
 .stop-button:hover {
@@ -3602,7 +3612,7 @@ body.session-transcript-selection-active .reload-banner * {
 
 .queue-button {
   background: var(--attention-color);
-  color: white;
+  color: var(--on-accent);
 }
 
 .queue-button:hover {
@@ -4041,7 +4051,7 @@ body.session-transcript-selection-active .reload-banner * {
   border: 1px solid var(--border-input);
   border-radius: var(--radius-md);
   color: var(--text-primary);
-  background: var(--bg-primary);
+  background: var(--input-bg);
   font-size: var(--font-size-sm);
 }
 
@@ -4063,7 +4073,7 @@ body.session-transcript-selection-active .reload-banner * {
   height: 16px;
   padding: 0 4px;
   background: var(--app-accent);
-  color: white;
+  color: var(--on-accent);
   border-radius: 8px;
   font-size: var(--font-size-xs);
   font-weight: 600;
@@ -4788,38 +4798,6 @@ body.session-transcript-selection-active .reload-banner * {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-}
-
-.status-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-}
-
-.status-dot.status-idle {
-  background: var(--text-muted);
-}
-
-.status-dot.status-owned {
-  background: var(--success-color);
-}
-
-.status-dot.status-owned.process-running {
-  background: var(--thinking-color);
-  animation: thinking-pulse 1.5s ease-in-out infinite;
-}
-
-.status-dot.status-owned.process-waiting-input {
-  background: var(--warning-color);
-}
-
-.status-dot.status-external {
-  background: var(--warning-color);
-}
-
-.status-dot.disconnected {
-  background: var(--error-color);
-  animation: thinking-pulse 1s ease-in-out infinite;
 }
 
 /* External session warning banner. Kept compact (small font, tight leading
@@ -5573,7 +5551,7 @@ body.session-transcript-selection-active .reload-banner * {
 .task-notification-event {
   margin: 0;
   padding: 8px 10px;
-  background: color-mix(in srgb, var(--bg-primary, #1a1a1a) 60%, transparent);
+  background: color-mix(in srgb, var(--bg-primary) 60%, transparent);
   border-radius: 4px;
   font-family: var(--font-mono, ui-monospace, monospace);
   font-size: 0.82em;
@@ -5737,13 +5715,13 @@ body.session-transcript-selection-active .reload-banner * {
 .settings-input-small,
 .session-heartbeat-input,
 .session-heartbeat-input-small {
-  min-height: var(--console-control-height);
+  min-height: var(--input-h);
   padding: var(--space-2) var(--space-3);
-  border-radius: var(--radius-md);
+  border-radius: var(--r-input);
   border: 1px solid var(--line-strong);
-  background: var(--bg-input);
-  color: var(--text-primary);
-  font-size: var(--font-size-lg);
+  background: var(--input-bg);
+  color: var(--ink);
+  font-size: var(--fs-input);
 }
 
 /* Touch: 44px fields, 16px text so iOS does not zoom on focus. */
@@ -6081,7 +6059,6 @@ body.session-transcript-selection-active .reload-banner * {
 .output-appearance-slider-row input[type="range"] {
   width: 100%;
   min-width: 0;
-  accent-color: var(--app-accent);
 }
 
 .output-appearance-number {
@@ -6359,7 +6336,7 @@ body.session-transcript-selection-active .reload-banner * {
   box-sizing: border-box;
   width: 100%;
   padding: var(--space-2);
-  background: var(--bg-primary);
+  background: var(--surface-2);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
 }
@@ -6397,7 +6374,6 @@ body.session-transcript-selection-active .reload-banner * {
 .session-toolbar-presence-range {
   width: 100%;
   margin: 0;
-  accent-color: var(--app-accent);
 }
 
 /* Side padding ≈ half the native thumb so ticks sit under thumb stops. */
@@ -6903,7 +6879,7 @@ body.session-transcript-selection-active .reload-banner * {
   padding: var(--space-2);
   border: 1px solid var(--border-muted);
   border-radius: var(--radius-sm);
-  background: var(--bg-primary);
+  background: var(--surface-2);
 }
 
 .helper-target-row-main {
@@ -6973,49 +6949,43 @@ body.session-transcript-selection-active .reload-banner * {
   font-weight: 500;
 }
 
-/* Settings buttons: the base is the secondary look (card, strong line);
-   -primary is indigo, -danger rose. 44px on touch. */
+/* Settings buttons follow the design .btn: the base is secondary (surface,
+   strong line); -primary is the accent fill, -danger the soft error look. */
 .settings-button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: var(--space-2);
-  min-height: 36px;
-  padding: var(--space-1) var(--space-4);
-  background: var(--bg-card);
+  min-height: var(--btn-h);
+  padding: var(--space-1) var(--btn-px);
+  background: var(--surface);
   border: 1px solid var(--line-strong);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-xs);
-  color: var(--text-primary);
-  font-size: var(--font-size-base);
-  font-weight: 500;
+  border-radius: var(--r-btn);
+  color: var(--ink);
+  font-size: var(--fs-btn);
+  font-weight: 600;
   line-height: 1.2;
   cursor: pointer;
   transition:
     background-color 0.12s,
-    border-color 0.12s;
+    border-color 0.12s,
+    color 0.12s;
   white-space: nowrap;
   text-decoration: none;
 }
 
 .settings-button:hover:not(:disabled) {
-  background: var(--bg-tertiary);
-}
-
-.settings-button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+  background: var(--surface-3);
 }
 
 .settings-button-primary {
-  background: var(--indigo);
-  border-color: var(--indigo);
-  box-shadow: var(--shadow-sm);
-  color: var(--ink-on);
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--on-accent);
 }
 
 .settings-button-primary:hover:not(:disabled) {
-  background: var(--indigo-2);
+  background: var(--accent-hover);
 }
 
 @media (pointer: coarse), (width <= 767px) {
@@ -7128,11 +7098,6 @@ body.session-transcript-selection-active .reload-banner * {
   line-height: 1;
 }
 
-/* Match the slider thumb/track to the VIBEALLDAY green used by the controls above. */
-.settings-item-actions input[type="range"] {
-  accent-color: var(--app-accent);
-}
-
 .settings-input-unit .settings-input-small::-webkit-inner-spin-button,
 .settings-input-unit .settings-input-small::-webkit-outer-spin-button {
   -webkit-appearance: none;
@@ -7173,22 +7138,21 @@ body.session-transcript-selection-active .reload-banner * {
   min-height: 2.6em;
 }
 
-/* Select dropdown for settings: the garden select (40px, token chevron). */
+/* Select dropdown for settings: the design .select (token chevron). */
 .settings-select {
   appearance: none;
-  min-height: 40px;
-  padding: 0 36px 0 14px;
+  min-height: var(--input-h);
+  padding: 0 36px 0 12px;
   background:
     linear-gradient(45deg, transparent 50%, var(--ink-3) 50%) calc(100% - 19px)
     50% / 5px 5px no-repeat,
     linear-gradient(135deg, var(--ink-3) 50%, transparent 50%) calc(100% - 14px)
     50% / 5px 5px no-repeat,
-    var(--card);
+    var(--input-bg);
   border: 1px solid var(--line-strong);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-xs);
+  border-radius: var(--r-input);
   color: var(--ink);
-  font-size: 14px;
+  font-size: var(--fs-input);
   cursor: pointer;
   min-width: 160px;
   max-width: 100%;
@@ -7259,20 +7223,20 @@ body.session-transcript-selection-active .reload-banner * {
 }
 
 .settings-button-danger {
-  background: var(--rose-soft);
-  border-color: color-mix(in srgb, var(--rose) 45%, transparent);
-  box-shadow: none;
-  color: var(--rose-ink);
+  background: var(--err-soft);
+  border-color: var(--err-line);
+  color: var(--err-ink);
 }
 
-/* Toggle switch */
+/* Toggle switch: the design .switch track (--sw-w x --sw-h), padded to a
+   44px touch target. */
 .toggle-switch {
   position: relative;
   display: inline-block;
   box-sizing: content-box;
-  width: 48px;
-  height: 28px;
-  padding-block: 8px; /* 44px touch target around the 28px track */
+  width: var(--sw-w);
+  height: var(--sw-h);
+  padding-block: calc((var(--tap-min) - var(--sw-h)) / 2);
   flex-shrink: 0;
 }
 
@@ -7285,35 +7249,38 @@ body.session-transcript-selection-active .reload-banner * {
 .toggle-slider {
   position: absolute;
   cursor: pointer;
-  inset: 8px 0;
-  background-color: var(--line-strong);
-  transition: background-color 0.2s;
+  inset: calc((var(--tap-min) - var(--sw-h)) / 2) 0;
+  border: 1px solid var(--line-strong);
+  background-color: var(--switch-off);
+  transition: background-color 0.15s;
   border-radius: var(--radius-pill);
 }
 
 .toggle-slider::before {
   position: absolute;
   content: "";
-  height: 22px;
-  width: 22px;
-  left: 3px;
-  bottom: 3px;
-  background-color: #fff;
-  box-shadow: var(--shadow-xs);
-  transition: transform 0.2s;
+  height: calc(var(--sw-h) - 6px);
+  width: calc(var(--sw-h) - 6px);
+  left: 2px;
+  top: 2px;
+  background-color: var(--switch-knob);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+  transition: transform 0.15s;
   border-radius: 50%;
 }
 
 .toggle-switch input:checked + .toggle-slider {
-  background-color: var(--indigo);
+  border-color: var(--accent);
+  background-color: var(--accent);
 }
 
 .toggle-switch input:checked + .toggle-slider::before {
-  transform: translateX(20px);
+  background-color: var(--switch-knob-on);
+  transform: translateX(calc(var(--sw-w) - var(--sw-h)));
 }
 
 .toggle-switch input:focus-visible + .toggle-slider {
-  outline: 2px solid var(--focus-ring);
+  outline: 2px solid var(--focus);
   outline-offset: 2px;
 }
 
@@ -7323,7 +7290,7 @@ body.session-transcript-selection-active .reload-banner * {
 }
 
 .settings-button-danger:hover:not(:disabled) {
-  background: color-mix(in srgb, var(--rose) 24%, transparent);
+  background: color-mix(in srgb, var(--err) 22%, var(--err-soft));
 }
 
 /* Ignored tools display */
@@ -7482,16 +7449,15 @@ body.session-transcript-selection-active .reload-banner * {
 .session-heartbeat-input:focus,
 .session-heartbeat-input-small:focus {
   outline: none;
-  border-color: var(--indigo);
-  box-shadow: 0 0 0 3px var(--indigo-soft);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
 }
 
 .settings-input::placeholder,
 .settings-input-small::placeholder,
 .session-heartbeat-input::placeholder,
 .session-heartbeat-input-small::placeholder {
-  color: var(--text-muted);
-  opacity: 0.6;
+  color: var(--ink-4);
 }
 
 .session-heartbeat-modal {
@@ -8012,39 +7978,42 @@ body.session-transcript-selection-active .reload-banner * {
 
 .btn-primary,
 .btn-secondary {
-  padding: var(--space-2) var(--space-3);
-  border-radius: var(--radius-md);
-  font-size: var(--font-size-sm);
+  min-height: var(--btn-h-sm);
+  padding: var(--space-1) var(--space-3);
+  border: 1px solid transparent;
+  border-radius: var(--r-btn);
+  font-size: var(--fs-small);
+  font-weight: 600;
   cursor: pointer;
-  border: none;
-  transition: background 0.15s;
+  transition: background-color 0.12s;
 }
 
 .btn-primary {
-  background: var(--app-accent-dark);
-  color: white;
+  background: var(--accent);
+  color: var(--on-accent);
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: var(--app-accent);
-}
-
-.btn-primary:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+  background: var(--accent-hover);
 }
 
 .btn-secondary {
-  background: var(--bg-hover);
-  color: var(--text-primary);
+  border-color: var(--line-strong);
+  background: var(--surface);
+  color: var(--ink);
 }
 
 .btn-secondary:hover:not(:disabled) {
-  background: var(--bg-hover);
+  background: var(--surface-3);
 }
 
+/* Shared disabled look for the legacy button classes (design .btn[disabled]). */
+.settings-button:disabled,
+.btn-primary:disabled,
 .btn-secondary:disabled {
-  opacity: 0.5;
+  border-color: transparent;
+  background: var(--surface-3);
+  color: var(--ink-4);
   cursor: not-allowed;
 }
 
@@ -10872,7 +10841,6 @@ body.session-transcript-selection-active .reload-banner * {
   height: 18px;
   flex-shrink: 0;
   cursor: pointer;
-  accent-color: var(--app-accent);
 }
 
 /* Read state: slightly dimmer than unread */
@@ -10996,7 +10964,7 @@ body.session-transcript-selection-active .reload-banner * {
   height: 48px;
   border-radius: 50%;
   background: var(--app-accent);
-  color: white;
+  color: var(--on-accent);
   border: none;
   cursor: pointer;
   display: flex;
@@ -11091,7 +11059,7 @@ body.session-transcript-selection-active .reload-banner * {
   height: 28px;
   border-radius: var(--radius-md);
   background: var(--app-accent);
-  color: white;
+  color: var(--on-accent);
   border: none;
   cursor: pointer;
   display: flex;
@@ -11485,7 +11453,7 @@ body:has(.session-page)
   min-height: 1.75rem;
   padding: 0.2rem 0.55rem;
   color: var(--text-primary);
-  background: var(--bg-primary);
+  background: var(--surface-2);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-sm);
   opacity: 0.65;
@@ -11502,7 +11470,7 @@ body:has(.session-page)
   width: 1.4rem;
   height: 1.4rem;
   color: var(--text-muted);
-  background: var(--bg-primary);
+  background: var(--surface);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-full, 999px);
   cursor: pointer;
@@ -11523,10 +11491,10 @@ body:has(.session-page)
   width: min(320px, calc(100dvw - 2rem));
   padding: var(--space-2) var(--space-3);
   color: var(--text-primary);
-  background: var(--bg-primary);
+  background: var(--surface);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-pop);
   font-size: 0.8rem;
   line-height: 1.4;
 }

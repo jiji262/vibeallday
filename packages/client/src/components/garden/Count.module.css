@@ -1,0 +1,24 @@
+.count {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--surface-3);
+  color: var(--ink-2);
+  font: 600 11px / 1 var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.attn {
+  background: var(--attn);
+  color: var(--on-attn);
+}
+
+.accent {
+  background: var(--accent);
+  color: var(--on-accent);
+}

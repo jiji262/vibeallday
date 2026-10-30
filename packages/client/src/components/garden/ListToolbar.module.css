@@ -30,7 +30,7 @@
 .count {
   margin: 0;
   color: var(--ink-3);
-  font-family: var(--label-font);
+  font-family: var(--font-mono);
   font-size: var(--eyebrow-size);
   font-variant-numeric: tabular-nums;
   letter-spacing: var(--meta-tracking);

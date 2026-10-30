@@ -15,7 +15,7 @@
 
 .label {
   color: var(--ink-3);
-  font-family: var(--label-font);
+  font-family: var(--font-mono);
   font-size: var(--eyebrow-size);
   letter-spacing: var(--eyebrow-tracking);
   text-transform: uppercase;
@@ -28,14 +28,14 @@
 }
 
 .mono {
-  font-family: var(--label-font);
+  font-family: var(--font-mono);
   font-size: 13px;
 }
 
 .divider {
   grid-column: 1 / -1;
   margin: var(--space-1) 0;
-  border-top: 1px dashed var(--dash);
+  border-top: 1px dashed var(--line);
 }
 
 .bigNumber {
@@ -48,17 +48,17 @@
 }
 
 .mint {
-  color: var(--mint-ink);
+  color: var(--ok-ink);
 }
 
 .rose {
-  color: var(--rose-ink);
+  color: var(--err-ink);
 }
 
 .indigo {
-  color: var(--indigo-ink);
+  color: var(--accent-ink);
 }
 
 .peach {
-  color: var(--peach-ink);
+  color: var(--attn-ink);
 }

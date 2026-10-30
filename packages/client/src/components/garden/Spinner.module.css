@@ -4,7 +4,7 @@
   flex-shrink: 0;
   width: var(--spinner-size, 16px);
   height: var(--spinner-size, 16px);
-  border: 2px solid var(--indigo);
+  border: 2px solid var(--accent);
   border-top-color: transparent;
   border-radius: 50%;
   vertical-align: middle;

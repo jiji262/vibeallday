@@ -1,15 +1,18 @@
-/* Garden Console buttons: 8px radius, 500 weight, colour-only transitions. */
+/* Design buttons (.btn): per-skin radius and heights from tokens, 600 weight,
+   colour-only transitions. */
 .button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
+  gap: 8px;
   border: 1px solid transparent;
-  border-radius: var(--radius-md);
+  border-radius: var(--r-btn);
   font: inherit;
-  font-weight: 500;
-  line-height: 1.5;
+  font-size: var(--fs-btn);
+  font-weight: 600;
+  line-height: 1.2;
   white-space: nowrap;
+  text-decoration: none;
   cursor: pointer;
   transition:
     background-color var(--duration-fast) var(--ease-standard),
@@ -18,28 +21,28 @@
 }
 
 .button:focus-visible {
-  border-color: var(--indigo);
-  box-shadow: 0 0 0 3px var(--indigo-soft);
+  border-color: var(--accent);
+  outline: none;
+  box-shadow: 0 0 0 3px var(--accent-soft);
 }
 
 .sm {
   --button-icon-size: 14px;
 
-  min-height: 32px;
-  padding: 0 var(--space-3);
-  font-size: 13px;
+  min-height: var(--btn-h-sm);
+  padding: 0 12px;
+  font-size: var(--fs-small);
 }
 
 .md {
-  min-height: var(--console-control-height);
-  padding: 0 var(--space-4);
-  font-size: 14px;
+  min-height: var(--btn-h);
+  padding: 0 var(--btn-px);
 }
 
 .lg {
-  min-height: 48px;
-  padding: 0 var(--space-5);
-  font-size: 15px;
+  min-height: var(--btn-h-lg);
+  padding: 0 22px;
+  font-size: calc(var(--fs-btn) + 1px);
 }
 
 .block {
@@ -58,58 +61,66 @@
 }
 
 .primary {
-  background: var(--indigo);
-  color: var(--ink-on);
-  box-shadow: var(--shadow-xs);
+  background: var(--accent);
+  color: var(--on-accent);
 }
 
 .primary:hover {
-  background: var(--indigo-ink);
+  background: var(--accent-hover);
 }
 
 .secondary {
   border-color: var(--line-strong);
-  background: var(--card);
+  background: var(--surface);
   color: var(--ink);
-  box-shadow: var(--shadow-xs);
 }
 
 .secondary:hover {
-  background: var(--bg-2);
+  background: var(--surface-3);
 }
 
 .ghost {
   background: transparent;
-  color: var(--ink);
+  color: var(--ink-2);
 }
 
 .ghost:hover {
-  background: var(--bg-soft);
+  background: var(--surface-3);
+  color: var(--ink);
 }
 
 .danger {
-  background: var(--rose-ink);
-  color: var(--ink-on);
+  background: var(--err);
+  color: var(--on-err);
 }
 
 .danger:hover {
-  filter: brightness(0.95);
+  background: color-mix(in srgb, var(--err) 88%, var(--ink));
 }
 
 .dangerSoft {
-  border-color: color-mix(in srgb, var(--rose) 40%, transparent);
-  background: var(--rose-soft);
-  color: var(--rose-ink);
+  border-color: var(--err-line);
+  background: var(--err-soft);
+  color: var(--err-ink);
 }
 
 .dangerSoft:hover {
-  background: color-mix(in srgb, var(--rose) 22%, transparent);
+  background: color-mix(in srgb, var(--err) 22%, var(--err-soft));
+}
+
+.attn {
+  background: var(--attn);
+  color: var(--on-attn);
+}
+
+.attn:hover {
+  background: color-mix(in srgb, var(--attn) 88%, var(--ink));
 }
 
 .link {
   padding-inline: var(--space-1);
   background: transparent;
-  color: var(--indigo);
+  color: var(--link);
 }
 
 .link:hover {
@@ -117,29 +128,28 @@
   text-underline-offset: 4px;
 }
 
-/* Muted fill rather than opacity: white-on-colour text stays readable. */
+/* Muted fill rather than opacity: the label stays readable. */
 .button:disabled {
-  border-color: var(--line);
-  background: var(--bg-soft);
-  color: var(--ink-3);
-  box-shadow: none;
-  filter: none;
+  border-color: transparent;
+  background: var(--surface-3);
+  color: var(--ink-4);
   text-decoration: none;
   cursor: not-allowed;
 }
 
 .iconButton {
+  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  width: 36px;
-  height: 36px;
+  width: var(--icon-btn);
+  height: var(--icon-btn);
   padding: 0;
-  border: 0;
-  border-radius: var(--radius-md);
+  border: 1px solid transparent;
+  border-radius: var(--r-icon-btn);
   background: transparent;
-  color: var(--ink-3);
+  color: var(--ink-2);
   cursor: pointer;
   transition:
     background-color var(--duration-fast) var(--ease-standard),
@@ -152,12 +162,14 @@
 }
 
 .iconButton:hover {
-  background: var(--bg-soft);
+  background: var(--surface-3);
   color: var(--ink);
 }
 
 .iconButton:focus-visible {
-  box-shadow: 0 0 0 3px var(--indigo-soft);
+  border-color: var(--accent);
+  outline: none;
+  box-shadow: 0 0 0 3px var(--accent-soft);
 }
 
 .iconButton:disabled {
@@ -173,19 +185,24 @@
   height: 28px;
 }
 
+.iconButtonOutlined {
+  border-color: var(--line-strong);
+  background: var(--surface);
+}
+
 .iconButtonPrimary {
-  background: var(--indigo);
-  color: var(--ink-on);
+  background: var(--accent);
+  color: var(--on-accent);
 }
 
 .iconButtonPrimary:hover {
-  background: var(--indigo-ink);
-  color: var(--ink-on);
+  background: var(--accent-hover);
+  color: var(--on-accent);
 }
 
 .iconButtonPrimary:disabled {
-  background: var(--bg-soft);
-  color: var(--ink-3);
+  background: var(--surface-3);
+  color: var(--ink-4);
 }
 
 @media (prefers-reduced-motion: reduce) {

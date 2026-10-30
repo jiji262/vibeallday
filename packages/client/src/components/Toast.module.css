@@ -22,19 +22,21 @@
   }
 }
 
-/* Garden Console toast: a card with a tone fill layered over it. */
+/* Design toast: a dark pill (light in night) with an outlined action. The
+   radius is capped so a wrapped message keeps rounded, not lens, ends. The
+   icon shape, not its colour, carries the type. */
 .toast {
   display: flex;
   align-items: flex-start;
   gap: 10px;
   max-width: 400px;
-  padding: var(--space-3) var(--space-4);
-  border: 1px solid var(--line);
-  border-radius: var(--radius-lg);
-  background-color: var(--card);
-  box-shadow: var(--shadow-md);
-  color: var(--ink);
-  font-size: 13px;
+  padding: 10px 16px;
+  border: 0;
+  border-radius: min(var(--r-toast), 22px);
+  background-color: var(--toast-bg);
+  box-shadow: var(--shadow-pop);
+  color: var(--toast-ink);
+  font-size: var(--fs-small);
   font-weight: 500;
   line-height: 1.5;
   text-align: left;
@@ -43,20 +45,10 @@
   animation: fadeOut var(--toast-fade-duration, 4.5s) linear forwards;
 }
 
-.error {
-  border-color: color-mix(in srgb, var(--rose) 30%, var(--line));
-  background-image: linear-gradient(var(--rose-soft), var(--rose-soft));
-  color: var(--rose-ink);
-}
-
-.success {
-  border-color: color-mix(in srgb, var(--mint) 30%, var(--line));
-  background-image: linear-gradient(var(--mint-soft), var(--mint-soft));
-  color: var(--mint-ink);
-}
-
+.error,
+.success,
 .info {
-  color: var(--ink);
+  color: var(--toast-ink);
 }
 
 .icon {
@@ -65,12 +57,9 @@
   margin-top: 2px;
 }
 
-.info .icon {
-  color: var(--indigo);
-}
-
 .toast:has(.action) {
   align-items: center;
+  padding: 8px 8px 8px 16px;
 }
 
 .message {
@@ -81,25 +70,26 @@
 
 .action {
   flex-shrink: 0;
-  min-height: 28px;
-  padding: 0 10px;
-  border: 1px solid color-mix(in srgb, currentcolor 30%, transparent);
-  border-radius: var(--radius-sm);
+  min-height: 30px;
+  padding: 0 12px;
+  border: 1px solid color-mix(in srgb, var(--toast-ink) 30%, transparent);
+  border-radius: var(--r-btn);
   background: transparent;
-  color: inherit;
+  color: var(--toast-ink);
   font: inherit;
-  font-size: 12px;
-  font-weight: 500;
+  font-size: var(--fs-small);
+  font-weight: 600;
   white-space: nowrap;
   cursor: pointer;
 }
 
 .action:hover {
-  background: color-mix(in srgb, currentcolor 10%, transparent);
+  background: color-mix(in srgb, var(--toast-ink) 12%, transparent);
 }
 
 .action:focus-visible {
-  box-shadow: 0 0 0 3px var(--indigo-soft);
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
 }
 
 @media (prefers-reduced-motion: reduce) {

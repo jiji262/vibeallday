@@ -12,14 +12,14 @@
   padding: 18px var(--space-5);
   border: 1px solid var(--line);
   border-radius: var(--radius-lg);
-  background: var(--card);
+  background: var(--surface);
   color: var(--ink);
   text-decoration: none;
 }
 
 .label {
   color: var(--ink-3);
-  font-family: var(--label-font);
+  font-family: var(--font-mono);
   font-size: var(--eyebrow-size);
   font-weight: 500;
   letter-spacing: var(--meta-tracking);
@@ -45,48 +45,48 @@
 }
 
 .indigo {
-  border-color: color-mix(in srgb, var(--indigo) 12%, transparent);
-  background: var(--indigo-soft);
+  border-color: color-mix(in srgb, var(--accent) 12%, transparent);
+  background: var(--accent-soft);
 }
 
 .indigo .value {
-  color: var(--indigo-ink);
+  color: var(--accent-ink);
 }
 
 .rose {
-  border-color: color-mix(in srgb, var(--rose) 20%, transparent);
-  background: var(--rose-soft);
+  border-color: color-mix(in srgb, var(--err) 20%, transparent);
+  background: var(--err-soft);
 }
 
 .rose .value {
-  color: var(--rose-ink);
+  color: var(--err-ink);
 }
 
 .mint {
-  border-color: color-mix(in srgb, var(--mint) 24%, transparent);
-  background: var(--mint-soft);
+  border-color: color-mix(in srgb, var(--ok) 24%, transparent);
+  background: var(--ok-soft);
 }
 
 .mint .value {
-  color: var(--mint-ink);
+  color: var(--ok-ink);
 }
 
 .peach {
-  border-color: color-mix(in srgb, var(--peach) 20%, transparent);
-  background: var(--peach-soft);
+  border-color: color-mix(in srgb, var(--attn) 20%, transparent);
+  background: var(--attn-soft);
 }
 
 .peach .value {
-  color: var(--peach-ink);
+  color: var(--attn-ink);
 }
 
 .sand {
-  border-color: color-mix(in srgb, var(--sand) 22%, transparent);
-  background: var(--sand-soft);
+  border-color: color-mix(in srgb, var(--attn) 22%, transparent);
+  background: var(--attn-soft);
 }
 
 .sand .value {
-  color: var(--sand-ink);
+  color: var(--attn-ink);
 }
 
 @media (width >= 640px) {
@@ -124,5 +124,5 @@ button.card:hover {
 
 a.card:focus-visible,
 button.card:focus-visible {
-  box-shadow: 0 0 0 3px var(--indigo-soft);
+  box-shadow: 0 0 0 3px var(--accent-soft);
 }

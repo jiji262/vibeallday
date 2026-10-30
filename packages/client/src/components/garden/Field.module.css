@@ -1,14 +1,14 @@
-/* Garden form controls: 40px, 1px line-strong, radius 8, card fill. */
+/* Design .input/.select: token height, strong line, input fill, accent ring. */
 .control {
   box-sizing: border-box;
   width: 100%;
-  height: 40px;
-  padding: 0 14px;
+  height: var(--input-h);
+  padding: 0 12px;
   border: 1px solid var(--line-strong);
-  border-radius: var(--radius-md);
-  background: var(--card);
+  border-radius: var(--r-input);
+  background: var(--input-bg);
   color: var(--ink);
-  font-size: 14px;
+  font-size: var(--fs-input);
   transition:
     border-color var(--duration-fast) var(--ease-standard),
     box-shadow var(--duration-fast) var(--ease-standard);
@@ -20,8 +20,8 @@
 
 .control:focus,
 .control:focus-visible {
-  border-color: var(--indigo);
-  box-shadow: 0 0 0 3px var(--indigo-soft);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
   outline: none;
 }
 
@@ -50,6 +50,34 @@
   cursor: pointer;
 }
 
+.textarea {
+  height: auto;
+  min-height: 96px;
+  padding: 10px 12px;
+  line-height: 1.55;
+  resize: vertical;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.label {
+  color: var(--ink);
+  font-size: var(--fs-small);
+  font-weight: 600;
+}
+
+.hint {
+  margin: 0;
+  color: var(--ink-3);
+  font-size: 12.5px;
+  line-height: 1.5;
+}
+
 .search {
   position: relative;
   display: flex;
@@ -66,13 +94,13 @@
 
 .searchInput {
   padding-left: 34px;
-  font-family: var(--label-font);
+  font-family: var(--font-mono);
   font-size: 13px;
 }
 
 @media (pointer: coarse) {
-  .control {
-    height: var(--tap-min);
+  .control:not(.textarea) {
+    height: max(var(--input-h), var(--tap-min));
   }
 }
 

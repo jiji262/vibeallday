@@ -56,11 +56,12 @@ import {
   OUTPUT_FIXED_FONT_SIZE_OFFSET_MAX_PX,
   OUTPUT_FIXED_FONT_SIZE_OFFSET_MIN_PX,
   OUTPUT_FIXED_FONT_SIZE_OFFSET_STEP_PX,
-  OUTPUT_FIXED_FONTS,
+  OUTPUT_FIXED_FONT_CHOICES,
   OUTPUT_FONT_SIZE_MAX_PX,
   OUTPUT_FONT_SIZE_MIN_PX,
   OUTPUT_FONT_SIZE_PRESETS,
   OUTPUT_FONT_SIZE_STEP_PX,
+  OUTPUT_FONT_THEME,
   OUTPUT_LINE_SPACING_MAX_PERCENT,
   OUTPUT_LINE_SPACING_MIN_PERCENT,
   OUTPUT_LINE_SPACING_STEP_PERCENT,
@@ -74,6 +75,7 @@ import {
   OUTPUT_TOOL_PREVIEW_LINE_COUNT_MAX,
   OUTPUT_TOOL_PREVIEW_LINE_COUNT_MIN,
   OUTPUT_TOOL_PREVIEW_LINE_COUNT_STEP,
+  OUTPUT_UI_FONT_CHOICES,
   OUTPUT_VERTICAL_SPACING_MAX_PERCENT,
   OUTPUT_VERTICAL_SPACING_MIN_PERCENT,
   OUTPUT_VERTICAL_SPACING_STEP_PERCENT,
@@ -1597,14 +1599,16 @@ export function AppearanceSettings() {
                   {t("appearanceOutputUiFontLabel")}
                 </span>
                 <div className="font-size-selector output-font-selector">
-                  {OUTPUT_PROSE_FONTS.map((font) => (
+                  {OUTPUT_UI_FONT_CHOICES.map((font) => (
                     <button
                       key={font}
                       type="button"
                       className={`font-size-option output-font-option output-font-option-${font} ${outputUiFont === font ? "active" : ""}`}
                       onClick={() => setOutputUiFont(font)}
                     >
-                      {getOutputProseFontLabel(font, translate)}
+                      {font === OUTPUT_FONT_THEME
+                        ? t("settingsAppearanceFontMatchTheme")
+                        : getOutputProseFontLabel(font, translate)}
                     </button>
                   ))}
                 </div>
@@ -1794,14 +1798,16 @@ export function AppearanceSettings() {
                   {t("appearanceOutputFixedFontLabel")}
                 </span>
                 <div className="font-size-selector output-font-selector">
-                  {OUTPUT_FIXED_FONTS.map((font) => (
+                  {OUTPUT_FIXED_FONT_CHOICES.map((font) => (
                     <button
                       key={font}
                       type="button"
                       className={`font-size-option output-font-option output-fixed-font-option-${font} ${outputFixedFont === font ? "active" : ""}`}
                       onClick={() => setOutputFixedFont(font)}
                     >
-                      {getOutputFixedFontLabel(font, translate)}
+                      {font === OUTPUT_FONT_THEME
+                        ? t("settingsAppearanceFontMatchTheme")
+                        : getOutputFixedFontLabel(font, translate)}
                     </button>
                   ))}
                 </div>

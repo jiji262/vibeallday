@@ -1,6 +1,7 @@
 import type { ProcessState } from "../hooks/useSession";
 import { useI18n } from "../i18n";
 import type { SessionStatus } from "../types";
+import { StatusDot, type StatusState } from "./garden/StatusDot";
 
 interface Props {
   status: SessionStatus;
@@ -16,6 +17,19 @@ function getStatusClass(status: SessionStatus): "idle" | "owned" | "external" {
 
 function getProcessClass(processState: ProcessState): string {
   return processState === "in-turn" ? "running" : processState;
+}
+
+/** Design status mapping: lost connection = err, waiting = attn, working = run. */
+function getDotState(
+  status: SessionStatus,
+  connected: boolean,
+  processState: ProcessState,
+): StatusState {
+  if (!connected && status.owner === "self") return "err";
+  if (status.owner === "external") return "idle";
+  if (processState === "waiting-input") return "attn";
+  if (processState === "in-turn") return "run";
+  return "idle";
 }
 
 export function StatusIndicator({
@@ -54,7 +68,8 @@ export function StatusIndicator({
       role="status"
       aria-label={statusText}
     >
-      <span
+      <StatusDot
+        state={getDotState(status, connected, processState)}
         className={`status-dot status-${getStatusClass(status)} process-${getProcessClass(
           processState,
         )}${!connected ? " disconnected" : ""}`}

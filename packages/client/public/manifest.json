@@ -4,8 +4,8 @@
   "description": "Access your AI agents from anywhere",
   "start_url": ".",
   "display": "standalone",
-  "background_color": "#fbf8f2",
-  "theme_color": "#fbf8f2",
+  "background_color": "#F3F5F3",
+  "theme_color": "#F3F5F3",
   "share_target": {
     "action": "./share-target",
     "method": "POST",

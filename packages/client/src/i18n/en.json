@@ -5151,5 +5151,15 @@
   "consoleRunning": "Running",
   "consoleUnread": "Unread",
   "consoleQueued": "Queued",
-  "consoleAgentsDescription": "Monitor agent activity and manage running processes."
+  "consoleAgentsDescription": "Monitor agent activity and manage running processes.",
+  "settingsAppearanceThemeCeladon": "Celadon",
+  "settingsAppearanceThemeNight": "Night",
+  "settingsAppearanceThemeNightOled": "Night · OLED",
+  "settingsAppearanceThemeSystem": "System",
+  "settingsAppearanceFontMatchTheme": "Match theme",
+  "gardenScopeLocal": "This device",
+  "gardenScopeServer": "Server",
+  "gardenScopeLocalHint": "Saved in this browser only",
+  "gardenScopeServerHint": "Saved on the server for every device",
+  "gardenSplitButtonMore": "More options"
 }
