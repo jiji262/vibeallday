@@ -832,7 +832,11 @@ describe("GlobalSessionsPage", () => {
     expect(screen.getByRole("alert").textContent).toContain("valid range");
     expect(screen.queryByTestId("session-renamed")).toBeNull();
     expect(runtime.transport.fetch).not.toHaveBeenCalled();
-  });
+    // Eight full-page renders with the filter sheet open: ~0.65s on a
+    // development host, 3.8s and 4.96s on passing CI runs at ec373c1 and
+    // 3481a34, and past the 5s default on a loaded unit-tests runner at
+    // ec373c1, so the budget is 3x that observed limit.
+  }, 15_000);
 
   it("ranks results from catalog order again when the needle changes", async () => {
     sessionCollectionState.records = [
