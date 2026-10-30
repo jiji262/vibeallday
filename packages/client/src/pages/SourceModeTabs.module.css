@@ -1,28 +1,17 @@
-/* Source Control mode tabs: the garden underline strip (TabList), with a mono
-   count chip. In the page intro it spans its row; on phones the tabs split
-   the row evenly so all four modes stay visible without scrolling. */
+/* Source Control mode tabs: the garden underline strip (TabList) with a
+   design count capsule. In the page intro the strip spans its row under a
+   hairline; on phones the tabs split the row evenly so every mode stays
+   visible without scrolling. */
 .tabs {
   min-width: 0;
 }
 
 .tab {
-  font-size: 14px;
+  font-size: var(--fs-small);
 }
 
 .count {
-  padding: 0 6px;
-  border-radius: var(--radius-pill);
-  color: var(--ink-3);
-  background: var(--bg-soft);
-  font-family: var(--label-font);
-  font-size: 11px;
-  font-variant-numeric: tabular-nums;
-  line-height: 18px;
-}
-
-.activeCount {
-  color: var(--indigo);
-  background: var(--indigo-soft);
+  font-size: var(--fs-meta);
 }
 
 .stacked {
@@ -43,7 +32,6 @@
     min-width: 0;
     min-height: var(--tap-min);
     padding-inline: 4px;
-    font-size: 13px;
     line-height: 1.15;
     text-align: center;
     white-space: normal;

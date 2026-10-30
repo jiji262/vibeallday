@@ -10,7 +10,7 @@
 }
 
 .operator {
-  color: var(--text-primary);
+  color: var(--ink-2);
   font:
     600 18px / 1 system-ui,
     sans-serif;

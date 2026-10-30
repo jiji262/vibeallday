@@ -1,36 +1,49 @@
-/* The browsed directory is outside the project, so its full path is the
-   intro lede as quiet mono context; the title carries only its name. */
+/* The browsed directory is outside the project: the lede carries the
+   snapshot tag, its full path as quiet mono context, and a copy chip. */
+.lede {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+  min-width: 0;
+  max-width: 100%;
+}
+
 .path {
+  min-width: 0;
   color: var(--ink-3);
   font-family: var(--font-mono);
-  font-size: 13px;
+  font-size: var(--fs-small);
   overflow-wrap: anywhere;
 }
 
-/* The missing-path state's one next step, as a garden secondary sm button. */
+.notice {
+  margin-bottom: 16px;
+}
+
+/* The missing-path state's one next step, as a secondary sm button. */
 .action {
   display: inline-flex;
   align-items: center;
-  min-height: 32px;
-  padding: 0 var(--space-3);
+  min-height: var(--btn-h-sm);
+  padding: 0 var(--btn-px);
   border: 1px solid var(--line-strong);
-  border-radius: var(--radius-md);
-  background: var(--card);
-  box-shadow: var(--shadow-xs);
+  border-radius: var(--r-btn);
+  background: var(--surface);
   color: var(--ink);
-  font-size: 13px;
-  font-weight: 500;
+  font-size: var(--fs-btn);
+  font-weight: 600;
   text-decoration: none;
   transition: background var(--duration-fast) var(--ease-standard);
 }
 
 .action:hover {
-  background: var(--bg-2);
+  background: var(--surface-3);
 }
 
 .action:focus-visible {
-  border-color: var(--indigo);
-  box-shadow: 0 0 0 3px var(--indigo-soft);
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
 }
 
 @media (pointer: coarse) {

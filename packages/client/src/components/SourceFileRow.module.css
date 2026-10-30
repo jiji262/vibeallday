@@ -37,7 +37,7 @@
   width: 20px;
   height: 20px;
   border-radius: var(--radius-sm);
-  font-family: var(--label-font);
+  font-family: var(--font-mono);
   font-size: 11px;
   font-weight: 600;
   letter-spacing: var(--badge-tracking);
@@ -45,23 +45,23 @@
 }
 
 .toneModified {
-  color: var(--peach-ink);
-  background: var(--peach-soft);
+  color: var(--attn-ink);
+  background: var(--attn-soft);
 }
 
 .toneAdded {
-  color: var(--mint-ink);
-  background: var(--mint-soft);
+  color: var(--ok-ink);
+  background: var(--ok-soft);
 }
 
 .toneDeleted {
-  color: var(--rose-ink);
-  background: var(--rose-soft);
+  color: var(--err-ink);
+  background: var(--err-soft);
 }
 
 .toneMoved {
-  color: var(--indigo-ink);
-  background: var(--indigo-soft);
+  color: var(--accent-ink);
+  background: var(--accent-soft);
 }
 
 .toneUntracked {
@@ -78,7 +78,7 @@
 
 .reviewState {
   padding: 1px 6px;
-  font-family: var(--label-font);
+  font-family: var(--font-mono);
   font-size: 0.65rem;
   letter-spacing: var(--badge-tracking);
   line-height: 1.25;
@@ -88,15 +88,15 @@
 }
 
 .open {
-  color: var(--peach-ink);
+  color: var(--attn-ink);
 }
 
 .addressed {
-  color: var(--indigo-ink);
+  color: var(--accent-ink);
 }
 
 .changed {
-  color: var(--mint-ink);
+  color: var(--ok-ink);
 }
 
 .unchanged,

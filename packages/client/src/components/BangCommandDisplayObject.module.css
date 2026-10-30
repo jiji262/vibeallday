@@ -1,19 +1,19 @@
-/* `!!` command block: mono command line with exit Badge and duration, the
-   output preview, and small text actions. Used in the transcript and on the
-   Shell history page. */
+/* `!!` command block: mono command line with exit Status and duration, the
+   output preview (8 lines, then it scrolls), and small actions. Used in the
+   transcript and on the Shell history page. */
 .root {
   margin: var(--space-2) 0;
   padding: var(--space-2) var(--space-3);
   border: 1px solid var(--line);
-  border-radius: var(--radius-md);
-  background: var(--bg-2);
+  border-radius: var(--r-card);
+  background: var(--surface-2);
   color: var(--ink-2);
   font-size: var(--font-size-xs);
 }
 
 .error,
 .killed {
-  border-color: color-mix(in srgb, var(--rose) 45%, var(--line));
+  border-color: var(--err-line);
 }
 
 .header {
@@ -25,8 +25,8 @@
 }
 
 .glyph {
-  color: var(--indigo);
-  font-family: var(--label-font);
+  color: var(--accent-ink);
+  font-family: var(--font-mono);
   font-weight: 600;
 }
 
@@ -35,8 +35,9 @@
   min-width: 0;
   overflow-wrap: anywhere;
   color: var(--ink);
-  font-family: var(--label-font);
-  font-size: 13px;
+  font-family: var(--font-mono);
+  font-size: var(--fs-code);
+  font-weight: 500;
 }
 
 .meta {
@@ -45,8 +46,8 @@
   gap: var(--space-2);
   margin-left: auto;
   color: var(--ink-3);
-  font-family: var(--label-font);
-  font-size: 12px;
+  font-family: var(--font-mono);
+  font-size: var(--fs-meta);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
@@ -58,18 +59,30 @@
 }
 
 .error[role="alert"] {
-  color: var(--rose-ink);
+  color: var(--err-ink);
 }
 
+/* Eight lines of output before the preview scrolls. */
 .preview {
-  max-height: 320px;
+  --bang-preview-lines: 8;
+  --bang-preview-line-height: 1.5;
+
+  max-height: calc(
+    var(--bang-preview-lines) *
+    var(--bang-preview-line-height) *
+    1em +
+    2 *
+    var(--space-2)
+  );
   margin: var(--space-2) 0 0;
   padding: var(--space-2) var(--space-3);
   overflow: auto;
   border: 1px solid var(--line);
   border-radius: var(--radius-sm);
-  background: var(--bg-code);
-  font-family: var(--label-font);
+  background: var(--code-bg);
+  color: var(--ink);
+  font-family: var(--font-mono);
+  line-height: var(--bang-preview-line-height);
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
@@ -98,11 +111,11 @@
 }
 
 .action {
-  height: 24px;
-  padding: 0 var(--space-2);
+  height: 26px;
+  padding: 0 10px;
   border: 1px solid var(--line-strong);
-  border-radius: var(--radius-sm);
-  background: var(--card);
+  border-radius: var(--r-btn);
+  background: var(--surface);
   color: var(--ink-2);
   font-size: var(--font-size-xs);
   cursor: pointer;
@@ -110,18 +123,19 @@
 }
 
 .action:hover {
-  border-color: var(--indigo);
+  background: var(--surface-3);
   color: var(--ink);
 }
 
 .action:focus-visible {
-  border-color: var(--indigo);
-  box-shadow: 0 0 0 3px var(--indigo-soft);
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
 }
 
 .actionDelete:hover {
-  border-color: var(--rose-ink);
-  color: var(--rose-ink);
+  border-color: var(--err-line);
+  background: var(--err-soft);
+  color: var(--err-ink);
 }
 
 @media (pointer: coarse) {

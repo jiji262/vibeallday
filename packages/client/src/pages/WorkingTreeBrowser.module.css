@@ -12,7 +12,7 @@
 .disclosure {
   width: 1rem;
   flex: 0 0 1rem;
-  color: var(--text-muted);
+  color: var(--ink-3);
   font-family: var(--font-mono);
   font-weight: 700;
   text-align: center;
@@ -22,12 +22,12 @@
   min-width: 1.5rem;
   flex: 0 0 auto;
   padding: 0 5px;
-  color: var(--text-muted);
+  color: var(--ink-3);
   font-family: var(--font-mono);
   font-size: 0.68rem;
   font-variant-numeric: tabular-nums;
   text-align: center;
-  background: var(--bg-tertiary);
+  background: var(--surface-3);
   border-radius: 999px;
 }
 
@@ -35,7 +35,7 @@
   margin: 0 0 0 0.95rem;
   padding: 0 0 0 0.45rem;
   list-style: none;
-  border-left: 1px solid var(--border-color);
+  border-left: 1px solid var(--line);
 }
 
 .scanProgress {
@@ -44,7 +44,7 @@
   gap: 6px;
   flex: 0 1 auto;
   margin-left: auto;
-  color: var(--text-muted);
+  color: var(--ink-3);
   font-size: 0.72rem;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
@@ -57,7 +57,7 @@
   height: 100%;
   flex-direction: column;
   overflow: hidden;
-  border: 1px solid var(--border-subtle);
+  border: 1px solid var(--card-line);
   border-radius: 8px;
 }
 
@@ -65,8 +65,8 @@
   display: flex;
   justify-content: flex-end;
   padding: 4px 8px;
-  background: var(--bg-secondary);
-  border-bottom: 1px solid var(--border-subtle);
+  background: var(--surface);
+  border-bottom: 1px solid var(--card-line);
 }
 
 .currentContent > :global(.file-viewer) {

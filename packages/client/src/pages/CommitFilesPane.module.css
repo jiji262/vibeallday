@@ -1,37 +1,75 @@
+/* Commit detail head (design GitHistory detail card): subject as a heading,
+   author and time under it, hash and actions beside. Two classes beat the
+   global `.source-detail-*` recipe it sits on. */
+.banner.banner {
+  gap: 8px 10px;
+  padding: 12px var(--pad-card);
+  background: var(--surface);
+  border-color: var(--card-line);
+  border-radius: var(--r-card);
+  box-shadow: var(--shadow-card);
+}
+
+.subject.subject {
+  color: var(--ink);
+  font-family: var(--font-ui);
+  font-size: var(--fs-h3);
+  font-weight: var(--title-weight);
+}
+
+.byline {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  color: var(--ink-3);
+  font-family: var(--font-mono);
+  font-size: var(--fs-meta);
+}
+
+.author {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--ink-2);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .body {
   display: block;
   width: 100%;
   margin: 0 0 var(--space-2);
   padding: 8px;
-  color: var(--text-secondary);
+  color: var(--ink-2);
   font-family: inherit;
-  font-size: 0.8rem;
+  font-size: var(--fs-small);
+  line-height: 1.65;
   text-align: left;
   white-space: pre-wrap;
   user-select: text;
-  background: var(--bg-secondary);
+  background: var(--surface);
   border: 1px solid transparent;
-  border-radius: 6px;
+  border-radius: var(--r-md);
   cursor: pointer;
 }
 
 .body:hover {
-  color: var(--text-primary);
+  color: var(--ink);
 }
 
 .body:focus-visible {
-  outline: 2px solid var(--focus-ring, var(--indigo));
+  outline: 2px solid var(--focus);
   outline-offset: -2px;
 }
 
 .selected {
-  background: var(--indigo-soft);
-  border-color: var(--border-color);
+  background: var(--accent-soft);
+  border-color: var(--line);
 }
 
 .mobile {
   padding-block: 6px;
-  color: var(--text-secondary);
+  color: var(--ink-2);
   white-space: normal;
 }
 

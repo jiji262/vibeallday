@@ -2,7 +2,7 @@ import type { ReviewComment } from "@vibeallday/shared";
 import { useState } from "react";
 import { api } from "../api/client";
 import { Button } from "../components/garden/Button";
-import { Card, CardFooter, CardHeader } from "../components/garden/Card";
+import { Card, CardFooter } from "../components/garden/Card";
 import { EmptyState } from "../components/garden/EmptyState";
 import { ErrorState } from "../components/garden/ErrorState";
 import { notifyReviewCommentsChanged } from "../lib/reviewCommentsBus";
@@ -93,10 +93,6 @@ export function ReviewCommentsPanel({
     <section className={styles.panel}>
       {error && <ErrorState inline message={error} />}
       <Card flush>
-        <CardHeader
-          title={t("sourceTabComments")}
-          meta={String(pending.length)}
-        />
         <ul className={styles.list}>
           {pending.map((comment) => (
             <li key={comment.id} className={styles.row}>

@@ -1,9 +1,9 @@
 .plainNotice {
   padding: 0.45rem 0.75rem;
-  color: var(--text-secondary);
+  color: var(--ink-2);
   font-size: 0.78rem;
-  background: var(--bg-secondary);
-  border-bottom: 1px solid var(--border-color);
+  background: var(--surface);
+  border-bottom: 1px solid var(--line);
 }
 
 /* In the phone modal the content runs edge to edge, so the revision label and

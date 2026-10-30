@@ -7,10 +7,10 @@
   height: 20px;
   place-items: center;
   padding: 0;
-  color: var(--text-secondary);
+  color: var(--ink-2);
   line-height: 1;
-  background: color-mix(in srgb, var(--bg-surface) 92%, transparent);
-  border: 1px solid var(--border-color);
+  background: color-mix(in srgb, var(--canvas) 92%, transparent);
+  border: 1px solid var(--line);
   border-radius: var(--radius-sm);
   box-shadow: var(--shadow-sm);
   cursor: pointer;
@@ -25,8 +25,8 @@
 
 .menuTrigger:hover,
 .menuTrigger:focus-visible {
-  color: var(--text-primary);
-  background: var(--bg-tertiary);
-  border-color: var(--indigo);
+  color: var(--ink);
+  background: var(--surface-3);
+  border-color: var(--accent);
   outline: none;
 }

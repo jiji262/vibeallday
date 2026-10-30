@@ -21,10 +21,11 @@ import {
   ProcessSection,
   ProcessSectionEmpty,
 } from "./AgentsProcessSection";
+import { computeProcessStats, ProcessStatsStrip } from "./AgentsProcessStats";
 import { observationMatchesQuery, processMatchesQuery } from "./agentsFormat";
 
-/** Session, project, provider, PID, started, resources, status, actions. */
-const PROCESS_COLUMNS = 8;
+/** Process, PID, status, CPU, memory, uptime, actions. */
+const PROCESS_COLUMNS = 7;
 
 type Translate = ReturnType<typeof useI18n>["t"];
 
@@ -138,7 +139,17 @@ function useProcessGroups(query: string) {
     (observation) => observation.supervision === "external",
   ).length;
   const total = processes.length + terminatedProcesses.length + externalTotal;
-  return { groups, host, total, loading, error, refetch };
+  const hostMetrics = host.enabled && host.supported !== false && !host.error;
+  const stats = useMemo(
+    () =>
+      computeProcessStats({
+        processes,
+        observations: host.observations,
+        hostMetrics,
+      }),
+    [processes, host.observations, hostMetrics],
+  );
+  return { groups, host, stats, total, loading, error, refetch };
 }
 
 function ExternalEmpty({
@@ -291,7 +302,7 @@ export function AgentsPage() {
   const [query, setQuery] = useState("");
   // The field echoes `query` at once; filtering follows the deferred copy.
   const deferredQuery = useDeferredValue(query);
-  const { groups, host, total, loading, error, refetch } =
+  const { groups, host, stats, total, loading, error, refetch } =
     useProcessGroups(deferredQuery);
   const { killingIds, feedback, kill } = useKill(refetch);
   return (
@@ -309,6 +320,7 @@ export function AgentsPage() {
             title={t("agentsTitle")}
             lede={t("consoleAgentsDescription")}
           />
+          {!loading && !error && <ProcessStatsStrip stats={stats} />}
           <ListToolbar
             label={t("agentsSearchLabel")}
             search={
@@ -353,6 +365,9 @@ export function AgentsPage() {
               kill={kill}
               killingIds={killingIds}
             />
+          )}
+          {!loading && !error && (
+            <p className={styles.footnote}>{t("agentsFootnote")}</p>
           )}
         </div>
       </main>

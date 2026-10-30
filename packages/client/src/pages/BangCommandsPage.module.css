@@ -1,35 +1,104 @@
 /*
- * Shell history page: one flush Card holding a list of `!!` runs. Each row is
- * a mono meta line (time, cwd, open-session link, the three actions) over the
- * command block, with dashed dividers between rows.
+ * Shell history page: day sections, each a vertical timeline. A row is the
+ * local time, a status node on the rail, and a card holding the meta line
+ * (cwd, open-session link, the three actions) over the command block.
  *
  * The block body belongs to BangCommandDisplayObject and keeps its own
  * `bang-command-*` vocabulary. See topics/bang-commands.md § Top-level
- * history view. The meta row's `bang-history-entry-time` and
- * `bang-history-entry-cwd` literals are unstyled DOM hooks.
+ * history view. The `bang-history-entry-time` and `bang-history-entry-cwd`
+ * literals are DOM hooks.
  */
 
+.days {
+  display: grid;
+  gap: var(--space-6);
+}
+
+.day {
+  display: grid;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.dayHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px var(--space-3);
+}
+
+.dayTitle {
+  margin: 0;
+  color: var(--ink);
+  font-size: var(--fs-h2);
+  font-weight: var(--title-weight);
+  font-stretch: var(--display-stretch);
+}
+
+.dayMeta {
+  color: var(--ink-3);
+  font-size: var(--fs-meta);
+}
+
+/* The rail runs through the node column (time 48px + half of 32px). */
 .entries {
+  position: relative;
+  display: grid;
+  gap: 10px;
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
+.entries::before {
+  content: "";
+  position: absolute;
+  top: var(--space-2);
+  bottom: var(--space-2);
+  left: 63px;
+  width: 1px;
+  background: var(--line-strong);
+}
+
 .entry {
-  padding: var(--space-4) var(--space-5);
-  border-bottom: 1px dashed var(--dash);
+  display: grid;
+  grid-template-columns: 48px 32px minmax(0, 1fr);
+  align-items: start;
 }
 
-.entry:last-child {
-  border-bottom: 0;
+.time {
+  padding-top: 15px;
+  color: var(--ink-3);
+  font-family: var(--font-mono);
+  font-size: var(--fs-meta);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
 }
 
-/* Time and place on the left, the three actions on the right. */
+.node {
+  position: relative;
+  display: grid;
+  place-items: center;
+  height: 46px;
+}
+
+.card {
+  min-width: 0;
+  padding: var(--space-3) var(--space-4);
+}
+
+.card.failed {
+  border-color: var(--err-line);
+  box-shadow:
+    inset 3px 0 0 var(--err),
+    var(--shadow-card);
+}
+
+/* Place and session on the left, the three actions on the right. */
 .entryMeta {
   display: flex;
   align-items: center;
   gap: var(--space-2);
-  margin-bottom: var(--space-2);
 }
 
 .entryWhen {
@@ -40,15 +109,21 @@
   gap: 2px var(--space-3);
   min-width: 0;
   color: var(--ink-3);
-  font-family: var(--label-font);
-  font-size: 12px;
+  font-size: var(--fs-small);
+}
+
+.cwd {
+  overflow: hidden;
+  font-family: var(--font-mono);
+  font-size: var(--fs-meta);
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .entrySession {
   position: relative;
-  color: var(--indigo);
-  font-family: var(--font-ui);
-  font-size: 13px;
+  color: var(--link);
+  font-size: var(--fs-small);
   text-decoration: none;
 }
 
@@ -65,7 +140,7 @@
 
 .entrySession:focus-visible {
   border-radius: var(--radius-xs);
-  outline: 2px solid var(--indigo);
+  outline: 2px solid var(--focus);
   outline-offset: 2px;
 }
 
@@ -76,8 +151,30 @@
   gap: 2px;
 }
 
+/* Phones: no time column; the time moves into the card's rail slot. */
 @media (width < 768px) {
+  .entries::before {
+    left: 15px;
+  }
+
   .entry {
-    padding-inline: var(--space-4);
+    grid-template-columns: 32px minmax(0, 1fr);
+  }
+
+  .time {
+    grid-column: 2;
+    padding-top: 0;
+    text-align: left;
+  }
+
+  .node {
+    grid-row: 1 / span 2;
+    grid-column: 1;
+    height: 24px;
+  }
+
+  .card {
+    grid-column: 2;
+    padding: var(--space-3);
   }
 }

@@ -4,8 +4,7 @@
  * the owning session. Contract: topics/bang-commands.md.
  */
 
-import type { BangCommandTranscriptDisplayObject } from "@vibeallday/shared";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { api } from "../api/client";
 import {
@@ -14,6 +13,7 @@ import {
 } from "../components/BangCommandDisplayObject";
 import { IconButton } from "../components/garden/Button";
 import { Card } from "../components/garden/Card";
+import { StatusDot } from "../components/garden/StatusDot";
 import { EmptyState } from "../components/garden/EmptyState";
 import { PlusIcon, TerminalIcon } from "../components/garden/icons";
 import { LoadingState } from "../components/garden/LoadingState";
@@ -24,6 +24,14 @@ import { useRemoteBasePath } from "../hooks/useRemoteBasePath";
 import { useI18n } from "../i18n";
 import { MainContent, useNavigationLayout } from "../layouts";
 import { createSessionNavigationState } from "../lib/sessionNavigationState";
+import {
+  type BangHistoryDay,
+  type BangHistoryEntry,
+  daysAgo,
+  groupByDay,
+  isFailedRun,
+  runStatus,
+} from "./BangCommandsPage.days";
 import styles from "./BangCommandsPage.module.css";
 
 /** Garden icon recipe for the two glyphs the shared set lacks. */
@@ -38,11 +46,15 @@ const ICON_PROPS = {
   strokeLinejoin: "round",
 } as const;
 
-interface BangHistoryEntry {
-  sessionId: string;
-  projectId?: string;
-  object: BangCommandTranscriptDisplayObject;
-}
+const TIME_FORMAT: Intl.DateTimeFormatOptions = {
+  hour: "2-digit",
+  minute: "2-digit",
+};
+const DATE_FORMAT: Intl.DateTimeFormatOptions = {
+  month: "short",
+  day: "numeric",
+  weekday: "short",
+};
 
 /**
  * Per-entry actions, all scoped to the entry's source session (which carries
@@ -151,24 +163,12 @@ export function BangCommandsPage() {
             <EmptyState title={t("bangHistoryEmpty")} icon={<TerminalIcon />} />
           )}
           {entries !== null && entries.length > 0 && (
-            <Card flush>
-              <ol className={styles.entries}>
-                {entries.map((entry) => {
-                  const entryKey = `${entry.sessionId}-${entry.object.id}`;
-                  return (
-                    <BangHistoryRow
-                      key={entryKey}
-                      entry={entry}
-                      basePath={basePath}
-                      expanded={expandedEntryKey === entryKey}
-                      onExpandedChange={(expanded) =>
-                        setExpandedEntryKey(expanded ? entryKey : null)
-                      }
-                    />
-                  );
-                })}
-              </ol>
-            </Card>
+            <BangHistoryTimeline
+              entries={entries}
+              basePath={basePath}
+              expandedEntryKey={expandedEntryKey}
+              onExpandedEntryKeyChange={setExpandedEntryKey}
+            />
           )}
         </div>
       </main>
@@ -176,7 +176,77 @@ export function BangCommandsPage() {
   );
 }
 
-/** Meta line (time, cwd, session link, actions) over the command block. */
+function DayHeading({ day, id }: { day: BangHistoryDay; id: string }) {
+  const { t } = useI18n();
+  const ago = daysAgo(day.start);
+  const label =
+    ago === 0
+      ? t("bangHistoryDayToday")
+      : ago === 1
+        ? t("bangHistoryDayYesterday")
+        : day.start.toLocaleDateString(undefined, DATE_FORMAT);
+  const meta = [t("bangHistoryDayCount", { count: day.entries.length })];
+  if (day.failed > 0) {
+    meta.push(t("bangHistoryDayFailed", { count: day.failed }));
+  }
+  return (
+    <div className={styles.dayHead}>
+      <h2 className={styles.dayTitle} id={id}>
+        {label}
+      </h2>
+      <span className={styles.dayMeta}>{meta.join(" · ")}</span>
+    </div>
+  );
+}
+
+/** Day sections, each a vertical timeline of time, status node and card. */
+function BangHistoryTimeline({
+  entries,
+  basePath,
+  expandedEntryKey,
+  onExpandedEntryKeyChange,
+}: {
+  entries: BangHistoryEntry[];
+  basePath: string;
+  expandedEntryKey: string | null;
+  onExpandedEntryKeyChange: (key: string | null) => void;
+}) {
+  const days = useMemo(() => groupByDay(entries), [entries]);
+  return (
+    <div className={styles.days}>
+      {days.map((day) => {
+        const headingId = `bang-history-day-${day.key}`;
+        return (
+          <section
+            key={day.key}
+            className={styles.day}
+            aria-labelledby={headingId}
+          >
+            <DayHeading day={day} id={headingId} />
+            <ol className={styles.entries}>
+              {day.entries.map((entry) => {
+                const entryKey = `${entry.sessionId}-${entry.object.id}`;
+                return (
+                  <BangHistoryRow
+                    key={entryKey}
+                    entry={entry}
+                    basePath={basePath}
+                    expanded={expandedEntryKey === entryKey}
+                    onExpandedChange={(expanded) =>
+                      onExpandedEntryKeyChange(expanded ? entryKey : null)
+                    }
+                  />
+                );
+              })}
+            </ol>
+          </section>
+        );
+      })}
+    </div>
+  );
+}
+
+/** Time and status node beside a card: cwd, session link, actions, block. */
 function BangHistoryRow({
   entry,
   basePath,
@@ -190,52 +260,69 @@ function BangHistoryRow({
 }) {
   const { t } = useI18n();
   const { projectId, sessionId, object } = entry;
+  const created = new Date(object.createdAt);
+  const failed = isFailedRun(object);
   return (
     <li className={styles.entry}>
-      <div className={styles.entryMeta}>
-        <div className={styles.entryWhen}>
-          <span className="bang-history-entry-time">
-            {new Date(object.createdAt).toLocaleString()}
-          </span>
-          <span className="bang-history-entry-cwd" title={object.cwd}>
-            {object.cwd.split("/").pop()}
-          </span>
-          {projectId && (
-            <Link
-              to={`${basePath}/projects/${projectId}/sessions/${sessionId}`}
-              className={styles.entrySession}
+      <time
+        className={`bang-history-entry-time ${styles.time}`}
+        dateTime={object.createdAt}
+        title={created.toLocaleString()}
+      >
+        {created.toLocaleTimeString([], TIME_FORMAT)}
+      </time>
+      <span className={styles.node}>
+        <StatusDot state={runStatus(object)} />
+      </span>
+      <Card
+        as="article"
+        className={failed ? `${styles.card} ${styles.failed}` : styles.card}
+      >
+        <div className={styles.entryMeta}>
+          <div className={styles.entryWhen}>
+            <span
+              className={`bang-history-entry-cwd ${styles.cwd}`}
+              title={object.cwd}
             >
-              {t("bangHistoryOpenSession")}
-            </Link>
+              {object.cwd.split("/").pop()}
+            </span>
+            {projectId && (
+              <Link
+                to={`${basePath}/projects/${projectId}/sessions/${sessionId}`}
+                className={styles.entrySession}
+              >
+                {t("bangHistoryOpenSession")}
+              </Link>
+            )}
+          </div>
+          {projectId && (
+            <BangHistoryEntryActions
+              projectId={projectId}
+              sessionId={sessionId}
+              command={object.command}
+              objectId={object.id}
+              basePath={basePath}
+            />
           )}
         </div>
-        {projectId && (
-          <BangHistoryEntryActions
-            projectId={projectId}
-            sessionId={sessionId}
-            command={object.command}
-            objectId={object.id}
-            basePath={basePath}
-          />
-        )}
-      </div>
-      <BangCommandDisplayObject
-        object={object}
-        outputExpanded={expanded}
-        onOutputExpandedChange={onExpandedChange}
-        handlers={
-          projectId
-            ? {
-                fetchOutput: (objectId: string) =>
-                  api.fetchBangCommandOutput(
-                    projectId,
-                    sessionId,
-                    objectId,
-                  ) as Promise<BangCommandOutput>,
-              }
-            : undefined
-        }
-      />
+        <BangCommandDisplayObject
+          object={object}
+          outputExpanded={expanded}
+          onOutputExpandedChange={onExpandedChange}
+          handlers={
+            projectId
+              ? {
+                  fetchOutput: (objectId: string) =>
+                    api.fetchBangCommandOutput(
+                      projectId,
+                      sessionId,
+                      objectId,
+                    ) as Promise<BangCommandOutput>,
+                }
+              : undefined
+          }
+        />
+      </Card>
     </li>
   );
 }

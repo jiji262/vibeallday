@@ -1,8 +1,9 @@
 import type { HostAgentProcessObservation } from "@vibeallday/shared";
 import { useCallback, useRef } from "react";
 import { Link } from "react-router-dom";
-import { Badge } from "../components/garden/Badge";
+import { Tag } from "../components/garden/Badge";
 import { Td, Tr } from "../components/garden/DataTable";
+import { ProviderMark } from "../components/garden/ProviderMark";
 import { ProviderChildNavTarget } from "../components/ProviderChildNavTarget";
 import type { ProcessInfo } from "../hooks/useProcesses";
 import { useI18n } from "../i18n";
@@ -11,9 +12,8 @@ import {
   providerChildTitle,
 } from "../lib/providerChildSessions";
 import styles from "./AgentsPage.module.css";
-import { EMPTY_CELL, ProcessRowCells } from "./AgentsProcessRowCells";
-import { ProcessMetrics } from "./AgentsProcessMetrics";
-import { formatUptime, getProviderLabel } from "./agentsFormat";
+import { ProcessRowCells, ResourceCells } from "./AgentsProcessRowCells";
+import { getProviderLabel } from "./agentsFormat";
 
 /** Short session id shown when an external process has no title. */
 const SHORT_ID_LENGTH = 8;
@@ -22,10 +22,12 @@ function sessionHref(basePath: string, projectId: string, sessionId: string) {
   return `${basePath}/projects/${projectId}/sessions/${sessionId}`;
 }
 
-/** Permission mode, queue depth and stop reason as one quiet line. */
+/** Project, provider, permission mode, queue and stop reason on one line. */
 function ProcessDetails({ process }: { process: ProcessInfo }) {
   const { t } = useI18n();
   const parts = [
+    process.projectName || null,
+    getProviderLabel(process.provider, t),
     process.permissionMode
       ? `${t("agentsPermissionMode")}: ${process.permissionMode}`
       : null,
@@ -111,16 +113,21 @@ export function ProcessRow({
   const { t } = useI18n();
   const live = !terminated;
   return (
-    <Tr>
+    <Tr className={styles.processRow}>
       <Td className={styles.sessionCell}>
-        <Link
-          to={sessionHref(basePath, process.projectId, process.sessionId)}
-          className={styles.sessionLink}
-          title={t("agentsSessionTooltip", { id: process.sessionId })}
-        >
-          {process.sessionTitle || t("agentsUntitled")}
-        </Link>
-        <ProcessDetails process={process} />
+        <span className={styles.identity}>
+          <ProviderMark provider={process.provider ?? "claude"} />
+          <span className={styles.identityText}>
+            <Link
+              to={sessionHref(basePath, process.projectId, process.sessionId)}
+              className={styles.sessionLink}
+              title={t("agentsSessionTooltip", { id: process.sessionId })}
+            >
+              {process.sessionTitle || t("agentsUntitled")}
+            </Link>
+            <ProcessDetails process={process} />
+          </span>
+        </span>
         <ProviderChildren process={process} basePath={basePath} />
       </Td>
       <ProcessRowCells
@@ -151,7 +158,6 @@ function externalTitle(
   return t("agentsExternalProcessTitle", { provider });
 }
 
-/** A provider process running on the host outside VibeAllDay's supervision. */
 /** The row's title cell: a session link when the process has one, else text. */
 function ExternalSessionCell({
   basePath,
@@ -188,6 +194,7 @@ interface ExternalProcessRowProps {
   basePath: string;
 }
 
+/** A provider process running on the host outside VibeAllDay's supervision. */
 export function ExternalProcessRow({
   observation,
   basePath,
@@ -206,35 +213,35 @@ export function ExternalProcessRow({
     ? t("agentsSessionTooltip", { id: sessionId })
     : undefined;
   return (
-    <Tr>
+    <Tr className={styles.processRow}>
       <Td className={styles.sessionCell}>
-        <ExternalSessionCell
-          basePath={basePath}
-          observation={observation}
-          title={title}
-          tooltip={tooltip}
-          attachRow={attachRow}
-        />
+        <span className={styles.identity}>
+          <ProviderMark provider={observation.provider} />
+          <span className={styles.identityText}>
+            <ExternalSessionCell
+              basePath={basePath}
+              observation={observation}
+              title={title}
+              tooltip={tooltip}
+              attachRow={attachRow}
+            />
+            <span className={styles.details}>{provider}</span>
+          </span>
+        </span>
       </Td>
-      <Td muted>{EMPTY_CELL}</Td>
-      <Td>{provider}</Td>
-      <Td mono num>
+      <Td mono num className={styles.cellPid} data-label={t("agentsColumnPid")}>
         {observation.pid}
       </Td>
-      <Td mono num>
-        {formatUptime(observation.startedAt)}
+      <Td className={styles.cellStatus}>
+        <Tag tone="attn">{t("agentsOutsideVibeAllDay")}</Tag>
       </Td>
-      <Td>
-        <ProcessMetrics
-          observation={observation}
-          sessionId={sessionId}
-          touchSurfaceRef={rowRef}
-        />
-      </Td>
-      <Td>
-        <Badge tone="peach">{t("agentsOutsideVibeAllDay")}</Badge>
-      </Td>
-      <Td actions />
+      <ResourceCells
+        observation={observation}
+        sessionId={sessionId}
+        live
+        touchSurfaceRef={rowRef}
+      />
+      <Td actions className={styles.cellActions} />
     </Tr>
   );
 }

@@ -1,8 +1,12 @@
 import type { LocalSourceRoot } from "@vibeallday/shared";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
+import { Tag } from "../components/garden/Badge";
+import { Button } from "../components/garden/Button";
+import { CopyChip } from "../components/garden/CopyChip";
 import { EmptyState } from "../components/garden/EmptyState";
-import { FolderIcon } from "../components/garden/icons";
+import { FolderIcon, RefreshIcon } from "../components/garden/icons";
+import { Notice } from "../components/garden/Notice";
 import { PageHeader } from "../components/PageHeader";
 import { PageIntro } from "../components/shell/PageIntro";
 import { GlossaryProjectBoundary } from "../contexts/GlossaryContext";
@@ -30,7 +34,16 @@ export function LocalSourcePage() {
   const [searchParams] = useSearchParams();
   const requestedPath = searchParams.get("path");
   const [root, setRoot] = useState<LocalSourceRoot | null>(null);
+  // Local time the current snapshot arrived; a refresh remounts the browser.
+  const [snapshotAt, setSnapshotAt] = useState<Date | null>(null);
+  const [snapshotGeneration, setSnapshotGeneration] = useState(0);
+  const handleRoot = useCallback((next: LocalSourceRoot) => {
+    setRoot(next);
+    setSnapshotAt(new Date());
+  }, []);
   const title = root?.path ?? requestedPath;
+  const snapshotTime = snapshotAt ? formatSnapshotTime(snapshotAt) : null;
+  const canBrowse = Boolean(projectId && requestedPath);
   // Without ?path= there is nothing to browse: the page names itself instead
   // of repeating "Source Control" as its own folder name.
   const name = title ? getPathBasename(title) : t("localSourceTitle");
@@ -48,28 +61,55 @@ export function LocalSourcePage() {
       <main className="page-scroll-container">
         <div className="page-content-inner">
           <PageIntro
-            eyebrow={[t("gitStatusTitle")]}
             title={name}
             lede={
               title ? (
-                <span className={styles.path} title={title}>
-                  {title}
+                <span className={styles.lede}>
+                  {snapshotTime ? (
+                    <Tag>
+                      {t("localSourceSnapshotTag", { time: snapshotTime })}
+                    </Tag>
+                  ) : null}
+                  <span className={styles.path} title={title}>
+                    {title}
+                  </span>
+                  <CopyChip
+                    value={title}
+                    label={t("sourceCopyPath")}
+                    copiedLabel={t("copied")}
+                  />
                 </span>
               ) : undefined
             }
+            actions={
+              canBrowse ? (
+                <Button
+                  size="sm"
+                  icon={<RefreshIcon />}
+                  onClick={() => setSnapshotGeneration((value) => value + 1)}
+                >
+                  {t("localSourceRefresh")}
+                </Button>
+              ) : undefined
+            }
           />
+          {canBrowse && snapshotTime ? (
+            <Notice className={styles.notice}>
+              {t("localSourceSnapshotNotice", { time: snapshotTime })}
+            </Notice>
+          ) : null}
           {!projectId || !requestedPath ? (
             <MissingPathState projectId={projectId} />
           ) : (
             <GlossaryProjectBoundary projectId={projectId}>
               <div className="git-status">
                 <BlameBrowser
-                  key={requestedPath}
+                  key={`${requestedPath}\0${snapshotGeneration}`}
                   projectId={projectId}
                   isWideScreen={isWideScreen}
                   supportsWorkingTreeFiles
                   localSourcePath={requestedPath}
-                  onLocalSourceRoot={setRoot}
+                  onLocalSourceRoot={handleRoot}
                   t={t}
                 />
               </div>
@@ -100,4 +140,14 @@ function MissingPathState({ projectId }: { projectId?: string }) {
       }
     />
   );
+}
+
+const SNAPSHOT_TIME_FORMAT: Intl.DateTimeFormatOptions = {
+  hour: "2-digit",
+  minute: "2-digit",
+};
+
+/** Local wall-clock time of the snapshot fetch. */
+function formatSnapshotTime(at: Date): string {
+  return at.toLocaleTimeString(undefined, SNAPSHOT_TIME_FORMAT);
 }

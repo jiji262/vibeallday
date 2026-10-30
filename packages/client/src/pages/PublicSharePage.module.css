@@ -2,105 +2,160 @@
    `.public-share-*` layout vocabulary in `styles/index.css`. The doubled
    selectors win over those single-class rules without editing them. */
 
+/* Compact read-only header (design Share): title over a quiet meta line,
+   snapshot tag and viewer count on the right. */
+.titleRow:global(.public-share-title-row) {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+}
+
 .titleRow :global(.public-share-title) {
-  font-family: var(--font-display);
-  font-size: 1.25rem;
-  font-weight: 600;
+  max-width: 100%;
+  color: var(--ink);
+  font-family: var(--font-ui);
+  font-size: var(--fs-h3);
+  font-stretch: var(--display-stretch);
+  font-weight: var(--title-weight);
+  letter-spacing: var(--display-tracking);
+}
+
+.meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  color: var(--ink-3);
+  font-size: var(--fs-meta);
+  white-space: nowrap;
+}
+
+.meta > * + *::before {
+  margin-right: 6px;
+  content: "·";
 }
 
 .titleRow :global(.public-share-project) {
+  max-width: 16rem;
   color: var(--ink-3);
-  font-family: var(--label-font);
-  font-size: var(--eyebrow-size);
-  letter-spacing: var(--eyebrow-tracking);
-  text-transform: uppercase;
+  font-size: var(--fs-meta);
 }
 
-/* Read-only reading surface: warm paper page, card-white header. */
 .page:global(.public-share-page) {
-  background: var(--bg);
+  --public-share-header-height: 60px;
+
+  background: var(--canvas);
   color: var(--ink);
 }
 
 .page :global(.public-share-header) {
-  border-bottom-color: var(--line);
-  background: var(--card);
+  border-bottom-color: var(--phead-line);
+  background: var(--phead-bg);
+}
+
+.headerInner:global(.public-share-header-inner) {
+  padding: 8px 28px;
+}
+
+/* One 720px reading column for notices, the view switch and the transcript. */
+.page :global(.public-share-caution),
+.page :global(.public-share-notice),
+.page :global(.public-share-error--inline),
+.page :global(.public-share-preview),
+.viewBar {
+  box-sizing: border-box;
+  width: auto;
+  max-width: 720px;
+  margin-inline: auto;
+}
+
+.page :global(.public-share-scroll .message-list) {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 720px;
+  margin-inline: auto;
+}
+
+.viewBar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 16px 0;
 }
 
 .page :global(.public-share-notice) {
   border-color: var(--line);
-  border-left: 3px solid var(--indigo);
-  background: var(--card);
+  border-left: 3px solid var(--accent);
+  border-radius: var(--r-card);
+  background: var(--surface);
   color: var(--ink-2);
-  font-size: 13px;
+  font-size: var(--fs-small);
 }
 
 .page :global(.public-share-error) {
-  border-color: var(--line);
-  border-left: 3px solid var(--rose);
-  border-radius: var(--radius-md);
-  background: color-mix(in srgb, var(--rose) 8%, var(--card));
-  color: var(--ink);
-  font-size: 13px;
+  border-color: var(--err-line);
+  border-radius: var(--r-card);
+  background: var(--err-soft);
+  color: var(--err-ink);
+  font-size: var(--fs-small);
 }
 
 .page :global(.public-share-preview-text) {
-  padding: var(--space-4);
-  border: 1px solid var(--line);
-  border-radius: var(--radius-md);
-  background: var(--card);
+  padding: var(--pad-card);
+  border: 1px solid var(--card-line);
+  border-radius: var(--r-card);
+  background: var(--surface);
   color: var(--ink);
 }
 
 .page :global(.public-share-fetch-status),
 .page :global(.public-share-empty) {
   color: var(--ink-3);
-  font-size: 13px;
+  font-size: var(--fs-small);
 }
 
 .page :global(.public-share-badge) {
-  padding: 2px var(--space-3);
-  border: 0;
-  border-radius: var(--radius-sm);
-  background: var(--mint-soft);
-  color: var(--mint-ink);
+  display: inline-flex;
+  align-items: center;
+  height: var(--chip-h);
+  padding: 0 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-chip);
+  background: var(--surface-2);
+  color: var(--ink-2);
   font-family: var(--font-ui);
-  font-size: 12px;
+  font-size: var(--fs-meta);
+  font-weight: 600;
 }
 
 .page :global(.public-share-caution) {
-  border-color: var(--line);
-  border-radius: var(--radius-md);
-  background: var(--card);
-  color: var(--ink-2);
-  font-size: 13px;
+  border-color: var(--attn-line);
+  border-radius: var(--r-card);
+  background: var(--attn-soft);
+  color: var(--attn-ink);
+  font-size: var(--fs-small);
 }
 
 .page :global(.public-share-caution--live) {
-  border-color: transparent;
-  background: var(--rose-soft);
-  color: var(--rose-ink);
+  border-color: var(--err-line);
+  background: var(--err-soft);
+  color: var(--err-ink);
 }
 
-/* Touch: the floating conversation toggle is a 44px target. */
+/* Touch: the floating follow toggle is a 44px target. */
 @media (pointer: coarse) {
-  .page
-    :global(.public-share-floating-controls .public-share-conversation-toggle),
   .page :global(.public-share-floating-controls .message-follow-toggle) {
     height: var(--tap-min);
   }
-
-  .page
-    :global(.public-share-floating-controls .public-share-conversation-toggle) {
-    width: var(--tap-min);
-  }
 }
 
-/* Phone: brand and badges on one row, the project and title on the next, so
+/* Phone: brand and badges on one row, the title and meta on the next, so
    the title keeps a readable column instead of squeezing to a few glyphs. */
 @media (width <= 600px) {
   .page:global(.public-share-page) {
-    --public-share-header-height: 76px;
+    --public-share-header-height: 88px;
   }
 
   .headerInner:global(.public-share-header-inner) {
@@ -110,8 +165,8 @@
       "brand actions"
       "title title";
     align-items: center;
-    row-gap: 2px;
-    padding: var(--space-2) var(--space-3);
+    row-gap: 4px;
+    padding: 8px 16px;
   }
 
   .headerLeft:global(.public-share-header-left) {
@@ -128,7 +183,6 @@
 
   .titleRow:global(.public-share-title-row) {
     grid-area: title;
-    gap: var(--space-2);
   }
 
   .titleRow :global(.public-share-project) {

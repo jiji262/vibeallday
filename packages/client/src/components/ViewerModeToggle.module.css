@@ -7,10 +7,10 @@
   height: 36px;
   box-sizing: border-box;
   padding: 0;
-  border: 1px solid var(--border-color);
-  border-radius: 6px;
-  color: var(--text-primary);
-  background: var(--bg-secondary);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-icon-btn);
+  color: var(--ink);
+  background: var(--surface);
   cursor: pointer;
   text-decoration: none;
 }
@@ -20,23 +20,23 @@
   height: 32px;
   border-color: transparent;
   background: transparent;
-  color: var(--text-muted);
+  color: var(--ink-3);
 }
 .toggle.edit:not([aria-pressed="true"]):hover {
-  background: var(--bg-hover);
-  color: var(--text-primary);
+  background: var(--surface-3);
+  color: var(--ink);
 }
 .toggle[aria-pressed="true"] {
-  color: var(--accent-contrast);
-  background: var(--primary-color);
-  border-color: var(--primary-color);
+  color: var(--accent-ink);
+  background: var(--accent-soft);
+  border-color: var(--accent-line);
 }
 .toggle[aria-disabled="true"] {
   opacity: 0.5;
   cursor: wait;
 }
 .toggle:focus-visible {
-  outline: 2px solid var(--focus-border);
+  outline: 2px solid var(--focus);
   outline-offset: 2px;
 }
 .label {

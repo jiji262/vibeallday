@@ -1,16 +1,22 @@
 import type { KeyboardEvent } from "react";
+import { Count } from "../components/garden/Count";
 import { TabList, tabClassName } from "../components/garden/Tabs";
 import type { MessageKey, TranslationFn } from "../i18n";
 import styles from "./SourceModeTabs.module.css";
 
 /**
- * The source-control mode selector (topic: source-review-to-session, stage 3):
- * one surface, several navigation modes that all feed the same review
- * accumulator. `changes` owns both the current working tree and explicitly
- * opened commit history, `files` is the all-files blame browser, and
- * `comments` is the pending-review list, and `reviews` is submitted history.
+ * Source-control body modes, as written to `?tab=` (topic:
+ * source-review-to-session): `changes` owns the working tree and commit
+ * history, `files` is the all-files blame browser, `comments` the pending
+ * review list, and `reviews` the submitted history.
  */
 export type SourceTab = "changes" | "files" | "comments" | "reviews";
+
+/**
+ * The tab strip over those modes: Changes, Commit history (Changes with its
+ * revision list), Files, and Review (pending comments plus submissions).
+ */
+export type SourceViewTab = "changes" | "history" | "files" | "review";
 
 const ARROW_STEP: Record<string, number> = { ArrowRight: 1, ArrowLeft: -1 };
 
@@ -45,12 +51,12 @@ export function SourceModeTabs({
   variant = "header",
   t,
 }: {
-  tab: SourceTab;
-  tabs: readonly SourceTab[];
-  /** Optional per-tab count chip (e.g. pending review comments). */
-  counts?: Partial<Record<SourceTab, number>>;
+  tab: SourceViewTab;
+  tabs: readonly SourceViewTab[];
+  /** Optional per-tab count chip (changed files, pending review comments). */
+  counts?: Partial<Record<SourceViewTab, number>>;
   fileTabLabelKey?: MessageKey;
-  onSelect: (tab: SourceTab) => void;
+  onSelect: (tab: SourceViewTab) => void;
   /**
    * `header` is the plain underline strip. `stacked` is the page-intro
    * layout, where the strip spans its row and splits evenly on phones.
@@ -92,11 +98,11 @@ function SourceModeTab({
   label,
   onSelect,
 }: {
-  tab: SourceTab;
+  tab: SourceViewTab;
   active: boolean;
   count?: number;
   label: string;
-  onSelect: (tab: SourceTab) => void;
+  onSelect: (tab: SourceViewTab) => void;
 }) {
   return (
     <button
@@ -110,25 +116,21 @@ function SourceModeTab({
     >
       {label}
       {typeof count === "number" && count > 0 && (
-        <span
-          className={`${styles.count} ${active ? styles.activeCount : ""}`.trimEnd()}
-        >
-          {count}
-        </span>
+        <Count className={styles.count}>{count}</Count>
       )}
     </button>
   );
 }
 
-function sourceTabLabelKey(tab: SourceTab): MessageKey {
+function sourceTabLabelKey(tab: SourceViewTab): MessageKey {
   switch (tab) {
     case "changes":
       return "sourceTabChanges";
+    case "history":
+      return "sourceCommitHistory";
     case "files":
       return "sourceTabFiles";
-    case "comments":
-      return "sourceTabComments";
-    case "reviews":
+    case "review":
       return "sourceTabReviews";
   }
 }

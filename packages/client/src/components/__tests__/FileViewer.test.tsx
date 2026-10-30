@@ -744,7 +744,12 @@ describe("FileViewer", () => {
     selection?.addRange(range);
 
     fireEvent.contextMenu(
-      screen.getByText("src/App.ts", { selector: ".file-viewer-path" }),
+      // The path renders as directory and name crumbs; match its full text.
+      screen.getByText(
+        (_, element) =>
+          element?.matches(".file-viewer-path") === true &&
+          element.textContent === "src/App.ts",
+      ),
     );
     expect(screen.getByRole("menuitem", { name: "New session" })).toBeTruthy();
     expect(screen.queryByRole("menuitem", { name: "Copy text" })).toBeNull();

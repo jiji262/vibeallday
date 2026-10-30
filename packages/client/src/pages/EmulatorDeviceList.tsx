@@ -1,8 +1,10 @@
 import type { DeviceInfo } from "@vibeallday/shared";
 import { useMemo } from "react";
-import { Badge } from "../components/garden/Badge";
 import { Button } from "../components/garden/Button";
 import { Card } from "../components/garden/Card";
+import { Count } from "../components/garden/Count";
+import { SmartphoneIcon } from "../components/garden/icons";
+import { Status } from "../components/garden/StatusDot";
 import { type MessageKey, useI18n } from "../i18n";
 import styles from "./EmulatorPage.module.css";
 
@@ -58,16 +60,16 @@ const DEVICE_STATES: Record<
   disconnected: { label: "emulatorDeviceDisconnected", live: false },
 };
 
-/** Live devices read mint, stopped or disconnected ones grey. */
+export function isLiveDevice(state: DeviceInfo["state"]): boolean {
+  return DEVICE_STATES[state]?.live ?? false;
+}
+
+/** Live devices read as running, stopped or disconnected ones idle. */
 export function DeviceStateBadge({ state }: { state: DeviceInfo["state"] }) {
   const { t } = useI18n();
   const known = DEVICE_STATES[state];
-  if (!known) return <Badge tone="sand">{state}</Badge>;
-  return (
-    <Badge tone={known.live ? "mint" : "grey"} dot>
-      {t(known.label)}
-    </Badge>
-  );
+  if (!known) return <Status state="attn">{state}</Status>;
+  return <Status state={known.live ? "run" : "idle"}>{t(known.label)}</Status>;
 }
 
 interface DeviceHandlers {
@@ -113,8 +115,15 @@ function DeviceActions({
 function DeviceRow(props: DeviceHandlers & { device: DeviceInfo }) {
   const { device } = props;
   const label = deviceLabel(device);
+  const live = isLiveDevice(device.state);
   return (
     <li className={styles.item} data-testid="device-row">
+      <span
+        className={live ? `${styles.itemIcon} ${styles.on}` : styles.itemIcon}
+        aria-hidden="true"
+      >
+        <SmartphoneIcon />
+      </span>
       <div className={styles.itemInfo}>
         <span className={styles.itemName}>{label}</span>
         {label !== device.id && (
@@ -140,7 +149,7 @@ function groupDevices(devices: DeviceInfo[]) {
   return groups;
 }
 
-/** One card per device class; each row carries its state and actions. */
+/** One titled card per device class; each row carries its Status and actions. */
 export function DeviceList({
   devices,
   ...handlers
@@ -153,7 +162,11 @@ export function DeviceList({
         if (entries.length === 0) return null;
         const labelKey = DEVICE_TYPE_LABELS[type];
         return (
-          <Card as="section" flush key={type} data-testid="device-group">
+          <section
+            key={type}
+            className={styles.group}
+            data-testid="device-group"
+          >
             <div className={styles.groupHeader}>
               <h2
                 className={styles.groupTitle}
@@ -161,14 +174,16 @@ export function DeviceList({
               >
                 {labelKey ? t(labelKey) : t("emulatorGroupOther")}
               </h2>
-              <span className={styles.groupCount}>{entries.length}</span>
+              <Count>{entries.length}</Count>
             </div>
-            <ul className={styles.rows}>
-              {entries.map((device) => (
-                <DeviceRow key={device.id} device={device} {...handlers} />
-              ))}
-            </ul>
-          </Card>
+            <Card flush>
+              <ul className={styles.rows}>
+                {entries.map((device) => (
+                  <DeviceRow key={device.id} device={device} {...handlers} />
+                ))}
+              </ul>
+            </Card>
+          </section>
         );
       })}
     </div>

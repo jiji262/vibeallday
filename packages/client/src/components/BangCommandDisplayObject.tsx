@@ -8,7 +8,7 @@ import type { BangCommandTranscriptDisplayObject } from "@vibeallday/shared";
 import { useEffect, useRef, useState } from "react";
 import { useI18n } from "../i18n";
 import { MarkdownPreview } from "./MarkdownPreview";
-import { Badge } from "./garden/Badge";
+import { Status } from "./garden/StatusDot";
 import { Spinner } from "./garden/Spinner";
 import styles from "./BangCommandDisplayObject.module.css";
 
@@ -155,9 +155,9 @@ export function BangCommandDisplayObject({
             </span>
           )}
           {exitLabel && (
-            <Badge tone={object.exitCode === 0 ? "mint" : "rose"}>
+            <Status state={object.exitCode === 0 ? "ok" : "err"}>
               {exitLabel}
-            </Badge>
+            </Status>
           )}
           {object.durationMs !== undefined && (
             <span>{formatDuration(object.durationMs)}</span>

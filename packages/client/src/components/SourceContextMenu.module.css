@@ -10,7 +10,7 @@
   align-self: stretch;
   min-height: 28px;
   padding: 0;
-  color: var(--text-muted);
+  color: var(--ink-3);
   background: transparent;
   border: 0;
   border-radius: 6px;
@@ -29,8 +29,8 @@
 
 .trigger:hover,
 .trigger:focus-visible {
-  color: var(--text-primary, #e6edf3);
-  background: var(--bg-hover, rgba(255, 255, 255, 0.08));
+  color: var(--ink);
+  background: var(--surface-3);
   outline: 2px solid var(--focus-ring, var(--accent-color));
   outline-offset: -2px;
 }
@@ -53,16 +53,16 @@
   max-width: min(280px, calc(100dvw - 16px));
   flex-direction: column;
   padding: var(--space-1, 4px);
-  background: var(--bg-surface);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-md, 8px);
-  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.34);
+  background: var(--canvas);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md, 8px);
+  box-shadow: var(--shadow-pop);
 }
 
 .menu button {
   min-height: 32px;
   padding: 0.4rem 0.6rem;
-  color: var(--text-primary);
+  color: var(--ink);
   font-size: var(--font-size-sm);
   text-align: left;
   background: transparent;
@@ -73,19 +73,19 @@
 
 .menu button.separatorBefore {
   margin-top: 4px;
-  border-top: 1px solid var(--border-subtle, #21262d);
+  border-top: 1px solid var(--card-line);
   border-top-left-radius: 0;
   border-top-right-radius: 0;
 }
 
 .menu button:hover:not(:disabled),
 .menu button:focus-visible {
-  background: var(--bg-hover);
+  background: var(--surface-3);
   outline: none;
 }
 
 .menu button:disabled {
-  color: var(--text-muted);
+  color: var(--ink-3);
   cursor: default;
   opacity: 0.5;
 }
@@ -96,7 +96,7 @@
 
 .heading {
   padding: 8px 10px;
-  color: var(--text-muted);
+  color: var(--ink-3);
   font-size: var(--font-size-sm);
   font-weight: 600;
 }

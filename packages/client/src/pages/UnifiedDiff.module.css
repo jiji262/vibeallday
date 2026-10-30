@@ -7,8 +7,8 @@
   width: max-content;
   margin: 0;
   padding: 0.5rem 1rem;
-  color: var(--text-primary);
-  background: var(--bg-code);
+  color: var(--ink);
+  background: var(--code-bg);
   border-radius: 4px;
 }
 
@@ -20,5 +20,5 @@
 }
 
 .hunkHeader {
-  color: var(--text-muted);
+  color: var(--ink-3);
 }

@@ -14,12 +14,12 @@
   overflow: auto;
   list-style: none;
   border: 1px solid var(--line);
-  border-radius: var(--radius-md);
+  border-radius: var(--r-md);
 }
 
 .row {
   padding: 0 var(--space-3) var(--space-3);
-  border-bottom: 1px dashed var(--dash);
+  border-bottom: 1px dashed var(--line-strong);
 }
 
 .row:last-child {
@@ -27,7 +27,7 @@
 }
 
 .stale {
-  background: var(--sand-soft);
+  background: var(--attn-soft);
 }
 
 /* The whole header row is the checkbox's 44px target. */
@@ -44,7 +44,7 @@
   width: 20px;
   height: 20px;
   flex-shrink: 0;
-  accent-color: var(--indigo);
+  accent-color: var(--accent);
 }
 
 .location {
@@ -62,7 +62,7 @@
 }
 
 .staleLabel {
-  color: var(--sand-ink);
+  color: var(--attn-ink);
 }
 
 .movedLabel {
@@ -80,9 +80,9 @@
   display: grid;
   gap: var(--space-2);
   padding: var(--space-3);
-  background: var(--bg-2);
+  background: var(--surface-2);
   border: 1px solid var(--line);
-  border-radius: var(--radius-md);
+  border-radius: var(--r-md);
 }
 
 .field {
@@ -107,7 +107,7 @@
 }
 
 .targetError {
-  color: var(--rose-ink);
+  color: var(--err-ink);
   font-size: 13px;
 }
 

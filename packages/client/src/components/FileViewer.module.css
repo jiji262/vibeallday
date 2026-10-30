@@ -1,6 +1,7 @@
 .viewer {
   container-type: inline-size;
   container-name: file-viewer;
+  background: var(--canvas);
 }
 
 .header {
@@ -36,7 +37,7 @@
   min-height: 32px;
   box-sizing: border-box;
   padding-block: 6px;
-  color: var(--link-color);
+  color: var(--ink);
   font-family: var(--font-mono);
   font-size: var(--fixed-font-size-base);
   line-height: 20px;
@@ -82,38 +83,67 @@
   height: 100%;
   min-height: min(68vh, 720px);
   border: 0;
-  background: var(--bg-primary);
+  background: var(--canvas);
 }
 
 .diffBody {
   min-height: 100%;
-  background: var(--bg-code);
+  background: var(--code-bg);
 }
 
 .reloadStale {
-  color: var(--peach-ink);
+  color: var(--attn-ink);
+}
+
+/* View switch (design .seg): source/preview toggle and the diff versions
+   share one track; the active one is the raised "on" option. */
+.viewSwitch {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 2px;
+  margin-inline: 4px;
+  padding: 2px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-seg);
+  background: var(--seg-track);
+}
+
+.viewSwitch:empty {
+  display: none;
+}
+
+.viewSwitch > :global(.file-viewer-action) {
+  height: var(--seg-h);
+  border-radius: var(--r-seg-item);
 }
 
 .rawToggle[aria-pressed="true"],
 .rawToggle[aria-pressed="true"]:hover {
-  background: var(--indigo-soft);
-  color: var(--indigo);
+  background: var(--seg-on);
+  box-shadow: var(--seg-shadow);
+  color: var(--ink);
 }
 
 .commentToggle[aria-pressed="true"],
 .commentToggle[aria-pressed="true"]:hover {
-  background: var(--mint-soft);
-  color: var(--mint-ink);
+  background: var(--accent-soft);
+  color: var(--accent-ink);
 }
 
 .commentSend {
-  min-height: 32px;
+  min-height: var(--btn-h-sm);
   border: 0;
-  border-radius: var(--radius-md);
-  padding: var(--space-1) var(--space-3);
-  background: var(--indigo);
-  color: var(--ink-on);
-  font-weight: 500;
+  border-radius: var(--r-btn);
+  padding: 0 var(--btn-px);
+  background: var(--accent);
+  color: var(--on-accent);
+  font-size: var(--fs-btn);
+  font-weight: 600;
+}
+
+.commentSend:hover:not(:disabled) {
+  background: var(--accent-hover);
 }
 
 .commentSend:disabled {
@@ -138,9 +168,8 @@
   min-width: 0;
   overflow: hidden;
   color: var(--ink-3);
-  font-family: var(--label-font);
-  font-size: 11px;
-  letter-spacing: var(--meta-tracking);
+  font-family: var(--font-ui);
+  font-size: var(--fs-meta);
   text-overflow: ellipsis;
 }
 
@@ -160,32 +189,43 @@
   flex: 0 0 auto;
 }
 
-/* Garden viewer bar: sunken strip on a hairline, ink mono path, ghost icon
-   actions with the indigo focus ring. Layout stays with the rules above. */
+/* Viewer bar (design topbar): canvas strip on a hairline, crumb-weighted
+   mono path, ghost icon buttons with the focus ring. Layout stays above. */
 .viewer .header {
-  background: var(--bg-2);
+  background: var(--canvas);
   border-bottom-color: var(--line);
 }
 
 .viewer .path {
-  color: var(--ink-2);
+  color: var(--ink);
 }
 
 .viewer :global(.file-viewer-action) {
   color: var(--ink-3);
-  border-radius: var(--radius-md);
+  border-radius: var(--r-icon-btn);
   transition:
     background var(--duration-fast) var(--ease-standard),
     color var(--duration-fast) var(--ease-standard);
 }
 
 .viewer :global(.file-viewer-action):hover:not(:disabled) {
-  background: var(--bg-soft);
+  background: var(--surface-3);
   color: var(--ink);
 }
 
 .viewer :global(.file-viewer-action):focus-visible {
-  box-shadow: 0 0 0 3px var(--indigo-soft);
+  outline: 2px solid var(--focus);
+  outline-offset: 1px;
+}
+
+.viewer :global(.file-viewer-action.copied),
+.viewer :global(.file-viewer-action.file-viewer-new-session) {
+  color: var(--accent-ink);
+}
+
+.viewer :global(.file-viewer-action.file-viewer-new-session):hover {
+  background: var(--accent-soft);
+  color: var(--accent-ink);
 }
 
 /* Narrow viewers (phones, side panes): the action row stays one strip that
@@ -215,6 +255,10 @@
   .viewer :global(.file-viewer-action) {
     width: var(--tap-min);
     height: var(--tap-min);
+  }
+
+  .viewSwitch {
+    padding: 0;
   }
 
   .context {

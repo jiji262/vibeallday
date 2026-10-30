@@ -83,7 +83,11 @@ export function ArtifactLinkViewer({
       aria-label={controller.label}
       hidden={hidden}
     >
-      <header className={`${headerStyles.header} ${styles.header}`}>
+      <header
+        className={`${headerStyles.header} ${styles.header}${
+          standalone ? ` ${styles.standaloneHeader}` : ""
+        }`}
+      >
         <span className={headerStyles.identity}>
           <span className={styles.title} title={controller.label}>
             {controller.label}

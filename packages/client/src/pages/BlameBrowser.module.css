@@ -14,29 +14,29 @@
 
 .sectionToggle {
   display: inline-flex;
-  min-height: 28px;
+  min-height: var(--chip-h);
   align-items: center;
   gap: 5px;
-  padding: 3px 8px;
-  color: var(--text-muted);
+  padding: 0 10px;
+  color: var(--ink-2);
   font: inherit;
-  font-size: 0.75rem;
-  background: transparent;
-  border: 1px solid var(--border-subtle);
-  border-radius: 6px;
+  font-size: var(--fs-small);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-chip);
   cursor: pointer;
 }
 
 .sectionToggle:hover,
 .sectionToggle:focus-visible {
-  color: var(--text-primary);
-  background: var(--bg-hover);
+  color: var(--ink);
+  background: var(--surface-3);
 }
 
 .activeSectionToggle {
-  color: var(--text-primary);
-  background: var(--bg-selected);
-  border-color: var(--border-color);
+  color: var(--accent-ink);
+  background: var(--accent-soft);
+  border-color: var(--accent-line);
 }
 
 .truncated {
@@ -44,26 +44,26 @@
   align-items: center;
   gap: 5px;
   margin: 8px;
-  color: var(--text-muted);
-  font-size: 0.75rem;
+  color: var(--ink-3);
+  font-size: var(--fs-meta);
 }
 
 .truncated button {
   display: inline-flex;
   min-height: 28px;
   align-items: center;
-  padding: 3px 8px;
-  color: var(--text-primary);
+  padding: 3px 10px;
+  color: var(--ink);
   font: inherit;
-  background: transparent;
-  border: 1px solid var(--border-subtle);
-  border-radius: 5px;
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-btn);
   cursor: pointer;
 }
 
 .truncated button:hover,
 .truncated button:focus-visible {
-  background: var(--bg-hover);
+  background: var(--surface-3);
 }
 
 .detail {
@@ -73,8 +73,10 @@
   height: 100%;
   flex-direction: column;
   overflow: hidden;
-  border: 1px solid var(--border-subtle);
-  border-radius: 8px;
+  background: var(--surface);
+  border: 1px solid var(--card-line);
+  border-radius: var(--r-card);
+  box-shadow: var(--shadow-card);
 }
 
 .detail > :global(.file-viewer),
@@ -90,30 +92,34 @@
   display: flex;
   justify-content: flex-end;
   margin: 0;
+  gap: 2px;
   padding: 4px 8px;
-  background: var(--bg-secondary);
+  background: var(--surface-2);
   border: 0;
-  border-bottom: 1px solid var(--border-subtle);
+  border-bottom: 1px solid var(--line);
 }
 
 .detailModes button {
-  padding: 3px 8px;
-  color: var(--text-muted);
+  min-height: 28px;
+  padding: 0 10px;
+  color: var(--ink-2);
   font: inherit;
-  font-size: 0.74rem;
+  font-size: var(--fs-small);
+  font-weight: 600;
   background: transparent;
   border: 0;
-  border-radius: 5px;
+  border-radius: var(--r-seg-item);
   cursor: pointer;
 }
 
 .detailModes button:hover,
 .detailModes button:focus-visible {
-  color: var(--text-primary);
-  background: var(--bg-hover);
+  color: var(--ink);
+  background: var(--surface-3);
 }
 
 .detailModes .activeMode {
-  color: var(--text-primary);
-  background: var(--bg-selected);
+  color: var(--ink);
+  background: var(--seg-on);
+  box-shadow: var(--seg-shadow);
 }

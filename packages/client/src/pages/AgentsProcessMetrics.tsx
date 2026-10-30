@@ -122,7 +122,7 @@ interface ProcessMetricsProps {
   touchSurfaceRef?: RefObject<HTMLElement | null>;
 }
 
-/** RSS · CPU chip with a detail popover sampled from the host. */
+/** Root RSS chip with a detail popover sampled from the host. */
 export function ProcessMetrics({
   observation,
   sessionId,
@@ -136,11 +136,6 @@ export function ProcessMetrics({
   useDismiss({ open, close, wrapper: wrapperRef, surface: touchSurfaceRef });
   useSurfaceToggle(touchSurfaceRef, wrapperRef, toggle);
   const detail = metricsDetail(observation, sessionId, t);
-  const cpu = observation.cpu
-    ? t("agentsMetricsCpuValue", {
-        percent: formatCpu(observation.cpu.treePercent),
-      })
-    : t("agentsMetricsCpuSampling");
 
   return (
     <span className={styles.metricsWrap} ref={wrapperRef}>
@@ -157,8 +152,6 @@ export function ProcessMetrics({
         }}
       >
         <span>{formatMemory(observation.memory.rootRssBytes)} RSS</span>
-        <span aria-hidden>·</span>
-        <span>{cpu}</span>
       </button>
       {open && (
         <span className={styles.metricsPopover} role="status">

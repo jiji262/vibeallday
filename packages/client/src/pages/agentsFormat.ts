@@ -1,5 +1,5 @@
 import type { HostAgentProcessObservation } from "@vibeallday/shared";
-import type { BadgeTone } from "../components/garden/Badge";
+import type { StatusState } from "../components/garden/StatusDot";
 import type { ProcessInfo } from "../hooks/useProcesses";
 import type { MessageKey } from "../i18n";
 
@@ -52,21 +52,31 @@ const STATE_LABEL_KEYS: Record<string, MessageKey> = {
   terminated: "agentsStopped",
 };
 
-const STATE_TONES: Record<string, BadgeTone> = {
-  "in-turn": "mint",
-  running: "mint",
-  "waiting-input": "rose",
-  idle: "grey",
-  terminated: "outline",
+/** Design status: running = run, needs input = attn, stopped = dashed ring. */
+const STATE_STATUS: Record<string, StatusState> = {
+  "in-turn": "run",
+  running: "run",
+  "waiting-input": "attn",
+  idle: "idle",
+  terminated: "queued",
 };
+
+/** CPU percent shown full-width in a meter; multi-core trees can exceed it. */
+const METER_MAX_PERCENT = 100;
 
 export function getStateLabel(state: string, t: Translate): string {
   const key = STATE_LABEL_KEYS[state];
   return key ? t(key) : state;
 }
 
-export function getStateTone(state: string): BadgeTone {
-  return STATE_TONES[state] ?? "grey";
+export function getStateStatus(state: string): StatusState {
+  return STATE_STATUS[state] ?? "idle";
+}
+
+/** Meter fill for a CPU percent, clamped to 0–100. */
+export function meterPercent(percent: number): number {
+  if (!Number.isFinite(percent) || percent <= 0) return 0;
+  return Math.min(percent, METER_MAX_PERCENT);
 }
 
 const PROVIDER_LABELS: Record<string, string> = {

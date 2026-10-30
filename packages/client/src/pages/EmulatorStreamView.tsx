@@ -145,11 +145,14 @@ function ImmersiveKeyboardButton({
 function StreamHeader({
   device,
   connectionState,
+  fps,
   keyboard,
   onBack,
 }: {
   device: DeviceInfo;
   connectionState: StreamState["connectionState"];
+  /** Frame rate of the latest adaptive profile, when one has arrived. */
+  fps?: number;
   keyboard?: ImmersiveKeyboard;
   onBack: () => void;
 }) {
@@ -171,6 +174,9 @@ function StreamHeader({
         {deviceLabel(device)} · {connectionState}
       </span>
       <div className={styles.streamHeaderActions}>
+        {fps !== undefined && (
+          <span className={styles.fps}>{t("emulatorStreamFps", { fps })}</span>
+        )}
         {keyboard && <ImmersiveKeyboardButton keyboard={keyboard} />}
       </div>
     </div>
@@ -207,14 +213,16 @@ function StreamPane({
         <LoadingState variant="compact" label={t("emulatorConnecting")} />
       )}
       <div className={styles.streamContainer}>
-        <EmulatorStream
-          stream={stream.remoteStream}
-          dataChannel={stream.dataChannel}
-          deviceType={device.type}
-          peerConnection={stream.peerConnection}
-          adaptiveFps={adaptiveFps}
-          configuredFps={maxFps}
-        />
+        <div className={styles.deviceFrame}>
+          <EmulatorStream
+            stream={stream.remoteStream}
+            dataChannel={stream.dataChannel}
+            deviceType={device.type}
+            peerConnection={stream.peerConnection}
+            adaptiveFps={adaptiveFps}
+            configuredFps={maxFps}
+          />
+        </div>
       </div>
       <EmulatorNavButtons
         dataChannel={stream.dataChannel}
@@ -261,6 +269,7 @@ export function StreamView({
       <StreamHeader
         device={device}
         connectionState={stream.connectionState}
+        fps={stream.latestProfileEvent?.fps}
         keyboard={supportsImmersive ? keyboard : undefined}
         onBack={handleBack}
       />

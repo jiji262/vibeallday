@@ -1,0 +1,9 @@
+/* Path crumbs: quiet directory, inked file name. Weight stays the same in
+   both parts so the measured path width never changes with emphasis. */
+.directory {
+  color: var(--ink-3);
+}
+
+.name {
+  color: var(--ink);
+}

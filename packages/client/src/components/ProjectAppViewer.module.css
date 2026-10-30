@@ -7,8 +7,9 @@
   min-height: 0;
   height: 100%;
   overflow: hidden;
-  background: var(--bg-surface);
+  background: var(--canvas);
 }
+/* Browser-frame chrome: the app name reads as the address field. */
 .title {
   flex: 1;
   /* A crowded phone toolbar still leaves the home icon whole. */
@@ -17,10 +18,19 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  height: 30px;
+  margin-inline: 4px;
+  padding: 0 8px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-input);
+  background: var(--input-bg);
+  color: var(--ink-2);
+  font-family: var(--font-mono);
+  font-size: var(--fs-small);
 }
 .title svg {
   flex-shrink: 0;
-  color: var(--text-secondary);
+  color: var(--ink-3);
 }
 /* Reads as the title; the icon and name are one target for the app's home. */
 .home {
@@ -31,14 +41,19 @@
   padding: 2px 4px;
   margin-left: -4px;
   border: 0;
-  border-radius: var(--radius-md);
+  border-radius: var(--r-sm);
   background: none;
   color: inherit;
   font: inherit;
   cursor: pointer;
 }
 .home:hover:not(:disabled) {
-  background: var(--bg-tertiary);
+  background: var(--surface-3);
+  color: var(--ink);
+}
+.home:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 1px;
 }
 .home:disabled {
   cursor: default;
@@ -63,8 +78,8 @@
   background: white;
 }
 .viewer .livePreviewToggle[aria-pressed="true"] {
-  background: var(--indigo);
-  color: var(--ink-on);
+  background: var(--accent);
+  color: var(--on-accent);
 }
 .details {
   overflow: auto;
@@ -76,8 +91,8 @@
 }
 .servedStopped {
   padding: 6px 10px;
-  border-inline-start: 3px solid var(--sand);
-  color: var(--sand-ink);
+  border-inline-start: 3px solid var(--attn);
+  color: var(--attn-ink);
 }
 .details label {
   display: block;
@@ -94,9 +109,11 @@
   min-height: var(--tap-min);
   padding: 5px 14px;
   border: 1px solid var(--line-strong);
-  border-radius: var(--radius-md);
-  background: var(--bg-card);
-  color: var(--text-primary);
+  border-radius: var(--r-btn);
+  background: var(--surface);
+  color: var(--ink);
+  font-size: var(--fs-btn);
+  font-weight: 600;
   cursor: pointer;
   /* Icon-and-text buttons sit level with plain ones in a row. */
   vertical-align: middle;
@@ -113,22 +130,23 @@
   box-sizing: border-box;
   padding: 8px 12px;
   margin-top: 6px;
-  border: 1px solid var(--border-input);
-  border-radius: var(--radius-md);
-  background: var(--bg-input);
-  color: var(--text-primary);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-input);
+  background: var(--input-bg);
+  color: var(--ink);
   font: inherit;
   font-size: 16px;
 }
 .details fieldset {
   min-width: 0;
   margin: 16px 0 0;
-  padding: 12px;
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
+  padding: var(--pad-card);
+  border: 1px solid var(--card-line);
+  border-radius: var(--r-card);
+  background: var(--surface);
 }
 .details dt {
-  color: var(--text-secondary);
+  color: var(--ink-3);
   margin-top: 8px;
 }
 .details dd {
@@ -196,7 +214,7 @@
   min-height: 0;
   flex: 1;
   padding-top: env(safe-area-inset-top, 0px);
-  background: var(--bg-surface);
+  background: var(--canvas);
 }
 .concealed {
   display: none;

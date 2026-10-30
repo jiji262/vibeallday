@@ -9,7 +9,7 @@ import {
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useParams, useSearchParams } from "react-router-dom";
 import { BrandWordmark } from "../components/BrandWordmark";
-import { ConversationViewIcon } from "../components/ConversationViewIcon";
+import { Segmented } from "../components/garden/Segmented";
 import { Spinner } from "../components/garden/Spinner";
 import { MessageList } from "../components/MessageList";
 import { ViewerCountIndicator } from "../components/ViewerCountIndicator";
@@ -556,14 +556,17 @@ function PublicSharePageGeneration({ locationHash }: { locationHash: string }) {
               className={`public-share-brand-wordmark ${styles.brand}`}
             />
             <div className={`public-share-title-row ${styles.titleRow}`}>
-              {projectName && (
-                <span className="public-share-project" title={projectName}>
-                  {projectName}
-                </span>
-              )}
               <h1 className="public-share-title">
                 {title ?? t("publicShareUntitled")}
               </h1>
+              <span className={styles.meta}>
+                {projectName && (
+                  <span className="public-share-project" title={projectName}>
+                    {projectName}
+                  </span>
+                )}
+                <span>{t("publicShareReadOnly")}</span>
+              </span>
             </div>
           </div>
           <div className="public-share-header-actions">
@@ -609,7 +612,25 @@ function PublicSharePageGeneration({ locationHash }: { locationHash: string }) {
                   {error}
                 </div>
               ) : messageContent ? (
-                messageContent
+                <>
+                  <div className={styles.viewBar}>
+                    <Segmented
+                      label={t("publicShareViewLabel")}
+                      options={[
+                        {
+                          value: "conversation",
+                          label: t("publicShareViewConversation"),
+                        },
+                        { value: "full", label: t("publicShareViewFull") },
+                      ]}
+                      value={conversationViewEnabled ? "conversation" : "full"}
+                      onChange={(view) =>
+                        setConversationViewEnabled(view === "conversation")
+                      }
+                    />
+                  </div>
+                  {messageContent}
+                </>
               ) : initialPromptPreview ? (
                 <div className="public-share-preview">
                   <div className="public-share-preview-text">
@@ -634,28 +655,7 @@ function PublicSharePageGeneration({ locationHash }: { locationHash: string }) {
         <div
           className="public-share-floating-controls"
           ref={setFloatingControlsElement}
-        >
-          <button
-            type="button"
-            className={`conversation-view-toolbar-button public-share-conversation-toggle${
-              conversationViewEnabled ? " active" : ""
-            }`}
-            onClick={() => setConversationViewEnabled((enabled) => !enabled)}
-            title={
-              conversationViewEnabled
-                ? t("toolbarConversationViewDisable")
-                : t("toolbarConversationViewEnable")
-            }
-            aria-label={
-              conversationViewEnabled
-                ? t("toolbarConversationViewDisable")
-                : t("toolbarConversationViewEnable")
-            }
-            aria-pressed={conversationViewEnabled}
-          >
-            <ConversationViewIcon />
-          </button>
-        </div>
+        ></div>
       )}
     </main>
   );

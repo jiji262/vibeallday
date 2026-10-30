@@ -1,11 +1,12 @@
-/* Source Control page intro. The page is a full-height workbench, so the
-   intro keeps its rows tight: identity and operations, then repository state
-   and the underline mode tabs spanning the content width. */
+/* Source Control page intro (design Git boards). The page is a full-height
+   workbench, so the intro keeps its rows tight: project title with the
+   identity bar and Sync on the right, then the mode tabs as a full-width
+   underline strip. */
 .intro {
   flex-shrink: 0;
 }
 
-/* The project switcher reads as the page title: serif, inherited size. */
+/* The project switcher reads as the page title at the inherited size. */
 .title {
   display: inline-flex;
   min-width: 0;
@@ -41,11 +42,14 @@
   font: inherit;
 }
 
-.rows {
-  display: grid;
-  flex: 1 1 100%;
-  gap: var(--space-3);
+/* Identity bar and Sync sit together and wrap as one cluster. */
+.identity {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
   min-width: 0;
+  max-width: 100%;
 }
 
 .repoStatus {
@@ -55,5 +59,14 @@
 @media (width < 768px) {
   .title button > span {
     max-width: calc(100dvw - 80px);
+  }
+
+  /* Phone: the identity bar takes its own row; Sync follows it. */
+  .identity {
+    width: 100%;
+  }
+
+  .repoStatus {
+    flex: 1 1 100%;
   }
 }

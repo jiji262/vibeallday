@@ -15,6 +15,8 @@ import {
 } from "../components/SourceContextMenu";
 import { SearchMatchText } from "../components/SearchMatchText";
 import { SourceShortcutHelp } from "../components/SourceShortcutHelp";
+import { formatRemoteCheckTime } from "../hooks/useGitActions";
+import { useRelativeNow } from "../hooks/useRelativeNow";
 import {
   handleSourceListKeyDown,
   suppressSourceKeyboardTooltips,
@@ -24,6 +26,11 @@ import type { CommitSearchMatch } from "../lib/commitSearchIndex";
 import { findTextMatch } from "../lib/searchMatch";
 import type { TranslationFn } from "../i18n";
 import { WORKING_TREE_KEY } from "./useCommitBrowserModel";
+import {
+  CommitAuthorInitial,
+  CommitGraphCell,
+  HeadTag,
+} from "./CommitRevisionPane.graph";
 import styles from "./CommitRevisionPane.module.css";
 import {
   SourcePaneEmpty,
@@ -103,6 +110,8 @@ export function CommitRevisionPane({
   t: TranslationFn;
 }) {
   const revisionMenu = useSourceContextMenu(t);
+  const nowMs = useRelativeNow();
+  const headSha = status?.recentCommits?.[0]?.hash;
   const revisionListRef = useRef<HTMLOListElement>(null);
   const initialRevisionFocusPending = useRef(true);
   const revisionMenuActions = useCallback(
@@ -330,7 +339,7 @@ export function CommitRevisionPane({
                   />
                 </li>
               )}
-              {displayedCommits.map((commit) => {
+              {displayedCommits.map((commit, index) => {
                 const commentCount = commentCountBySha.get(commit.hash) ?? 0;
                 const menuActions = revisionMenuActions(commit.hash, commit);
                 const targetProps = revisionMenu.targetProps(menuActions, () =>
@@ -338,18 +347,22 @@ export function CommitRevisionPane({
                 );
                 const match = commitSearchMatches.get(commit.hash);
                 const formattedDate = formatCommitDate(commit.authorDate);
-                const matchContext = getCommitMatchContext(
-                  match,
-                  searchQuery,
-                  formattedDate,
+                const relativeDate = formatRemoteCheckTime(
+                  commit.authorDate,
+                  nowMs,
+                  t,
                 );
+                const matchContext = getCommitMatchContext(match, searchQuery, {
+                  shown: relativeDate,
+                  full: formattedDate,
+                });
                 return (
                   <li
                     key={commit.hash}
                     className={`commit-list-row ${sourceRowMenuSurface}`}
                   >
                     <a
-                      className={`commit-list-item ${styles.link} ${
+                      className={`commit-list-item ${styles.link} ${styles.commit} ${
                         selectedKey === commit.hash ? "selected" : ""
                       } ${isRead(commit.authorDate) ? "read" : "unread"}`}
                       href={revisionHref(commit.hash)}
@@ -372,62 +385,79 @@ export function CommitRevisionPane({
                         targetProps.onClick();
                       }}
                     >
-                      <span className="commit-subject-row">
-                        <SearchMatchText
-                          className="commit-subject"
-                          text={commit.subject}
-                          query={
-                            match?.field === "subject" ? searchQuery : undefined
-                          }
-                          title={commit.subject}
-                        />
-                        {commentCount > 0 && (
-                          <span
-                            className="source-comment-badge"
-                            title={t("sourceCommentCount", {
-                              count: commentCount,
-                            })}
-                          >
-                            {commentCount}
-                          </span>
+                      <CommitGraphCell
+                        first={index === 0}
+                        last={
+                          index === displayedCommits.length - 1 &&
+                          (!hasMore || searchActive)
+                        }
+                        head={commit.hash === headSha}
+                      />
+                      <span className={styles.body}>
+                        <span className="commit-subject-row">
+                          <SearchMatchText
+                            className="commit-subject"
+                            text={commit.subject}
+                            query={
+                              match?.field === "subject"
+                                ? searchQuery
+                                : undefined
+                            }
+                            title={commit.subject}
+                          />
+                          {commit.hash === headSha && <HeadTag />}
+                          {commentCount > 0 && (
+                            <span
+                              className="source-comment-badge"
+                              title={t("sourceCommentCount", {
+                                count: commentCount,
+                              })}
+                            >
+                              {commentCount}
+                            </span>
+                          )}
+                        </span>
+                        <span className={`commit-meta ${styles.meta}`}>
+                          <CommitAuthorInitial name={commit.authorName} />
+                          <SearchMatchText
+                            className="commit-author"
+                            text={commit.authorName}
+                            query={
+                              match?.field === "author"
+                                ? searchQuery
+                                : undefined
+                            }
+                          />
+                          <SearchMatchText
+                            className={`commit-hash ${styles.hash}`}
+                            text={commit.shortHash}
+                            query={
+                              match?.field === "shortHash"
+                                ? searchQuery
+                                : undefined
+                            }
+                          />
+                          <SearchMatchText
+                            className={`commit-date ${styles.date}`}
+                            text={relativeDate}
+                            title={formattedDate}
+                            query={
+                              match?.field === "date" &&
+                              findTextMatch(relativeDate, searchQuery)
+                                ? searchQuery
+                                : undefined
+                            }
+                          />
+                        </span>
+                        {matchContext && (
+                          <SearchMatchText
+                            className={styles.matchContext}
+                            text={matchContext}
+                            query={searchQuery}
+                            title={matchContext}
+                          />
                         )}
                       </span>
-                      <span className="commit-meta">
-                        <SearchMatchText
-                          className="commit-hash"
-                          text={commit.shortHash}
-                          query={
-                            match?.field === "shortHash"
-                              ? searchQuery
-                              : undefined
-                          }
-                        />
-                        <SearchMatchText
-                          className="commit-author"
-                          text={commit.authorName}
-                          query={
-                            match?.field === "author" ? searchQuery : undefined
-                          }
-                        />
-                        <SearchMatchText
-                          className="commit-date"
-                          text={formattedDate}
-                          query={
-                            match?.field === "date" &&
-                            findTextMatch(formattedDate, searchQuery)
-                              ? searchQuery
-                              : undefined
-                          }
-                        />
-                      </span>
-                      {matchContext && (
-                        <SearchMatchText
-                          className={styles.matchContext}
-                          text={matchContext}
-                          query={searchQuery}
-                          title={matchContext}
-                        />
-                      )}
                     </a>
                     <SourceRowMenuTrigger
                       actions={menuActions}
@@ -487,15 +517,20 @@ function isModifiedLinkActivation(
   );
 }
 
+/**
+ * Extra line under a row for matches the row does not show: a change or full
+ * hash, or a date the relative label hides (then the full date, else the
+ * indexed text).
+ */
 function getCommitMatchContext(
   match: CommitSearchMatch | undefined,
   query: string,
-  formattedDate: string,
+  date: { shown: string; full: string },
 ): string | null {
   if (!match) return null;
   if (match.field === "change" || match.field === "hash") return match.text;
-  if (match.field === "date" && !findTextMatch(formattedDate, query)) {
-    return match.text;
+  if (match.field === "date" && !findTextMatch(date.shown, query)) {
+    return findTextMatch(date.full, query) ? date.full : match.text;
   }
   return null;
 }

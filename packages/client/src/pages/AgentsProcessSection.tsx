@@ -20,13 +20,12 @@ function ProcessTableHead() {
   return (
     <thead>
       <tr>
-        <Th>{t("agentsColumnSession")}</Th>
-        <Th>{t("agentsColumnProject")}</Th>
-        <Th>{t("agentsColumnProvider")}</Th>
+        <Th>{t("agentsColumnProcess")}</Th>
         <Th>{t("agentsColumnPid")}</Th>
-        <Th>{t("agentsColumnStarted")}</Th>
-        <Th>{t("agentsColumnResources")}</Th>
         <Th>{t("agentsColumnStatus")}</Th>
+        <Th>{t("agentsColumnCpu")}</Th>
+        <Th>{t("agentsColumnMemory")}</Th>
+        <Th>{t("agentsColumnUptime")}</Th>
         <Th right>
           <span className={styles.visuallyHidden}>
             {t("agentsColumnActions")}
@@ -37,7 +36,7 @@ function ProcessTableHead() {
   );
 }
 
-/** One process group: serif title, mono count, then a flush table. */
+/** One process group: title, count, then a flush table (cards on phones). */
 export function ProcessSection({
   title,
   count,
@@ -50,7 +49,7 @@ export function ProcessSection({
       {count === 0 ? (
         empty
       ) : (
-        <Table label={title}>
+        <Table label={title} className={styles.processTable}>
           <ProcessTableHead />
           <tbody>{children}</tbody>
         </Table>

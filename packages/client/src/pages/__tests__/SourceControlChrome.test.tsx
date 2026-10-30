@@ -17,7 +17,7 @@ import { I18nProvider } from "../../i18n";
 import menuStyles from "../../components/SourceContextMenu.module.css";
 import { RepoStatusBar } from "../RepoStatusBar";
 import repoStyles from "../RepoStatusBar.module.css";
-import { SourceModeTabs, type SourceTab } from "../SourceModeTabs";
+import { SourceModeTabs, type SourceViewTab } from "../SourceModeTabs";
 import tabStyles from "../SourceModeTabs.module.css";
 
 const apiMocks = vi.hoisted(() => ({
@@ -30,7 +30,7 @@ vi.mock("../../api/client", () => ({
 
 const t = ((key: string) => key) as never;
 
-const TABS: readonly SourceTab[] = ["changes", "files", "comments"];
+const TABS: readonly SourceViewTab[] = ["changes", "files", "review"];
 
 function gitStatus(overrides: Partial<GitStatusInfo> = {}): GitStatusInfo {
   return {
@@ -261,7 +261,7 @@ describe("SourceModeTabs", () => {
     expect(tabs.map((tab) => tab.getAttribute("data-tab"))).toEqual(TABS);
     expect(tabs.map((tab) => tab.tabIndex)).toEqual([0, -1, -1]);
     fireEvent.keyDown(tabs[0] as HTMLElement, { key: "ArrowLeft" });
-    expect(onSelect).toHaveBeenLastCalledWith("comments");
+    expect(onSelect).toHaveBeenLastCalledWith("review");
     fireEvent.keyDown(tabs[0] as HTMLElement, { key: "End" });
     expect(document.activeElement).toBe(tabs[2]);
   });
@@ -271,7 +271,7 @@ describe("SourceModeTabs", () => {
       <SourceModeTabs
         tab="changes"
         tabs={TABS}
-        counts={{ changes: 3, comments: 0 }}
+        counts={{ changes: 3, review: 0 }}
         onSelect={vi.fn()}
         t={t}
       />,
@@ -282,21 +282,21 @@ describe("SourceModeTabs", () => {
     expect(counts[0]?.textContent).toBe("3");
   });
 
-  it("supports a fourth Reviews mode without changing the tab contract", () => {
+  it("names the Commit history and Review tabs by view", () => {
     const onSelect = vi.fn();
     render(
       <SourceModeTabs
-        tab="reviews"
-        tabs={[...TABS, "reviews"]}
+        tab="review"
+        tabs={["changes", "history", "files", "review"]}
         onSelect={onSelect}
         t={t}
       />,
     );
 
-    const reviews = screen.getByRole("tab", { name: "sourceTabReviews" });
-    expect(reviews.getAttribute("aria-selected")).toBe("true");
-    fireEvent.click(screen.getByRole("tab", { name: "sourceTabComments" }));
-    expect(onSelect).toHaveBeenCalledWith("comments");
+    const review = screen.getByRole("tab", { name: "sourceTabReviews" });
+    expect(review.getAttribute("aria-selected")).toBe("true");
+    fireEvent.click(screen.getByRole("tab", { name: "sourceCommitHistory" }));
+    expect(onSelect).toHaveBeenCalledWith("history");
   });
 
   it("selects the stacked phone layout by variant rather than by caller CSS", () => {

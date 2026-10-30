@@ -131,6 +131,7 @@ import {
   getEmbeddedMediaKind,
 } from "./FileViewerEmbeddedMedia";
 import { FileViewerLoading } from "./FileViewerLoading";
+import { FileViewerCopyPathButton, FileViewerPathText } from "./FileViewerPath";
 
 export interface FileViewerSource {
   loadFile: (
@@ -2046,7 +2047,7 @@ export const FileViewer = memo(function FileViewer({
           ref={fileHeaderPathMeasureRef}
           className={`${viewerStyles.path} ${viewerStyles.pathMeasure}`}
         >
-          {displayPath}
+          <FileViewerPathText path={displayPath} />
         </span>
       </span>
       <div className={viewerStyles.identityRow}>
@@ -2071,7 +2072,7 @@ export const FileViewer = memo(function FileViewer({
             title={filePath}
             onContextMenu={handlePathContextMenu}
           >
-            {displayPath}
+            <FileViewerPathText path={displayPath} />
           </span>
           <div
             ref={fileHeaderProvenanceRef}
@@ -2109,36 +2110,47 @@ export const FileViewer = memo(function FileViewer({
       </div>
       <div className={`file-viewer-actions ${viewerStyles.actions}`}>
         <ViewerFindField find={find} />
-        {publicShareContext === null && (
-          <FileDiffViewLinks
-            activeView={activeView}
-            availability={fileVersionControl}
-            onSelect={selectView}
-            projectId={projectId}
-            variant="header"
-          />
-        )}
-        {(diffActive || hasFilePreview) && (
-          <button
-            type="button"
-            className={`file-viewer-action ${viewerStyles.rawToggle}`}
-            aria-label={t("fileViewerRawSource" as never)}
-            aria-pressed={!diffActive && !showPreview}
-            title={t("fileViewerRawSource" as never)}
-            onClick={() => {
-              if (diffActive) {
-                selectView("source");
-                return;
-              }
-              setInteractivePreviewIdentity(
-                !showPreview && hasHtmlPreview ? viewIdentity : null,
-              );
-              setShowPreview((visible) => !visible);
-            }}
-          >
-            <RawSourceIcon />
-          </button>
-        )}
+        <FileViewerCopyPathButton
+          value={
+            projectRelativeCopyPath ??
+            (publicShareContext === null ? absoluteCopyPath : null) ??
+            filePath
+          }
+          label={t("sourceCopyPath")}
+          copiedLabel={t("copied")}
+        />
+        <span className={viewerStyles.viewSwitch}>
+          {(diffActive || hasFilePreview) && (
+            <button
+              type="button"
+              className={`file-viewer-action ${viewerStyles.rawToggle}`}
+              aria-label={t("fileViewerRawSource" as never)}
+              aria-pressed={!diffActive && !showPreview}
+              title={t("fileViewerRawSource" as never)}
+              onClick={() => {
+                if (diffActive) {
+                  selectView("source");
+                  return;
+                }
+                setInteractivePreviewIdentity(
+                  !showPreview && hasHtmlPreview ? viewIdentity : null,
+                );
+                setShowPreview((visible) => !visible);
+              }}
+            >
+              <RawSourceIcon />
+            </button>
+          )}
+          {publicShareContext === null && (
+            <FileDiffViewLinks
+              activeView={activeView}
+              availability={fileVersionControl}
+              onSelect={selectView}
+              projectId={projectId}
+              variant="header"
+            />
+          )}
+        </span>
         {commentModeSupported && (
           <button
             type="button"

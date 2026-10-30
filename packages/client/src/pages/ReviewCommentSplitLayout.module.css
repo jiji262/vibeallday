@@ -10,6 +10,6 @@
 
 .editor {
   padding: var(--space-3);
-  border-block: 1px solid var(--border-color);
-  background: var(--bg-secondary);
+  border-block: 1px solid var(--line);
+  background: var(--surface);
 }

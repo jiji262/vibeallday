@@ -1,37 +1,26 @@
-import type {
-  GitIncomingCommitListResult,
-  GitStatusInfo,
-} from "@vibeallday/shared";
-import { useEffect, useState } from "react";
-import { api } from "../api/client";
+import type { GitStatusInfo } from "@vibeallday/shared";
+import { type MouseEvent, useState } from "react";
 import { CopyButton } from "../components/CopyButton";
-import { Badge } from "../components/garden/Badge";
-import { EmptyState } from "../components/garden/EmptyState";
-import { ErrorState } from "../components/garden/ErrorState";
+import { Tag } from "../components/garden/Badge";
 import { GitBranchIcon } from "../components/garden/icons";
-import { LoadingState } from "../components/garden/LoadingState";
-import { Modal } from "../components/ui/Modal";
 import type { TranslationFn } from "../i18n";
-import { formatCommitDateTime } from "./CommitFilesPane";
 import styles from "./RepoStatusBar.module.css";
+import { IncomingCommitsDialog } from "./RepoStatusBar.incoming";
 
 const BRANCH_ICON_SIZE = 13;
 
-/**
- * Persistent branch status in the Source Control identity header. Project,
- * branch, upstream, and clean/dirty state stay together while mode navigation
- * and repository actions use their own layout regions.
- */
-export function RepoStatusBar({
-  status,
-  projectId,
-  supportsIncomingCommits = false,
-  onSelectChanges,
-  headCommitHref,
-  onOpenHeadCommit,
-  className,
-  t,
-}: {
+/** Activation the browser owns (new tab, download, …), not in-page routing. */
+function isModifiedClick(event: MouseEvent<HTMLAnchorElement>): boolean {
+  return (
+    event.button !== 0 ||
+    event.metaKey ||
+    event.ctrlKey ||
+    event.shiftKey ||
+    event.altKey
+  );
+}
+
+interface RepoStatusBarProps {
   status: GitStatusInfo;
   projectId?: string;
   supportsIncomingCommits?: boolean;
@@ -44,117 +33,63 @@ export function RepoStatusBar({
   /** Caller-supplied placement class for the header region that holds the bar. */
   className?: string;
   t: TranslationFn;
-}) {
+}
+
+/**
+ * Persistent repository identity (design Git boards): branch with its copy
+ * control, upstream, ahead/behind, and the clean/changed tag in one inset
+ * group. Mode navigation and repository actions sit beside it.
+ */
+export function RepoStatusBar(props: RepoStatusBarProps) {
+  const { status, projectId, supportsIncomingCommits = false, t } = props;
   const [incomingOpen, setIncomingOpen] = useState(false);
   const outOfSync = status.ahead > 0 || status.behind > 0;
   const warn = !status.isClean || outOfSync;
-  // Detached HEAD has no branch name but still has a tip, so the copy control
-  // and the commit link both fall back to that SHA.
-  const headCommit = status.recentCommits?.[0];
-  const branchLabel = status.branch ?? t("gitStatusDetachedHead");
-  const copyValue = status.branch ?? headCommit?.hash;
-  const opensHeadCommit =
-    headCommit !== undefined &&
-    headCommitHref !== undefined &&
-    onOpenHeadCommit !== undefined;
   const previewsIncoming =
     supportsIncomingCommits &&
     projectId !== undefined &&
     status.upstream !== null;
-
   return (
     <>
       <div
         data-testid="repo-status-bar"
+        role="group"
+        aria-label={t("sourceRepoStatusLabel")}
         className={[
           styles.bar,
           styles.inline,
           warn ? styles.warn : "",
-          className ?? "",
+          props.className ?? "",
         ]
           .filter(Boolean)
           .join(" ")}
       >
-        <span className={styles.branch}>
-          <GitBranchIcon size={BRANCH_ICON_SIZE} />
-          {opensHeadCommit ? (
-            <a
-              className={`${styles.branchName} ${styles.branchLink}`}
-              href={headCommitHref}
-              title={t("sourceOpenHeadCommit", {
-                commit: headCommit.shortHash,
+        <RepoBranch {...props} />
+        {status.upstream && (
+          <RepoUpstream
+            upstream={status.upstream}
+            previewsIncoming={previewsIncoming}
+            onOpenIncoming={() => setIncomingOpen(true)}
+            t={t}
+          />
+        )}
+        {status.upstream && (
+          <>
+            <span className={styles.sep} aria-hidden="true" />
+            <span className={outOfSync ? styles.syncWarn : styles.sync}>
+              {t("sourceAheadBehind", {
+                ahead: status.ahead,
+                behind: status.behind,
               })}
-              onClick={(event) => {
-                if (
-                  event.button !== 0 ||
-                  event.metaKey ||
-                  event.ctrlKey ||
-                  event.shiftKey ||
-                  event.altKey
-                ) {
-                  return;
-                }
-                event.preventDefault();
-                onOpenHeadCommit();
-              }}
-            >
-              {branchLabel}
-            </a>
-          ) : (
-            <span className={styles.branchName}>{branchLabel}</span>
-          )}
-          {copyValue && (
-            <CopyButton
-              value={copyValue}
-              title={
-                status.branch
-                  ? t("sourceCopyBranch")
-                  : t("sourceCopyCommitHash")
-              }
-              className={styles.copyButton}
-            />
-          )}
-        </span>
-        {status.upstream &&
-          (previewsIncoming ? (
-            <button
-              type="button"
-              className={`${styles.upstream} ${styles.upstreamButton}`}
-              title={t("sourceOpenIncomingCommits", {
-                upstream: status.upstream,
-              })}
-              onClick={() => setIncomingOpen(true)}
-            >
-              → {status.upstream}
-            </button>
-          ) : (
-            <span className={styles.upstream} title={status.upstream}>
-              → {status.upstream}
             </span>
-          ))}
-        {outOfSync && (
-          <span className={styles.sync}>
-            {status.ahead > 0 && ` ↑${status.ahead}`}
-            {status.behind > 0 && ` ↓${status.behind}`}
-          </span>
+          </>
         )}
-        {!status.isClean && onSelectChanges ? (
-          <button
-            type="button"
-            className={`${styles.badge} ${styles.dirty} ${styles.badgeAction}`}
-            title={t("sourceOpenChanges")}
-            onClick={onSelectChanges}
-          >
-            {t("gitStatusDirty")}
-          </button>
-        ) : (
-          <Badge
-            tone={status.isClean ? "mint" : "sand"}
-            className={styles.stateBadge}
-          >
-            {status.isClean ? t("gitStatusClean") : t("gitStatusDirty")}
-          </Badge>
-        )}
+        <span className={styles.sep} aria-hidden="true" />
+        <RepoStateTag
+          status={status}
+          onSelectChanges={props.onSelectChanges}
+          t={t}
+        />
       </div>
       {incomingOpen && projectId && (
         <IncomingCommitsDialog
@@ -167,85 +102,115 @@ export function RepoStatusBar({
   );
 }
 
-function IncomingCommitsDialog({
-  projectId,
-  onClose,
+function RepoBranch({
+  status,
+  headCommitHref,
+  onOpenHeadCommit,
+  t,
+}: RepoStatusBarProps) {
+  // Detached HEAD has no branch name but still has a tip, so the copy control
+  // and the commit link both fall back to that SHA.
+  const headCommit = status.recentCommits?.[0];
+  const branchLabel = status.branch ?? t("gitStatusDetachedHead");
+  const copyValue = status.branch ?? headCommit?.hash;
+  return (
+    <span className={styles.branch}>
+      <GitBranchIcon size={BRANCH_ICON_SIZE} />
+      {headCommit && headCommitHref && onOpenHeadCommit ? (
+        <a
+          className={`${styles.branchName} ${styles.branchLink}`}
+          href={headCommitHref}
+          title={t("sourceOpenHeadCommit", { commit: headCommit.shortHash })}
+          onClick={(event) => {
+            if (isModifiedClick(event)) return;
+            event.preventDefault();
+            onOpenHeadCommit();
+          }}
+        >
+          {branchLabel}
+        </a>
+      ) : (
+        <span className={styles.branchName}>{branchLabel}</span>
+      )}
+      {copyValue && (
+        <CopyButton
+          value={copyValue}
+          title={
+            status.branch ? t("sourceCopyBranch") : t("sourceCopyCommitHash")
+          }
+          className={styles.copyButton}
+        />
+      )}
+    </span>
+  );
+}
+
+function RepoUpstream({
+  upstream,
+  previewsIncoming,
+  onOpenIncoming,
   t,
 }: {
-  projectId: string;
-  onClose: () => void;
+  upstream: string;
+  previewsIncoming: boolean;
+  onOpenIncoming: () => void;
   t: TranslationFn;
 }) {
-  const [result, setResult] = useState<GitIncomingCommitListResult | null>(
-    null,
-  );
-  const [error, setError] = useState(false);
-
-  useEffect(() => {
-    let active = true;
-    api
-      .getGitIncomingCommits(projectId)
-      .then((nextResult) => {
-        if (active) setResult(nextResult);
-      })
-      .catch(() => {
-        if (active) setError(true);
-      });
-    return () => {
-      active = false;
-    };
-  }, [projectId]);
-
+  if (!previewsIncoming) {
+    return (
+      <span className={styles.upstream} title={upstream}>
+        → {upstream}
+      </span>
+    );
+  }
   return (
-    <Modal
-      variant="dialog"
-      title={t("sourceIncomingCommitsTitle")}
-      onClose={onClose}
+    <button
+      type="button"
+      className={`${styles.upstream} ${styles.upstreamButton}`}
+      title={t("sourceOpenIncomingCommits", { upstream })}
+      onClick={onOpenIncoming}
     >
-      <div className={styles.incomingDialog}>
-        <p className={styles.incomingIntro}>
-          {t("sourceIncomingCommitsDescription")}
-        </p>
-        {error ? (
-          <ErrorState inline message={t("sourceIncomingCommitsError")} />
-        ) : result === null ? (
-          <LoadingState
-            variant="compact"
-            label={t("sourceIncomingCommitsLoading")}
-          />
-        ) : result.commits.length === 0 ? (
-          <EmptyState
-            compact
-            title={t("sourceIncomingCommitsEmpty", {
-              upstream: result.upstream,
-            })}
-          />
-        ) : (
-          <>
-            <ul className={styles.incomingList}>
-              {result.commits.map((commit) => (
-                <li key={commit.hash} className={styles.incomingCommit}>
-                  <span className={styles.incomingCommitHeader}>
-                    <code title={commit.hash}>{commit.shortHash}</code>
-                    <strong className={styles.incomingSubject}>
-                      {commit.subject}
-                    </strong>
-                  </span>
-                  <span className={styles.incomingMeta}>
-                    {commit.authorName} ·{" "}
-                    {formatCommitDateTime(commit.authorDate)}
-                  </span>
-                </li>
-              ))}
-            </ul>
-            {result.truncated && (
-              <p className={styles.incomingTruncated}>
-                {t("sourceIncomingCommitsTruncated", { count: result.limit })}
-              </p>
-            )}
-          </>
-        )}
-      </div>
-    </Modal>
+      → {upstream}
+    </button>
   );
+}
+
+/** "N changes" opens Changes when it can; a clean tree reads ok. */
+function RepoStateTag({
+  status,
+  onSelectChanges,
+  t,
+}: {
+  status: GitStatusInfo;
+  onSelectChanges?: () => void;
+  t: TranslationFn;
+}) {
+  if (status.isClean) {
+    return (
+      <Tag tone="ok" className={styles.stateTag}>
+        {t("gitStatusClean")}
+      </Tag>
+    );
+  }
+  const count = countChangedPaths(status);
+  const label =
+    count > 0 ? t("sourceChangeCountTag", { count }) : t("gitStatusDirty");
+  if (!onSelectChanges) {
+    return <Tag className={styles.stateTag}>{label}</Tag>;
+  }
+  return (
+    <button
+      type="button"
+      className={`${styles.stateTag} ${styles.stateAction}`}
+      title={t("sourceOpenChanges")}
+      onClick={onSelectChanges}
+    >
+      {label}
+    </button>
+  );
+}
+
+/** Distinct changed paths; staged and unstaged halves of one file count once. */
+export function countChangedPaths(status: GitStatusInfo): number {
+  return new Set(status.files.map((file) => file.path)).size;
 }

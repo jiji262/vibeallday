@@ -1,8 +1,8 @@
 .message {
   min-width: 0;
   padding: var(--space-2) var(--space-3);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
   font-size: 0.82rem;
   overflow-wrap: anywhere;
 }
@@ -37,7 +37,7 @@
   margin-top: var(--space-1);
   padding: var(--space-2);
   border-radius: var(--radius-sm);
-  background: var(--bg-surface);
+  background: var(--canvas);
 }
 
 .output pre {
@@ -45,7 +45,7 @@
   padding-right: 32px;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
-  color: var(--text-primary);
+  color: var(--ink);
 }
 
 .copy {

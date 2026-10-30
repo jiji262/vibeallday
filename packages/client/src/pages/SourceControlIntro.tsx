@@ -3,15 +3,12 @@ import { ProjectSelector } from "../components/ProjectSelector";
 import { PageIntro } from "../components/shell/PageIntro";
 import type { GitActionState } from "../hooks/useGitActions";
 import type { TranslationFn } from "../i18n";
-import { RepoStatusBar } from "./RepoStatusBar";
-import { SourceHeaderControls } from "./SourceActionControls";
+import { useSourceControlCleanLanding } from "../hooks/useSourceControlCleanLanding";
+import { countChangedPaths, RepoStatusBar } from "./RepoStatusBar";
+import { SourceSyncControls } from "./SourceActionControls.sync";
 import styles from "./SourceControlIntro.module.css";
 import { SourceModeTabs } from "./SourceModeTabs";
-import {
-  SOURCE_TABS,
-  SOURCE_TABS_WITH_REVIEWS,
-  useSourceTab,
-} from "./useSourceTab";
+import { SOURCE_VIEW_TABS, useSourceTab } from "./useSourceTab";
 
 export interface SourceControlIntroProps {
   projectId?: string;
@@ -39,16 +36,33 @@ export interface SourceWorkbenchProps {
 }
 
 /**
- * The Source Control page head (license-hub page intro): the project as the
- * title (a project switcher when there are several), repository state under
- * it, repository operations as the page actions, and the mode tabs as the
- * filter row. It scrolls with the page instead of riding the fixed top bar.
+ * The Source Control page head (design Git boards): the project as the title
+ * (a switcher when there are several), the repository identity bar and the
+ * Sync split as page actions, and the mode tabs as a full-width strip under
+ * them. It scrolls with the page instead of riding the fixed top bar.
  */
 export function SourceControlIntro(props: SourceControlIntroProps) {
   const { status, workbench, codeName, t } = props;
   const gitStatus = status?.isGitRepo ? status : null;
   const activeWorkbench = gitStatus ? workbench : undefined;
   const repoStatus = <IntroRepoStatus {...props} />;
+  const sync =
+    activeWorkbench && gitStatus ? (
+      <SourceSyncControls
+        gitActions={activeWorkbench.gitActions}
+        status={gitStatus}
+        worktreePaused={activeWorkbench.worktreePaused}
+        onToggleWorktreePaused={activeWorkbench.onToggleWorktreePaused}
+        t={t}
+      />
+    ) : null;
+  const identity =
+    gitStatus && props.projectId ? (
+      <div className={styles.identity}>
+        {repoStatus}
+        {sync}
+      </div>
+    ) : undefined;
   return (
     <PageIntro
       className={styles.intro}
@@ -58,28 +72,14 @@ export function SourceControlIntro(props: SourceControlIntroProps) {
           : [t("gitStatusTitle")]
       }
       title={<IntroTitle {...props} />}
-      actions={
-        activeWorkbench ? (
-          <SourceHeaderControls
-            gitActions={activeWorkbench.gitActions}
-            worktreePaused={activeWorkbench.worktreePaused}
-            onToggleWorktreePaused={activeWorkbench.onToggleWorktreePaused}
+      actions={identity}
+      filters={
+        activeWorkbench && gitStatus ? (
+          <SourceIntroTabs
+            status={gitStatus}
+            workbench={activeWorkbench}
             t={t}
           />
-        ) : undefined
-      }
-      filters={
-        gitStatus && props.projectId ? (
-          <div className={styles.rows}>
-            {repoStatus}
-            {activeWorkbench ? (
-              <SourceIntroTabs
-                status={gitStatus}
-                workbench={activeWorkbench}
-                t={t}
-              />
-            ) : null}
-          </div>
         ) : undefined
       }
     />
@@ -138,25 +138,26 @@ function SourceIntroTabs({
   workbench: SourceWorkbenchProps;
   t: TranslationFn;
 }) {
-  const { tab, setTab } = useSourceTab(workbench.reviewsEnabled);
+  const { sourceControlCleanLanding } = useSourceControlCleanLanding();
+  const { view, setView } = useSourceTab({
+    reviewsEnabled: workbench.reviewsEnabled,
+    cleanLatestLanding:
+      status.isClean && sourceControlCleanLanding === "latest-commit",
+  });
   return (
     <SourceModeTabs
-      tab={tab}
-      tabs={workbench.reviewsEnabled ? SOURCE_TABS_WITH_REVIEWS : SOURCE_TABS}
+      tab={view}
+      tabs={SOURCE_VIEW_TABS}
       variant="stacked"
       counts={{
         changes: countChangedPaths(status),
-        comments: workbench.pendingCount,
+        review: workbench.pendingCount,
       }}
       fileTabLabelKey={
         workbench.supportsWorkingTreeFiles ? "sourceTabWorkingTree" : undefined
       }
-      onSelect={setTab}
+      onSelect={setView}
       t={t}
     />
   );
-}
-
-export function countChangedPaths(status: GitStatusInfo): number {
-  return new Set(status.files.map((file) => file.path)).size;
 }

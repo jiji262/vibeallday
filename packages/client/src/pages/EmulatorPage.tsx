@@ -155,6 +155,10 @@ export function EmulatorPage() {
             title={t("sidebarDevices")}
             lede={t("emulatorPageLede")}
           />
+          <Notice tone="warning" className={styles.experimental}>
+            <strong>{t("emulatorExperimentalNoticeTitle")}</strong>{" "}
+            {t("emulatorExperimentalNotice")}
+          </Notice>
           {bridgeRuntimeMode ? (
             <BridgeRuntimePrompt
               mode={bridgeRuntimeMode}

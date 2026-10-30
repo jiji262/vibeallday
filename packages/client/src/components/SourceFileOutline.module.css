@@ -16,27 +16,34 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 5px 8px;
-  color: var(--text-secondary);
+  min-height: 30px;
+  padding: 4px 10px;
+  color: var(--ink-2);
   font: inherit;
-  font-size: 0.8rem;
+  font-size: var(--fs-small);
   text-align: left;
   background: transparent;
   border: 0;
-  border-radius: 6px;
+  border-radius: var(--r-sm);
   cursor: pointer;
 }
 
-.groupButton:hover,
+.groupButton:hover {
+  color: var(--ink);
+  background: var(--surface-3);
+}
+
 .groupButton:focus-visible {
-  color: var(--text-primary);
-  background: var(--bg-hover);
+  color: var(--ink);
+  background: var(--surface-3);
+  outline: 2px solid var(--focus);
+  outline-offset: -2px;
 }
 
 .disclosure {
   width: 12px;
   flex: 0 0 12px;
-  color: var(--text-muted);
+  color: var(--ink-3);
   text-align: center;
 }
 
@@ -59,11 +66,11 @@
 .groupCount {
   min-width: 22px;
   padding: 1px 5px;
-  color: var(--text-muted);
-  font-size: 0.7rem;
+  color: var(--ink-3);
+  font-size: var(--fs-meta);
   font-variant-numeric: tabular-nums;
   text-align: center;
-  background: var(--bg-tertiary);
+  background: var(--surface-3);
   border-radius: 999px;
 }
 
@@ -71,7 +78,7 @@
   margin: 0 0 0 0.95rem;
   padding: 0 0 0 0.45rem;
   list-style: none;
-  border-left: 1px solid var(--border-subtle);
+  border-left: 1px solid var(--line);
 }
 
 .sectionDivider {
@@ -79,8 +86,8 @@
   align-items: center;
   gap: 8px;
   margin: 10px 8px 6px;
-  color: var(--text-muted);
-  font-size: 0.72rem;
+  color: var(--ink-3);
+  font-size: var(--fs-meta);
   font-weight: 600;
   letter-spacing: 0.02em;
   text-transform: uppercase;
@@ -91,7 +98,7 @@
   height: 1px;
   flex: 1;
   content: "";
-  background: var(--border-subtle);
+  background: var(--line);
 }
 
 .sectionDivider::before {
@@ -109,7 +116,7 @@
 
 .sectionDividerButton:hover,
 .sectionDividerButton:focus-visible {
-  color: var(--text-primary);
+  color: var(--ink);
 }
 
 .sectionDisclosure {

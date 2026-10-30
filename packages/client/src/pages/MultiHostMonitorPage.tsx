@@ -1,16 +1,16 @@
 import { useEffect, useMemo, useSyncExternalStore } from "react";
 import { Link } from "react-router-dom";
-import { Badge, type BadgeTone } from "../components/garden/Badge";
+import { Tag } from "../components/garden/Badge";
 import { Button } from "../components/garden/Button";
-import {
-  Card,
-  CardBody,
-  CardFooter,
-  CardHeader,
-} from "../components/garden/Card";
+import { Card } from "../components/garden/Card";
 import { EmptyState } from "../components/garden/EmptyState";
 import { Eyebrow } from "../components/garden/Eyebrow";
-import { BigNumber, MetaField, MetaGrid } from "../components/garden/Meta";
+import {
+  GlobeIcon,
+  RefreshIcon,
+  TerminalIcon,
+} from "../components/garden/icons";
+import { Status, type StatusState } from "../components/garden/StatusDot";
 import { VibeAllDayGlyph } from "../components/VibeAllDayLogo";
 import { type MessageKey, useI18n } from "../i18n";
 import { loadSavedHosts, type SavedHost } from "../lib/hostStorage";
@@ -24,11 +24,11 @@ import styles from "./MultiHostMonitorPage.module.css";
 
 const LOGO_SIZE = 32;
 
-const STATUS_TONES: Record<MultiHostMonitorHostState, BadgeTone> = {
-  connecting: "sand",
-  connected: "mint",
-  offline: "rose",
-  "sign-in-required": "peach",
+const STATUS_STATES: Record<MultiHostMonitorHostState, StatusState> = {
+  connecting: "run",
+  connected: "ok",
+  offline: "err",
+  "sign-in-required": "attn",
 };
 
 const STATUS_KEYS: Record<MultiHostMonitorHostState, MessageKey> = {
@@ -100,7 +100,12 @@ function HostAction({
   const { t } = useI18n();
   if (host.state === "offline") {
     return (
-      <Button size="sm" onClick={() => controller.retryHost(host.hostId)}>
+      <Button
+        size="sm"
+        block
+        icon={<RefreshIcon />}
+        onClick={() => controller.retryHost(host.hostId)}
+      >
         {t("multiHostMonitorRetry")}
       </Button>
     );
@@ -115,6 +120,57 @@ function HostAction({
   return null;
 }
 
+/** Needs-attention and active-agent counts in one inset band. */
+function HostCounts({
+  needsAttention,
+  active,
+}: {
+  needsAttention: number;
+  active: number;
+}) {
+  const { t } = useI18n();
+  return (
+    <dl className={styles.counts}>
+      <div className={styles.count}>
+        <dt>{t("multiHostMonitorNeedsAttention")}</dt>
+        <dd className={needsAttention > 0 ? styles.attnNum : styles.quietNum}>
+          {needsAttention}
+        </dd>
+      </div>
+      <div className={styles.count}>
+        <dt>{t("multiHostMonitorActiveAgents")}</dt>
+        <dd className={active > 0 ? styles.runNum : styles.quietNum}>
+          {active}
+        </dd>
+      </div>
+    </dl>
+  );
+}
+
+function HostCardHead({ host }: { host: MultiHostMonitorHostSnapshot }) {
+  const { t } = useI18n();
+  const kind = t(
+    host.mode === "relay"
+      ? "multiHostMonitorKindRelay"
+      : "multiHostMonitorKindDirect",
+  );
+  const meta = host.relayUsername ? `${kind} · ${host.relayUsername}` : kind;
+  return (
+    <div className={styles.cardHead}>
+      <span className={styles.hostIcon} aria-hidden="true">
+        {host.mode === "relay" ? <GlobeIcon /> : <TerminalIcon />}
+      </span>
+      <div className={styles.hostText}>
+        <h2 className={styles.hostName}>{host.displayName}</h2>
+        <span className={styles.hostMeta}>{meta}</span>
+      </div>
+      <Status state={STATUS_STATES[host.state]}>
+        {t(STATUS_KEYS[host.state])}
+      </Status>
+    </div>
+  );
+}
+
 function HostMonitorCard({
   controller,
   host,
@@ -122,57 +178,43 @@ function HostMonitorCard({
   controller: MultiHostMonitorController;
   host: MultiHostMonitorHostSnapshot;
 }) {
-  const { t } = useI18n();
   const summary = host.state === "connected" ? host.summary : undefined;
+  const needsYou = (summary?.needsAttentionCount ?? 0) > 0;
+  const classes = [
+    "multi-host-card",
+    styles.card,
+    needsYou && styles.attnCard,
+    !summary && styles.offCard,
+  ]
+    .filter(Boolean)
+    .join(" ");
   return (
     <Card
       as="article"
       // `multi-host-card` and the data attributes are e2e hooks.
-      className={`multi-host-card ${styles.card}`}
+      className={classes}
       data-host-name={host.displayName}
       data-host-state={host.state}
     >
-      <CardHeader
-        title={host.displayName}
-        titleAs="h2"
-        description={host.relayUsername}
-        actions={
-          <Badge
-            tone={STATUS_TONES[host.state]}
-            dot={host.state === "connecting" ? "pulse" : true}
-          >
-            {t(STATUS_KEYS[host.state])}
-          </Badge>
-        }
-      />
+      <HostCardHead host={host} />
       {summary ? (
-        <CardBody className={styles.body}>
-          <MetaGrid columns={2}>
-            <MetaField
-              label={t("multiHostMonitorActiveAgents")}
-              value={
-                <BigNumber tone="mint">{summary.activeAgentCount}</BigNumber>
-              }
-            />
-            <MetaField
-              label={t("multiHostMonitorNeedsAttention")}
-              value={
-                <BigNumber tone="rose">{summary.needsAttentionCount}</BigNumber>
-              }
-            />
-          </MetaGrid>
+        <>
+          <HostCounts
+            needsAttention={summary.needsAttentionCount}
+            active={summary.activeAgentCount}
+          />
           <HostSessions host={host} />
-        </CardBody>
+        </>
       ) : (
-        <CardFooter className={styles.action}>
+        <div className={styles.action}>
           <HostAction controller={controller} host={host} />
-        </CardFooter>
+        </div>
       )}
     </Card>
   );
 }
 
-function MonitorHeader() {
+function MonitorHeader({ count }: { count?: string }) {
   const { t } = useI18n();
   return (
     <header className={styles.header}>
@@ -181,7 +223,14 @@ function MonitorHeader() {
       </Link>
       <div className={styles.heading}>
         <Eyebrow parts={[t("multiHostMonitorExperimental")]} />
-        <h1 className={styles.title}>{t("multiHostMonitorTitle")}</h1>
+        <div className={styles.titleRow}>
+          <h1 className={styles.title}>{t("multiHostMonitorTitle")}</h1>
+          {count ? (
+            <span data-testid="multi-host-connected-count">
+              <Tag>{count}</Tag>
+            </span>
+          ) : null}
+        </div>
         <p className={styles.lede}>{t("multiHostMonitorDescription")}</p>
       </div>
       <Link className={styles.linkButton} to="/login">
@@ -212,31 +261,29 @@ export function MultiHostMonitorPage() {
   return (
     <main className={styles.page} data-testid="multi-host-monitor">
       <div className={styles.shell}>
-        <MonitorHeader />
+        <MonitorHeader
+          count={
+            snapshot.selectedCount > 0
+              ? t("multiHostMonitorConnectedCount", {
+                  connected: snapshot.connectedCount,
+                  total: snapshot.selectedCount,
+                })
+              : undefined
+          }
+        />
         {snapshot.selectedCount > 0 ? (
-          <>
-            <p
-              className={styles.count}
-              data-testid="multi-host-connected-count"
-            >
-              {t("multiHostMonitorConnectedCount", {
-                connected: snapshot.connectedCount,
-                total: snapshot.selectedCount,
-              })}
-            </p>
-            <section
-              className={styles.grid}
-              aria-label={t("multiHostMonitorTitle")}
-            >
-              {snapshot.hosts.map((host) => (
-                <HostMonitorCard
-                  key={host.hostId}
-                  controller={controller}
-                  host={host}
-                />
-              ))}
-            </section>
-          </>
+          <section
+            className={styles.grid}
+            aria-label={t("multiHostMonitorTitle")}
+          >
+            {snapshot.hosts.map((host) => (
+              <HostMonitorCard
+                key={host.hostId}
+                controller={controller}
+                host={host}
+              />
+            ))}
+          </section>
         ) : (
           <EmptyState
             title={t("multiHostMonitorEmptyTitle")}

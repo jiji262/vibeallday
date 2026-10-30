@@ -1,34 +1,35 @@
-/* Test devices: one flush Card per device class with card rows, the bridge
-   runtime prompt, and the live stream view (stream pane + MetaGrid card). */
+/* Test devices: an experimental Notice, one titled card per device class
+   (icon tile, name and id, Status, actions), the bridge runtime prompt, and
+   the live stream view (device frame on a stage + MetaGrid card). */
+
+.experimental {
+  margin-bottom: var(--space-5);
+}
 
 .list {
   display: grid;
-  gap: var(--space-5);
+  gap: var(--space-6);
+}
+
+.group {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
 }
 
 .groupHeader {
   display: flex;
   align-items: baseline;
-  justify-content: space-between;
-  gap: var(--space-3);
-  padding: var(--space-4) var(--space-5) 14px;
-  border-bottom: 1px dashed var(--dash);
+  gap: 10px;
+  padding: 0 var(--space-1);
 }
 
 .groupTitle {
   margin: 0;
   color: var(--ink);
-  font-family: var(--font-display);
-  font-size: 20px;
-  font-weight: 500;
-  letter-spacing: -0.005em;
-}
-
-.groupCount {
-  color: var(--ink-3);
-  font-family: var(--label-font);
-  font-size: 11px;
-  letter-spacing: var(--meta-tracking);
+  font-size: var(--fs-h2);
+  font-weight: var(--title-weight);
+  font-stretch: var(--display-stretch);
 }
 
 .rows {
@@ -39,11 +40,11 @@
 
 .item {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto auto;
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
   align-items: center;
-  gap: var(--space-3);
-  padding: 14px var(--space-5);
-  border-bottom: 1px dashed var(--dash);
+  gap: 14px;
+  padding: 14px var(--pad-card);
+  border-bottom: 1px solid var(--line);
   transition: background-color var(--duration-fast) var(--ease-standard);
 }
 
@@ -52,7 +53,24 @@
 }
 
 .item:hover {
-  background: var(--bg-2);
+  background: var(--surface-2);
+}
+
+.itemIcon {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-card);
+  background: var(--surface-2);
+  color: var(--ink-2);
+}
+
+.itemIcon.on {
+  border-color: transparent;
+  background: var(--run-soft);
+  color: var(--run-ink);
 }
 
 .itemInfo {
@@ -64,15 +82,15 @@
 .itemName {
   overflow-wrap: anywhere;
   color: var(--ink);
-  font-size: 14px;
-  font-weight: 500;
+  font-size: var(--fs-h3);
+  font-weight: 600;
 }
 
 .itemId {
   overflow: hidden;
   color: var(--ink-3);
-  font-family: var(--label-font);
-  font-size: 12px;
+  font-family: var(--font-mono);
+  font-size: var(--fs-meta);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -86,8 +104,7 @@
 
 .noActions {
   color: var(--ink-3);
-  font-family: var(--label-font);
-  font-size: 12px;
+  font-size: var(--fs-meta);
 }
 
 .downloadPrompt {
@@ -102,7 +119,7 @@
 .downloadCopy {
   margin: 0;
   color: var(--ink-2);
-  font-size: 14px;
+  font-size: var(--fs-body);
   line-height: 1.6;
 }
 
@@ -112,7 +129,7 @@
   flex-direction: column;
   height: 100dvh;
   max-height: 100dvh;
-  background: var(--bg);
+  background: var(--canvas);
 }
 
 .streamHeader {
@@ -123,21 +140,38 @@
   min-height: var(--topbar-height);
   padding: 0 var(--page-gutter);
   border-bottom: 1px solid var(--line);
-  background: var(--bg-surface);
+  background: var(--canvas);
 }
 
 .connectionState {
   overflow: hidden;
   color: var(--ink-2);
-  font-family: var(--label-font);
-  font-size: 12px;
+  font-family: var(--font-mono);
+  font-size: var(--fs-meta);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .streamHeaderActions {
   display: flex;
+  align-items: center;
   justify-content: flex-end;
+  gap: var(--space-2);
+}
+
+.fps {
+  display: inline-flex;
+  align-items: center;
+  height: var(--chip-h);
+  padding: 0 10px;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--ink-2);
+  font-family: var(--font-mono);
+  font-size: var(--fs-meta);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
 
 .streamBody {
@@ -158,14 +192,36 @@
   margin: var(--space-3) var(--space-4) 0;
 }
 
+/* The stage sizes the device frame through container units, so the video
+   keeps its own box (pointer mapping reads the video rect) inside the bezel. */
 .streamContainer {
+  --device-bezel: 9px;
+  --device-stage-pad: var(--space-4);
+
   display: flex;
   flex: 1;
   align-items: center;
   justify-content: center;
   min-height: 0;
+  padding: var(--device-stage-pad);
   overflow: hidden;
-  background: black;
+  background: var(--surface-2);
+  container-type: size;
+}
+
+.deviceFrame {
+  display: flex;
+  overflow: hidden;
+  border: var(--device-bezel) solid var(--surface-3);
+  border-radius: 32px;
+  outline: 1px solid var(--line-strong);
+  background: var(--code-bg);
+  box-shadow: var(--shadow-pop);
+}
+
+.deviceFrame :global(.emulator-video) {
+  max-width: calc(100cqw - 2 * var(--device-bezel));
+  max-height: calc(100cqh - 2 * var(--device-bezel));
 }
 
 .metaCard {
@@ -184,7 +240,7 @@
   gap: var(--space-1);
   margin: 0;
   padding: var(--space-3) var(--space-5) var(--space-4);
-  border-top: 1px dashed var(--dash);
+  border-top: 1px solid var(--line);
   list-style: none;
 }
 
@@ -193,8 +249,8 @@
   gap: var(--space-2);
   overflow: hidden;
   color: var(--ink-3);
-  font-family: var(--label-font);
-  font-size: 12px;
+  font-family: var(--font-mono);
+  font-size: var(--fs-meta);
   white-space: nowrap;
 }
 
@@ -227,7 +283,7 @@
 
 @media (width < 768px) {
   .item {
-    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-columns: auto minmax(0, 1fr) auto;
     padding-inline: var(--space-4);
   }
 
@@ -236,7 +292,7 @@
     justify-content: flex-start;
   }
 
-  .groupHeader {
-    padding-inline: var(--space-4);
+  .streamContainer {
+    --device-stage-pad: var(--space-2);
   }
 }

@@ -1,4 +1,4 @@
-/* Pending-review list (the comments mode). */
+/* Pending-review list (the Review tab's pending section). */
 .panel {
   display: flex;
   flex-direction: column;
@@ -6,7 +6,7 @@
   max-width: 900px;
 }
 
-/* One flush card; rows split by dashed rules (license-hub list). */
+/* One flush card; rows split by hairlines (design .list). */
 .list {
   list-style: none;
   margin: 0;
@@ -15,7 +15,7 @@
 
 .row {
   padding: 14px 20px;
-  border-bottom: 1px dashed var(--dash);
+  border-bottom: 1px solid var(--line);
 }
 
 .row:last-child {
@@ -34,8 +34,8 @@
   min-height: var(--tap-min);
   padding: 0;
   font-family: var(--font-mono);
-  font-size: 13px;
-  color: var(--link-color);
+  font-size: var(--fs-small);
+  color: var(--link);
   background: transparent;
   border: none;
   cursor: pointer;
@@ -48,8 +48,8 @@
 }
 
 .revision {
-  font-family: var(--label-font);
-  font-size: 12px;
+  font-family: var(--font-mono);
+  font-size: var(--fs-meta);
   color: var(--ink-3);
   white-space: nowrap;
 }
@@ -66,23 +66,23 @@
   padding: 0 var(--space-3);
   color: var(--ink-3);
   font: inherit;
-  font-size: 14px;
+  font-size: var(--fs-btn);
   font-weight: 500;
   white-space: nowrap;
   cursor: pointer;
   background: transparent;
   border: 1px solid transparent;
-  border-radius: var(--radius-md);
+  border-radius: var(--r-btn);
 }
 
 .edit:hover {
-  color: var(--indigo);
-  background: var(--indigo-soft);
+  color: var(--ink);
+  background: var(--surface-3);
 }
 
 .delete:hover {
-  color: var(--rose-ink);
-  background: var(--rose-soft);
+  color: var(--err-ink);
+  background: var(--err-soft);
 }
 
 .text {
@@ -90,7 +90,7 @@
   white-space: pre-wrap;
   overflow-wrap: anywhere;
   color: var(--ink);
-  font-size: 14px;
+  font-size: var(--fs-body);
   line-height: 1.5;
 }
 
@@ -107,14 +107,14 @@
   font: inherit;
   font-size: 16px;
   resize: vertical;
-  background: var(--card);
+  background: var(--surface);
   border: 1px solid var(--line-strong);
-  border-radius: var(--radius-md);
+  border-radius: var(--r-input);
 }
 
 .editor textarea:focus-visible {
-  border-color: var(--indigo);
-  box-shadow: 0 0 0 3px var(--indigo-soft);
+  border-color: var(--focus);
+  box-shadow: 0 0 0 3px var(--accent-soft);
   outline: none;
 }
 

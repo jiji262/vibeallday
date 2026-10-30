@@ -6,26 +6,39 @@
   z-index: 10003;
   display: flex;
   flex-direction: column;
-  background: var(--bg-surface);
-  color: var(--text-primary);
+  background: var(--canvas);
+  color: var(--ink);
   padding: env(safe-area-inset-top) env(safe-area-inset-right)
     env(safe-area-inset-bottom) env(safe-area-inset-left);
 }
 .workspace button {
-  min-height: 36px;
-  padding: 6px 12px;
-  border: 1px solid var(--border-color);
-  border-radius: 6px;
-  color: var(--text-primary);
-  background: var(--bg-secondary);
+  min-height: var(--btn-h-sm);
+  padding: 0 var(--btn-px);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-btn);
+  color: var(--ink);
+  background: var(--surface);
+  font-size: var(--fs-btn);
+  font-weight: 600;
   cursor: pointer;
 }
+.workspace button:hover:not(:disabled) {
+  background: var(--surface-3);
+}
+.workspace button:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+/* Fixed title bar (design FileView head): name, status, view, actions. */
 .header {
   display: flex;
-  gap: 8px;
+  flex-wrap: wrap;
+  gap: 8px 12px;
   align-items: center;
-  padding: 8px 12px;
-  border-bottom: 1px solid var(--border-color);
+  min-height: 56px;
+  padding: 8px 16px;
+  border-bottom: 1px solid var(--line);
+  background: var(--canvas);
 }
 .identity {
   display: flex;
@@ -38,14 +51,15 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-size: 12px;
+  color: var(--ink-3);
+  font-size: var(--fs-meta);
 }
 .status,
 .notice,
 .error,
 .confirm {
-  padding: 6px 12px;
-  font-size: 13px;
+  padding: 6px 16px;
+  font-size: var(--fs-small);
 }
 .status {
   display: flex;
@@ -57,7 +71,9 @@
   flex-wrap: wrap;
   align-items: center;
   gap: 8px 16px;
-  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--line);
+  background: var(--surface-2);
+  color: var(--ink-2);
 }
 .rebuildControls {
   display: inline-flex;
@@ -79,11 +95,12 @@
   overflow: auto;
   margin: 4px 0 0;
   padding: 8px;
-  background: var(--bg-code, var(--bg-secondary));
+  border-radius: var(--r-sm);
+  background: var(--code-bg);
   white-space: pre-wrap;
 }
 .error {
-  color: var(--error-color, #e66);
+  color: var(--err-ink);
 }
 .confirm {
   display: flex;
@@ -112,13 +129,13 @@
   resize: none;
   border: 0;
   padding: 12px;
-  color: var(--text-primary);
-  background: var(--bg-surface);
-  font: 14px / 24px monospace;
+  color: var(--ink);
+  background: var(--code-bg);
+  font: 14px / 24px var(--font-mono);
   tab-size: 2;
 }
 .previewPane {
-  border-left: 1px solid var(--border-color);
+  border-left: 1px solid var(--line);
 }
 .previewPane iframe {
   flex: 1;

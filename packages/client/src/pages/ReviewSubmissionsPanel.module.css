@@ -14,14 +14,14 @@
   padding: 0;
   overflow: hidden;
   list-style: none;
-  background: var(--card);
+  background: var(--surface);
   border: 1px solid var(--line);
-  border-radius: var(--radius-lg);
+  border-radius: var(--r-card);
   box-shadow: var(--shadow-xs);
 }
 
 .submissionList > li + li {
-  border-top: 1px dashed var(--dash);
+  border-top: 1px dashed var(--line-strong);
 }
 
 .siteList,
@@ -54,7 +54,7 @@
 }
 
 .submissionButton:focus-visible {
-  box-shadow: inset 0 0 0 2px var(--indigo-soft-2);
+  box-shadow: inset 0 0 0 2px var(--accent-line);
 }
 
 .submissionButton > span:first-child {
@@ -65,23 +65,23 @@
 
 .submissionButton:hover {
   color: var(--ink);
-  background: var(--bg-2);
+  background: var(--surface-2);
 }
 
 .submissionButton.active {
-  color: var(--indigo-ink);
-  background: var(--indigo-soft);
+  color: var(--accent-ink);
+  background: var(--accent-soft);
   font-weight: 500;
 }
 
 .loadMore {
   width: 100%;
   min-height: var(--tap-min);
-  color: var(--indigo);
+  color: var(--accent);
   font: inherit;
   font-size: 13px;
   cursor: pointer;
-  background: var(--bg-2);
+  background: var(--surface-2);
   border: 0;
 }
 
@@ -89,7 +89,7 @@
   width: 8px;
   height: 8px;
   flex: 0 0 auto;
-  background: var(--sand);
+  background: var(--attn);
   border-radius: 50%;
 }
 
@@ -133,14 +133,14 @@
 .siteActions button {
   min-height: var(--tap-min);
   padding: 0 var(--space-3);
-  color: var(--text-primary);
+  color: var(--ink);
   font: inherit;
   font-size: 14px;
   font-weight: 550;
   cursor: pointer;
-  background: var(--bg-card);
+  background: var(--surface);
   border: 1px solid var(--line-strong);
-  border-radius: var(--radius-md);
+  border-radius: var(--r-md);
 }
 
 .detailActions button:disabled,
@@ -151,7 +151,7 @@
 
 .responseNotice {
   margin: calc(-1 * var(--space-2)) 0 var(--space-3);
-  color: var(--text-secondary);
+  color: var(--ink-2);
   font-size: 13px;
 }
 
@@ -167,7 +167,7 @@
 .awaitingSession,
 .entryHead,
 .captureId {
-  color: var(--text-muted);
+  color: var(--ink-3);
   font-family: var(--font-mono);
   font-size: 12px;
 }
@@ -177,15 +177,15 @@
   display: inline-flex;
   align-items: center;
   min-height: var(--tap-min);
-  color: var(--link-color);
+  color: var(--link);
   font-size: 14px;
 }
 
 .site {
   padding: 16px 20px;
-  background: var(--card);
+  background: var(--surface);
   border: 1px solid var(--line);
-  border-radius: var(--radius-lg);
+  border-radius: var(--r-card);
   box-shadow: var(--shadow-xs);
 }
 
@@ -201,7 +201,7 @@
 
 .location {
   min-width: 0;
-  color: var(--link-color);
+  color: var(--link);
   font-size: 13px;
   overflow-wrap: anywhere;
 }
@@ -220,31 +220,31 @@
 }
 
 .open {
-  color: var(--sand-ink);
-  background: var(--sand-soft);
+  color: var(--attn-ink);
+  background: var(--attn-soft);
 }
 
 .addressed {
-  color: var(--indigo);
-  background: var(--indigo-soft);
+  color: var(--accent);
+  background: var(--accent-soft);
 }
 
 .resolved,
 .unchanged,
 .unavailable {
-  color: var(--text-muted);
+  color: var(--ink-3);
   background: var(--grey-soft);
 }
 
 .changed {
-  color: var(--mint-ink);
-  background: var(--mint-soft);
+  color: var(--ok-ink);
+  background: var(--ok-soft);
 }
 
 .entry {
   padding: var(--space-3);
-  background: var(--bg-sunken);
-  border-radius: var(--radius-md);
+  background: var(--surface-2);
+  border-radius: var(--r-md);
 }
 
 .entryHead {
@@ -262,7 +262,7 @@
 .commentLine {
   min-width: 1.75rem;
   padding: 1px 6px;
-  color: var(--text-muted);
+  color: var(--ink-3);
   font-family: var(--font-mono);
   font-size: 12px;
   line-height: 1.4;
@@ -273,7 +273,7 @@
 }
 
 .text {
-  color: var(--text-primary);
+  color: var(--ink);
   font-size: 15px;
   line-height: 1.5;
   white-space: pre-wrap;
@@ -283,15 +283,15 @@
 .source {
   margin-top: var(--space-2);
   overflow: hidden;
-  background: var(--bg-card);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
 }
 
 .captureId {
   padding: var(--space-1) var(--space-3);
-  background: var(--bg-card);
-  border-bottom: 1px dashed var(--dash);
+  background: var(--surface);
+  border-bottom: 1px dashed var(--line-strong);
 }
 
 .source pre {
@@ -299,7 +299,7 @@
   padding: var(--space-2) 0;
   margin: 0;
   overflow: auto;
-  color: var(--text-secondary);
+  color: var(--ink-2);
   font-family: var(--font-mono);
   font-size: 12.5px;
   white-space: pre;
@@ -312,15 +312,15 @@
 }
 
 .highlight {
-  color: var(--text-primary);
-  background: var(--indigo-soft);
+  color: var(--ink);
+  background: var(--accent-soft);
 }
 
 .lineNumber {
   display: inline-block;
   width: 3.5rem;
   padding-right: var(--space-2);
-  color: var(--text-muted);
+  color: var(--ink-3);
   text-align: right;
   user-select: none;
 }
@@ -332,11 +332,11 @@
 }
 
 .captureMissing {
-  color: var(--text-muted);
+  color: var(--ink-3);
 }
 
 .error {
-  color: var(--rose-ink);
+  color: var(--err-ink);
 }
 
 .outcome {
@@ -344,17 +344,17 @@
   gap: var(--space-1);
   padding: var(--space-3);
   margin-top: var(--space-2);
-  color: var(--text-primary);
+  color: var(--ink);
   font-size: 15px;
   line-height: 1.5;
-  background: var(--indigo-soft);
-  border-left: 3px solid var(--indigo);
+  background: var(--accent-soft);
+  border-left: 3px solid var(--accent);
   border-radius: var(--radius-sm);
 }
 
 .outcomeHead {
   justify-content: space-between;
-  color: var(--indigo);
+  color: var(--accent);
   font-family: var(--font-mono);
   font-size: 12px;
 }
@@ -368,13 +368,13 @@
 .followUp textarea {
   min-height: 5rem;
   padding: var(--space-3);
-  color: var(--text-primary);
+  color: var(--ink);
   font: inherit;
   font-size: 16px;
   resize: vertical;
-  background: var(--bg-input);
-  border: 1px solid var(--border-input);
-  border-radius: var(--radius-md);
+  background: var(--input-bg);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-md);
 }
 
 .siteActions {
@@ -394,7 +394,7 @@
     display: grid;
     gap: var(--space-1);
     margin-bottom: var(--space-3);
-    color: var(--text-secondary);
+    color: var(--ink-2);
     font-size: 13px;
     font-weight: 600;
   }

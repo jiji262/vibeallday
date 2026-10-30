@@ -1,16 +1,19 @@
+import type { HostAgentProcessObservation } from "@vibeallday/shared";
 import { ClearloopRemainingBadge } from "../components/ClearloopRemainingBadge";
 import { ContextUsageIndicator } from "../components/ContextUsageIndicator";
-import { Badge } from "../components/garden/Badge";
-import { RowAction, Td } from "../components/garden/DataTable";
+import { Button } from "../components/garden/Button";
+import { Td } from "../components/garden/DataTable";
+import { Status } from "../components/garden/StatusDot";
 import type { ProcessInfo } from "../hooks/useProcesses";
 import { useI18n } from "../i18n";
 import styles from "./AgentsPage.module.css";
 import { ProcessMetrics } from "./AgentsProcessMetrics";
 import {
+  formatCpu,
   formatUptime,
-  getProviderLabel,
   getStateLabel,
-  getStateTone,
+  getStateStatus,
+  meterPercent,
 } from "./agentsFormat";
 import type { ProcessRowProps } from "./AgentsProcessRows";
 
@@ -20,12 +23,9 @@ export function ProcessStatus({ process }: { process: ProcessInfo }) {
   const { t } = useI18n();
   return (
     <span className={styles.status}>
-      <Badge
-        tone={getStateTone(process.state)}
-        dot={process.state === "in-turn" ? "pulse" : true}
-      >
+      <Status state={getStateStatus(process.state)}>
         {getStateLabel(process.state, t)}
-      </Badge>
+      </Status>
       {process.clearloop !== undefined && (
         <ClearloopRemainingBadge badge={process.clearloop} />
       )}
@@ -47,26 +47,93 @@ function KillAction({
 }) {
   const { t } = useI18n();
   return (
-    <RowAction
-      tone="rose"
+    <Button
+      variant="danger-soft"
+      size="sm"
       disabled={killing}
       onClick={() => onKill(process)}
       title={t("agentsKillTitle")}
     >
       {killing ? t("agentsKilling") : t("agentsKill")}
-    </RowAction>
+    </Button>
   );
 }
 
-/** Live metrics need both an OS observation and a running process. */
-function metricsCell(
-  process: ProcessRowProps["process"],
-  observation: ProcessRowProps["observation"],
-  live: boolean,
-) {
-  if (!live || !observation) return EMPTY_CELL;
+/** Process-tree CPU as a small meter plus the percent. */
+export function CpuMeter({
+  observation,
+}: {
+  observation?: HostAgentProcessObservation;
+}) {
+  const { t } = useI18n();
+  if (!observation) return <>{EMPTY_CELL}</>;
+  const { cpu } = observation;
+  if (!cpu) {
+    return (
+      <span className={styles.cpuPending}>{t("agentsMetricsCpuSampling")}</span>
+    );
+  }
   return (
-    <ProcessMetrics observation={observation} sessionId={process.sessionId} />
+    <span className={styles.resource}>
+      <span className={styles.meter} aria-hidden="true">
+        <span
+          className={styles.meterFill}
+          style={{ width: `${meterPercent(cpu.treePercent)}%` }}
+        />
+      </span>
+      <span className={styles.resourceValue}>{formatCpu(cpu.treePercent)}</span>
+    </span>
+  );
+}
+
+export interface ResourceCellsProps {
+  observation?: HostAgentProcessObservation;
+  sessionId?: string;
+  /** Uptime origin when no host observation dates the process. */
+  fallbackStartedAt?: string;
+  ageTitle?: string;
+  live: boolean;
+  touchSurfaceRef?: Parameters<typeof ProcessMetrics>[0]["touchSurfaceRef"];
+}
+
+/** CPU, memory and uptime cells shared by owned and external rows. */
+export function ResourceCells({
+  observation,
+  sessionId,
+  fallbackStartedAt,
+  ageTitle,
+  live,
+  touchSurfaceRef,
+}: ResourceCellsProps) {
+  const { t } = useI18n();
+  const shown = live ? observation : undefined;
+  const startedAt = observation?.startedAt ?? fallbackStartedAt;
+  return (
+    <>
+      <Td className={styles.cellCpu} data-label={t("agentsColumnCpu")}>
+        <CpuMeter observation={shown} />
+      </Td>
+      <Td className={styles.cellMemory} data-label={t("agentsColumnMemory")}>
+        {shown ? (
+          <ProcessMetrics
+            observation={shown}
+            sessionId={sessionId}
+            touchSurfaceRef={touchSurfaceRef}
+          />
+        ) : (
+          EMPTY_CELL
+        )}
+      </Td>
+      <Td
+        mono
+        num
+        className={styles.cellUptime}
+        data-label={t("agentsColumnUptime")}
+        title={ageTitle}
+      >
+        {live && startedAt ? formatUptime(startedAt) : EMPTY_CELL}
+      </Td>
+    </>
   );
 }
 
@@ -90,21 +157,20 @@ export function ProcessRowCells({
     : undefined;
   return (
     <>
-      <Td muted>{process.projectName}</Td>
-      <Td>{getProviderLabel(process.provider, t)}</Td>
-      <Td mono num>
+      <Td mono num className={styles.cellPid} data-label={t("agentsColumnPid")}>
         {process.pid ?? EMPTY_CELL}
       </Td>
-      <Td mono num title={ageTitle}>
-        {live
-          ? formatUptime(observation?.startedAt ?? process.startedAt)
-          : EMPTY_CELL}
-      </Td>
-      <Td>{metricsCell(process, observation, live)}</Td>
-      <Td>
+      <Td className={styles.cellStatus}>
         <ProcessStatus process={process} />
       </Td>
-      <Td actions>
+      <ResourceCells
+        observation={observation}
+        sessionId={process.sessionId}
+        fallbackStartedAt={process.startedAt}
+        ageTitle={ageTitle}
+        live={live}
+      />
+      <Td actions className={styles.cellActions}>
         {live && onKill ? (
           <KillAction process={process} killing={killing} onKill={onKill} />
         ) : null}

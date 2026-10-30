@@ -1,11 +1,11 @@
-/* Back / home / recents bar under the device stream. */
+/* Back / home / recents controls under the device stream. */
 .root {
   display: flex;
   justify-content: center;
   gap: var(--space-6);
   padding: var(--space-3);
   border-top: 1px solid var(--line);
-  background: var(--bg-2);
+  background: var(--surface-2);
 }
 
 .button {
@@ -15,27 +15,26 @@
   width: 48px;
   height: 48px;
   border: 1px solid var(--line-strong);
-  border-radius: 50%;
-  background: var(--card);
-  box-shadow: var(--shadow-xs);
+  border-radius: var(--r-icon-btn);
+  background: var(--surface);
   color: var(--ink-2);
   cursor: pointer;
   transition: background-color var(--duration-fast) var(--ease-standard);
 }
 
 .button:hover:not(:disabled) {
-  background: var(--bg-soft);
+  background: var(--surface-3);
   color: var(--ink);
 }
 
 .button:focus-visible {
-  border-color: var(--indigo);
-  box-shadow: 0 0 0 3px var(--indigo-soft);
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
 }
 
 .button:disabled {
   border-color: var(--line);
-  background: var(--bg-soft);
+  background: var(--surface-2);
   color: var(--ink-4);
   cursor: default;
 }

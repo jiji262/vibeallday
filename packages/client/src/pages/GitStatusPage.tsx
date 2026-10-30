@@ -81,13 +81,12 @@ import { parseSourceControlNavigationState } from "../lib/sourceControlNavigatio
 import { BlameBrowser } from "./BlameBrowser";
 import { CommitBrowser } from "./CommitBrowser";
 import styles from "./GitStatusPage.module.css";
-import { ReviewCommentsPanel } from "./ReviewCommentsPanel";
-import { ReviewSubmissionsPanel } from "./ReviewSubmissionsPanel";
+import { ReviewTabPanel } from "./ReviewTabPanel";
 import { ReviewSubmitModal } from "./ReviewSubmitModal";
 import { SourceHeaderControls } from "./SourceActionControls";
 import { SourceControlIntro } from "./SourceControlIntro";
 import { useReturnToSession } from "./useReturnToSession";
-import { useSourceTab } from "./useSourceTab";
+import { isHistoryListOpen, useSourceTab } from "./useSourceTab";
 import { WorkingTreeBrowser } from "./WorkingTreeBrowser";
 
 interface SourceControlRouteState {
@@ -245,7 +244,7 @@ export function GitStatusPage() {
   const reviewsEnabled =
     serverHasCapability(version, GIT_SOURCE_REVIEW_SUBMISSIONS_CAPABILITY) &&
     (serverSettings?.sourceReviewSubmissionsEnabled ?? false);
-  const { setTab: setHeaderTab } = useSourceTab(reviewsEnabled);
+  const { setTab: setHeaderTab } = useSourceTab({ reviewsEnabled });
   const supportsEnhancedGitStatus = serverHasCapability(
     version,
     GIT_STATUS_ENHANCED_CAPABILITY,
@@ -649,7 +648,7 @@ function GitStatusContent({
   const location = useLocation();
   const basePath = useRemoteBasePath();
   const [searchParams, setSearchParams] = useSearchParams();
-  const { tab } = useSourceTab(reviewsEnabled);
+  const { tab } = useSourceTab({ reviewsEnabled });
   const blameFile = searchParams.get("bf") ?? undefined;
   const commitSha = searchParams.get("rev") ?? undefined;
   const commitFile = searchParams.get("commitFile") ?? undefined;
@@ -658,12 +657,10 @@ function GitStatusContent({
   const { sourceControlCleanLanding } = useSourceControlCleanLanding();
   const historyOpen =
     tab === "changes" &&
-    (searchParams.get("history") === "1" ||
-      searchParams.get("tab") === "commits" ||
-      (commitSha === undefined &&
-        status.isClean &&
-        worktreeFile === undefined &&
-        sourceControlCleanLanding === "latest-commit"));
+    isHistoryListOpen(
+      searchParams,
+      status.isClean && sourceControlCleanLanding === "latest-commit",
+    );
   const [ignoreWhitespace, setIgnoreWhitespace] = useState(false);
   const [showProjectionNotice, setShowProjectionNotice] = useState(false);
   const [projectionRequestError, setProjectionRequestError] = useState<
@@ -857,17 +854,14 @@ function GitStatusContent({
           onProjectionRequestFailure={handleProjectionRequestFailure}
           t={t}
         />
-      ) : tab === "comments" ? (
-        <ReviewCommentsPanel
+      ) : tab === "comments" || tab === "reviews" ? (
+        <ReviewTabPanel
           projectId={projectId}
           pending={reviewComments.pending}
           onOpenFile={handleBlameFile}
           onSubmit={onOpenReview}
-          t={t}
-        />
-      ) : tab === "reviews" ? (
-        <ReviewSubmissionsPanel
-          projectId={projectId}
+          reviewsEnabled={reviewsEnabled}
+          focusSubmitted={tab === "reviews"}
           initialSubmissionId={searchParams.get("submission") ?? undefined}
           sessionHref={(sessionId) =>
             `${basePath}/projects/${projectId}/sessions/${sessionId}`

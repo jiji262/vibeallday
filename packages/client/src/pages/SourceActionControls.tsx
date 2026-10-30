@@ -18,8 +18,8 @@ const OUTCOME_VISIBLE_MS = 6000;
 /** Matches the 0.75rem indicator slot, so the button width never moves. */
 const RUNNING_SPINNER_SIZE = 12;
 
-type SourceAction = "pull" | "push" | "check";
-type SourceOutcome = "success" | "warning";
+export type SourceAction = "pull" | "push" | "check";
+export type SourceOutcome = "success" | "warning";
 type SourceGlyph = SourceAction | "pause" | "play";
 
 /**
@@ -59,7 +59,7 @@ export function SourceHeaderControls({
 }
 
 /** The supported repository operations, in display order. */
-function sourceActionButtons(
+export function sourceActionButtons(
   gitActions: GitActionState,
   remoteTitle: string,
   t: TranslationFn,
@@ -108,13 +108,16 @@ function sourceActionButtons(
   return buttons;
 }
 
-function PauseToggleButton({
+export function PauseToggleButton({
   paused,
   onToggle,
+  iconOnly = false,
   t,
 }: {
   paused: boolean;
   onToggle: () => void;
+  /** Glyph-only beside the Sync split; the label stays the accessible name. */
+  iconOnly?: boolean;
   t: TranslationFn;
 }) {
   const label = paused
@@ -123,8 +126,11 @@ function PauseToggleButton({
   return (
     <Button
       size="sm"
-      className={styles.action}
+      className={
+        iconOnly ? `${styles.action} ${styles.iconOnly}` : styles.action
+      }
       aria-pressed={paused}
+      aria-label={iconOnly ? label : undefined}
       title={label}
       onClick={onToggle}
       icon={
@@ -133,13 +139,13 @@ function PauseToggleButton({
         </span>
       }
     >
-      <span className={styles.actionLabel}>{label}</span>
+      {iconOnly ? null : <span className={styles.actionLabel}>{label}</span>}
     </Button>
   );
 }
 
 /** Keeps a finished action's outcome visible briefly after it changes. */
-function useRecentOutcome(
+export function useRecentOutcome(
   tone: SourceOutcome | null,
   feedback: string,
 ): boolean {
@@ -158,7 +164,7 @@ function useRecentOutcome(
   return recent && tone !== null && feedback !== "";
 }
 
-interface SourceActionButtonProps {
+export interface SourceActionButtonProps {
   action: SourceAction;
   label: string;
   runningLabel: string;
@@ -218,7 +224,7 @@ const OUTCOME_MARK: Record<SourceOutcome, string> = {
 };
 
 /** The fixed leading slot: spinner while running, then outcome, else glyph. */
-function ActionIndicator({
+export function ActionIndicator({
   action,
   running,
   outcome,

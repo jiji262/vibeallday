@@ -41,6 +41,7 @@ import { writeClipboardText } from "../lib/clipboard";
 import { reflowCommitMessage } from "../lib/reflowCommitMessage";
 import type { TranslationFn } from "../i18n";
 import { CommitHistoryParentLink } from "./CommitHistoryParentLink";
+import { CommitAuthorInitial } from "./CommitRevisionPane.graph";
 import styles from "./CommitFilesPane.module.css";
 import {
   SourcePaneEmpty,
@@ -220,15 +221,24 @@ export function CommitFilesPane({
         ref={columnRef}
       >
         {onBack && <CommitHistoryParentLink onClick={onBack} t={t} />}
-        <div className="source-detail-banner">
+        <div className={`source-detail-banner ${styles.banner}`}>
           {revisionNavigation}
           <span className="source-detail-identity">
             <span
-              className="source-detail-subject"
+              className={`source-detail-subject ${styles.subject}`}
               title={detail?.subject ?? selectedCommit?.subject}
             >
               {detail?.subject ?? selectedCommit?.subject ?? "…"}
             </span>
+            {selectedCommit && (
+              <span className={styles.byline}>
+                <CommitAuthorInitial name={selectedCommit.authorName} />
+                <span className={styles.author}>
+                  {selectedCommit.authorName}
+                </span>
+                <span>{formatCommitDateTime(selectedCommit.authorDate)}</span>
+              </span>
+            )}
             <span
               className="source-detail-title"
               title={

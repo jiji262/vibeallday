@@ -6,8 +6,8 @@
   gap: 4px;
   flex-shrink: 0;
   padding: 2px var(--space-2);
-  border-radius: var(--radius-sm);
-  font-family: var(--label-font);
+  border-radius: var(--r-xs);
+  font-family: var(--font-mono);
   font-size: 11px;
   font-weight: 500;
   letter-spacing: var(--badge-tracking);
@@ -17,8 +17,8 @@
 }
 
 .jira {
-  background: var(--indigo-soft);
-  color: var(--indigo);
+  background: var(--accent-soft);
+  color: var(--accent-ink);
 }
 
 .pr {
@@ -32,6 +32,6 @@
 }
 
 .unknown {
-  background: var(--bg-soft);
+  background: var(--surface-3);
   color: var(--ink-3);
 }

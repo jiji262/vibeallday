@@ -427,7 +427,7 @@ describe("GitStatusPage source header", () => {
     expect(
       main.querySelectorAll('[data-testid="repo-status-bar"]'),
     ).toHaveLength(1);
-    expect(main.querySelectorAll('[role="tab"]')).toHaveLength(3);
+    expect(main.querySelectorAll('[role="tab"]')).toHaveLength(4);
     expect(
       main.querySelector('[role="tab"][data-tab="changes"]'),
     ).not.toBeNull();
@@ -436,8 +436,9 @@ describe("GitStatusPage source header", () => {
     expect(
       screen.queryByRole("button", { name: "sourceCommentsAction" }),
     ).toBeNull();
+    expect(screen.getByRole("tab", { name: /sourceTabReviews/ })).toBeDefined();
     expect(
-      screen.getByRole("tab", { name: /sourceTabComments/ }),
+      screen.getByRole("tab", { name: "sourceCommitHistory" }),
     ).toBeDefined();
     expect(document.querySelector(".source-control-action-row")).toBeNull();
     expect(screen.queryByRole("button", { name: "actionBack" })).toBeNull();
@@ -459,7 +460,7 @@ describe("GitStatusPage source header", () => {
     expect(await screen.findByText("sessions-page")).toBeDefined();
   });
 
-  it("opens Pending Comments even with pending drafts and preserves mode history", async () => {
+  it("opens the Review tab even with pending drafts and preserves mode history", async () => {
     mocks.listReviewComments.mockResolvedValue({
       comments: [
         {
@@ -484,14 +485,18 @@ describe("GitStatusPage source header", () => {
 
     await screen.findByTestId("working-tree-browser");
     fireEvent.click(
-      await screen.findByRole("tab", { name: /sourceTabComments/ }),
+      await screen.findByRole("tab", { name: /sourceTabReviews/ }),
     );
 
     expect(
       screen
-        .getByRole("tab", { name: /sourceTabComments/ })
+        .getByRole("tab", { name: /sourceTabReviews/ })
         .getAttribute("aria-selected"),
     ).toBe("true");
+    expect(screen.getByTestId("test-location").textContent).toContain(
+      "tab=comments",
+    );
+    expect(screen.getByText("why?")).toBeDefined();
     fireEvent.click(screen.getByRole("button", { name: "testBrowserBack" }));
 
     expect(await screen.findByTestId("working-tree-browser")).toBeDefined();
@@ -530,7 +535,7 @@ describe("GitStatusPage source header", () => {
 
     expect(
       (
-        await screen.findByRole("tab", { name: /sourceTabComments/ })
+        await screen.findByRole("tab", { name: /sourceTabReviews/ })
       ).getAttribute("aria-selected"),
     ).toBe("true");
     fireEvent.click(screen.getByRole("button", { name: "testBrowserBack" }));
@@ -582,6 +587,20 @@ describe("GitStatusPage source header", () => {
 
     expect(await screen.findByTestId("commit-browser")).toBeDefined();
     expect(screen.queryByTestId("working-tree-browser")).toBeNull();
+    expect(
+      screen
+        .getByRole("tab", { name: "sourceCommitHistory" })
+        .getAttribute("aria-selected"),
+    ).toBe("true");
+
+    // The Changes tab still reaches the clean working tree from the landing.
+    fireEvent.click(screen.getByRole("tab", { name: /sourceTabChanges/ }));
+    expect(await screen.findByTestId("working-tree-browser")).toBeDefined();
+    expect(
+      screen
+        .getByRole("tab", { name: /sourceTabChanges/ })
+        .getAttribute("aria-selected"),
+    ).toBe("true");
   });
 
   it("gates diff projections without blocking ordinary Source Control", async () => {
@@ -750,37 +769,54 @@ describe("GitStatusPage source header", () => {
     expect(screen.queryByText("sourceProjectionUpgradeNotice")).toBeNull();
   });
 
-  it("opens history inside Changes and keeps legacy commit URLs working", async () => {
+  it("opens history from Changes as the Commit history tab", async () => {
     renderPage();
     await screen.findByTestId("working-tree-browser");
 
-    fireEvent.click(screen.getByText("sourceCommitHistory"));
+    fireEvent.click(
+      screen.getByRole("button", { name: "sourceCommitHistory" }),
+    );
 
     expect(await screen.findByTestId("commit-browser")).toBeDefined();
     expect(
       screen
-        .getByRole("tab", { name: /sourceTabChanges/ })
+        .getByRole("tab", { name: "sourceCommitHistory" })
         .getAttribute("aria-selected"),
     ).toBe("true");
     expect(screen.queryByRole("tab", { name: "sourceTabCommits" })).toBeNull();
+
+    fireEvent.click(screen.getByRole("tab", { name: /sourceTabChanges/ }));
+    expect(await screen.findByTestId("working-tree-browser")).toBeDefined();
+    fireEvent.click(screen.getByRole("tab", { name: "sourceCommitHistory" }));
+    expect(await screen.findByTestId("commit-browser")).toBeDefined();
+    expect(screen.getByTestId("test-location").textContent).toContain(
+      "history=1",
+    );
   });
 
-  it("maps legacy commit URLs to history inside Changes", async () => {
+  it("maps legacy commit URLs to the Commit history tab", async () => {
     renderPage("/git-status?projectId=project-a&tab=commits");
 
     expect(await screen.findByTestId("commit-browser")).toBeDefined();
     expect(
       screen
-        .getByRole("tab", { name: /sourceTabChanges/ })
+        .getByRole("tab", { name: "sourceCommitHistory" })
         .getAttribute("aria-selected"),
     ).toBe("true");
   });
 
-  it("keeps Reviews dormant until the new capability and setting land", async () => {
+  it("keeps submitted reviews dormant until the new capability and setting land", async () => {
     renderPage("/git-status?projectId=project-a&tab=reviews");
 
     expect(await screen.findByTestId("working-tree-browser")).toBeDefined();
-    expect(screen.queryByRole("tab", { name: "sourceTabReviews" })).toBeNull();
+    expect(
+      screen
+        .getByRole("tab", { name: "sourceTabReviews" })
+        .getAttribute("aria-selected"),
+    ).toBe("false");
+    fireEvent.click(screen.getByRole("tab", { name: "sourceTabReviews" }));
+    expect(await screen.findByText("sourceReviewPendingHeading")).toBeDefined();
+    expect(screen.queryByText("sourceReviewSubmittedHeading")).toBeNull();
   });
 
   it("shows Reviews only when capability and persisted opt-in are both present", async () => {
@@ -805,9 +841,16 @@ describe("GitStatusPage source header", () => {
     renderPage("/git-status?projectId=project-a&tab=reviews");
 
     expect(
-      await screen.findByRole("tab", { name: "sourceTabReviews" }),
-    ).toBeDefined();
+      (
+        await screen.findByRole("tab", { name: "sourceTabReviews" })
+      ).getAttribute("aria-selected"),
+    ).toBe("true");
     expect(await screen.findByText("sourceReviewNoSubmissions")).toBeDefined();
+    expect(screen.getByText("sourceReviewPendingHeading")).toBeDefined();
+    expect(screen.getByText("sourceReviewSubmittedHeading")).toBeDefined();
+    expect(screen.getByTestId("test-location").textContent).toContain(
+      "tab=reviews",
+    );
   });
 
   it("opens an asynchronously populated Files hash in commit history", async () => {
@@ -830,7 +873,7 @@ describe("GitStatusPage source header", () => {
     expect(await screen.findByTestId("commit-browser")).toBeDefined();
     expect(
       screen
-        .getByRole("tab", { name: /sourceTabChanges/ })
+        .getByRole("tab", { name: "sourceCommitHistory" })
         .getAttribute("aria-selected"),
     ).toBe("true");
     expect(mocks.renderCommitBrowser).toHaveBeenLastCalledWith(
@@ -979,7 +1022,9 @@ describe("GitStatusPage source header", () => {
     renderPage("/git-status?projectId=project-a&rev=abc123");
     await screen.findByTestId("commit-browser");
 
-    fireEvent.click(screen.getByText("sourceCommitHistory"));
+    fireEvent.click(
+      screen.getByRole("button", { name: "sourceCommitHistory" }),
+    );
 
     await waitFor(() =>
       expect(mocks.renderCommitBrowser).toHaveBeenLastCalledWith(
@@ -1055,7 +1100,7 @@ describe("GitStatusPage source header", () => {
       }),
     );
 
-    fireEvent.click(screen.getByRole("tab", { name: "sourceTabComments" }));
+    fireEvent.click(screen.getByRole("tab", { name: "sourceTabReviews" }));
     fireEvent.click(screen.getByRole("tab", { name: /sourceTabChanges/ }));
     await screen.findByTestId("working-tree-browser");
     expect(mocks.renderWorkingTreeBrowser).toHaveBeenLastCalledWith(
@@ -1063,7 +1108,7 @@ describe("GitStatusPage source header", () => {
     );
   });
 
-  it("shows remote-check feedback without changing the visible button label", async () => {
+  it("runs the needed operation from Sync without changing its visible label", async () => {
     let resolveCheck:
       | ((value: { status: "checked"; checkedRemoteAt: string }) => void)
       | undefined;
@@ -1073,33 +1118,79 @@ describe("GitStatusPage source header", () => {
       }),
     );
     renderPage();
-    const check = await screen.findByRole("button", {
-      name: "gitStatusCheckRemote",
+    // In sync with the upstream, Sync checks the remote.
+    const sync = await screen.findByRole("button", {
+      name: "sourceSyncAction",
     });
-    expect(check.textContent).toBe("gitStatusCheckRemote");
-    expect(check.querySelector(".git-status-action-glyph")).not.toBeNull();
-    fireEvent.click(check);
+    expect(sync.textContent).toBe("sourceSyncAction");
+    expect(sync.getAttribute("title")).toBe("sourceSyncCheckTitle");
+    expect(sync.querySelector(".git-status-action-glyph")).not.toBeNull();
+    fireEvent.click(sync);
 
     const checking = await screen.findByRole("button", {
-      name: "gitStatusCheckRemote: gitStatusCheckingRemote",
+      name: "sourceSyncAction: gitStatusCheckingRemote",
     });
-    expect(checking.textContent).toBe("gitStatusCheckRemote");
+    expect(checking.textContent).toBe("sourceSyncAction");
     expect(checking.querySelector(".git-status-action-glyph")).toBeNull();
     expect(checking.classList.contains("git-status-action-running")).toBe(true);
+    expect(mocks.checkGitRemote).toHaveBeenCalledTimes(1);
 
     resolveCheck?.({
       status: "checked",
       checkedRemoteAt: "2026-07-26T12:00:00.000Z",
     });
     const completed = await screen.findByRole("button", {
-      name: /gitStatusCheckRemote: gitStatusRemoteCheckSuccess/,
+      name: /sourceSyncAction: gitStatusRemoteCheckSuccess/,
     });
     await waitFor(() =>
-      expect(completed.textContent).toBe("✓gitStatusCheckRemote"),
+      expect(completed.textContent).toBe("✓sourceSyncAction"),
     );
     expect(screen.getByRole("status").textContent).toBe(
       "gitStatusRemoteCheckSuccess",
     );
+  });
+
+  it("pulls from Sync when behind and keeps every operation in its menu", async () => {
+    mocks.useVersion.mockReturnValue({
+      version: {
+        capabilities: [
+          GIT_SOURCE_REVIEW_CAPABILITY,
+          GIT_STATUS_ENHANCED_CAPABILITY,
+          GIT_STATUS_REMOTE_CHECK_CAPABILITY,
+          GIT_STATUS_PULL_CAPABILITY,
+          GIT_STATUS_PUSH_CAPABILITY,
+        ],
+      },
+      loading: false,
+      error: null,
+    });
+    mocks.useGitStatus.mockReturnValue({
+      gitStatus: { ...status(), ahead: 2, behind: 1 },
+      loading: false,
+      error: null,
+      refetch: vi.fn(),
+    });
+    renderPage();
+
+    const sync = await screen.findByRole("button", {
+      name: "sourceSyncAction",
+    });
+    expect(sync.textContent).toBe("sourceSyncAction↑2 ↓1");
+    fireEvent.click(sync);
+    await waitFor(() => expect(mocks.pullGit).toHaveBeenCalledTimes(1));
+    expect(mocks.pushGit).not.toHaveBeenCalled();
+
+    fireEvent.click(
+      await screen.findByRole("button", { name: "sourceSyncMenuLabel" }),
+    );
+    const items = await screen.findAllByRole("menuitem");
+    expect(items.map((item) => item.textContent)).toEqual([
+      expect.stringContaining("gitStatusPull"),
+      expect.stringContaining("gitStatusPush"),
+      expect.stringContaining("gitStatusCheckRemote"),
+    ]);
+    fireEvent.click(items[1] as HTMLElement);
+    await waitFor(() => expect(mocks.pushGit).toHaveBeenCalledTimes(1));
   });
 
   it("keeps one tab selector in the page intro at mobile width", async () => {
