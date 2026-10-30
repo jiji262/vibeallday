@@ -1,0 +1,34 @@
+/* Design t-meta line under the chips. */
+.line {
+  margin: 10px 0 0;
+  padding: 0 4px;
+  color: var(--ink-3);
+  font-family: var(--font-mono);
+  font-size: var(--fs-meta);
+  line-height: 1.6;
+}
+
+/* Beside the toolbar controls; the auto margin keeps Start at the end. */
+.toolbarHints {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  margin-inline: 12px auto;
+}
+
+.toolbarHint {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--ink-3);
+  font-size: var(--fs-small);
+  white-space: nowrap;
+}
+
+/* Touch keyboards have no room for passive hints in the toolbar. */
+@media (pointer: coarse), (width < 768px) {
+  .toolbarHints {
+    display: none;
+  }
+}

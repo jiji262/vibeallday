@@ -278,12 +278,18 @@ import { AttachmentChip } from "./AttachmentChip";
 import { FilterDropdown, type FilterOption } from "./FilterDropdown";
 import { LoadingState } from "./garden/LoadingState";
 import { Button } from "./garden/Button";
+import { Count } from "./garden/Count";
 import { Sheet } from "./garden/Sheet";
 import { NewSessionAdvancedGroups } from "./NewSessionAdvancedGroups";
 import { NewSessionPermissionChip } from "./NewSessionPermissionChip";
 import { NewSessionStartSplit } from "./NewSessionStartSplit";
 import { FullPaneComposerToggle } from "./FullPaneComposerToggle";
 import { NewSessionFixedLaunch } from "./NewSessionFixedLaunch";
+import {
+  NewSessionComposerHints,
+  NewSessionHintLine,
+} from "./NewSessionHintLine";
+import { NewSessionRecentPrompts } from "./NewSessionRecentPrompts";
 import { NewSessionProjectQueue } from "./NewSessionProjectQueue";
 import { SpeechPrefixActionCue } from "./SpeechPrefixActionCue";
 import { ProviderBadge } from "./ProviderBadge";
@@ -4371,6 +4377,7 @@ export function NewSessionForm({
               />
             )}
           </div>
+          {!compact && <NewSessionComposerHints />}
           <div className="new-session-form-toolbar-actions">
             <NewSessionStartSplit
               disabled={isStarting}
@@ -5446,6 +5453,30 @@ export function NewSessionForm({
       ? `${t("newSessionRunOnTitle")}: ${effectiveExecutor}`
       : null,
   ].filter((label): label is string => label !== null);
+  // A limited account's sandbox is fixed: counted above, never reset.
+  const lockedAdvancedCount = launchLock.limited ? 1 : 0;
+  const canResetAdvanced = activeAdvancedOptions.length > lockedAdvancedCount;
+  // 恢复默认: every option counted above back to standard, saved like a pick.
+  const resetAdvancedOptions = () => {
+    if (isStarting) return;
+    hasUserCustomizedDefaultsRef.current = true;
+    setSelectedServiceTier(null);
+    setShowThinking("default");
+    setSelectedRecapMode("off");
+    setSelectedPromptSuggestionMode("off");
+    if (!launchLock.limited) setSandboxLevel("none");
+    selectMachineControl(false);
+    setSelectedExecutor(null);
+  };
+  // A recent prompt fills the composer for editing; it never starts.
+  const fillRecentPrompt = (text: string) => {
+    setMessage(text);
+    requestAnimationFrame(() => {
+      const field = textareaRef.current;
+      field?.focus();
+      field?.setSelectionRange(text.length, text.length);
+    });
+  };
 
   const displayDefaultsError =
     displayDefaultsPending && settingsError ? (
@@ -5676,15 +5707,46 @@ export function NewSessionForm({
           >
             <span aria-hidden="true">?</span>
           </button>
-          {activeAdvancedOptions.length > 0 && (
-            <span className={styles.advancedSummary}>
-              {activeAdvancedOptions.join(" · ")}
-            </span>
-          )}
         </div>
+        <NewSessionHintLine
+          className={styles.hintSlot}
+          keyHints={!hasCoarsePointer()}
+          queueShortcut={
+            projectQueueCtrlEnterEnabled &&
+            toolbarVisibility.projectQueue &&
+            showProjectQueueAction
+          }
+          advanced={activeAdvancedOptions}
+        />
+        {!message.trim() && pendingFiles.length === 0 && (
+          <NewSessionRecentPrompts
+            className={styles.recentSlot}
+            scope={historyScope}
+            onFill={fillRecentPrompt}
+          />
+        )}
         {advancedOpen && (
           <Sheet
-            title={t("newSessionShowAdvancedOptions")}
+            title={
+              <>
+                {t("newSessionShowAdvancedOptions")}
+                {activeAdvancedOptions.length > 0 && (
+                  <Count tone="accent" className={styles.sheetCount}>
+                    {activeAdvancedOptions.length}
+                  </Count>
+                )}
+              </>
+            }
+            actions={
+              <Button
+                variant="ghost"
+                size="sm"
+                disabled={isStarting || !canResetAdvanced}
+                onClick={resetAdvancedOptions}
+              >
+                {t("newSessionAdvancedReset")}
+              </Button>
+            }
             onClose={() => setAdvancedOpen(false)}
           >
             <div
