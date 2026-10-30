@@ -20,11 +20,24 @@ const SKIN_OPTIONS: readonly { value: Theme; label: MessageKey }[] = [
   { value: "auto", label: "settingsAppearanceThemeSystem" },
 ];
 
-const TEXT_SIZE_OPTIONS: readonly SegmentedOption<string>[] =
-  UI_FONT_SCALE_PRESETS.map((value) => ({
-    value: String(value),
-    label: String(value),
-  }));
+const TEXT_SIZE_PRESETS: readonly number[] = UI_FONT_SCALE_PRESETS;
+
+function textSizeOption(value: number): SegmentedOption<string> {
+  return { value: String(value), label: String(value) };
+}
+
+const TEXT_SIZE_OPTIONS = TEXT_SIZE_PRESETS.map(textSizeOption);
+
+/**
+ * The presets, plus the saved size in order when it is not one (set from
+ * Appearance), so exactly one option is always selected.
+ */
+function textSizeOptions(current: number): readonly SegmentedOption<string>[] {
+  if (TEXT_SIZE_PRESETS.includes(current)) return TEXT_SIZE_OPTIONS;
+  return [...TEXT_SIZE_PRESETS, current]
+    .sort((a, b) => a - b)
+    .map(textSizeOption);
+}
 
 export interface SettingsQuickControlsProps {
   theme: Theme;
@@ -59,8 +72,10 @@ function NotificationsRow({ desktop }: { desktop: boolean }) {
           {t("settingsQuickNotificationsDescription")}
         </span>
       </div>
+      {/* Named by the title alone: the label also holds the scope tag. */}
       <Switch
         id={id}
+        label={title}
         checked={push.isSubscribed}
         disabled={push.isLoading || push.permission === "denied"}
         onChange={toggle}
@@ -120,7 +135,7 @@ export function SettingsQuickControls({
         <span className={styles.detail}>{`${fontSizePercent}%`}</span>
         <Segmented
           label={sizeTitle}
-          options={TEXT_SIZE_OPTIONS}
+          options={textSizeOptions(fontSizePercent)}
           value={String(fontSizePercent)}
           onChange={(value) => onFontSizeChange(Number(value))}
           block={!desktop}

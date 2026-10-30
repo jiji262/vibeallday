@@ -59,9 +59,14 @@
   resize: vertical;
 }
 
+/* The soft ring is decoration; the focus outline carries the focus state. */
 .editor:focus {
-  outline: none;
   box-shadow: inset 0 0 0 2px var(--accent-soft);
+}
+
+.editor:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: -2px;
 }
 
 .editorFoot {

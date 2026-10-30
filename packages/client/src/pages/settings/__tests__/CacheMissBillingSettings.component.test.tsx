@@ -1,6 +1,12 @@
 // @vitest-environment jsdom
 
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  within,
+} from "@testing-library/react";
 import {
   CACHE_MISS_BILLING_EXPECTED_EXPIRY_CAPABILITY,
   CACHE_MISS_BILLING_IGNORE_AFTER_CAPABILITY,
@@ -114,6 +120,19 @@ describe("CacheMissBillingSettings capability gate", () => {
     expect(
       screen.getByRole("checkbox", {
         name: "cacheMissExpectedExpiryToggleTitle",
+      }),
+    ).toBeTruthy();
+  });
+
+  it("puts the open view in a tabpanel named by its tab", () => {
+    renderSettingsTab();
+
+    const panel = screen.getByRole("tabpanel", {
+      name: "settingsCacheTabSettings",
+    });
+    expect(
+      within(panel).getByRole("checkbox", {
+        name: "cacheMissBillingEnableTitle",
       }),
     ).toBeTruthy();
   });

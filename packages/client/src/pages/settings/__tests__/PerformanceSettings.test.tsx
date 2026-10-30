@@ -6,6 +6,7 @@ import {
   fireEvent,
   render,
   screen,
+  within,
 } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { invalidateLocalStorageValues } from "../../../lib/localStorageValue";
@@ -75,6 +76,24 @@ describe("PerformanceSettings", () => {
     expect(window.localStorage.getItem(UI_KEYS.sessionActiveWindowTrim)).toBe(
       "false",
     );
+  });
+
+  it("keeps the scope tag out of control names and still says where values live", () => {
+    render(<PerformanceSettings />);
+
+    // A standard row and a custom-info row (ScopedRowTitle) alike.
+    for (const control of [
+      screen.getByRole("checkbox", {
+        name: "performanceActiveWindowTrimTitle",
+      }),
+      screen.getByRole("slider", { name: "performanceTranscriptCacheTitle" }),
+    ]) {
+      const row = control.closest<HTMLElement>("[data-settings-item]");
+      expect(row).not.toBeNull();
+      expect(
+        within(row as HTMLElement).getByText("gardenScopeLocalHint"),
+      ).toBeTruthy();
+    }
   });
 
   it("persists bounded and unlimited initial history values", () => {

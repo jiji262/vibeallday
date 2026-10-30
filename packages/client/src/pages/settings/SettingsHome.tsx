@@ -150,6 +150,11 @@ interface SettingsHomeProps {
   groups: SettingsGroup[];
   onSelect: (categoryId: string) => void;
   extras: ReactNode;
+  /**
+   * False until the acting principal resolves: only search and host show,
+   * so the overview hooks never send requests a limited user is refused.
+   */
+  overviewReady: boolean;
 }
 
 /** Phone settings home: search, host, quick controls, then grouped categories. */
@@ -159,6 +164,7 @@ export function SettingsHome({
   groups,
   onSelect,
   extras,
+  overviewReady,
 }: SettingsHomeProps) {
   const { t } = useI18n();
   return (
@@ -168,14 +174,19 @@ export function SettingsHome({
         lede={t("settingsHomeLede")}
         filters={searchBar}
       />
-      {searchResults ?? (
-        <OverviewBody
-          groups={groups}
-          onSelect={onSelect}
-          extras={extras}
-          desktop={false}
-        />
-      )}
+      {searchResults ??
+        (overviewReady ? (
+          <OverviewBody
+            groups={groups}
+            onSelect={onSelect}
+            extras={extras}
+            desktop={false}
+          />
+        ) : (
+          <div className={styles.home}>
+            <SettingsHostCard />
+          </div>
+        ))}
     </div>
   );
 }

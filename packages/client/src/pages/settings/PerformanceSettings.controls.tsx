@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import { ScopeTag, type SettingScope } from "../../components/garden/ScopeTag";
 import { useI18n } from "../../i18n";
 import styles from "./PerformanceSettings.module.css";
-import { SettingsItem } from "./SettingsItem";
+import { ScopeHint, SettingsItem } from "./SettingsItem";
 
 interface ToggleSettingRowProps {
   label: string;
@@ -82,7 +82,10 @@ export function PerformanceValueControl({
   );
 }
 
-/** Custom-info title that keeps the row's storage scope tag. */
+/**
+ * Custom-info title that keeps the row's storage scope tag; the tag stays out
+ * of the accessible name and ScopeHint after the title speaks it instead.
+ */
 export function ScopedRowTitle({
   label,
   scope,
@@ -94,12 +97,15 @@ export function ScopedRowTitle({
   tag?: ReactNode;
 }) {
   return (
-    <strong>
-      <span>{label}</span>
-      {tag && <span className={styles.scopeTag}>{tag}</span>}
-      <span aria-hidden="true" className={styles.scopeTag}>
-        <ScopeTag scope={scope} />
-      </span>
-    </strong>
+    <>
+      <strong>
+        <span>{label}</span>
+        {tag && <span className={styles.scopeTag}>{tag}</span>}
+        <span aria-hidden="true" className={styles.scopeTag}>
+          <ScopeTag scope={scope} />
+        </span>
+      </strong>
+      <ScopeHint scope={scope} />
+    </>
   );
 }

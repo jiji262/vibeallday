@@ -3,6 +3,7 @@ import { cleanup, render, screen, within } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { afterEach, expect, it, vi } from "vitest";
+import { UI_KEYS } from "../../../lib/storageKeys";
 import { SettingsLayout } from "../SettingsLayout";
 
 vi.mock("../../../hooks/useActingPrincipal", () => ({
@@ -29,15 +30,65 @@ vi.mock("../../../i18n-settings", () => ({
   getThemeLabel: (theme: string) => theme,
   getSettingsCategories: () => [
     { id: "appearance", label: "Appearance", description: "Display prefs" },
+    { id: "providers", label: "Providers", description: "Agent CLIs" },
   ],
+}));
+vi.mock("../../../hooks/useProviders", () => ({
+  useProviders: () => ({
+    providers: [
+      {
+        name: "codex",
+        displayName: "Codex",
+        installed: true,
+        authenticated: false,
+        enabled: false,
+      },
+    ],
+    loading: false,
+  }),
+}));
+vi.mock("../../../hooks/usePushNotifications", () => ({
+  usePushNotifications: () => ({
+    isSupported: true,
+    isSubscribed: false,
+    isLoading: false,
+    permission: "default",
+    subscribe: vi.fn(),
+    unsubscribe: vi.fn(),
+  }),
 }));
 vi.mock("../AppearanceSettings", () => ({
   AppearanceSettings: () => <p>appearance pane</p>,
 }));
 
 const PHONE_WIDTH = 375;
+const DESKTOP_WIDTH = 1200;
 
-afterEach(cleanup);
+afterEach(() => {
+  cleanup();
+  localStorage.clear();
+});
+
+/** jsdom lays nothing out; give the settings container a desktop width. */
+function withDesktopWidth(run: () => Promise<void>): Promise<void> {
+  const descriptor = Object.getOwnPropertyDescriptor(
+    HTMLElement.prototype,
+    "clientWidth",
+  );
+  Object.defineProperty(HTMLElement.prototype, "clientWidth", {
+    configurable: true,
+    get: () => DESKTOP_WIDTH,
+  });
+  return run().finally(() => {
+    // jsdom defines clientWidth on Element.prototype, so usually just drop
+    // the override.
+    if (descriptor) {
+      Object.defineProperty(HTMLElement.prototype, "clientWidth", descriptor);
+    } else {
+      Reflect.deleteProperty(HTMLElement.prototype, "clientWidth");
+    }
+  });
+}
 
 function renderAt(path: string) {
   render(
@@ -62,29 +113,24 @@ it("names a category with crumbs Settings / category and one h1", async () => {
   expect(screen.getByText("Display prefs")).toBeTruthy();
 });
 
-it("titles the phone settings home Settings", () => {
+/** The layout starts from the window width (MainContent is mocked away). */
+function renderOnPhone(path: string) {
   const width = window.innerWidth;
   window.innerWidth = PHONE_WIDTH;
-  renderAt("/settings");
+  renderAt(path);
   window.innerWidth = width;
+}
+
+it("titles the phone settings home Settings", () => {
+  renderOnPhone("/settings");
   const titles = screen.getAllByRole("heading", { level: 1 });
   expect(titles.map((title) => title.textContent)).toEqual([
     "pageTitleSettings",
   ]);
 });
 
-const DESKTOP_WIDTH = 1200;
-
-it("opens the overview at the desktop index instead of the first category", async () => {
-  const descriptor = Object.getOwnPropertyDescriptor(
-    HTMLElement.prototype,
-    "clientWidth",
-  );
-  Object.defineProperty(HTMLElement.prototype, "clientWidth", {
-    configurable: true,
-    get: () => DESKTOP_WIDTH,
-  });
-  try {
+it("opens the overview at the desktop index instead of the first category", () =>
+  withDesktopWidth(async () => {
     renderAt("/settings");
     expect(await screen.findByText("settingsQuickTitle")).toBeTruthy();
     expect(screen.queryByText("appearance pane")).toBeNull();
@@ -95,9 +141,50 @@ it("opens the overview at the desktop index instead of the first category", asyn
     });
     const back = within(rail).getByRole("link", { name: "shellNavBackToApp" });
     expect(back.getAttribute("href")).toBe("/inbox");
-  } finally {
-    if (descriptor) {
-      Object.defineProperty(HTMLElement.prototype, "clientWidth", descriptor);
-    }
-  }
+  }));
+
+it("answers an unknown category URL with the settings index", async () => {
+  renderOnPhone("/settings/not-a-category");
+  expect(await screen.findByText("settingsQuickTitle")).toBeTruthy();
+  expect(screen.queryByRole("button", { name: "actionBack" })).toBeNull();
+  cleanup();
+
+  await withDesktopWidth(async () => {
+    renderAt("/settings/not-a-category");
+    const overview = await screen.findByRole("button", {
+      name: "settingsOverviewTitle",
+    });
+    expect(overview.getAttribute("aria-current")).toBe("page");
+  });
+});
+
+it("flags a provider waiting on sign-in in the rail", () =>
+  withDesktopWidth(async () => {
+    renderAt("/settings/appearance");
+    const rail = screen.getByRole("complementary", {
+      name: "pageTitleSettings",
+    });
+    const row = within(rail).getByRole("button", { name: /^Providers/ });
+    expect(
+      within(row).getByRole("img", { name: "settingsRailNeedsAttention" }),
+    ).toBeTruthy();
+  }));
+
+it("names the notifications switch by its title alone", async () => {
+  renderOnPhone("/settings");
+  expect(
+    await screen.findByRole("switch", {
+      name: "settingsQuickPushNotifications",
+    }),
+  ).toBeTruthy();
+});
+
+it("selects a saved text size that is not a preset", async () => {
+  localStorage.setItem(UI_KEYS.fontSize, "105");
+  renderAt("/settings");
+  const sizes = await screen.findByRole("radiogroup", {
+    name: "settingsQuickTextSize",
+  });
+  const checked = within(sizes).getAllByRole("radio", { checked: true });
+  expect(checked.map((radio) => radio.textContent)).toEqual(["105"]);
 });

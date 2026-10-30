@@ -70,6 +70,7 @@ const {
   mockUpdateSettings: vi.fn(),
   versionState: {
     capabilities: [] as string[],
+    pending: false,
   },
 }));
 
@@ -99,9 +100,10 @@ vi.mock("../../../hooks/useServerSettings", () => ({
 }));
 
 vi.mock("../../../hooks/useVersion", () => ({
-  useVersion: () => ({
-    version: { capabilities: versionState.capabilities },
-  }),
+  useVersion: () =>
+    versionState.pending
+      ? { version: null, loading: true }
+      : { version: { capabilities: versionState.capabilities } },
 }));
 
 vi.mock("../../../i18n", () => ({
@@ -174,6 +176,7 @@ describe("ProvidersSettings additional models", () => {
       },
     ];
     versionState.capabilities = [CLAUDE_ADDITIONAL_MODELS_CAPABILITY];
+    versionState.pending = false;
     mockUpdateSetting.mockResolvedValue(undefined);
     mockUpdateSettings.mockImplementation(
       async (updates: Partial<ServerSettings>) => ({
@@ -749,6 +752,18 @@ describe("ProvidersSettings additional models", () => {
     expect(
       screen.getByText("providersAdditionalModelsUnlistedDescription"),
     ).toBeTruthy();
+  });
+
+  it("answers a capability-gated detail URL by what this server serves", () => {
+    versionState.pending = true;
+    render(<ProvidersAt path="/settings/providers/gateway-services" />);
+    expect(screen.getByText("loading")).toBeTruthy();
+    expect(screen.queryByText("providersDetailNotFound")).toBeNull();
+    cleanup();
+
+    versionState.pending = false;
+    render(<ProvidersAt path="/settings/providers/gateway-services" />);
+    expect(screen.getByText("providersDetailNotFound")).toBeTruthy();
   });
 
   it("hides Claude Gateway configuration from older servers", () => {

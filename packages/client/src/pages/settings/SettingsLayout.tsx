@@ -12,7 +12,12 @@ import {
   useRef,
   useState,
 } from "react";
-import { useLocation, useNavigate, useParams } from "react-router-dom";
+import {
+  Navigate,
+  useLocation,
+  useNavigate,
+  useParams,
+} from "react-router-dom";
 import { LoadingState } from "../../components/garden/LoadingState";
 import { Notice } from "../../components/garden/Notice";
 import { PageHeader } from "../../components/PageHeader";
@@ -414,6 +419,12 @@ export function SettingsLayout() {
     </SettingsJumpTargetProvider>
   );
 
+  // An unknown category, or one withheld from this principal, has no pane
+  // and no rail entry: answer its URL with the settings index instead.
+  if (principalResolved && effectiveCategory && !activeCategory) {
+    return <Navigate to={settingsRoot} replace />;
+  }
+
   // Narrow settings: category list OR category detail (not both)
   if (!useTwoColumnSettings) {
     if (!category) {
@@ -438,6 +449,7 @@ export function SettingsLayout() {
               groups={groups}
               onSelect={handleCategoryClick}
               extras={transferTools}
+              overviewReady={principalResolved}
             />
           </main>
         </MainContent>

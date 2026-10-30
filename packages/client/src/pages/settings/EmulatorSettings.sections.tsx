@@ -11,7 +11,7 @@ import {
   type EmulatorWidth,
   getQualityLabel,
 } from "../../hooks/useEmulatorSettings";
-import { useI18n } from "../../i18n";
+import { type MessageKey, useI18n } from "../../i18n";
 import styles from "./EmulatorSettings.module.css";
 import { HideInSettingsSearch } from "./SettingsSearchContext";
 import { SettingsItem } from "./SettingsItem";
@@ -19,12 +19,15 @@ import { SettingsSection } from "./SettingsSection";
 
 const QUALITY_OPTIONS: EmulatorQuality[] = ["high", "medium", "low"];
 
-const DEVICE_STATUS: Record<DeviceState, StatusState> = {
-  running: "ok",
-  booted: "ok",
-  connected: "ok",
-  stopped: "idle",
-  disconnected: "idle",
+const DEVICE_STATUS: Record<
+  DeviceState,
+  { state: StatusState; label: MessageKey }
+> = {
+  running: { state: "ok", label: "emulatorDeviceRunning" },
+  booted: { state: "ok", label: "emulatorDeviceBooted" },
+  connected: { state: "ok", label: "emulatorDeviceConnected" },
+  stopped: { state: "idle", label: "emulatorDeviceStopped" },
+  disconnected: { state: "idle", label: "emulatorDeviceDisconnected" },
 };
 
 function canStartDevice(device: DeviceInfo): boolean {
@@ -45,6 +48,11 @@ interface DeviceCardProps {
 
 function DeviceCard({ device, onStart, onStop }: DeviceCardProps) {
   const { t } = useI18n();
+  // A state a newer server adds shows as sent until it gets a label here.
+  const status = DEVICE_STATUS[device.state] as
+    | (typeof DEVICE_STATUS)[DeviceState]
+    | undefined;
+  const stateLabel = status ? t(status.label) : device.state;
   const action = canStopDevice(device)
     ? { label: t("emulatorStop"), run: onStop }
     : canStartDevice(device)
@@ -56,15 +64,13 @@ function DeviceCard({ device, onStart, onStop }: DeviceCardProps) {
         <strong className={styles.deviceName}>
           {device.label || device.avd || device.id}
         </strong>
-        <Status state={DEVICE_STATUS[device.state] ?? "idle"}>
-          {device.state}
-        </Status>
+        <Status state={status?.state ?? "idle"}>{stateLabel}</Status>
       </div>
       <span className={styles.deviceMeta}>
         {t("emulatorDeviceSummary", {
           type: device.type,
           id: device.id,
-          state: device.state,
+          state: stateLabel,
         })}
       </span>
       {action ? (

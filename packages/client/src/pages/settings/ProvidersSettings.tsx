@@ -35,6 +35,7 @@ import {
   type HelperTargetConfig,
   type ModelInfo,
   type ProviderInfo,
+  type ServerCapabilitySource,
   serverHasCapability,
 } from "@vibeallday/shared";
 import { api, type ServerSettings } from "../../api/client";
@@ -56,7 +57,7 @@ import {
   HideInSettingsSearch,
   useSettingsSearchScope,
 } from "./SettingsSearchContext";
-import { Notice } from "../../components/garden";
+import { LoadingState, Notice } from "../../components/garden";
 import { ProviderDetailHeader } from "./ProviderDetailHeader";
 import { ProvidersOverview } from "./ProvidersSettings.overview";
 import {
@@ -1498,14 +1499,17 @@ interface ProviderPaneState {
   providersError: ProvidersQuery["error"];
   reloadProviders: () => Promise<void>;
   supports: ProviderSupportFlags;
+  /** No server version yet, so every capability still reads as absent. */
+  versionPending: boolean;
   providers: ProviderDisplayEntry[];
   showClaudeOllamaDeprecation: boolean;
   dismissClaudeOllamaDeprecation: () => void;
   copyLoginCommand: (command: string, provider: string) => Promise<void>;
 }
 
-function useProviderSupportFlags(): ProviderSupportFlags {
-  const { version } = useVersion();
+function providerSupportFlags(
+  version: ServerCapabilitySource | null | undefined,
+): ProviderSupportFlags {
   const has = (capability: string) => serverHasCapability(version, capability);
   return {
     additionalModels: has(CLAUDE_ADDITIONAL_MODELS_CAPABILITY),
@@ -1528,7 +1532,8 @@ function useProviderPaneState(): ProviderPaneState {
     useState(shouldShowClaudeOllamaDeprecation);
   const query = useProviders();
   const { settings, updateSetting } = useServerSettings();
-  const supports = useProviderSupportFlags();
+  const { version, loading: versionLoading } = useVersion();
+  const supports = providerSupportFlags(version);
   const copyLoginCommand = useCallback(
     async (command: string, provider: string) => {
       try {
@@ -1552,6 +1557,7 @@ function useProviderPaneState(): ProviderPaneState {
     providersError: query.error,
     reloadProviders: query.refetch,
     supports,
+    versionPending: !version && versionLoading,
     providers: buildProviderDisplayList(
       query.providers,
       supports.claudeGateway,
@@ -1955,11 +1961,15 @@ function useProviderDetailLabel(
   pane: ProviderPaneState,
 ): string | null {
   const { t } = useI18n();
+  const { supports } = pane;
   if (!itemId) return null;
   if (itemId === GATEWAY_SERVICES_ITEM_ID) {
-    return t("providersGatewayServicesTitle");
+    const served = supports.claudeGateway && supports.gatewayServices;
+    return served ? t("providersGatewayServicesTitle") : null;
   }
-  if (itemId === AUTH_ROUTER_ITEM_ID) return t("routerTitle");
+  if (itemId === AUTH_ROUTER_ITEM_ID) {
+    return supports.authRouter ? t("routerTitle") : null;
+  }
   return (
     pane.providers.find((entry) => entry.id === itemId)?.displayName ?? null
   );
@@ -1977,8 +1987,13 @@ function ProviderDetailPage({
   const listPath = `${basePath}/settings/providers`;
   const label = useProviderDetailLabel(itemId, pane);
   useSettingsDetailCrumb({ label: label ?? itemId, backTo: listPath });
-  const body = <ProviderDetailBody itemId={itemId} pane={pane} />;
-  if (label) return body;
+  if (label) return <ProviderDetailBody itemId={itemId} pane={pane} />;
+  // Capabilities and server-reported providers are unknown until both
+  // answers arrive; a direct load must not call the page missing meanwhile.
+  const pending =
+    pane.versionPending ||
+    (pane.providersLoading && pane.serverProviders.length === 0);
+  if (pending) return <LoadingState label={t("loading")} variant="compact" />;
   return (
     <Notice
       tone="warning"

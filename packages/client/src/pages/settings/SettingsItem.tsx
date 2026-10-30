@@ -91,12 +91,14 @@ export interface SettingsItemProps {
 }
 
 const JUMP_FLASH_DURATION_MS = 1800;
+const REDUCED_MOTION_QUERY = "(prefers-reduced-motion: reduce)";
 
-function prefersReducedMotion(): boolean {
-  return (
-    typeof window !== "undefined" &&
-    !!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches
-  );
+/** Where a row's value is stored, for screen readers (the tag is aria-hidden). */
+export function ScopeHint({ scope }: { scope: SettingScope }) {
+  const { t } = useI18n();
+  const hint =
+    scope === "local" ? "gardenScopeLocalHint" : "gardenScopeServerHint";
+  return <span className={styles.visuallyHidden}>{t(hint)}</span>;
 }
 
 /**
@@ -141,9 +143,10 @@ export function SettingsItem({
   useEffect(() => {
     if (!jumpTargetsThisRow || !consume) return;
     consume();
+    const reduceMotion = window.matchMedia?.(REDUCED_MOTION_QUERY).matches;
     ref.current?.scrollIntoView({
       block: "center",
-      behavior: prefersReducedMotion() ? "auto" : "smooth",
+      behavior: reduceMotion ? "auto" : "smooth",
     });
     setFlash(true);
   }, [jumpTargetsThisRow, consume]);
@@ -169,45 +172,32 @@ export function SettingsItem({
   if (scope && !matched) return null;
 
   // The tag stays out of the row's accessible name (label rows name their
-  // control), so existing names and text queries keep matching the title.
-  const withScopeTag = (title: ReactNode) =>
-    storageScope ? (
-      <>
-        <span>{title}</span>
-        <span aria-hidden="true" className={styles.scopeTag}>
-          <ScopeTag scope={storageScope} />
-        </span>
-      </>
-    ) : (
-      title
-    );
+  // control), so names keep matching the title; ScopeHint speaks it instead.
+  const scopeTag = storageScope ? (
+    <span aria-hidden="true" className={styles.scopeTag}>
+      <ScopeTag scope={storageScope} />
+    </span>
+  ) : null;
   const valueChip =
     scope && valueText ? (
       <span className={styles.valueChip}>{valueText}</span>
     ) : null;
-  const infoBody =
-    info ??
-    (scope ? (
-      <>
-        <strong>
-          {withScopeTag(renderSettingsSearchHighlight(label, scope.query))}
-        </strong>
-        {description && (
-          <p>{renderSettingsSearchHighlight(description, scope.query)}</p>
-        )}
-      </>
-    ) : (
-      <>
-        <strong>{withScopeTag(label)}</strong>
-        {description && <p>{description}</p>}
-      </>
-    ));
+  const highlight = (text: string) =>
+    scope ? renderSettingsSearchHighlight(text, scope.query) : text;
+  const infoBody = info ?? (
+    <>
+      <strong>
+        <span>{highlight(label)}</span>
+        {scopeTag}
+      </strong>
+      {description && <p>{highlight(description)}</p>}
+      {storageScope && <ScopeHint scope={storageScope} />}
+    </>
+  );
 
-  const originLabel = scope
-    ? scope.sectionTitle
-      ? `${scope.categoryLabel} › ${scope.sectionTitle}`
-      : scope.categoryLabel
-    : null;
+  const originLabel =
+    scope &&
+    [scope.categoryLabel, scope.sectionTitle].filter(Boolean).join(" › ");
 
   const itemClassName = [
     baseClassName,

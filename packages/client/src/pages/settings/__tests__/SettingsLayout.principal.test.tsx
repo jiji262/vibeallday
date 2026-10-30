@@ -71,6 +71,7 @@ function renderAt(path: string) {
   return render(
     <MemoryRouter initialEntries={[path]}>
       <Routes>
+        <Route path="/settings" element={<SettingsLayout />} />
         <Route path="/settings/:category" element={<SettingsLayout />} />
       </Routes>
     </MemoryRouter>,
@@ -99,6 +100,15 @@ describe("SettingsLayout principal gating", () => {
     expect(screen.queryByText("local access pane")).toBeNull();
     expect(screen.queryByText("backup actions")).toBeNull();
     expect(screen.queryByRole("button", { name: /local-access/i })).toBeNull();
+  });
+
+  it("shows only search on the phone home until the principal is known", async () => {
+    principalState.principal = SUPERUSER;
+    principalState.resolved = false;
+    renderAt("/settings");
+    await act(async () => {});
+    expect(screen.getByRole("search")).toBeTruthy();
+    expect(screen.queryByText("settingsQuickTitle")).toBeNull();
   });
 
   it("withholds a superuser-only category from a resolved limited user", async () => {

@@ -1,6 +1,7 @@
-import type { ReactNode } from "react";
+import { type ComponentProps, type ReactNode, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { ChevronLeftIcon, OverviewIcon } from "../../components/garden/icons";
+import { DEFAULT_UI_FONT_SCALE_PERCENT } from "../../hooks/useFontSize";
 import { useRemoteBasePath } from "../../hooks/useRemoteBasePath";
 import { useI18n } from "../../i18n";
 import catStyles from "./SettingsCategoryItem.module.css";
@@ -8,9 +9,12 @@ import { SettingsGroupList } from "./SettingsGroupList";
 import { SettingsHostCard } from "./SettingsHostCard";
 import styles from "./SettingsLayout.module.css";
 import type { SettingsGroup } from "./settingsGroups";
+import { useSettingsOverview } from "./useSettingsOverview";
 
 const BACK_ICON_SIZE = 16;
 const OVERVIEW_ICON_SIZE = 15;
+// The only category the overview can flag today (providers waiting on sign-in).
+const ATTENTION_CATEGORY_IDS = ["providers"];
 
 interface SettingsLayoutRailProps {
   searchBar: ReactNode;
@@ -60,6 +64,35 @@ function OverviewEntry({
   );
 }
 
+type RailListProps = ComponentProps<typeof SettingsGroupList> & {
+  searchActive: boolean;
+};
+
+/**
+ * The rail's categories with the overview's attention dots (design `.dot.attn`
+ * on the row and its group). Mounted only when a flaggable category is
+ * visible, so a principal who cannot open it never asks for its state; the
+ * dots step aside while a search query is active.
+ */
+function AttentionRailList({ searchActive, ...props }: RailListProps) {
+  const overview = useSettingsOverview({
+    visibleCategoryIds: ATTENTION_CATEGORY_IDS,
+    // Only the appearance summary reads these, and it is not requested.
+    theme: "auto",
+    fontSizePercent: DEFAULT_UI_FONT_SCALE_PERCENT,
+  });
+  const attentionIds = useMemo(
+    () => new Set(overview.attention.map((item) => item.categoryId)),
+    [overview.attention],
+  );
+  return (
+    <SettingsGroupList
+      {...props}
+      attentionIds={searchActive ? undefined : attentionIds}
+    />
+  );
+}
+
 /**
  * Desktop settings rail (design `.side`): it replaces the app sidebar, so it
  * leads with a way back to the app, then host, search and the categories.
@@ -76,6 +109,17 @@ export function SettingsLayoutRail({
 }: SettingsLayoutRailProps) {
   const { t } = useI18n();
   const basePath = useRemoteBasePath();
+  const watchesAttention = groups.some((group) =>
+    group.categories.some((c) => ATTENTION_CATEGORY_IDS.includes(c.id)),
+  );
+  const list: ComponentProps<typeof SettingsGroupList> = {
+    groups,
+    variant: "rail",
+    activeId: searchActive ? undefined : activeId,
+    expandAll: searchActive,
+    onSelect,
+    extras,
+  };
   return (
     <aside className={styles.rail} aria-label={t("pageTitleSettings")}>
       <Link to={`${basePath}/inbox`} className={styles.back}>
@@ -95,14 +139,11 @@ export function SettingsLayoutRail({
           active={overviewActive && !searchActive}
           onClick={onOverview}
         />
-        <SettingsGroupList
-          groups={groups}
-          variant="rail"
-          activeId={searchActive ? undefined : activeId}
-          expandAll={searchActive}
-          onSelect={onSelect}
-          extras={extras}
-        />
+        {watchesAttention ? (
+          <AttentionRailList {...list} searchActive={searchActive} />
+        ) : (
+          <SettingsGroupList {...list} />
+        )}
       </nav>
     </aside>
   );
