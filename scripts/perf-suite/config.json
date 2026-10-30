@@ -21,7 +21,8 @@
     }
   },
   "fixture": {
-    "revision": "2f5e403e20fc5b96d5634a4b8f5a57704023d8da",
+    "_revision": "A permanently reachable commit in THIS repository that carries every REQUIRED_FIXTURE_PATHS entry, pinned so the fixture stays reproducible between runs. The repository's first commit is the safest choice: later ones can be rewritten away, and the previous value was a sha from the pre-fork repository, which no clone here contains.",
+    "revision": "11a2bbe08a6b26b06b5e98ab518689d34a3d6ceb",
     "providerCatalogFamilies": ["claude"],
     "workingSetSessions": 3,
     "cacheProofTimeoutMs": 1000,
