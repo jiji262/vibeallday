@@ -461,6 +461,24 @@ describe("GlobalSessionsPage", () => {
     expect(screen.queryByText("Open session for")).toBeNull();
   });
 
+  it("clears an activity chip from the sheet when no sheet filter is set", () => {
+    sessionCollectionState.records = [
+      makeSessionRecord("waiting", { activity: "waiting-input" }),
+      makeSessionRecord("idle"),
+    ];
+    renderPage("/sessions?activity=attention");
+    const needsYou = screen.getByRole("button", { name: /^Needs you/ });
+    expect(needsYou.getAttribute("aria-pressed")).toBe("true");
+    expect(screen.queryByTestId("session-idle")).toBeNull();
+    openFilters();
+    const sheet = within(screen.getByRole("dialog", { name: "Filters" }));
+    const clear = sheet.getByRole("button", { name: "Clear filters" });
+    expect(clear.hasAttribute("disabled")).toBe(false);
+    fireEvent.click(clear);
+    expect(needsYou.getAttribute("aria-pressed")).toBe("false");
+    expect(screen.getByTestId("session-idle")).toBeDefined();
+  });
+
   it("filters recorded web sessions and keeps unmarked sessions distinct", () => {
     versionState.version = {
       capabilities: [SESSION_CREATION_PROVENANCE_CAPABILITY],

@@ -97,19 +97,47 @@ export function findLatestPlan(
   return null;
 }
 
+/** What the last scan saw, so the next tick reads only what it appended. */
+interface PlanScan {
+  first: Message | undefined;
+  length: number;
+  plan: PlanSnapshot | null;
+}
+
+/**
+ * Newest plan, reading only from the previously last message on when the
+ * transcript just grew at its end (a stream tick; that message may have
+ * gained blocks). A new first message or a shorter array (another session,
+ * older history prepended, a reset) scans the whole transcript again.
+ */
+function scanPlan(
+  messages: readonly Message[],
+  previous: PlanScan | null,
+): PlanScan {
+  const first = messages[0];
+  const { length } = messages;
+  if (!previous || length < previous.length || first !== previous.first) {
+    return { first, length, plan: findLatestPlan(messages) };
+  }
+  const tail = findLatestPlan(messages.slice(Math.max(previous.length - 1, 0)));
+  return { first, length, plan: tail ?? previous.plan };
+}
+
 /**
  * Latest plan while `active`, keeping the previous object when the plan did
  * not change, so a memoized inspector skips stream ticks that only append
- * text. Inactive callers pay nothing.
+ * text. Inactive callers pay nothing, and a tick reads only new messages.
  */
 export function useLatestPlan(
   messages: readonly Message[],
   active: boolean,
 ): PlanSnapshot | null {
-  const found = useMemo(
-    () => (active ? findLatestPlan(messages) : null),
-    [active, messages],
-  );
+  const scan = useRef<PlanScan | null>(null);
+  const found = useMemo(() => {
+    if (!active) return null;
+    scan.current = scanPlan(messages, scan.current);
+    return scan.current.plan;
+  }, [active, messages]);
   const stable = useRef<PlanSnapshot | null>(null);
   if (found?.signature !== stable.current?.signature) {
     stable.current = found;

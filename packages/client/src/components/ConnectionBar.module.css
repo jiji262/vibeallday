@@ -1,8 +1,10 @@
-/* Labelled bar pinned to the top edge while the transport is down
-   (design auth/Connection). Sits under sheets, dialogs and menus. */
+/* Labelled bar pinned to the top edge, below the safe area, while the
+   transport is down (design auth/Connection). Sits under sheets, dialogs and
+   menus. Its height is published as --connection-bar-height, which the app
+   shell reserves above its frame, so the bar never covers the top bar. */
 .root {
   position: fixed;
-  top: 0;
+  top: env(safe-area-inset-top, 0px);
   right: 0;
   left: 0;
   z-index: calc(var(--z-sheet) - 1);
@@ -10,8 +12,7 @@
   flex-wrap: wrap;
   align-items: center;
   gap: 4px 12px;
-  padding: max(6px, env(safe-area-inset-top))
-    max(16px, env(safe-area-inset-right)) 6px
+  padding: 6px max(16px, env(safe-area-inset-right)) 6px
     max(16px, env(safe-area-inset-left));
   border-bottom: 1px solid var(--line);
   font-family: var(--font-ui);

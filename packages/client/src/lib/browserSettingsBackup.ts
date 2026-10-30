@@ -32,6 +32,8 @@ export const BROWSER_SETTINGS_BACKUP_KEYS = [
   UI_KEYS.projectAppComposing,
   UI_KEYS.sessionRightPane,
   UI_KEYS.sessionRightPaneWidth,
+  UI_KEYS.sessionInspectorOpen,
+  UI_KEYS.sessionInspectorTab,
   UI_KEYS.pdfjsRenderer,
   UI_KEYS.transcriptMarginNavigation,
   UI_KEYS.escapeInterruptDisabled,

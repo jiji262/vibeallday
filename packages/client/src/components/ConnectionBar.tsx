@@ -8,7 +8,14 @@
  * Both states name the host, show when it last answered and offer Retry now.
  */
 
-import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import {
+  type RefObject,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from "react";
 import { useLocation } from "react-router-dom";
 import { useCurrentSourceRuntime } from "../contexts/SourceRuntimeContext";
 import { useActivityBusState } from "../hooks/useActivityBusState";
@@ -16,6 +23,9 @@ import { useI18n } from "../i18n";
 import type { SourceTransportStatusSnapshot } from "../lib/transport";
 import styles from "./ConnectionBar.module.css";
 import { Button } from "./garden/Button";
+
+/** Root custom property the app shell reads to keep its top bar clear. */
+const BAR_HEIGHT_PROPERTY = "--connection-bar-height";
 
 /** Routes where we don't show the connection bar */
 const LOGIN_ROUTES = ["/login", "/login/direct", "/login/relay"];
@@ -57,6 +67,30 @@ function useLostAt(connected: boolean): number | null {
     }
   }, [connected]);
   return lostAt;
+}
+
+/**
+ * Publish the mounted bar's height on the document root, so the shell can
+ * reserve that space instead of letting the bar cover its top bar.
+ */
+function usePublishedBarHeight(ref: RefObject<HTMLDivElement | null>) {
+  useLayoutEffect(() => {
+    const bar = ref.current;
+    if (!bar) return;
+    const root = document.documentElement;
+    const publish = () =>
+      root.style.setProperty(BAR_HEIGHT_PROPERTY, `${bar.offsetHeight}px`);
+    publish();
+    const observer =
+      typeof ResizeObserver === "undefined"
+        ? null
+        : new ResizeObserver(publish);
+    observer?.observe(bar);
+    return () => {
+      observer?.disconnect();
+      root.style.removeProperty(BAR_HEIGHT_PROPERTY);
+    };
+  }, [ref]);
 }
 
 function isLoginRoute(pathname: string): boolean {
@@ -103,6 +137,8 @@ function ConnectionBarContent({
   const { t } = useI18n();
   const { transport } = useCurrentSourceRuntime();
   const attempts = useReconnectAttempts();
+  const barRef = useRef<HTMLDivElement>(null);
+  usePublishedBarHeight(barRef);
   const connecting = status === "connecting";
   const title = connecting
     ? hostName
@@ -114,6 +150,7 @@ function ConnectionBarContent({
 
   return (
     <div
+      ref={barRef}
       className={`${styles.root} ${connecting ? styles.connecting : styles.disconnected}`}
       role="status"
       data-connection-status={status}

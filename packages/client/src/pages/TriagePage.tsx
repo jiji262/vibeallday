@@ -113,6 +113,10 @@ function TriageBody({
       />
     );
   }
+  // An incomplete catalog may still hold sessions that need the reader.
+  if (!current && overview.partial) {
+    return <LoadingState label={t("inboxLoading")} variant="cards" />;
+  }
   if (!current) return <TriageDone onExit={onExit} />;
   return (
     <>

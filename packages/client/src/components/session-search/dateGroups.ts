@@ -1,7 +1,6 @@
 /** Last-activity buckets the Sessions list heads its rows with. */
 export type DateGroup = "today" | "yesterday" | "week" | "earlier";
 
-const DAY_MS = 86_400_000;
 const DAYS_PER_WEEK = 7;
 /** `Date#getDay()` numbers Sunday 0; weeks here start on Monday. */
 const MONDAY = 1;
@@ -12,17 +11,21 @@ interface DateGroupBounds {
   week: number;
 }
 
-/** Local midnights that open today, yesterday and the current week. */
+/**
+ * Local midnights that open today, yesterday and the current week. Built from
+ * calendar days, not 24-hour steps, so a daylight-saving change in between
+ * does not move a bound by an hour.
+ */
 export function dateGroupBounds(now: number): DateGroupBounds {
-  const midnight = new Date(now);
-  midnight.setHours(0, 0, 0, 0);
-  const today = midnight.getTime();
-  const sinceMonday =
-    (midnight.getDay() - MONDAY + DAYS_PER_WEEK) % DAYS_PER_WEEK;
+  const date = new Date(now);
+  const year = date.getFullYear();
+  const month = date.getMonth();
+  const day = date.getDate();
+  const sinceMonday = (date.getDay() - MONDAY + DAYS_PER_WEEK) % DAYS_PER_WEEK;
   return {
-    today,
-    yesterday: today - DAY_MS,
-    week: today - sinceMonday * DAY_MS,
+    today: new Date(year, month, day).getTime(),
+    yesterday: new Date(year, month, day - 1).getTime(),
+    week: new Date(year, month, day - sinceMonday).getTime(),
   };
 }
 

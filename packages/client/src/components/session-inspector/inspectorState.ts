@@ -1,5 +1,6 @@
 import { useCallback, useSyncExternalStore } from "react";
 import { createLocalStorageValue } from "../../lib/localStorageValue";
+import { UI_KEYS } from "../../lib/storageKeys";
 
 export const INSPECTOR_TABS = [
   "changes",
@@ -10,8 +11,8 @@ export const INSPECTOR_TABS = [
 export type InspectorTab = (typeof INSPECTOR_TABS)[number];
 
 /** Browser-local inspector preferences; they never reach the server. */
-const OPEN_KEY = "vibeallday-session-inspector-open";
-const TAB_KEY = "vibeallday-session-inspector-tab";
+const OPEN_KEY = UI_KEYS.sessionInspectorOpen;
+const TAB_KEY = UI_KEYS.sessionInspectorTab;
 
 /** Closed until the reader opens it, so the transcript keeps its width. */
 const OPEN_BY_DEFAULT = false;

@@ -97,3 +97,31 @@ export function Segmented<T extends string>({
     </div>
   );
 }
+
+/**
+ * The segmented track over links (design .seg of anchors), for options that
+ * each open a page. Every link is its own tab stop and arrows do nothing, so
+ * moving focus never navigates; mark the current link `aria-current="page"`
+ * and draw each with `segmentedLinkClassName`.
+ */
+export function SegmentedNav({
+  label,
+  className,
+  children,
+}: {
+  label: string;
+  className?: string;
+  children: ReactNode;
+}) {
+  return (
+    <nav
+      aria-label={label}
+      className={className ? `${styles.seg} ${className}` : styles.seg}
+    >
+      {children}
+    </nav>
+  );
+}
+
+/** Class for a link drawn as a `SegmentedNav` option. */
+export const segmentedLinkClassName = styles.option;

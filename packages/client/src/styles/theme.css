@@ -624,7 +624,7 @@
   --text-primary: var(--ink);
   --text-secondary: var(--ink-2);
   --text-muted: var(--ink-3);
-  --text-dimmed: var(--ink-4);
+  --text-dimmed: var(--ink-3);
   --ink-on: var(--on-accent);
   --blame-author-color-lightness: 0.43;
   --blame-author-color-chroma: 0.12;

@@ -10,6 +10,8 @@ import type { SessionCollectionQueryDescriptor } from "../lib/clientSummaryColle
 export const SIDEBAR_SESSION_FEED_LIMIT = 50;
 
 export interface SidebarSessionFeeds {
+  /** False where no sidebar shows them; the queries then go stale. */
+  enabled: boolean;
   globalQuery: SessionCollectionQueryDescriptor;
   starredQuery: SessionCollectionQueryDescriptor;
   loading: boolean;
@@ -80,6 +82,7 @@ export function SidebarSessionFeedsProvider({
 
   const value = useMemo<SidebarSessionFeeds>(
     () => ({
+      enabled,
       globalQuery: globalFeed.query,
       starredQuery: starredFeed.query,
       loading: globalFeed.loading || starredFeed.loading,
@@ -93,6 +96,7 @@ export function SidebarSessionFeedsProvider({
       loadMoreCategorizedSessions: categorizedFeed.loadMore,
     }),
     [
+      enabled,
       sidebarCategoriesSupported,
       categorizedFeed.hasMore,
       categorizedFeed.loadMore,

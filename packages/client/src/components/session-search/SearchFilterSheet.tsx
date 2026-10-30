@@ -26,7 +26,11 @@ export interface FilterSheetProps {
   onClear: () => void;
   /** Sessions the current filters leave, for the footer button. */
   resultCount: number;
-  activeCount: number;
+  /**
+   * Something Clear would reset: a sheet filter, an activity filter or a
+   * status chip. Wider than the Filters badge, which counts sheet groups.
+   */
+  canClear: boolean;
   fields: SearchField[];
   onFields: (fields: SearchField[]) => void;
   /** False on servers without turn search: only the title field works. */
@@ -231,7 +235,7 @@ export function SearchFilterSheet(props: FilterSheetProps) {
           variant="secondary"
           size="lg"
           onClick={props.onClear}
-          disabled={props.activeCount === 0}
+          disabled={!props.canClear}
         >
           {t("globalSessionsClearFilters")}
         </Button>

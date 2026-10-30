@@ -68,4 +68,26 @@ describe("inspector plan", () => {
     rerender({ messages: [...first], active: false });
     expect(result.current).toBeNull();
   });
+
+  it("finds a plan added to the streaming message or to prepended history", () => {
+    const opening = text("start");
+    const { result, rerender } = renderHook(
+      ({ messages }) => useLatestPlan(messages, true),
+      { initialProps: { messages: [opening, text("streaming")] } },
+    );
+    expect(result.current).toBeNull();
+
+    // The last message is replaced in place as it streams in a plan.
+    rerender({ messages: [opening, todos("in_progress")] });
+    expect(result.current?.steps[1]?.state).toBe("in_progress");
+
+    // Ticks that only append text keep the plan found earlier.
+    rerender({ messages: [opening, todos("in_progress"), text("tick")] });
+    expect(result.current?.steps[1]?.state).toBe("in_progress");
+
+    // Older history arrives at the front: it is scanned again.
+    const older = [todos("completed"), opening, text("streaming")];
+    rerender({ messages: older });
+    expect(result.current?.steps[1]?.state).toBe("completed");
+  });
 });

@@ -44,7 +44,8 @@ const FAMILY_CLASS: Record<ProviderFamily, string | undefined> = {
 };
 
 interface ProviderMarkProps {
-  provider: ProviderName;
+  /** Unknown (unreported) providers get the neutral tile with no letter. */
+  provider?: ProviderName;
   /** `sm` 16px for inline badges, `md` 20px, `lg` 36px for detail headers. */
   size?: "sm" | "md" | "lg";
   className?: string;
@@ -60,10 +61,10 @@ export function ProviderMark({
   size = "md",
   className,
 }: ProviderMarkProps) {
-  const family = PROVIDER_FAMILY[provider];
+  const family = provider ? PROVIDER_FAMILY[provider] : undefined;
   const classes = [
     styles.mark,
-    FAMILY_CLASS[family],
+    family ? FAMILY_CLASS[family] : "",
     size === "sm" ? styles.sm : "",
     size === "lg" ? styles.lg : "",
     className,
@@ -73,7 +74,7 @@ export function ProviderMark({
   return (
     <span
       className={classes}
-      data-letter={FAMILY_LETTER[family]}
+      data-letter={family ? FAMILY_LETTER[family] : ""}
       data-provider-family={family}
       aria-hidden="true"
     />

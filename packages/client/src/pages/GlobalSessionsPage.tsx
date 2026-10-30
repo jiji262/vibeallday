@@ -668,13 +668,13 @@ function SessionSearchPage() {
     created: creationProvenanceAvailable ? created : [],
     statuses: filters,
   });
-  const narrowed =
-    !!query.trim() ||
+  const filtersNarrowed =
     activeFilterCount > 0 ||
     activity.length > 0 ||
     filters.some((status) =>
       (chipStatuses as readonly string[]).includes(status),
     );
+  const narrowed = !!query.trim() || filtersNarrowed;
   const clearFilters = (includeQuery: boolean) => {
     setParams((previous) => {
       const next = new URLSearchParams(previous);
@@ -1149,7 +1149,7 @@ function SessionSearchPage() {
           onClose={() => setFiltersOpen(false)}
           onClear={() => clearFilters(false)}
           resultCount={results.length}
-          activeCount={activeFilterCount}
+          canClear={filtersNarrowed}
           fields={effectiveFields}
           onFields={updateFields}
           supported={supported}

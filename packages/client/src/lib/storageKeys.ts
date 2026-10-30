@@ -42,6 +42,8 @@ export const UI_KEYS = {
   projectAppComposing: "vibeallday-project-app-composing-enabled",
   sessionRightPane: "vibeallday-session-right-pane-enabled",
   sessionRightPaneWidth: "vibeallday-session-right-pane-width",
+  sessionInspectorOpen: "vibeallday-session-inspector-open",
+  sessionInspectorTab: "vibeallday-session-inspector-tab",
   /** Followed by `:<projectId>`; "1" reloads a static App on every change. */
   projectAppAutoReload: "vibeallday-project-app-auto-reload",
   searchConcurrency: "vibeallday-search-concurrency",

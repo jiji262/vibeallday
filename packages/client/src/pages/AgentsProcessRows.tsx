@@ -117,7 +117,7 @@ export function ProcessRow({
     <Tr className={rowStyles.processRow}>
       <Td className={rowStyles.sessionCell}>
         <span className={rowStyles.identity}>
-          <ProviderMark provider={process.provider ?? "claude"} />
+          <ProviderMark provider={process.provider} />
           <span className={rowStyles.identityText}>
             <Link
               to={sessionHref(basePath, process.projectId, process.sessionId)}

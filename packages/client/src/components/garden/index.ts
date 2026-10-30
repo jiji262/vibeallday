@@ -40,7 +40,12 @@ export { Pill, type PillTone } from "./Pill";
 export { ProviderMark } from "./ProviderMark";
 export { ScopeTag, type SettingScope } from "./ScopeTag";
 export { SectionHeader, type SectionTone } from "./SectionHeader";
-export { Segmented, type SegmentedOption } from "./Segmented";
+export {
+  Segmented,
+  SegmentedNav,
+  type SegmentedOption,
+  segmentedLinkClassName,
+} from "./Segmented";
 export { Skeleton, SkeletonText } from "./Skeleton";
 export { Spinner, type SpinnerSize, type SpinnerTone } from "./Spinner";
 export { SplitButton } from "./SplitButton";

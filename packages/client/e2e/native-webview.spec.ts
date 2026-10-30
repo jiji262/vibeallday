@@ -122,6 +122,21 @@ for (const viewport of [
     await expect(
       page.locator('[data-connection-status="disconnected"]'),
     ).toBeVisible();
+    // The bar reserves its own height above the shell rather than covering
+    // the page's top bar.
+    const offlineBar = page.locator("[data-connection-status]");
+    const projectsTitle = page
+      .locator("header")
+      .getByText("Projects", { exact: true });
+    await expect
+      .poll(async () => {
+        const [bar, title] = await Promise.all([
+          offlineBar.boundingBox(),
+          projectsTitle.boundingBox(),
+        ]);
+        return bar && title ? title.y - (bar.y + bar.height) : -1;
+      })
+      .toBeGreaterThanOrEqual(0);
     const coldOut = mkdtempSync(
       join(tmpdir(), "vibeallday-native-offline-captures-"),
     );

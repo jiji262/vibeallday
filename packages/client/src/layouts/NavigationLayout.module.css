@@ -1,7 +1,10 @@
+/* While the connection bar is up, its published height is reserved above
+   the frame (the bar itself sits just below the safe area the frame pads). */
 .shell {
   display: flex;
   flex-direction: column;
   height: 100dvh;
+  padding-top: var(--connection-bar-height, 0px);
   overflow: hidden;
 }
 

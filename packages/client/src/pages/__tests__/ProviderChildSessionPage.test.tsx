@@ -119,14 +119,23 @@ describe("ProviderChildSessionPage", () => {
         within(header).getByRole("link", { name: "Fix the draft restore" }),
       ).toBeTruthy();
     });
-    const siblings = screen.getByRole("radiogroup", {
+    // Siblings are links: arrows move focus without opening another child.
+    const siblings = screen.getByRole("navigation", {
       name: "Subagents of the same parent session",
     });
     expect(
       within(siblings)
-        .getByRole("radio", { name: "Explore" })
-        .getAttribute("aria-checked"),
-    ).toBe("true");
+        .getByRole("link", { name: "Explore" })
+        .getAttribute("aria-current"),
+    ).toBe("page");
+    expect(
+      within(siblings).getByRole("link", { name: "reviewer" }),
+    ).toHaveProperty(
+      "href",
+      expect.stringContaining(
+        "/projects/proj-1/sessions/sess-1/agents/child-2",
+      ),
+    );
     // The composer is replaced by a read-only notice that leads back.
     expect(
       screen.getByText(

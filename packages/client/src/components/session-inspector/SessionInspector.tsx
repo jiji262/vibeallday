@@ -159,7 +159,8 @@ export function SessionInspectorToggle({
   const { t } = useI18n();
   return (
     <IconButton
-      label={t(pressed ? "sessionInspectorHide" : "sessionInspectorShow")}
+      label={t("sessionInspectorLabel")}
+      title={t(pressed ? "sessionInspectorHide" : "sessionInspectorShow")}
       aria-pressed={pressed}
       onClick={onClick}
       className={`${styles.toggle} ${className ?? ""}`}

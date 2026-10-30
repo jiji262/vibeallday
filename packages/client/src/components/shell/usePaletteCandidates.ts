@@ -1,8 +1,12 @@
 import { serverHasCapability } from "@vibeallday/shared";
 import { useMemo } from "react";
 import { useActingPrincipal } from "../../hooks/useActingPrincipal";
+import { useGlobalSessionsFeed } from "../../hooks/useGlobalSessionsFeed";
 import { useProjects } from "../../hooks/useProjects";
-import { useSidebarSessionFeeds } from "../../hooks/useSidebarSessionFeeds";
+import {
+  SIDEBAR_SESSION_FEED_LIMIT,
+  useSidebarSessionFeeds,
+} from "../../hooks/useSidebarSessionFeeds";
 import { useVersion } from "../../hooks/useVersion";
 import { type TranslationFn, useI18n } from "../../i18n";
 import { getSettingsCategories } from "../../i18n-settings";
@@ -54,9 +58,23 @@ function sessionLabel(record: SessionCollectionRecord, fallback: string) {
   return record.customTitle || record.title || record.fullTitle || fallback;
 }
 
+/**
+ * The sidebar's recent-sessions query. Where no sidebar runs its feeds
+ * (desktop Settings, a minimized or closed sidebar) the open palette runs the
+ * same feed itself, so its Recent group is not left empty or stale.
+ */
+function useRecentSessionQuery() {
+  const feeds = useSidebarSessionFeeds();
+  const own = useGlobalSessionsFeed({
+    enabled: !feeds.enabled,
+    limit: SIDEBAR_SESSION_FEED_LIMIT,
+    includeStats: false,
+  });
+  return feeds.enabled ? feeds.globalQuery : own.query;
+}
+
 function useRecentSessionItems(t: TranslationFn): PaletteItem[] {
-  const { globalQuery } = useSidebarSessionFeeds();
-  const records = useSessionCollectionQueryRecords(globalQuery);
+  const records = useSessionCollectionQueryRecords(useRecentSessionQuery());
   return useMemo(() => {
     const fallback = t("newSessionTitle");
     return records
