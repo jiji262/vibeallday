@@ -426,8 +426,11 @@
 }
 
 /* "Next topic when done" reads as the attention action: amber fill with its
-   paired ink, so the glyph keeps contrast in every skin. */
-.patientQueueAction:global(.send-button.patient-queue-action):not(:disabled) {
+   paired ink, so the glyph keeps contrast in every skin. The toolbar root in
+   the selector keeps it above the dock's accent send rule. Disabled, it takes
+   the shared send-button disabled look. */
+:global(.message-input-toolbar)
+.patientQueueAction:global(.send-button):not(:disabled) {
   background: var(--attn);
   color: var(--on-attn);
 }

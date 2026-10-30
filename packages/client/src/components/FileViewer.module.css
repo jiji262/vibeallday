@@ -164,7 +164,7 @@
   white-space: nowrap;
 }
 
-.provenanceRow > :global(.file-viewer-meta) {
+.provenanceRow > .meta {
   min-width: 0;
   overflow: hidden;
   color: var(--ink-3);
@@ -219,11 +219,11 @@
 }
 
 .viewer :global(.file-viewer-action.copied),
-.viewer :global(.file-viewer-action.file-viewer-new-session) {
+.viewer .newSession:global(.file-viewer-action) {
   color: var(--accent-ink);
 }
 
-.viewer :global(.file-viewer-action.file-viewer-new-session):hover {
+.viewer .newSession:global(.file-viewer-action):hover {
   background: var(--accent-soft);
   color: var(--accent-ink);
 }

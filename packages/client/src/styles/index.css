@@ -3309,11 +3309,6 @@ body.session-transcript-selection-active .reload-banner * {
   box-shadow: none;
 }
 
-.send-button.patient-queue-action {
-  background: var(--attn);
-  color: var(--on-attn);
-}
-
 .steer-now-toggle {
   display: inline-flex;
   box-sizing: border-box;

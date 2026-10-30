@@ -2087,7 +2087,7 @@ export const FileViewer = memo(function FileViewer({
                 uncommittedLabel={t("fileRevisionUncommitted" as never)}
               />
             )}
-            <span className="file-viewer-meta">
+            <span className={viewerStyles.meta}>
               {metadata ? formatFileSize(metadata.size) : ""}
               {!diffActive && metadata?.isText && content !== undefined && (
                 <>
@@ -2256,7 +2256,7 @@ export const FileViewer = memo(function FileViewer({
         {publicShareContext === null && (
           <button
             type="button"
-            className="file-viewer-action file-viewer-new-session"
+            className={`file-viewer-action ${viewerStyles.newSession}`}
             onClick={startNewSession}
             title={t("fileViewerNewSession" as never)}
           >

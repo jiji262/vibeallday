@@ -1794,7 +1794,6 @@ export function MessageInputToolbarView({
         className={(menu ? menuTierClass : inlineTierClass)(
           "topicShift",
           "send-button",
-          "patient-queue-action",
           toolbarModuleStyles.patientQueueAction,
         )}
         aria-label={t("toolbarTopicShiftLabel")}
