@@ -98,6 +98,8 @@ interface SessionListItemProps {
   // Feature toggles
   mode: "card" | "compact";
   searchPreviews?: ReactNode;
+  /** Card rows: content under the row, outside its link (inline actions). */
+  footer?: ReactNode;
   openMessageId?: string;
   showProjectName?: boolean;
   showTimestamp?: boolean;
@@ -251,6 +253,7 @@ export function SessionListItem({
   // Feature toggles
   mode,
   searchPreviews,
+  footer,
   openMessageId,
   showProjectName = false,
   showTimestamp = true,
@@ -673,6 +676,7 @@ export function SessionListItem({
     searchPreviews !== undefined && styles.searchRow,
     mode === "card" ? "session-list-item--card" : "session-list-item--compact",
     mode === "card" && searchPreviews === undefined && styles.card,
+    footer !== undefined && styles.withFooter,
     isCurrent && "current",
     hasUnread && "unread",
     isBtwAside && "btw-aside-session",
@@ -1168,6 +1172,7 @@ export function SessionListItem({
       {searchPreviews !== undefined && (
         <div className={styles.searchPreviews}>{searchPreviews}</div>
       )}
+      {footer !== undefined && <div className={styles.footer}>{footer}</div>}
       {compactTrailing && (
         <Link
           to={sessionHref}

@@ -1,15 +1,24 @@
+import { useState } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "../components/garden/Button";
 import { EmptyState } from "../components/garden/EmptyState";
 import { ErrorState } from "../components/garden/ErrorState";
 import { Kbd } from "../components/garden/Kbd";
 import { LoadingState } from "../components/garden/LoadingState";
+import type { DenyReasonControl } from "../components/needsYou/InlineApproval";
+import { inlineAsk } from "../components/needsYou/pendingInputModel";
+import { useArmed } from "../components/needsYou/useArmed";
+import {
+  type PendingInput,
+  usePendingInput,
+} from "../components/needsYou/usePendingInput";
 import { PageHeader } from "../components/PageHeader";
 import { PageIntro } from "../components/shell/PageIntro";
 import { pageWidthClass } from "../components/shell/pageWidth";
 import { TriageCard } from "../components/triage/TriageCard";
 import { TriageNext } from "../components/triage/TriageNext";
 import styles from "../components/triage/TriagePage.module.css";
+import { TriagePhoneBar } from "../components/triage/TriagePhoneBar";
 import { TriageProgress } from "../components/triage/TriageProgress";
 import { triageSessionHref } from "../components/triage/triageItem";
 import { useTriageQueue } from "../components/triage/useTriageQueue";
@@ -36,10 +45,13 @@ function useTriageNavigation(projectId: string | undefined) {
     inboxHref,
     restored: location.state,
     exit: () => navigate(inboxHref),
-    /** Keep progress on this history entry, then open the session. */
+    /**
+     * Keep progress on this history entry, then open the session with the
+     * way back, so its back link returns here with the same progress.
+     */
     open: (href: string, progress: unknown) => {
       navigate(here, { replace: true, state: { triage: progress } });
-      navigate(href, { state: { triageReturnTo: here } });
+      navigate(href, { state: { triageReturnTo: here, triage: progress } });
     },
   };
 }
@@ -59,7 +71,13 @@ function TriageDone({ onExit }: { onExit: () => void }) {
   );
 }
 
-function ShortcutHints({ canSkip }: { canSkip: boolean }) {
+function ShortcutHints({
+  canSkip,
+  canDecide,
+}: {
+  canSkip: boolean;
+  canDecide: boolean;
+}) {
   const { t } = useI18n();
   return (
     <div
@@ -67,6 +85,16 @@ function ShortcutHints({ canSkip }: { canSkip: boolean }) {
       role="group"
       aria-label={t("inboxTriageShortcutsLabel")}
     >
+      {canDecide && (
+        <>
+          <span>
+            <Kbd>A</Kbd> {t("inboxTriageKeyApprove")}
+          </span>
+          <span>
+            <Kbd>D</Kbd> {t("inboxTriageKeyDeny")}
+          </span>
+        </>
+      )}
       {canSkip && (
         <span>
           <Kbd>S</Kbd> {t("inboxTriageSkip")}
@@ -88,6 +116,7 @@ interface TriageBodyProps {
   hrefFor: (item: InboxItem) => string;
   onOpen: (item: InboxItem) => void;
   onExit: () => void;
+  decision: TriageDecision;
 }
 
 /** Loading, error, done, or the current card with the items after it. */
@@ -97,6 +126,7 @@ function TriageBody({
   hrefFor,
   onOpen,
   onExit,
+  decision,
 }: TriageBodyProps) {
   const { t } = useI18n();
   const [current, ...rest] = queue.order;
@@ -126,6 +156,9 @@ function TriageBody({
         onOpen={onOpen}
         onSkip={queue.skipCurrent}
         canSkip={rest.length > 0}
+        pending={decision.pending}
+        armed={decision.armed}
+        reason={decision.reason}
       />
       <TriageNext
         items={rest}
@@ -133,9 +166,43 @@ function TriageBody({
         hrefFor={hrefFor}
         onOpen={onOpen}
       />
-      <ShortcutHints canSkip={rest.length > 0} />
+      <ShortcutHints canSkip={rest.length > 0} canDecide={decision.canDecide} />
     </>
   );
+}
+
+interface TriageDecision {
+  pending: PendingInput;
+  armed: boolean;
+  reason: DenyReasonControl;
+  /** The current item is an approval answerable on the card. */
+  isApproval: boolean;
+  /** ...and it can be answered right now. */
+  canDecide: boolean;
+}
+
+/**
+ * The current item's pending request, shared by its card and the A / D
+ * keys. D opens the reason form for that request only, so a form left open
+ * never carries over to the next item.
+ */
+function useTriageDecision(current: InboxItem | undefined): TriageDecision {
+  const pending = usePendingInput(current);
+  const requestId = pending.request?.id;
+  const armed = useArmed(requestId);
+  const [reasonFor, setReasonFor] = useState<string | null>(null);
+  const isApproval = inlineAsk(pending.request).kind === "approval";
+  return {
+    pending,
+    armed,
+    reason: {
+      sessionId: current?.sessionId ?? "",
+      open: !!requestId && reasonFor === requestId,
+      onOpenChange: (open) => setReasonFor(open ? (requestId ?? null) : null),
+    },
+    isApproval,
+    canDecide: isApproval && armed && !pending.submitting,
+  };
 }
 
 function ExitButton({ onExit }: { onExit: () => void }) {
@@ -165,9 +232,15 @@ export function TriagePage() {
   const queue = useTriageQueue(overview.needsAttention, nav.restored);
   const hrefFor = (item: InboxItem) => triageSessionHref(nav.basePath, item);
   const open = (item: InboxItem) => nav.open(hrefFor(item), queue.progress);
+  const decision = useTriageDecision(queue.order[0]);
+  const deciding = decision.canDecide && !decision.reason.open;
   useTriageShortcuts({
     onSkip: queue.order.length > 1 ? queue.skipCurrent : undefined,
     onExit: nav.exit,
+    onApprove: deciding
+      ? () => void decision.pending.respond("approve")
+      : undefined,
+    onDeny: deciding ? () => decision.reason.onOpenChange(true) : undefined,
   });
   const title = t("inboxTriageTitle");
   return (
@@ -202,8 +275,18 @@ export function TriagePage() {
               hrefFor={hrefFor}
               onOpen={open}
               onExit={nav.exit}
+              decision={decision}
             />
           </div>
+          {queue.order[0] && !overview.loading && (
+            <TriagePhoneBar
+              pending={decision.pending}
+              armed={decision.armed}
+              reason={decision.reason}
+              approval={decision.isApproval}
+              onSkip={queue.order.length > 1 ? queue.skipCurrent : undefined}
+            />
+          )}
         </div>
       </main>
     </MainContent>

@@ -250,8 +250,9 @@ diffs) stay edge to edge on phones; ordinary prompts and forms pass
   The status blocks are in-page filter toggles; the filtered unread or queued
   section then offers **View all unread** (the complete filtered All view) or
   **Manage queue**. No large all-clear headline. Old pending asks stay
-  visible. **Triage** walks the needs-you sessions one at a time. Partial
-  catalog discovery is explicit. See [session workbench](session-workbench.md).
+  visible. **Triage** walks the needs-you sessions one at a time and answers
+  approvals and one-tap questions on the card, from a bottom decision bar on
+  phones. Partial catalog discovery is explicit. See [session workbench](session-workbench.md).
 - **Sessions / All**: sticky search field, quick chips (Unread, Needs you,
   Running; the last two set `activity`), a Filters button opening a sheet that
   also holds Starred and Archived, and existing bulk controls. Advanced

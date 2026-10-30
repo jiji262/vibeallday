@@ -1,0 +1,208 @@
+/* Inline approval and question bodies for Inbox and Triage cards (design
+   Inbox `.card.list article` and Triage `.ask`). */
+
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+  font-size: var(--fs-body);
+}
+
+.caption {
+  margin: 0;
+  color: var(--ink-2);
+  font-size: var(--fs-small);
+  overflow-wrap: anywhere;
+}
+
+/* The full command stays reachable: long ones scroll inside the block. */
+.code {
+  max-height: 9.6em;
+  margin: 0;
+  overflow: auto;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  background: var(--code-bg);
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-size: var(--fs-code);
+  line-height: 1.6;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.trailing {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-left: auto;
+}
+
+.kbd {
+  display: inline-flex;
+  margin-left: 6px;
+}
+
+.openLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  min-height: var(--btn-h-sm);
+  padding: 0 var(--space-2);
+  border-radius: var(--r-btn);
+  color: var(--ink-2);
+  font-size: var(--fs-small);
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.openLink:hover {
+  background: var(--surface-3);
+  color: var(--ink);
+}
+
+.openLink:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.question {
+  margin: 0;
+  color: var(--ink-2);
+  font-size: var(--fs-body);
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: var(--chip-h);
+  padding: 4px 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-chip);
+  background: var(--surface);
+  color: var(--ink-2);
+  font: inherit;
+  font-size: var(--fs-small);
+  font-weight: 500;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.chip:hover:not(:disabled) {
+  background: var(--surface-3);
+  color: var(--ink);
+}
+
+.chip:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.chip:disabled {
+  cursor: default;
+  opacity: 0.6;
+}
+
+.chipQuiet {
+  color: var(--ink-3);
+}
+
+.note {
+  margin: 0;
+  color: var(--ink-3);
+  font-size: var(--fs-small);
+}
+
+.reason {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  background: var(--surface-2);
+}
+
+.reasonLabel {
+  color: var(--ink);
+  font-size: var(--fs-small);
+  font-weight: 600;
+}
+
+.reasonInput {
+  min-height: 72px;
+  padding: 10px 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-md);
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  resize: vertical;
+}
+
+.reasonInput:focus-visible {
+  border-color: var(--accent);
+  outline: 2px solid var(--focus);
+  outline-offset: 0;
+}
+
+.reasonFoot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.reasonHint {
+  color: var(--ink-3);
+  font-family: var(--font-mono);
+  font-size: var(--fs-meta);
+}
+
+.reasonFoot > :first-child {
+  margin-right: auto;
+}
+
+@media (width < 768px) {
+  .code {
+    max-height: 7.2em;
+  }
+
+  .kbd,
+  .reasonHint {
+    display: none;
+  }
+
+  /* Touch rows: buttons share the line instead of hugging their labels. */
+  .actions > button {
+    flex: 1 1 auto;
+  }
+
+  .trailing {
+    margin-left: 0;
+  }
+
+  .phoneDocked {
+    display: none;
+  }
+}

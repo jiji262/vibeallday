@@ -1,4 +1,5 @@
 import { LAUNCH_SOURCES } from "@vibeallday/shared";
+import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
 import type { InboxItem } from "../../contexts/InboxContext";
 import { type MessageKey, useI18n } from "../../i18n";
@@ -6,6 +7,10 @@ import { getSessionDisplayTitle } from "../../utils";
 import { Card } from "../garden/Card";
 import { Count } from "../garden/Count";
 import { ChevronRightIcon } from "../garden/icons";
+import { hasInlineActions, NeedsYouActions } from "../needsYou/NeedsYouActions";
+import { projectPathOf } from "../needsYou/pendingInputModel";
+import { useArmed } from "../needsYou/useArmed";
+import { usePendingInput } from "../needsYou/usePendingInput";
 import { SessionListItem } from "../SessionListItem";
 import { InboxQueueItem } from "./InboxQueueItem";
 import styles from "./InboxSection.module.css";
@@ -44,10 +49,12 @@ function InboxRow({
   row,
   sectionKey,
   context,
+  footer,
 }: {
   row: InboxItem;
   sectionKey: InboxSectionModel["key"];
   context: InboxRowContext;
+  footer?: ReactNode;
 }) {
   const { t } = useI18n();
   const badgeKey = needsBadgeKey(row, sectionKey === "needsAttention");
@@ -69,6 +76,7 @@ function InboxRow({
       activity={row.activityInferredFromInboxTier ? undefined : row.activity}
       pendingInputType={row.pendingInputType}
       mode="card"
+      footer={footer}
       openNonHumanUserTurn
       showProjectName={!context.hideProjectName}
       showTimestamp
@@ -84,6 +92,35 @@ function InboxRow({
       hasProjectQueue={context.projectQueuedSessionIds.has(row.sessionId)}
       publicShareCreationReady={context.publicShareCreationReady}
       publicShareManagementAvailable={context.publicShareManagementAvailable}
+    />
+  );
+}
+
+/** A needs-you row answers its pending approval or question in place. */
+function NeedsYouRow({
+  row,
+  context,
+}: {
+  row: InboxItem;
+  context: InboxRowContext;
+}) {
+  const pending = usePendingInput(row);
+  const armed = useArmed(pending.request?.id);
+  const href = `${context.basePath}/projects/${row.projectId}/sessions/${row.sessionId}`;
+  const footer = hasInlineActions(pending) ? (
+    <NeedsYouActions
+      pending={pending}
+      armed={armed}
+      sessionHref={href}
+      projectPath={projectPathOf(row.projectId)}
+    />
+  ) : undefined;
+  return (
+    <InboxRow
+      row={row}
+      sectionKey="needsAttention"
+      context={context}
+      footer={footer}
     />
   );
 }
@@ -161,14 +198,18 @@ export function InboxSection({
                 basePath={context.basePath}
               />
             ))}
-            {model.items.map((row) => (
-              <InboxRow
-                key={row.sessionId}
-                row={row}
-                sectionKey={model.key}
-                context={context}
-              />
-            ))}
+            {model.items.map((row) =>
+              model.key === "needsAttention" ? (
+                <NeedsYouRow key={row.sessionId} row={row} context={context} />
+              ) : (
+                <InboxRow
+                  key={row.sessionId}
+                  row={row}
+                  sectionKey={model.key}
+                  context={context}
+                />
+              ),
+            )}
           </ul>
         </Card>
       )}

@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   mergeSeen,
   readTriageProgress,
+  readTriageReturn,
   skipItem,
   type TriageProgress,
   triageCounts,
@@ -58,5 +59,16 @@ describe("triage queue", () => {
       readTriageProgress({ triage: { seen: ["a", 1], skipped: "b" } }),
     ).toEqual({ seen: ["a"], skipped: [] });
     expect(readTriageProgress(null)).toEqual({ seen: [], skipped: [] });
+  });
+
+  it("returns to Triage only through an in-app path", () => {
+    const progress = { seen: ["a"], skipped: ["a"] };
+    expect(
+      readTriageReturn({ triageReturnTo: "/triage?x=1", triage: progress }),
+    ).toEqual({ to: "/triage?x=1", progress });
+    for (const to of ["//evil.test", "/\\evil.test", "https://evil.test", 3]) {
+      expect(readTriageReturn({ triageReturnTo: to })).toBeNull();
+    }
+    expect(readTriageReturn(undefined)).toBeNull();
   });
 });

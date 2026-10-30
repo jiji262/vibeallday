@@ -46,3 +46,50 @@ describe("useTriageShortcuts", () => {
     expect(onExit).toHaveBeenCalledTimes(1);
   });
 });
+
+describe("useTriageShortcuts approve and deny", () => {
+  afterEach(cleanup);
+
+  it("answers once per key press and never from a held key", () => {
+    const onApprove = vi.fn();
+    const onDeny = vi.fn();
+    render(
+      <ApproveHarness onApprove={onApprove} onDeny={onDeny} onExit={vi.fn()} />,
+    );
+
+    fireEvent.keyDown(screen.getByLabelText("reason"), { key: "a" });
+    fireEvent.keyDown(screen.getByLabelText("reason"), { key: "d" });
+    expect(onApprove).not.toHaveBeenCalled();
+    expect(onDeny).not.toHaveBeenCalled();
+
+    fireEvent.keyDown(document.body, { key: "a" });
+    fireEvent.keyDown(document.body, { key: "a", repeat: true });
+    fireEvent.keyDown(document.body, { key: "a", ctrlKey: true });
+    fireEvent.keyDown(document.body, { key: "D" });
+    fireEvent.keyDown(document.body, { key: "d", repeat: true });
+    expect(onApprove).toHaveBeenCalledTimes(1);
+    expect(onDeny).toHaveBeenCalledTimes(1);
+  });
+
+  it("leaves A and D alone while nothing can be answered", () => {
+    const onExit = vi.fn();
+    render(<ApproveHarness onExit={onExit} />);
+    const event = new KeyboardEvent("keydown", {
+      key: "a",
+      bubbles: true,
+      cancelable: true,
+    });
+    document.body.dispatchEvent(event);
+    expect(event.defaultPrevented).toBe(false);
+    expect(onExit).not.toHaveBeenCalled();
+  });
+});
+
+function ApproveHarness(props: {
+  onApprove?: () => void;
+  onDeny?: () => void;
+  onExit: () => void;
+}) {
+  useTriageShortcuts(props);
+  return <input aria-label="reason" />;
+}

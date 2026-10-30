@@ -27,12 +27,27 @@
 }
 
 .age {
+  display: inline-flex;
   flex: none;
+  gap: 6px;
   margin-left: auto;
   color: var(--ink-3);
   font-family: var(--font-mono);
   font-size: var(--fs-meta);
   font-weight: 400;
+}
+
+/* "Bash · 2m": the tool waiting, then how long it has waited. */
+.tool {
+  color: var(--ink-2);
+  font-weight: 600;
+}
+
+.tool::after {
+  margin-left: 6px;
+  color: var(--ink-3);
+  font-weight: 400;
+  content: "·";
 }
 
 .body {
@@ -42,8 +57,15 @@
   padding: 22px 24px 24px;
 }
 
+.titleRow {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+}
+
 .titleBlock {
   display: flex;
+  flex: 1;
   flex-direction: column;
   gap: 6px;
   min-width: 0;
@@ -109,8 +131,14 @@
     flex: 1 1 0;
   }
 
+  /* The page bar carries Skip on phones. */
   .skip {
-    margin-left: 0;
+    display: none;
+  }
+
+  /* The title is the phone's way into the session. */
+  .titleOpen {
+    display: none;
   }
 
   .hint {

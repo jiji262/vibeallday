@@ -1,15 +1,20 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { useRemoteBasePath } from "../hooks/useRemoteBasePath";
 import { useI18n } from "../i18n";
 import { useNavigationLayout } from "../layouts/NavigationLayout";
 import { SidebarToggleIcon } from "./SidebarLauncher";
+import { readTriageReturn } from "./triage/triageQueue";
 import styles from "./SessionNavigationControl.module.css";
 
-/** Phone details return to their list; narrow desktop windows keep the drawer. */
+/**
+ * Phone details return to their list, or to Triage with its progress when
+ * Triage opened them; narrow desktop windows keep the drawer.
+ */
 export function SessionNavigationControl({ projectId }: { projectId: string }) {
   const { tabBarNavigation, openSidebar } = useNavigationLayout();
   const basePath = useRemoteBasePath();
   const { t } = useI18n();
+  const triage = readTriageReturn(useLocation().state);
   if (!tabBarNavigation) {
     return (
       <button
@@ -23,12 +28,17 @@ export function SessionNavigationControl({ projectId }: { projectId: string }) {
       </button>
     );
   }
+  const label = triage ? t("sessionBackToTriage") : t("sessionBackToList");
   return (
     <Link
       className={`sidebar-toggle ${styles.back}`}
-      to={`${basePath}/sessions?${new URLSearchParams({ project: projectId })}`}
-      title={t("sessionBackToList")}
-      aria-label={t("sessionBackToList")}
+      to={
+        triage?.to ??
+        `${basePath}/sessions?${new URLSearchParams({ project: projectId })}`
+      }
+      state={triage ? { triage: triage.progress } : undefined}
+      title={label}
+      aria-label={label}
     >
       <svg
         width="20"

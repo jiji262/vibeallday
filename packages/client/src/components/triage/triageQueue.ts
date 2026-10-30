@@ -74,6 +74,26 @@ export function readTriageProgress(state: unknown): TriageProgress {
   };
 }
 
+/** Where a session opened from Triage goes back to, with that progress. */
+export interface TriageReturn {
+  to: string;
+  progress: TriageProgress;
+}
+
+/** One leading slash and no backslash: never `//host` or `/\host`. */
+const IN_APP_PATH = /^\/(?!\/)[^\\]*$/;
+
+/**
+ * The Triage page puts its own path and progress in the state of the
+ * session entry it opens; anything else is not a way back.
+ */
+export function readTriageReturn(state: unknown): TriageReturn | null {
+  if (!state || typeof state !== "object") return null;
+  const to = (state as { triageReturnTo?: unknown }).triageReturnTo;
+  if (typeof to !== "string" || !IN_APP_PATH.test(to)) return null;
+  return { to, progress: readTriageProgress(state) };
+}
+
 function stringList(value: unknown): string[] {
   return Array.isArray(value)
     ? value.filter((item): item is string => typeof item === "string")

@@ -12,7 +12,8 @@ URLs remain valid, and the application landing route remains `/inbox`.
 
 Mobile has Sessions, New, Projects and More in a tab bar that appears only on
 the root pages `/inbox`, `/sessions`, `/projects` and `/more`. Session details
-have no tab bar; they retain the project-specific All back link and existing
+have no tab bar; they retain the project-specific All back link (Back to
+triage, with its progress, for a session opened from Triage) and existing
 recent-session switcher, and keep the shared keyboard/safe-area behavior.
 Hiding the bar for the keyboard never changes the header's navigation mode.
 
@@ -35,6 +36,17 @@ contains a long unbroken URL. Titles retain their two-line truncation.
 The summary tiles above the sections (Needs you, Running, Unread, and Queued
 where the server has a Project Queue) are in-page filter toggles: selecting one
 narrows the inbox to that group and selecting it again clears the filter.
+
+A Needs you row answers a simple pending request in place, through the same
+pending-input endpoint as the session panel. A tool approval offers Approve
+once and Deny, plus Allow edits for this session for edit tools only (the
+panel's accept-edits response); the full shell command is shown with hidden
+characters made visible, and the buttons keep the panel's click-protection
+delay. One plain single-choice question offers its options. Plan approvals,
+several questions, multi-select and secret questions open the session.
+Triage adds **A** (approve once) and **D** (deny with a reason, sent with
+Mod+Enter); held, modified and IME keys and keys typed in fields never act.
+On phones Triage's decision buttons sit in a bottom bar.
 
 Unread is independent of these sections. Its always-visible tile counts all
 loaded, accessible non-archived records, including old and hidden-automation

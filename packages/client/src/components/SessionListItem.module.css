@@ -172,6 +172,24 @@
   white-space: nowrap;
 }
 
+/* Inline actions under a card row (Inbox needs-you approvals and questions)
+   start at the title's edge: status column inset, dot, row gap, link inset. */
+.withFooter:global(.session-list-item) {
+  flex-wrap: wrap;
+  row-gap: 0;
+}
+
+.withFooter:global(.session-list-item--card) :global(.session-list-item__link) {
+  padding-bottom: var(--space-2);
+}
+
+.footer {
+  flex-basis: 100%;
+  min-width: 0;
+  padding: 0 var(--space-5) var(--space-4)
+    calc(var(--space-5) + 8px + var(--space-2) + var(--space-1));
+}
+
 /* Card rows (design .ses-row): a leading status column, then the link. The
    row's flex gap plus the link's small start inset make the design's 12px. */
 .stateDot {
@@ -261,6 +279,16 @@
 
   .card:global(.session-list-item--card) > .questions {
     padding-inline-end: var(--space-4);
+  }
+
+  /* Phones give inline actions the card's full width. */
+  .withFooter:global(.session-list-item--card)
+  :global(.session-list-item__link) {
+    padding-bottom: var(--space-2);
+  }
+
+  .footer {
+    padding: 0 var(--space-4) var(--space-4);
   }
 }
 
