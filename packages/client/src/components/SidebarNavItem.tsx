@@ -10,7 +10,8 @@ export const SIDEBAR_ICON_SIZE = 18;
 
 /**
  * Sidebar-only glyphs. Destination icons come from `garden/icons` through
- * `sidebar/shellDestinations`; the new-session mark keeps its filled disc.
+ * `sidebar/shellDestinations`. The new-session mark is a plus in the primary
+ * button's ink; its disc stays in the markup but is unfilled.
  */
 export const SidebarIcons = {
   newSession: (
@@ -21,22 +22,22 @@ export const SidebarIcons = {
       viewBox="0 0 24 24"
       aria-hidden="true"
     >
-      <circle cx="12" cy="12" r="12" fill="var(--indigo)" />
+      <circle cx="12" cy="12" r="12" fill="none" />
       <line
         x1="12"
-        y1="7"
+        y1="5"
         x2="12"
-        y2="17"
-        stroke="var(--ink-on)"
+        y2="19"
+        stroke="currentColor"
         strokeWidth="2"
         strokeLinecap="round"
       />
       <line
-        x1="7"
+        x1="5"
         y1="12"
-        x2="17"
+        x2="19"
         y2="12"
-        stroke="var(--ink-on)"
+        stroke="currentColor"
         strokeWidth="2"
         strokeLinecap="round"
       />
@@ -66,6 +67,8 @@ export interface SidebarNavItemProps {
   title?: string;
   /** Whether this item has an unsent draft */
   hasDraft?: boolean;
+  /** Accessible name of the draft dot. */
+  draftLabel?: string;
   /** Show pulsing activity indicator (e.g., for active agents) */
   hasActivityIndicator?: boolean;
   /** Base path prefix for relay mode (e.g., "/remote/my-server") */
@@ -127,6 +130,7 @@ export function SidebarNavItem({
   onClick,
   title,
   hasDraft,
+  draftLabel,
   hasActivityIndicator,
   basePath = "",
   activePaths = [],
@@ -153,7 +157,14 @@ export function SidebarNavItem({
     >
       <span className={styles.icon}>{icon}</span>
       <span className={`sidebar-nav-text ${styles.text}`}>{label}</span>
-      {hasDraft && <span className="session-draft-badge">Draft</span>}
+      {hasDraft && (
+        <span
+          className={styles.draftDot}
+          role="img"
+          aria-label={draftLabel}
+          title={draftLabel}
+        />
+      )}
       {hasActivityIndicator && <ThinkingIndicator />}
       {tag ? (
         <Tag tone="indigo" className={styles.tag}>

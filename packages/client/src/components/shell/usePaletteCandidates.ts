@@ -9,38 +9,29 @@ import { getSettingsCategories } from "../../i18n-settings";
 import type { SessionCollectionRecord } from "../../lib/clientSummaryCollections";
 import { useSessionCollectionQueryRecords } from "../../lib/clientSummaryStore";
 import { limitedUserMaySeeSettingsCategory } from "../../lib/limitedUserSettings";
-import { FolderIcon, ListIcon, PlusIcon, SettingsIcon } from "../garden/icons";
+import { FolderIcon, ListIcon, SettingsIcon } from "../garden/icons";
 import { pathTail, recentProjects } from "../sidebar/projectSwitcherModel";
 import { useShellDestinations } from "../sidebar/shellDestinations";
 import type { PaletteItem } from "./paletteData";
+import { usePaletteActions } from "./usePaletteActions";
 
 /** Recent sessions considered before the query filters and caps them. */
 const RECENT_SESSION_POOL = 40;
 
 function useJumpItems(t: TranslationFn): PaletteItem[] {
   const destinations = useShellDestinations();
-  return useMemo(() => {
-    const items: PaletteItem[] = [
-      {
-        id: "jump:new-session",
-        group: "jump",
-        label: t("sidebarNewSession"),
-        to: "/new-session",
-        Icon: PlusIcon,
-      },
-    ];
-    for (const destination of destinations) {
-      items.push({
+  return useMemo(
+    () =>
+      destinations.map((destination) => ({
         id: `jump:${destination.key}`,
-        group: "jump",
+        group: "jump" as const,
         label: t(destination.labelKey),
         hint: destination.hintKey ? t(destination.hintKey) : undefined,
         to: destination.to,
         Icon: destination.Icon,
-      });
-    }
-    return items;
-  }, [destinations, t]);
+      })),
+    [destinations, t],
+  );
 }
 
 function useProjectItems(): PaletteItem[] {
@@ -112,15 +103,19 @@ function useSettingsItems(t: TranslationFn): PaletteItem[] {
   );
 }
 
-/** Palette rows from data the shell has already loaded; no new requests. */
+/**
+ * Palette rows from data the shell has already loaded, then the commands;
+ * no new requests.
+ */
 export function usePaletteCandidates(): PaletteItem[] {
   const { t } = useI18n();
   const jump = useJumpItems(t);
   const projects = useProjectItems();
   const recent = useRecentSessionItems(t);
   const settings = useSettingsItems(t);
+  const actions = usePaletteActions();
   return useMemo(
-    () => [...jump, ...projects, ...recent, ...settings],
-    [jump, projects, recent, settings],
+    () => [...jump, ...projects, ...recent, ...settings, ...actions],
+    [actions, jump, projects, recent, settings],
   );
 }

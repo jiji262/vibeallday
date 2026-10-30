@@ -1,18 +1,24 @@
 import type { MouseEvent } from "react";
-import { Badge, type BadgeTone } from "../components/garden/Badge";
+import { Tag } from "../components/garden/Badge";
+import { Button, IconButton } from "../components/garden/Button";
 import { ChevronRightIcon, XIcon } from "../components/garden/icons";
-import { Spinner } from "../components/garden/Spinner";
+import {
+  Status,
+  StatusDot,
+  type StatusState,
+} from "../components/garden/StatusDot";
 import { useI18n } from "../i18n";
 import type { SavedHost } from "../lib/hostStorage";
 import styles from "./HostPickerPage.module.css";
 
 export type HostStatus = "online" | "offline" | "checking" | "unknown";
 
-const STATUS_TONE: Record<HostStatus, BadgeTone> = {
-  online: "mint",
-  offline: "rose",
-  checking: "sand",
-  unknown: "grey",
+/** Status = colour + shape: online ok, offline err, checking run, unknown idle. */
+const STATUS_STATE: Record<HostStatus, StatusState> = {
+  online: "ok",
+  offline: "err",
+  checking: "run",
+  unknown: "idle",
 };
 
 const STATUS_LABEL_KEY = {
@@ -22,64 +28,82 @@ const STATUS_LABEL_KEY = {
   unknown: "hostPickerStatusUnknown",
 } as const satisfies Record<HostStatus, string>;
 
+const MODE_LABEL_KEY = {
+  relay: "hostPickerModeRelay",
+  direct: "hostPickerModeDirect",
+} as const satisfies Record<SavedHost["mode"], string>;
+
 const ICON_SIZE = 16;
 
 interface HostRowProps {
   host: SavedHost;
   status: HostStatus;
+  current: boolean;
   connecting: boolean;
   lastConnected: string;
   onConnect: () => void;
   onRemove: (event: MouseEvent) => void;
 }
 
-/** One saved host: tap the row to connect, the end button removes it. */
+function hostInitial(name: string): string {
+  return name.trim().charAt(0).toUpperCase();
+}
+
+/** One saved host: avatar with state, name, meta, Connect and remove. */
 export function HostRow({
   host,
   status,
+  current,
   connecting,
   lastConnected,
   onConnect,
   onRemove,
 }: HostRowProps) {
   const { t } = useI18n();
-  const statusLabel = t(STATUS_LABEL_KEY[status]);
-  const meta = [host.mode, lastConnected].filter(Boolean);
+  const state = STATUS_STATE[status];
+  const meta = [
+    t(MODE_LABEL_KEY[host.mode]),
+    lastConnected ? t("hostPickerLastSeen", { time: lastConnected }) : "",
+  ].filter(Boolean);
   return (
     <li className={`host-picker-item ${styles.host}`}>
-      <button
-        type="button"
-        className={styles.hostMain}
+      <span
+        className={
+          current ? `${styles.avatar} ${styles.avatarOn}` : styles.avatar
+        }
+        aria-hidden="true"
+      >
+        {hostInitial(host.displayName)}
+        <StatusDot state={state} className={styles.avatarDot} />
+      </span>
+      <span className={styles.hostText}>
+        <span className={styles.nameRow}>
+          <span className={styles.hostName}>{host.displayName}</span>
+          {current ? <Tag tone="accent">{t("hostPickerCurrent")}</Tag> : null}
+        </span>
+        <span className={styles.hostMeta}>{meta.join(" · ")}</span>
+      </span>
+      <Status state={state} className={styles.hostStatus}>
+        {t(STATUS_LABEL_KEY[status])}
+      </Status>
+      <Button
+        size="sm"
+        variant={current ? "primary" : "secondary"}
         onClick={onConnect}
-        disabled={connecting}
+        loading={connecting}
         aria-busy={connecting}
+        aria-label={t("hostPickerConnectHost", { host: host.displayName })}
         data-testid={`host-item-${host.id}`}
       >
-        <span className={styles.hostText}>
-          <span className={styles.hostName}>{host.displayName}</span>
-          <span className={styles.hostMeta}>{meta.join(" · ")}</span>
-        </span>
-        {connecting ? (
-          <Spinner size={16} />
-        ) : (
-          <Badge
-            tone={STATUS_TONE[status]}
-            dot={status === "checking" ? "pulse" : true}
-          >
-            {statusLabel}
-          </Badge>
-        )}
-      </button>
-      <button
-        type="button"
-        className={styles.remove}
+        {t("hostPickerConnect")}
+      </Button>
+      <IconButton
+        label={t("hostPickerRemoveHost")}
         onClick={onRemove}
-        title={t("hostPickerRemoveHost")}
-        aria-label={t("hostPickerRemoveHost")}
         data-testid={`delete-host-${host.id}`}
       >
         <XIcon size={ICON_SIZE} />
-      </button>
+      </IconButton>
     </li>
   );
 }

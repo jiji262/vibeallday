@@ -21,6 +21,7 @@ import {
   type ReactNode,
   Suspense,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from "react";
@@ -65,6 +66,7 @@ import { useVersion } from "./hooks/useVersion";
 import { useClientSummarySourceKey } from "./lib/clientSummaryStore";
 import { initResumeDebugger } from "./lib/resumeDebugger";
 import { initClientLogCollection } from "./lib/diagnostics";
+import { loadSavedHosts } from "./lib/hostStorage";
 import {
   getRelayCanonicalRedirectTarget,
   getSafeRemoteReturnTarget,
@@ -362,13 +364,25 @@ export function ConnectionGate() {
  * Inner component that runs hooks requiring InboxContext.
  * Must be rendered inside InboxProvider.
  */
+/** Name of the host the client is reaching, for the connection bar. */
+function useConnectionHostName(): string | null {
+  const { currentHostId, currentRelayUsername } = useRemoteConnection();
+  return useMemo(() => {
+    const saved = currentHostId
+      ? loadSavedHosts().hosts.find((host) => host.id === currentHostId)
+      : undefined;
+    return saved?.displayName ?? currentRelayUsername ?? null;
+  }, [currentHostId, currentRelayUsername]);
+}
+
 function RemoteAppInner({ children }: Props) {
   const location = useLocation();
   const isSessionDetailRoute = /\/sessions\/[^/]+/.test(location.pathname);
+  const hostName = useConnectionHostName();
 
   return (
     <>
-      <ConnectionBar />
+      <ConnectionBar hostName={hostName} />
       {!isSessionDetailRoute && <ClientLogRecordingBadge />}
       {children}
     </>

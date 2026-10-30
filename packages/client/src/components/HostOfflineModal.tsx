@@ -2,7 +2,8 @@
  * HostOfflineModal - Shows when auto-resume fails because host is unreachable.
  *
  * Displays a user-friendly error when the remote host cannot be reached during
- * session resumption, with options to retry or go to the login page.
+ * session resumption (design auth/Connection): the reason, what the client
+ * knows about the host, and retry, switch host or go to the login page.
  */
 
 import {
@@ -13,6 +14,7 @@ import type {
   AutoResumeError,
   AutoResumeErrorReason,
 } from "../contexts/RemoteConnectionContext";
+import { useNavigate } from "react-router-dom";
 import { useI18n } from "../i18n";
 import { AuthShell } from "./auth/AuthShell";
 import { Button } from "./garden/Button";
@@ -96,6 +98,42 @@ function getErrorMessage(error: AutoResumeError, t: Translate): string {
   }
 }
 
+function getHint(error: AutoResumeError, t: Translate): string {
+  switch (error.reason) {
+    case "auth_failed":
+      return t("hostOfflineHintResumeRejected");
+    case "resume_incompatible":
+      return t("hostOfflineHintResumeIncompatible");
+    case "resume_verification":
+      return t("hostOfflineHintResumeVerification");
+    default:
+      return error.mode === "relay"
+        ? t("hostOfflineHintRelay")
+        : t("hostOfflineHintDirect");
+  }
+}
+
+/** Host facts the client already holds: server name and relay URL. */
+function HostFacts({ error, t }: { error: AutoResumeError; t: Translate }) {
+  if (!error.relayUsername && !error.serverUrl) return null;
+  return (
+    <dl className={styles.facts}>
+      {error.relayUsername ? (
+        <>
+          <dt>{t("relayLoginServerName")}</dt>
+          <dd>{error.relayUsername}</dd>
+        </>
+      ) : null}
+      {error.serverUrl ? (
+        <>
+          <dt>{t("relayLoginCustomRelayUrl")}</dt>
+          <dd>{error.serverUrl}</dd>
+        </>
+      ) : null}
+    </dl>
+  );
+}
+
 export function HostOfflineModal({
   error,
   onDismiss,
@@ -104,8 +142,12 @@ export function HostOfflineModal({
   standalone = false,
 }: HostOfflineModalProps) {
   const { t } = useI18n();
+  const navigate = useNavigate();
   const title = getErrorTitle(error.reason, t);
   const message = getErrorMessage(error, t);
+  const canRetry = canRetryResume(error.reason);
+  const showDetail =
+    requiresResumeLogin(error.reason) || error.reason === "resume_verification";
 
   return (
     <>
@@ -115,43 +157,25 @@ export function HostOfflineModal({
       <Modal title={title} onClose={onDismiss} variant="dialog">
         <div className={styles.content}>
           <p className={styles.message}>{message}</p>
-
-          {(requiresResumeLogin(error.reason) ||
-            error.reason === "resume_verification") && (
-            <p className={styles.detail}>{error.message}</p>
-          )}
-
-          {error.relayUsername && (
-            <p className={styles.detail}>
-              <strong>{t("relayLoginServerName")}:</strong>{" "}
-              {error.relayUsername}
-            </p>
-          )}
-
-          {error.serverUrl && (
-            <p className={styles.detail}>
-              <strong>{t("relayLoginCustomRelayUrl")}:</strong>{" "}
-              {error.serverUrl}
-            </p>
-          )}
-
-          <p className={styles.hint}>
-            {error.reason === "auth_failed"
-              ? t("hostOfflineHintResumeRejected")
-              : error.reason === "resume_incompatible"
-                ? t("hostOfflineHintResumeIncompatible")
-                : error.reason === "resume_verification"
-                  ? t("hostOfflineHintResumeVerification")
-                  : error.mode === "relay"
-                    ? t("hostOfflineHintRelay")
-                    : t("hostOfflineHintDirect")}
-          </p>
+          {showDetail && <p className={styles.detail}>{error.message}</p>}
+          <HostFacts error={error} t={t} />
+          <p className={styles.hint}>{getHint(error, t)}</p>
 
           <div className={styles.actions}>
-            <Button variant="secondary" onClick={onGoToLogin}>
+            <Button
+              variant={canRetry ? "ghost" : "primary"}
+              onClick={onGoToLogin}
+            >
               {t("hostOfflineGoToLogin")}
             </Button>
-            {canRetryResume(error.reason) && (
+            <Button
+              variant="secondary"
+              className={styles.switchHost}
+              onClick={() => navigate("/login")}
+            >
+              {t("hostOfflineSwitchHost")}
+            </Button>
+            {canRetry && (
               <Button variant="primary" onClick={onRetry}>
                 {t("hostOfflineRetry")}
               </Button>

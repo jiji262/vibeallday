@@ -1,57 +1,63 @@
 import type { InputHTMLAttributes, ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { useI18n } from "../../i18n";
+import { CopyChip } from "../garden/CopyChip";
 import { ChevronLeftIcon } from "../garden/icons";
 import { Spinner } from "../garden/Spinner";
-import { VibeAllDayGlyph } from "../VibeAllDayLogo";
+import { AuthBrandColumn } from "./AuthBrandColumn";
 import styles from "./AuthShell.module.css";
 
-const LOGO_SIZE = 40;
 const BACK_ICON_SIZE = 16;
 
 interface AuthShellProps {
-  /** Page title, drawn in Fraunces under the logo tile. */
+  /** Card title: the page's only h1. */
   title: string;
   subtitle?: string;
   /** A quiet "back" link above the logo. */
   back?: { to: string; label?: string };
-  /** One quiet line of guidance under the form. */
+  /** Quiet guidance under the form, after a divider. */
   footer?: ReactNode;
+  /** Controls drawn under the title, before the page's form. */
+  controls?: ReactNode;
   /** Sit near the top instead of the middle, for a sheet that opens over it. */
   top?: boolean;
   children?: ReactNode;
 }
 
 /**
- * The paper shell shared by sign-in, host picker and reconnect screens: one
- * centred card with the logo tile, a serif title, then the page's own form.
+ * The shell shared by sign-in, host picker and reconnect screens: a brand
+ * column beside one form card, stacking into a single column when narrow.
  */
 export function AuthShell({
   title,
   subtitle,
   back,
   footer,
+  controls,
   top = false,
   children,
 }: AuthShellProps) {
   const { t } = useI18n();
   return (
     <div className={top ? `${styles.page} ${styles.top}` : styles.page}>
-      <main className={styles.card}>
-        {back ? (
-          <Link to={back.to} className={styles.back}>
-            <ChevronLeftIcon size={BACK_ICON_SIZE} />
-            {back.label ?? t("actionBack")}
-          </Link>
-        ) : null}
-        <div className={styles.brand}>
-          <VibeAllDayGlyph size={LOGO_SIZE} className={styles.logo} />
-          <h1 className={styles.title}>{title}</h1>
-          {subtitle ? <p className={styles.subtitle}>{subtitle}</p> : null}
-        </div>
-        {children}
-        {footer ? <p className={styles.footer}>{footer}</p> : null}
-      </main>
+      <div className={styles.layout}>
+        <AuthBrandColumn />
+        <main className={styles.card}>
+          {back ? (
+            <Link to={back.to} className={styles.back}>
+              <ChevronLeftIcon size={BACK_ICON_SIZE} />
+              {back.label ?? t("actionBack")}
+            </Link>
+          ) : null}
+          <div className={styles.heading}>
+            <h1 className={styles.title}>{title}</h1>
+            {subtitle ? <p className={styles.subtitle}>{subtitle}</p> : null}
+          </div>
+          {controls}
+          {children}
+          {footer ? <div className={styles.footer}>{footer}</div> : null}
+        </main>
+      </div>
     </div>
   );
 }
@@ -188,5 +194,22 @@ export function AuthLinkButton({
     <button type="button" className={styles.linkButton} {...rest}>
       {children}
     </button>
+  );
+}
+
+/** A shell command the user runs on the host, with a copy button. */
+export function AuthCommand({
+  command,
+  copyLabel,
+}: {
+  command: string;
+  copyLabel: string;
+}) {
+  const { t } = useI18n();
+  return (
+    <div className={styles.command}>
+      <code className={styles.commandText}>{command}</code>
+      <CopyChip value={command} label={copyLabel} copiedLabel={t("copied")} />
+    </div>
   );
 }

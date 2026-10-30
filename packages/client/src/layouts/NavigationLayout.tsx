@@ -13,6 +13,13 @@ import { CommandPaletteHost } from "../components/shell/CommandPaletteHost";
 import { ProviderHostDegradedBanner } from "../components/ProviderHostDegradedBanner";
 import styles from "./NavigationLayout.module.css";
 import { Sidebar, SidebarToggleIcon } from "../components/Sidebar";
+import {
+  isSessionDetailPathname,
+  isSettingsPathname,
+  isTabBarRootPathname,
+} from "../components/sidebar/shellRoutes";
+import { ChevronLeftIcon } from "../components/garden/icons";
+import { useRemoteBasePath } from "../hooks/useRemoteBasePath";
 import { GlossaryProjectProvider } from "../contexts/GlossaryContext";
 import { hasCoarsePointer } from "../lib/deviceDetection";
 import { MOBILE_KEYBOARD_OPEN_VIEWPORT_RATIO } from "../lib/mobileKeyboardViewport";
@@ -45,11 +52,15 @@ export interface NavigationLayoutContext {
   toggleSidebar: () => void;
   /** Temporary sidebar collapse owned by the visible route's right pane. */
   setRightPaneExpanded?: (expanded: boolean) => void;
-  /** Phone tab-bar route: the tab bar replaces the header sidebar launcher. */
+  /**
+   * Phone route navigated by the tab bar (root pages) or its own back link
+   * (session details): the header shows no sidebar launcher.
+   */
   tabBarNavigation?: boolean;
 }
 
 const NOOP = () => {};
+const BACK_ICON_SIZE = 18;
 const TAB_BAR_MEDIA_QUERY = "(width < 768px), (pointer: coarse)";
 const NON_TEXT_INPUT_TYPES = new Set([
   "button",
@@ -249,12 +260,7 @@ function NavigationLayoutFrame({ sessionElement }: NavigationLayoutProps) {
     toggleExpanded,
     minimizeToFloatingToggle,
     restoreCollapsedSidebar,
-  } = useSidebarPreference(
-    forceExpandedSidebar,
-    /^(?:\/-\/relay\/[^/]+)?\/settings(?:\/|$)/.test(location.pathname)
-      ? "collapsed"
-      : null,
-  );
+  } = useSidebarPreference(forceExpandedSidebar);
   const {
     width: sidebarWidth,
     setWidth: setSidebarWidth,
@@ -386,14 +392,21 @@ function NavigationLayoutFrame({ sessionElement }: NavigationLayoutProps) {
     [setIsResizing],
   );
 
-  // Phones keep one navigation model, including session details. Full-screen
-  // apps and file viewers own the viewport; the keyboard hides the bar.
-  const tabBarNavigation =
+  // The phone tab bar shows only on root pages; deeper pages navigate back.
+  // Full-screen apps and file viewers own the viewport; the keyboard hides
+  // the bar. Deep pages without their own back link keep the drawer launcher.
+  const phoneShell =
     tabBarDevice &&
     !isWideScreen &&
     !isContentFrameRoute &&
     !isFullScreenRoutePathname(location.pathname);
-  const showTabBar = tabBarNavigation && !keyboardOpen;
+  const tabBarRoute = isTabBarRootPathname(location.pathname);
+  const tabBarNavigation =
+    phoneShell && (tabBarRoute || isSessionDetailPathname(location.pathname));
+  const showTabBar = phoneShell && tabBarRoute && !keyboardOpen;
+  // Desktop Settings draws its own rail in place of the app sidebar.
+  const settingsReplacesSidebar =
+    isWideScreen && isSettingsPathname(location.pathname);
 
   const context: NavigationLayoutContext = useMemo(
     () => ({
@@ -430,7 +443,8 @@ function NavigationLayoutFrame({ sessionElement }: NavigationLayoutProps) {
 
   const sidebarFeedsEnabled = isContentFrameRoute
     ? sidebarOpen
-    : (isWideScreen && !isMinimized) || (!isWideScreen && sidebarOpen);
+    : (isWideScreen && !isMinimized && !settingsReplacesSidebar) ||
+      (!isWideScreen && sidebarOpen);
 
   return (
     <SessionDomLingerHost sessionElement={sessionElement}>
@@ -448,8 +462,10 @@ function NavigationLayoutFrame({ sessionElement }: NavigationLayoutProps) {
               >
                 {/* Desktop sidebar - always visible on wide screens; the minimized mode
           renders the floating restore toggle in its place */}
+                {settingsReplacesSidebar && <BackToAppLink />}
                 {isWideScreen &&
                   !isContentFrameRoute &&
+                  !settingsReplacesSidebar &&
                   (isMinimized ? (
                     <Link
                       to={{
@@ -535,6 +551,22 @@ function NavigationLayoutFrame({ sessionElement }: NavigationLayoutProps) {
         </SidebarSessionFeedsProvider>
       )}
     </SessionDomLingerHost>
+  );
+}
+
+/** Settings hide the app sidebar on desktop; this floating link leaves them. */
+function BackToAppLink() {
+  const { t } = useI18n();
+  const basePath = useRemoteBasePath();
+  return (
+    <Link
+      to={`${basePath}/inbox`}
+      className="sidebar-toggle sidebar-floating-restore"
+      title={t("shellNavBackToApp")}
+      aria-label={t("shellNavBackToApp")}
+    >
+      <ChevronLeftIcon size={BACK_ICON_SIZE} />
+    </Link>
   );
 }
 

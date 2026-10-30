@@ -20,6 +20,7 @@ import { inputClassName } from "../components/garden/Field";
 import { useRemoteConnection } from "../contexts/RemoteConnectionContext";
 import { useSignInRequiredNotice } from "../hooks/useSignInRequiredNotice";
 import { useI18n } from "../i18n";
+import { AddHostModeSwitch } from "./AddHostPage";
 import { createDirectHost, loadSavedHosts, saveHost } from "../lib/hostStorage";
 
 export function DirectLoginPage() {
@@ -137,6 +138,8 @@ export function DirectLoginPage() {
     <AuthShell
       title={t("directLoginTitle")}
       back={{ to: "/login" }}
+      subtitle={t("addHostSubtitle")}
+      controls={<AddHostModeSwitch mode="direct" />}
       footer={t("directLoginHint")}
     >
       <AuthForm onSubmit={handleSubmit} data-testid="login-form">

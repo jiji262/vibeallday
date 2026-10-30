@@ -13,43 +13,6 @@
   gap: var(--space-2);
 }
 
-.codeRow {
-  align-self: stretch;
-}
-
-/* The device code is a name-like token: big, spaced, easy to copy. */
-.userCode {
-  padding: var(--space-1) var(--space-3);
-  border-radius: var(--radius-md);
-  background: var(--indigo-soft);
-  color: var(--indigo-ink);
-  font-family: var(--font-mono);
-  font-size: 1.15em;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  user-select: all;
-}
-
-.codeInput {
-  flex: 1 1 16rem;
-  min-width: 0;
-  min-height: var(--tap-min);
-  padding: 0 var(--space-3);
-  box-sizing: border-box;
-  font-family: var(--font-mono);
-  font-size: 16px;
-  color: var(--text-primary);
-  background: var(--bg-input);
-  border: 1px solid var(--line-strong);
-  border-radius: var(--radius-md);
-}
-
-.codeInput:focus {
-  outline: none;
-  border-color: var(--indigo);
-  box-shadow: 0 0 0 3px var(--indigo-soft-2);
-}
-
 .output {
   max-width: 100%;
   max-height: 10rem;
@@ -59,9 +22,9 @@
   font-size: 0.85em;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
-  background: var(--bg-sunken);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
+  background: var(--code-bg);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
 }
 
 /* On phones every action fills the width, like the sign-in screens. */
@@ -73,10 +36,6 @@
   .row {
     flex-direction: column;
     align-items: stretch;
-  }
-
-  .codeInput {
-    flex: none;
   }
 
   .panel :global(.settings-button) {

@@ -45,8 +45,13 @@ function relayLoginPath(host: SavedHost): string {
 export function HostPickerPage() {
   const { t } = useI18n();
   const navigate = useNavigate();
-  const { isAutoResuming, connectViaRelay, connect, setCurrentHostId } =
-    useRemoteConnection();
+  const {
+    isAutoResuming,
+    connectViaRelay,
+    connect,
+    currentHostId,
+    setCurrentHostId,
+  } = useRemoteConnection();
   const [hosts, setHosts] = useState<SavedHost[]>([]);
   const [hostStatuses, setHostStatuses] = useState<HostStatusMap>({});
   const [connectingHostId, setConnectingHostId] = useState<string | null>(null);
@@ -221,20 +226,30 @@ export function HostPickerPage() {
   return (
     <AuthShell
       title={t("hostPickerTitle")}
-      subtitle={hosts.length === 0 ? t("hostPickerHowToConnect") : undefined}
+      subtitle={
+        hosts.length === 0
+          ? t("hostPickerHowToConnect")
+          : t("hostPickerChooseSubtitle")
+      }
       footer={
         hosts.length > 0 ? t("hostPickerSavedHint") : t("hostPickerEmptyHint")
       }
     >
       {hosts.length > 0 && (
         <section className={styles.section}>
-          <h2 className={styles.sectionTitle}>{t("hostPickerSavedHosts")}</h2>
+          <div className={styles.sectionHead}>
+            <h2 className={styles.sectionTitle}>{t("hostPickerSavedHosts")}</h2>
+            <span className={styles.sectionCount}>
+              {t("hostPickerSavedCount", { count: hosts.length })}
+            </span>
+          </div>
           <ul className={styles.list} data-testid="saved-hosts-list">
             {hosts.map((host) => (
               <HostRow
                 key={host.id}
                 host={host}
                 status={hostStatuses[host.id] ?? "unknown"}
+                current={host.id === currentHostId}
                 connecting={connectingHostId === host.id}
                 lastConnected={formatLastConnected(host.lastConnected)}
                 onConnect={() => handleConnectHost(host)}
@@ -250,7 +265,9 @@ export function HostPickerPage() {
 
       <section className={styles.section}>
         {hosts.length > 0 && (
-          <h2 className={styles.sectionTitle}>{t("hostPickerAddNewHost")}</h2>
+          <h2 className={styles.sectionTitle}>
+            {t("hostPickerConnectNewHost")}
+          </h2>
         )}
         <div className={styles.options}>
           <ModeOption

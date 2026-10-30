@@ -59,9 +59,12 @@ import { SessionListItem } from "./SessionListItem";
 import type { SessionNavigationIntent } from "./SessionListItem";
 import sidebarStyles from "./Sidebar.module.css";
 import { SidebarIcons, SidebarNavItem } from "./SidebarNavItem";
-import { ProjectSwitcher } from "./sidebar/ProjectSwitcher";
 import { SidebarBrand } from "./sidebar/SidebarBrand";
-import { SidebarHostFooter } from "./sidebar/SidebarHostFooter";
+import {
+  SidebarFooter,
+  SidebarSearchButton,
+} from "./sidebar/SidebarChromeControls";
+import { SidebarHostCard } from "./sidebar/SidebarHostFooter";
 import { SidebarNavGroups } from "./sidebar/SidebarNavGroups";
 
 export { SidebarToggleIcon } from "./SidebarLauncher";
@@ -1137,11 +1140,7 @@ export function Sidebar({
           onNavigate={onNavigate}
         />
 
-        <ProjectSwitcher
-          basePath={basePath}
-          onNavigate={onNavigate}
-          isRail={isDesktop && isCollapsed}
-        />
+        <SidebarHostCard basePath={basePath} onNavigate={onNavigate} />
 
         <div className={`sidebar-actions ${sidebarStyles.actions}`}>
           {/* New Session: link to most recent project's new session page */}
@@ -1152,8 +1151,10 @@ export function Sidebar({
             onClick={onNavigate}
             basePath={basePath}
             hasDraft={hasNewSessionDraft && !isCollapsed}
+            draftLabel={t("shellNavDraft")}
             className={sidebarStyles.newSession}
           />
+          <SidebarSearchButton onNavigate={onNavigate} />
         </div>
 
         <div
@@ -1356,7 +1357,7 @@ export function Sidebar({
             )}
         </div>
 
-        <SidebarHostFooter basePath={basePath} onNavigate={onNavigate} />
+        <SidebarFooter basePath={basePath} onNavigate={onNavigate} />
 
         {/* Resize handle - desktop only, when expanded */}
         {isDesktop && !isCollapsed && (

@@ -12,6 +12,7 @@ import {
   render,
   screen,
   waitFor,
+  within,
 } from "@testing-library/react";
 import { MemoryRouter, Route, Routes, useLocation } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -244,7 +245,8 @@ vi.mock("../../i18n", () => ({
         sidebarSectionPendingSessions: "Pending Sessions",
         sidebarSettings: "Settings",
         sidebarSwitchHost: "Switch Host",
-        sidebarSwitchHostNamed: "Switch host, now {host}",
+        shellHostSwitchCurrent: "Switch host, current {host}",
+        shellNavDraft: "Unsent draft",
         sidebarSectionStarred: "Starred",
         sidebarSectionLast24Hours: "Last 24 Hours",
         sessionRecentSessions: "Recent sessions",
@@ -472,16 +474,49 @@ describe("Sidebar collapsed toggle", () => {
     // The host pill shares the representation of standard nav items (a
     // `.sidebar-nav-item` with a `.sidebar-nav-text` label) so the mini rail's
     // shared `.sidebar-collapsed .sidebar-nav-text { display: none }` rule
-    // reduces it to its avatar. Its accessible name carries the visible host
+    // reduces it to its status dot. Its accessible name carries the visible host
     // name, so speaking that name reaches the pill.
     const switchHost = screen.getByRole("button", {
-      name: /^Switch host, now /,
+      name: /^Switch host, current /,
     });
     expect(switchHost.classList.contains("sidebar-switch-host")).toBe(true);
     expect(switchHost.classList.contains("sidebar-nav-item")).toBe(true);
     const label = switchHost.querySelector(".sidebar-nav-text");
     expect(label?.textContent).toContain("sidebarHostRemote");
     expect(label?.textContent).toContain("sidebarHostModeDirect");
+  });
+
+  it("applies the appearance picked from the footer menu and closes it", () => {
+    renderSidebar();
+
+    const trigger = screen.getByRole("button", {
+      name: "shellNavThemeButton",
+    });
+    fireEvent.click(trigger);
+    const menu = screen.getByRole("menu", { name: "shellNavThemeMenu" });
+    expect(
+      within(menu)
+        .getAllByRole("menuitem")
+        .map((item) => item.textContent),
+    ).toEqual([
+      "settingsAppearanceThemeSystem",
+      "settingsAppearanceThemeCeladon",
+      "settingsAppearanceThemeNight",
+      "settingsAppearanceThemeNightOled",
+    ]);
+
+    fireEvent.click(
+      within(menu).getByRole("menuitem", {
+        name: "settingsAppearanceThemeNightOled",
+      }),
+    );
+
+    expect(document.documentElement.getAttribute("data-theme")).toBe(
+      "verydark",
+    );
+    expect(localStorage.getItem(UI_KEYS.theme)).toBe("verydark");
+    expect(screen.queryByRole("menu")).toBeNull();
+    expect(document.activeElement).toBe(trigger);
   });
 
   it("reloads the host picker when switching hosts", () => {
@@ -500,7 +535,7 @@ describe("Sidebar collapsed toggle", () => {
     try {
       renderSidebar();
       fireEvent.click(
-        screen.getByRole("button", { name: /^Switch host, now / }),
+        screen.getByRole("button", { name: /^Switch host, current / }),
       );
 
       expect(disconnect).toHaveBeenCalledOnce();
@@ -570,7 +605,7 @@ describe("Sidebar collapsed toggle", () => {
       );
 
       fireEvent.contextMenu(
-        screen.getByRole("button", { name: /^Switch host, now / }),
+        screen.getByRole("button", { name: /^Switch host, current / }),
       );
       const items = screen
         .getAllByRole("menuitem")
@@ -1234,7 +1269,9 @@ describe("Sidebar collapsed toggle", () => {
     expect(newSessionIcon?.getAttribute("height")).toBe("16");
     expect(newSessionIcon?.querySelector("circle")).toBeTruthy();
     expect(newSessionIcon?.querySelectorAll("line")).toHaveLength(2);
-    expect(screen.getByText("Draft")).toBeDefined();
+    expect(
+      within(newSessionLink).getByRole("img", { name: "Unsent draft" }),
+    ).toBeDefined();
   });
 
   it("collapses and expands the last-24-hours bucket", () => {

@@ -10,7 +10,7 @@ import {
 } from "./garden/Breadcrumb";
 import { Eyebrow } from "./garden/Eyebrow";
 import { ChevronLeftIcon } from "./garden/icons";
-import { HostIdentityMarker } from "./HostIdentityMarker";
+import { HostChip, HostIdentityMarker } from "./HostIdentityMarker";
 import styles from "./PageHeader.module.css";
 import { SearchTrigger } from "./shell/SearchTrigger";
 import { SidebarLauncher } from "./SidebarLauncher";
@@ -46,6 +46,8 @@ interface PageHeaderProps {
   intro?: "header" | "content";
   /** Mono context line above the header intro title. */
   eyebrow?: ReactNode[];
+  /** Phone host chip; off where the page itself presents the host. */
+  hostChip?: boolean;
 }
 
 function crumbLink({ to, className, title, children }: CrumbLinkProps) {
@@ -107,7 +109,9 @@ function HeaderIntro({
   const titleClass = `session-title ${styles.title}`;
   return (
     <div className={styles.intro}>
-      {eyebrow && eyebrow.length > 0 ? <Eyebrow parts={eyebrow} /> : null}
+      {eyebrow && eyebrow.length > 0 ? (
+        <Eyebrow parts={eyebrow} className={styles.eyebrow} />
+      ) : null}
       {titleElement ??
         (onTitleClick ? (
           <button
@@ -131,7 +135,8 @@ function HeaderIntro({
 /**
  * The page top bar: leading control, breadcrumb, actions and the search
  * trigger, with an optional compact intro row for pages that have not moved
- * their title into a `PageIntro`.
+ * their title into a `PageIntro`. Phones draw it as one sticky row: back
+ * button, the title (header intro or last crumb), host chip and actions.
  */
 export function PageHeader({
   title,
@@ -142,6 +147,7 @@ export function PageHeader({
   actions,
   breadcrumbs,
   intro = "header",
+  hostChip = true,
   ...introProps
 }: PageHeaderProps) {
   const { t } = useI18n();
@@ -162,6 +168,7 @@ export function PageHeader({
       className={`session-header ${styles.header}`}
       data-intro={intro}
       data-default-crumbs={breadcrumbs ? undefined : ""}
+      data-back={back ? "" : undefined}
     >
       <div className={`session-header-inner ${styles.inner}`}>
         <div className={`session-header-left ${styles.lead}`}>
@@ -175,6 +182,7 @@ export function PageHeader({
           />
         </div>
         <div className={`session-header-actions ${styles.tools}`}>
+          {hostChip ? <HostChip className={styles.hostChip} /> : null}
           {actions}
           <SearchTrigger />
         </div>

@@ -14,7 +14,17 @@ import { I18nProvider } from "../../i18n";
 import { IssuesPage } from "../IssuesPage";
 
 const state = vi.hoisted(() => ({ fetch: vi.fn() }));
-const runtime = { sourceKey: "localhost", transport: { fetch: state.fetch } };
+// The page header's host chip reads the transport status.
+const runtime = {
+  sourceKey: "localhost",
+  transport: {
+    fetch: state.fetch,
+    status: {
+      subscribe: () => () => {},
+      getSnapshot: () => ({ state: "ready" }),
+    },
+  },
+};
 vi.mock("../../contexts/SourceRuntimeContext", () => ({
   useCurrentSourceRuntime: () => runtime,
 }));

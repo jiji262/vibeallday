@@ -1,0 +1,90 @@
+/* A running provider sign-in: stepper, CLI output and Cancel. */
+.panel {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 14px;
+  margin-top: var(--space-2);
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.codeRow {
+  align-self: stretch;
+}
+
+/* The device code is a name-like token: big, spaced, easy to copy. */
+.userCode {
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--r-md);
+  background: var(--accent-soft);
+  color: var(--accent-ink);
+  font-family: var(--font-mono);
+  font-size: 1.15em;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  user-select: all;
+}
+
+.codeInput {
+  flex: 1 1 16rem;
+  min-width: 0;
+  height: var(--input-h);
+  min-height: var(--tap-min);
+  padding: 0 12px;
+  box-sizing: border-box;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-input);
+  background: var(--surface);
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-size: 16px;
+}
+
+.codeInput:focus {
+  border-color: var(--focus);
+  outline: none;
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.output {
+  align-self: stretch;
+  max-width: 100%;
+  max-height: 10rem;
+  margin: 0;
+  padding: 10px 12px;
+  overflow: auto;
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  background: var(--code-bg);
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-size: var(--fs-code);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+/* On phones every action fills the width, like the sign-in screens. */
+@media (width < 768px) {
+  .panel {
+    align-items: stretch;
+  }
+
+  .row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .codeInput {
+    flex: none;
+  }
+
+  .panel :global(.settings-button) {
+    justify-content: center;
+  }
+}

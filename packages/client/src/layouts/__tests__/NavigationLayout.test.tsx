@@ -412,38 +412,34 @@ describe("NavigationLayout", () => {
     }
   });
 
-  it.each(["/agents", "/projects/project-1/sessions/session-1"])(
+  function emulatePhone() {
+    Object.defineProperty(window, "innerWidth", {
+      configurable: true,
+      value: 375,
+    });
+    const originalMatchMedia = window.matchMedia;
+    window.matchMedia = ((media: string) => ({
+      ...originalMatchMedia(media),
+      matches: media.includes("pointer: coarse"),
+    })) as typeof window.matchMedia;
+    return () => {
+      window.matchMedia = originalMatchMedia;
+    };
+  }
+
+  const tabBar = () =>
+    screen.queryByRole("navigation", { name: "Main navigation" });
+
+  it.each(["/inbox", "/-/relay/host/sessions"])(
     "keeps phone navigation reachable on %s through keyboard changes",
     (path) => {
-      Object.defineProperty(window, "innerWidth", {
-        configurable: true,
-        value: 375,
-      });
-      const originalMatchMedia = window.matchMedia;
-      window.matchMedia = ((media: string) => ({
-        ...originalMatchMedia(media),
-        matches: media.includes("pointer: coarse"),
-      })) as typeof window.matchMedia;
+      const restoreMatchMedia = emulatePhone();
       const viewport = installMobileVisualViewport();
       renderNavigationLayout(path);
-      const tabBar = () =>
-        screen.queryByRole("navigation", { name: "Main navigation" });
 
       try {
         const composer = screen.getByRole("textbox", { name: "Composer" });
         expect(tabBar()).toBeTruthy();
-        if (path.includes("/sessions/")) {
-          expect(
-            screen
-              .getByRole("link", { name: "Sessions" })
-              .getAttribute("aria-current"),
-          ).toBe("page");
-          expect(
-            screen
-              .getByRole("link", { name: "Projects" })
-              .getAttribute("aria-current"),
-          ).toBeNull();
-        }
 
         // Focus without a keyboard (iOS programmatic focus, Android back
         // gesture): navigation stays reachable.
@@ -463,10 +459,40 @@ describe("NavigationLayout", () => {
         expect(tabBar()).toBeTruthy();
       } finally {
         viewport.restore();
-        window.matchMedia = originalMatchMedia;
+        restoreMatchMedia();
       }
     },
   );
+
+  it.each([
+    "/agents",
+    "/projects/project-1/sessions/session-1",
+    "/settings/appearance",
+  ])("leaves the tab bar to root pages, not %s", (path) => {
+    const restoreMatchMedia = emulatePhone();
+    try {
+      renderNavigationLayout(path);
+      expect(tabBar()).toBeNull();
+    } finally {
+      restoreMatchMedia();
+    }
+  });
+
+  it("replaces the desktop sidebar on Settings with a way back", () => {
+    Object.defineProperty(window, "innerWidth", {
+      configurable: true,
+      value: 1400,
+    });
+    renderNavigationLayout("/-/relay/host/settings/appearance");
+
+    expect(screen.queryByTestId("desktop-sidebar")).toBeNull();
+    expect(
+      screen.getByTestId("sidebar-session-feeds-provider").dataset.enabled,
+    ).toBe("false");
+    expect(
+      screen.getByRole("link", { name: "Back to app" }).getAttribute("href"),
+    ).toBe("/inbox");
+  });
 
   it("does not reserve keyboard space for non-text controls", () => {
     const viewport = installMobileVisualViewport();

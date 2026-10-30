@@ -24,6 +24,7 @@ import { inputClassName } from "../components/garden/Field";
 import { useRemoteConnection } from "../contexts/RemoteConnectionContext";
 import { useSignInRequiredNotice } from "../hooks/useSignInRequiredNotice";
 import { useI18n } from "../i18n";
+import { AddHostModeSwitch } from "./AddHostPage";
 import {
   getDefaultRelayUrl,
   resolveLoginRelayUrl,
@@ -285,6 +286,8 @@ export function RelayLoginPage() {
     <AuthShell
       title={t("relayLoginTitle")}
       back={{ to: "/login" }}
+      subtitle={t("addHostSubtitle")}
+      controls={<AddHostModeSwitch mode="relay" />}
       footer={t("relayLoginHint")}
     >
       <AuthForm onSubmit={handleSubmit} data-testid="relay-login-form">

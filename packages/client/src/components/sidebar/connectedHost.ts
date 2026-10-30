@@ -12,7 +12,7 @@ import { formatVersionTag } from "./SidebarBrand";
 
 export type HostMode = "local" | "relay" | "direct";
 
-const HOST_MODE_LABEL = {
+export const HOST_MODE_LABEL = {
   local: "sidebarHostModeLocal",
   relay: "sidebarHostModeRelay",
   direct: "sidebarHostModeDirect",

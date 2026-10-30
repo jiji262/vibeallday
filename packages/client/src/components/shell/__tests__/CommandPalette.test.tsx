@@ -163,6 +163,26 @@ describe("CommandPaletteHost", () => {
     expect(location()).toBe("/remote/host/sessions?q=flaky%20test");
   });
 
+  it("moves between groups with Tab and Shift+Tab", async () => {
+    renderShell();
+    pressShortcut();
+    const input = await screen.findByRole("combobox");
+    const activeName = () =>
+      document
+        .getElementById(input.getAttribute("aria-activedescendant") ?? "")
+        ?.getAttribute("aria-label");
+
+    fireEvent.keyDown(input, { key: "Tab" });
+    expect(activeName()).toBe("Projects");
+    fireEvent.keyDown(input, { key: "Tab" });
+    expect(activeName()).toBe("vibeallday codes/vibeallday");
+    fireEvent.keyDown(input, { key: "Tab" });
+    expect(activeName()).toBe("Search sessions");
+    fireEvent.keyDown(input, { key: "Tab", shiftKey: true });
+    expect(activeName()).toBe("vibeallday codes/vibeallday");
+    expect(document.activeElement).toBe(input);
+  });
+
   it("closes itself, not the dialog it opened over, on Escape", async () => {
     const closeModal = vi.fn();
     renderShell(

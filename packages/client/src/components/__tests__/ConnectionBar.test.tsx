@@ -1,13 +1,38 @@
 // @vitest-environment jsdom
 
-import { cleanup, render } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { MemoryRouter } from "react-router-dom";
+import { I18nProvider } from "../../i18n";
 import { ConnectionBar } from "../ConnectionBar";
 
 const state = vi.hoisted(() => ({
   connectionState: "connected" as "connected" | "reconnecting" | "disconnected",
   showConnectionBars: true,
+  reconnectAttempts: 0,
+  reconnect: vi.fn(() => Promise.resolve()),
+}));
+
+vi.mock("../../contexts/SourceRuntimeContext", () => ({
+  useCurrentSourceRuntime: () => ({
+    transport: {
+      status: {
+        getSnapshot: () => ({
+          kind: "secure",
+          state: "reconnecting",
+          channels: [
+            {
+              name: "relay",
+              state: "reconnecting",
+              reconnectAttempts: state.reconnectAttempts,
+            },
+          ],
+        }),
+        subscribe: () => () => {},
+      },
+      reconnect: state.reconnect,
+    },
+  }),
 }));
 
 vi.mock("../../hooks/useActivityBusState", () => ({
@@ -21,17 +46,21 @@ vi.mock("../../hooks/useDeveloperMode", () => ({
 beforeEach(() => {
   state.connectionState = "connected";
   state.showConnectionBars = true;
+  state.reconnectAttempts = 0;
+  state.reconnect.mockClear();
 });
 
 afterEach(() => {
   cleanup();
 });
 
-function renderConnectionBar(path = "/") {
+function renderConnectionBar(path = "/", hostName?: string) {
   return render(
-    <MemoryRouter initialEntries={[path]}>
-      <ConnectionBar />
-    </MemoryRouter>,
+    <I18nProvider>
+      <MemoryRouter initialEntries={[path]}>
+        <ConnectionBar hostName={hostName} />
+      </MemoryRouter>
+    </I18nProvider>,
   );
 }
 
@@ -73,5 +102,18 @@ describe("ConnectionBar", () => {
         '[data-connection-status="disconnected"]',
       ),
     ).not.toBeNull();
+  });
+
+  it("names the host and the client's attempt, and retries on demand", () => {
+    state.connectionState = "reconnecting";
+    state.reconnectAttempts = 3;
+
+    renderConnectionBar("/inbox", "my-mac");
+
+    expect(screen.getByRole("status").textContent).toContain(
+      "Reconnecting to my-mac… attempt 3",
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Retry now" }));
+    expect(state.reconnect).toHaveBeenCalledTimes(1);
   });
 });

@@ -1,7 +1,7 @@
 import {
   type KeyboardEvent,
-  type MouseEvent,
   type ReactNode,
+  useDeferredValue,
   useEffect,
   useId,
   useMemo,
@@ -15,16 +15,22 @@ import { useModalLayer } from "../ui/Modal";
 import { SearchIcon } from "../garden/icons";
 import { Kbd } from "../garden/Kbd";
 import styles from "./CommandPalette.module.css";
+import { CommandPaletteFooter } from "./CommandPaletteFooter";
+import { PaletteRow } from "./CommandPaletteRow";
 import {
+  normalizeQuery,
   type PaletteGroup,
   type PaletteItem,
   type PaletteSection,
+  sectionStarts,
+  stepGroup,
   stepIndex,
 } from "./paletteData";
 import { usePaletteSections } from "./usePaletteSections";
 
 const FIELD_ICON_SIZE = 18;
-const ROW_ICON_SIZE = 16;
+/** The search row already quotes the query; it carries no marks. */
+const NO_TERMS: readonly string[] = [];
 /** The field takes focus when the palette mounts. */
 const focusOnMount = (input: HTMLInputElement | null) => input?.focus();
 const STEP_KEYS: Record<string, number> = { ArrowDown: 1, ArrowUp: -1 };
@@ -35,39 +41,11 @@ const GROUP_LABEL: Record<PaletteGroup, MessageKey | null> = {
   projects: "paletteGroupProjects",
   recent: "paletteGroupRecent",
   settings: "paletteGroupSettings",
+  actions: "paletteGroupActions",
 };
 
 interface CommandPaletteProps {
   onClose: () => void;
-}
-
-interface RowProps {
-  item: PaletteItem;
-  optionId: string;
-  active: boolean;
-  onHover: () => void;
-  onChoose: () => void;
-}
-
-function PaletteRow({ item, optionId, active, onHover, onChoose }: RowProps) {
-  const Icon = item.Icon;
-  return (
-    // biome-ignore lint/a11y/useKeyWithClickEvents: rows are chosen from the combobox's Arrow/Enter keys; the field keeps focus
-    <div
-      id={optionId}
-      role="option"
-      aria-selected={active}
-      tabIndex={-1}
-      className={active ? `${styles.row} ${styles.active}` : styles.row}
-      onMouseMove={active ? undefined : onHover}
-      onMouseDown={(event: MouseEvent) => event.preventDefault()}
-      onClick={onChoose}
-    >
-      {Icon ? <Icon size={ROW_ICON_SIZE} className={styles.rowIcon} /> : null}
-      <span className={styles.rowLabel}>{item.label}</span>
-      {item.hint ? <span className={styles.rowHint}>{item.hint}</span> : null}
-    </div>
-  );
 }
 
 function SectionGroup({
@@ -99,6 +77,7 @@ interface PaletteNavigation {
 }
 
 function usePaletteNavigation(
+  sections: readonly PaletteSection[],
   rows: readonly PaletteItem[],
   onClose: () => void,
 ): PaletteNavigation {
@@ -110,7 +89,8 @@ function usePaletteNavigation(
   const choose = (item: PaletteItem | undefined) => {
     if (!item) return;
     onClose();
-    navigate(`${basePath}${item.to}`);
+    if (item.run) item.run();
+    else if (item.to) navigate(`${basePath}${item.to}`);
   };
 
   const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
@@ -122,8 +102,10 @@ function usePaletteNavigation(
       event.preventDefault();
       choose(rows[activeIndex]);
     } else if (event.key === "Tab") {
-      // The field is the palette's only tab stop; rows move by arrow keys.
+      // The field is the palette's only tab stop; Tab moves between groups.
       event.preventDefault();
+      const delta = event.shiftKey ? -1 : 1;
+      setActive(stepGroup(sectionStarts(sections), activeIndex, delta));
     }
   };
 
@@ -133,6 +115,8 @@ function usePaletteNavigation(
 interface ResultsProps {
   listId: string;
   sections: readonly PaletteSection[];
+  /** Normalized terms of the query the sections were built from. */
+  terms: readonly string[];
   showEmpty: boolean;
   optionId: (index: number) => string;
   navigation: PaletteNavigation;
@@ -141,6 +125,7 @@ interface ResultsProps {
 function PaletteResults({
   listId,
   sections,
+  terms,
   showEmpty,
   optionId,
   navigation,
@@ -165,6 +150,7 @@ function PaletteResults({
                 item={item}
                 optionId={optionId(index)}
                 active={index === activeIndex}
+                terms={section.group === "search" ? NO_TERMS : terms}
                 onHover={() => setActive(index)}
                 onChoose={() => choose(item)}
               />
@@ -255,13 +241,22 @@ function PaletteScrim({
   );
 }
 
-/** ⌘K palette: jump to destinations, projects, recent sessions, settings. */
+/**
+ * ⌘K palette: jump to destinations, projects, recent sessions and settings,
+ * or run an action (new session, skin toggle, host switch).
+ */
 export default function CommandPalette({ onClose }: CommandPaletteProps) {
   const baseId = useId();
   const [query, setQuery] = useState("");
   const sections = usePaletteSections(query);
+  // Marks follow the same deferred needle the matched rows were built from.
+  const deferredQuery = useDeferredValue(query);
+  const terms = useMemo(() => {
+    const normalized = normalizeQuery(deferredQuery);
+    return normalized ? normalized.split(/\s+/) : [];
+  }, [deferredQuery]);
   const rows = useMemo(() => sections.flatMap((s) => s.items), [sections]);
-  const navigation = usePaletteNavigation(rows, onClose);
+  const navigation = usePaletteNavigation(sections, rows, onClose);
   // The palette also opens over modals, and Modal's document-capture Escape
   // closes the topmost layer. Own that slot, or Escape would dismiss the
   // dialog behind instead of the palette.
@@ -288,10 +283,12 @@ export default function CommandPalette({ onClose }: CommandPaletteProps) {
       <PaletteResults
         listId={`${baseId}-list`}
         sections={sections}
+        terms={terms}
         showEmpty={rows.length === 1 && query.trim() !== ""}
         optionId={optionId}
         navigation={navigation}
       />
+      <CommandPaletteFooter />
     </PaletteScrim>,
     document.body,
   );

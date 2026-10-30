@@ -17,7 +17,7 @@ export type RemoteRouteModuleKey =
   | "localSourcePage"
   | "multiHostMonitorPage"
   | "newSessionPage"
-  | "projectSessionsRedirect"
+  | "projectHomePage"
   | "projectsPage"
   | "publicShareFilePage"
   | "publicSharePage"
@@ -26,7 +26,8 @@ export type RemoteRouteModuleKey =
   | "remoteApp"
   | "sessionCore"
   | "sessionPage"
-  | "settings";
+  | "settings"
+  | "triagePage";
 
 function normalizeRouterPathname(pathname: string, baseUrl: string): string {
   const basePath = baseUrl.replace(/\/$/, "");
@@ -54,9 +55,10 @@ function selectedAppPageModules(pathname: string): RemoteRouteModuleKey[] {
     return [...modules, "localSourcePage"];
   }
   if (/^\/projects\/[^/]+(?:\/|$)/.test(pathname)) {
-    return [...modules, "projectSessionsRedirect"];
+    return [...modules, "projectHomePage"];
   }
   if (pathname === "/sessions") return [...modules, "globalSessionsPage"];
+  if (pathname === "/triage") return [...modules, "triagePage"];
   if (pathname === "/agents") return [...modules, "agentsPage"];
   if (pathname === "/issues") return [...modules, "issuesPage"];
   if (pathname === "/git-status") return [...modules, "gitStatusPage"];

@@ -57,6 +57,8 @@ function DestinationItem({
   }
   const isOverview = destination.key === "overview";
   const isProjects = destination.key === "projects";
+  // App-root routes (All hosts) live outside the relay host's base path.
+  const linkBasePath = destination.appRoot ? "" : basePath;
   return (
     <SidebarNavItem
       to={
@@ -83,14 +85,15 @@ function DestinationItem({
         ) : undefined
       }
       onClick={onNavigate}
-      basePath={basePath}
+      basePath={linkBasePath}
     />
   );
 }
 
 /**
- * Work, Tools and System destinations in one landmark. The same groups order
- * the phone More page and the command palette (`shellDestinations`).
+ * Work and Tools destinations in one landmark. The same groups order the
+ * phone More page and the command palette (`shellDestinations`); the System
+ * group (Settings) sits in the sidebar footer.
  */
 export function SidebarNavGroups({
   basePath,
@@ -99,9 +102,8 @@ export function SidebarNavGroups({
   projectQueueCount,
 }: SidebarNavGroupsProps) {
   const { t } = useI18n();
-  const destinations = useShellDestinations();
+  const destinations = useShellDestinations({ includeAppRoot: true });
   const { needsAttention } = useInboxCounts();
-  const { principal } = useActingPrincipal();
   const renderDestination = (destination: ShellDestination) => (
     <DestinationItem
       key={destination.key}
@@ -114,7 +116,6 @@ export function SidebarNavGroups({
     />
   );
   const tools = destinationsInGroup(destinations, "tools");
-  const switchedUsername = principal.switched ? principal.username : null;
 
   return (
     <SidebarNavSection label={t("sidebarNavigationLabel")}>
@@ -126,10 +127,6 @@ export function SidebarNavGroups({
           {tools.map(renderDestination)}
         </SidebarNavGroup>
       ) : null}
-      <SidebarNavGroup label={t("sidebarGroupSystem")}>
-        {destinationsInGroup(destinations, "system").map(renderDestination)}
-        <ReturnToSuperuserButton username={switchedUsername} />
-      </SidebarNavGroup>
     </SidebarNavSection>
   );
 }
@@ -138,8 +135,10 @@ export function SidebarNavGroups({
  * A switched superuser sees the limited user's app; this is the way
  * back that does not require finding Settings > Users.
  */
-function ReturnToSuperuserButton({ username }: { username: string | null }) {
+export function ReturnToSuperuserButton() {
   const { t } = useI18n();
+  const { principal } = useActingPrincipal();
+  const username = principal.switched ? principal.username : null;
   if (!username) return null;
   return (
     <SidebarNavButton

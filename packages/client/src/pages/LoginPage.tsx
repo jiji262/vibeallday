@@ -8,6 +8,7 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
+  AuthCommand,
   AuthError,
   AuthField,
   AuthForm,
@@ -111,7 +112,7 @@ export function LoginPage() {
         isSetupMode ? t("authWelcomeSetupTitle") : t("authWelcomeBackTitle")
       }
       subtitle={isSetupMode ? t("loginSetupSubtitle") : t("loginSubtitle")}
-      footer={isSetupMode ? t("loginSetupHint") : t("loginRecoveryHint")}
+      footer={isSetupMode ? t("loginSetupHint") : <LoginRecoveryHint />}
     >
       <AuthForm onSubmit={handleSubmit}>
         {/* A named login is a limited user; blank is the owner, exactly as
@@ -170,5 +171,19 @@ export function LoginPage() {
         </Button>
       </AuthForm>
     </AuthShell>
+  );
+}
+
+/** Forgot-password guidance: the reset command, ready to copy. */
+function LoginRecoveryHint() {
+  const { t } = useI18n();
+  return (
+    <>
+      <p>{t("loginRecoveryLead")}</p>
+      <AuthCommand
+        command={t("loginRecoveryCommand")}
+        copyLabel={t("loginRecoveryCopy")}
+      />
+    </>
   );
 }

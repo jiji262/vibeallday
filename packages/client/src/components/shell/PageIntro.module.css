@@ -23,11 +23,12 @@
   margin: 0;
   overflow: visible;
   color: var(--ink);
-  font-family: var(--font-display);
-  font-size: 36px;
-  font-weight: 600;
+  font-family: var(--font-ui);
+  font-size: var(--fs-display);
+  font-weight: var(--title-weight);
+  font-stretch: var(--display-stretch);
   line-height: 1.1;
-  letter-spacing: -0.025em;
+  letter-spacing: var(--display-tracking);
   white-space: normal;
   font-optical-sizing: auto;
   cursor: auto;
@@ -40,7 +41,7 @@
 .lede {
   margin: 0;
   color: var(--ink-3);
-  font-size: 15px;
+  font-size: var(--fs-body);
   line-height: 1.55;
 }
 
@@ -59,9 +60,9 @@
 }
 
 .meta {
-  color: var(--ink-4);
-  font-family: var(--label-font);
-  font-size: 11px;
+  color: var(--ink-3);
+  font-family: var(--font-mono);
+  font-size: var(--fs-meta);
   letter-spacing: var(--meta-tracking);
   text-transform: uppercase;
 }
@@ -71,12 +72,24 @@
     margin-bottom: var(--space-6);
   }
 
+  /* A title-only intro collapses once the header carries the title. */
+  .intro:has(> .head:only-child > .text:only-child > .title:only-child) {
+    margin-bottom: 0;
+  }
+
+  /* The sticky page header shows the title on phones; the h1 stays for
+     assistive technology and in-page landmarks. */
   .title:global(.session-title) {
-    font-size: 28px;
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    white-space: nowrap;
+    clip-path: inset(50%);
   }
 
   .lede {
-    font-size: 14px;
+    font-size: var(--fs-small);
   }
 
   .actions {

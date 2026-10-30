@@ -96,9 +96,10 @@ const ConversationPreviewPage = lazy(() =>
 const loadMultiHostMonitorPageModule = cachedModule(
   () => import("./pages/MultiHostMonitorPage"),
 );
-const loadProjectSessionsRedirectModule = cachedModule(
-  () => import("./pages/ProjectSessionsRedirect"),
+const loadProjectHomePageModule = cachedModule(
+  () => import("./pages/ProjectHomePage"),
 );
+const loadTriagePageModule = cachedModule(() => import("./pages/TriagePage"));
 const loadNewSessionPageModule = cachedModule(
   () => import("./pages/NewSessionPage"),
 );
@@ -214,9 +215,14 @@ const MultiHostMonitorPage = lazy(() =>
     default: MultiHostMonitorPage,
   })),
 );
-const ProjectSessionsRedirect = lazy(() =>
-  loadProjectSessionsRedirectModule().then(({ ProjectSessionsRedirect }) => ({
-    default: ProjectSessionsRedirect,
+const ProjectHomePage = lazy(() =>
+  loadProjectHomePageModule().then(({ ProjectHomePage }) => ({
+    default: ProjectHomePage,
+  })),
+);
+const TriagePage = lazy(() =>
+  loadTriagePageModule().then(({ TriagePage }) => ({
+    default: TriagePage,
   })),
 );
 const NewSessionPage = preloadableComponent(async () => ({
@@ -297,7 +303,7 @@ const initialRemoteModuleLoaders: Record<
   morePage: loadMorePageModule,
   multiHostMonitorPage: loadMultiHostMonitorPageModule,
   newSessionPage: loadNewSessionPageModule,
-  projectSessionsRedirect: loadProjectSessionsRedirectModule,
+  projectHomePage: loadProjectHomePageModule,
   projectsPage: loadProjectsPageModule,
   publicShareFilePage: loadPublicShareFilePageModule,
   publicSharePage: loadPublicSharePageModule,
@@ -307,6 +313,7 @@ const initialRemoteModuleLoaders: Record<
   sessionCore: loadSessionCoreModules,
   sessionPage: loadSessionPageModule,
   settings: loadSettingsModule,
+  triagePage: loadTriagePageModule,
 };
 
 const initialRouteModuleKeys = getInitialRemoteRouteModuleKeys(
@@ -390,11 +397,12 @@ const APP_ROUTES = (
       />
       <Route
         path="projects/:projectId"
-        element={routeModule(<ProjectSessionsRedirect />)}
+        element={routeModule(<ProjectHomePage />)}
       />
       <Route path="sessions" element={routeModule(<GlobalSessionsPage />)} />
       <Route path="agents" element={routeModule(<AgentsPage />)} />
       <Route path="inbox" element={routeModule(<InboxPage />)} />
+      <Route path="triage" element={routeModule(<TriagePage />)} />
       <Route path="more" element={routeModule(<MorePage />)} />
       <Route path="issues" element={routeModule(<IssuesPage />)} />
       <Route path="git-status" element={routeModule(<GitStatusPage />)} />
@@ -408,6 +416,10 @@ const APP_ROUTES = (
       <Route path="settings" element={routeModule(<SettingsLayout />)} />
       <Route
         path="settings/:category"
+        element={routeModule(<SettingsLayout />)}
+      />
+      <Route
+        path="settings/:category/:itemId"
         element={routeModule(<SettingsLayout />)}
       />
       <Route path="new-session" element={routeModule(<NewSessionPage />)} />

@@ -1,18 +1,32 @@
-/* Saved hosts and the ways to add one, inside the shared auth card. */
+/* Saved hosts and the ways to add one, inside the shared auth card
+   (design auth/HostPicker). */
 .section {
   display: flex;
   flex-direction: column;
-  gap: var(--space-2);
+  gap: 8px;
+}
+
+.sectionHead {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
 }
 
 .sectionTitle {
   margin: 0;
   color: var(--ink-3);
-  font-family: var(--label-font);
-  font-size: var(--eyebrow-size);
+  font-family: var(--font-mono);
+  font-size: 11px;
   font-weight: 500;
-  letter-spacing: var(--eyebrow-tracking);
+  letter-spacing: 0.08em;
   text-transform: uppercase;
+}
+
+.sectionCount {
+  margin-left: auto;
+  color: var(--ink-3);
+  font-family: var(--font-mono);
+  font-size: var(--fs-meta);
 }
 
 .list {
@@ -22,94 +36,84 @@
   padding: 0;
   overflow: hidden;
   border: 1px solid var(--line);
-  border-radius: var(--radius-md);
-  background: var(--card);
+  border-radius: var(--r-md);
+  background: var(--surface);
   list-style: none;
 }
 
 .host {
   display: flex;
-  align-items: stretch;
+  align-items: center;
+  gap: 12px;
+  min-height: var(--row-h);
+  padding: 12px 8px 12px 12px;
 }
 
 .host + .host {
-  border-top: 1px dashed var(--dash);
+  border-top: 1px solid var(--line);
 }
 
-.hostMain {
-  display: flex;
-  flex: 1;
-  align-items: center;
-  gap: var(--space-3);
-  min-width: 0;
-  min-height: 60px;
-  padding: var(--space-3) var(--space-3) var(--space-3) var(--space-4);
-  border: 0;
-  background: transparent;
-  color: var(--ink);
-  font: inherit;
-  text-align: start;
-  cursor: pointer;
-  transition: background-color var(--duration-fast) var(--ease-standard);
+.avatar {
+  position: relative;
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--r-md);
+  background: var(--surface-3);
+  color: var(--ink-2);
+  font-family: var(--font-mono);
+  font-weight: 700;
 }
 
-.hostMain:hover:not(:disabled) {
-  background: var(--bg-2);
+.avatarOn {
+  background: var(--accent-soft);
+  color: var(--accent-ink);
 }
 
-.hostMain:focus-visible,
-.remove:focus-visible,
-.option:focus-visible {
-  outline: 2px solid var(--indigo);
-  outline-offset: -2px;
-}
-
-.hostMain:disabled {
-  cursor: wait;
+.avatarDot {
+  position: absolute;
+  right: -3px;
+  bottom: -3px;
+  box-shadow: 0 0 0 3px var(--surface);
 }
 
 .hostText {
   display: flex;
   flex: 1;
   flex-direction: column;
-  gap: 2px;
+  gap: 3px;
+  min-width: 0;
+}
+
+.nameRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   min-width: 0;
 }
 
 .hostName {
   overflow: hidden;
-  font-size: 14px;
-  font-weight: 500;
+  color: var(--ink);
+  font-size: var(--fs-h3);
+  font-weight: 600;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .hostMeta {
+  overflow: hidden;
   color: var(--ink-3);
-  font-family: var(--label-font);
-  font-size: 11px;
-  letter-spacing: var(--meta-tracking);
-  text-transform: uppercase;
+  font-family: var(--font-mono);
+  font-size: var(--fs-meta);
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-/* Always visible: touch has no hover to reveal it. */
-.remove {
-  display: flex;
-  flex-shrink: 0;
-  align-items: center;
-  justify-content: center;
-  width: var(--tap-min);
-  border: 0;
-  border-left: 1px dashed var(--dash);
-  background: transparent;
-  color: var(--ink-4);
-  cursor: pointer;
-  transition: color var(--duration-fast) var(--ease-standard);
-}
-
-.remove:hover {
-  background: var(--rose-soft);
-  color: var(--rose-ink);
+.hostStatus {
+  flex: none;
 }
 
 .options {
@@ -117,16 +121,16 @@
   flex-direction: column;
   overflow: hidden;
   border: 1px solid var(--line);
-  border-radius: var(--radius-md);
-  background: var(--card);
+  border-radius: var(--r-md);
+  background: var(--surface);
 }
 
 .option {
   display: flex;
   align-items: center;
-  gap: var(--space-3);
+  gap: 12px;
   min-height: 60px;
-  padding: var(--space-3) var(--space-3) var(--space-3) var(--space-4);
+  padding: 12px 12px 12px 16px;
   border: 0;
   background: transparent;
   color: var(--ink);
@@ -137,11 +141,16 @@
 }
 
 .option + .option {
-  border-top: 1px dashed var(--dash);
+  border-top: 1px solid var(--line);
 }
 
 .option:hover {
-  background: var(--bg-2);
+  background: var(--surface-3);
+}
+
+.option:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: -2px;
 }
 
 .optionText {
@@ -153,17 +162,17 @@
 }
 
 .optionTitle {
-  font-size: 14px;
-  font-weight: 500;
+  font-size: var(--fs-body);
+  font-weight: 600;
 }
 
 .optionDesc {
   color: var(--ink-3);
-  font-size: 13px;
+  font-size: var(--fs-small);
   line-height: 1.45;
 }
 
 .chevron {
   flex-shrink: 0;
-  color: var(--ink-4);
+  color: var(--ink-3);
 }

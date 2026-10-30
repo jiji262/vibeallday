@@ -6,15 +6,18 @@ export type PaletteGroup =
   | "jump"
   | "projects"
   | "recent"
-  | "settings";
+  | "settings"
+  | "actions";
 
 export interface PaletteItem {
   id: string;
   group: PaletteGroup;
   label: string;
   hint?: string;
-  /** App path without the remote base path. */
-  to: string;
+  /** App path without the remote base path; navigated to when chosen. */
+  to?: string;
+  /** Runs instead of navigating, for commands such as the skin toggle. */
+  run?: () => void;
   Icon?: ComponentType<IconProps>;
 }
 
@@ -30,6 +33,7 @@ export const PALETTE_GROUP_LIMIT: Record<PaletteGroup, number> = {
   projects: 6,
   recent: 6,
   settings: 6,
+  actions: Number.POSITIVE_INFINITY,
 };
 
 const GROUP_ORDER: readonly PaletteGroup[] = [
@@ -37,6 +41,7 @@ const GROUP_ORDER: readonly PaletteGroup[] = [
   "projects",
   "recent",
   "settings",
+  "actions",
 ];
 
 export function normalizeQuery(query: string): string {
@@ -82,4 +87,30 @@ export function buildPaletteSections(
 export function stepIndex(current: number, delta: number, count: number) {
   if (count <= 0) return 0;
   return (current + delta + count) % count;
+}
+
+/** Index of each section's first row in the flattened row list. */
+export function sectionStarts(sections: readonly PaletteSection[]): number[] {
+  const starts: number[] = [];
+  let index = 0;
+  for (const section of sections) {
+    starts.push(index);
+    index += section.items.length;
+  }
+  return starts;
+}
+
+/** First row of the next or previous group, wrapping at either end. */
+export function stepGroup(
+  starts: readonly number[],
+  current: number,
+  delta: number,
+): number {
+  if (starts.length === 0) return 0;
+  let owner = 0;
+  starts.forEach((start, group) => {
+    if (start <= current) owner = group;
+  });
+  const target = (owner + Math.sign(delta) + starts.length) % starts.length;
+  return starts[target] ?? 0;
 }

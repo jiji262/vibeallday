@@ -1,5 +1,6 @@
-/* Garden Console navigation: 14px rows on the sunken sidebar, a white card
- * with an indigo edge bar for the current destination, mono group captions. */
+/* Sidebar navigation (design .nav-item / .nav-label / .count). The current
+ * destination takes the skin's --nav-on-* treatment: a raised pill in
+ * Celadon, an inset accent bar in Night. Density knobs set the spacing. */
 .section {
   display: flex;
   flex-direction: column;
@@ -11,17 +12,17 @@
 .group {
   display: flex;
   flex-direction: column;
-  gap: 1px;
+  gap: 2px;
 }
 
 .groupLabel {
-  margin: var(--space-4) 0 0;
-  padding: 6px var(--sidebar-navigation-inline-spacing, 0.75rem);
-  color: var(--ink-4);
-  font-family: var(--label-font);
-  font-size: 10px;
-  font-weight: 500;
-  letter-spacing: var(--eyebrow-tracking);
+  margin: var(--space-4) 0 4px;
+  padding: 0 10px;
+  color: var(--ink-3);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.08em;
   line-height: 1.4;
   text-transform: uppercase;
 }
@@ -37,16 +38,18 @@
   position: relative;
   display: flex;
   align-items: center;
-  gap: var(--sidebar-navigation-inline-spacing, 0.75rem);
+  gap: var(--sidebar-navigation-inline-spacing, 10px);
   min-width: 0;
-  padding: var(--sidebar-navigation-padding-block, 0.5rem)
-    var(--sidebar-navigation-inline-spacing, 0.75rem);
+  min-height: 36px;
+  padding: var(--sidebar-navigation-padding-block, 0)
+    var(--sidebar-navigation-inline-spacing, 10px);
   border: 0;
-  border-radius: var(--radius-md);
+  border-radius: var(--r-md);
   background: transparent;
   color: var(--ink-2);
   font: inherit;
-  font-size: 14px;
+  font-size: var(--fs-body);
+  font-weight: 500;
   line-height: 1.35;
   text-align: start;
   text-decoration: none;
@@ -57,12 +60,13 @@
 }
 
 .item:hover {
-  background: var(--bg-soft);
+  background: var(--surface-3);
   color: var(--ink);
 }
 
 .item:focus-visible {
-  box-shadow: 0 0 0 3px var(--indigo-soft);
+  outline: 2px solid var(--focus);
+  outline-offset: -2px;
 }
 
 .icon {
@@ -72,7 +76,7 @@
   justify-content: center;
   width: 18px;
   height: 18px;
-  color: var(--ink-3);
+  color: inherit;
 }
 
 .icon > svg {
@@ -89,26 +93,18 @@
 
 .current,
 .current:hover {
-  background: var(--card);
-  box-shadow: var(--shadow-xs);
-  color: var(--ink);
-  font-weight: 500;
+  background: var(--nav-on-bg);
+  box-shadow: var(--nav-on-shadow);
+  color: var(--nav-on-ink);
+  font-weight: 600;
 }
 
-.current .icon {
-  color: var(--indigo);
-}
-
-/* The bar sits in the sidebar's inline padding, outside the row. */
-.current::before {
-  position: absolute;
-  top: 8px;
-  bottom: 8px;
-  left: -4px;
-  width: 3px;
-  border-radius: 2px;
-  background: var(--indigo);
-  content: "";
+.draftDot {
+  flex: none;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
 }
 
 .badge {
@@ -121,21 +117,18 @@
   margin-inline-start: auto;
   padding: 0 6px;
   border-radius: var(--radius-pill);
-  font-family: var(--label-font);
-  font-size: 11px;
+  font: 600 11px / 1 var(--font-mono);
   font-variant-numeric: tabular-nums;
-  font-weight: 500;
-  line-height: 1;
 }
 
 .badgeNeedsYou {
-  background: var(--rose-soft);
-  color: var(--rose-ink);
+  background: var(--attn);
+  color: var(--on-attn);
 }
 
 .badgeQueue {
-  background: var(--sand-soft);
-  color: var(--sand-ink);
+  background: var(--surface-3);
+  color: var(--ink-2);
 }
 
 .tag {
@@ -151,7 +144,7 @@
   align-items: center;
   gap: 4px;
   min-inline-size: 0;
-  border-radius: var(--radius-md);
+  border-radius: var(--r-md);
   transition: background-color var(--duration-fast) var(--ease-standard);
 }
 
@@ -161,13 +154,13 @@
 }
 
 .row:hover {
-  background: var(--bg-soft);
+  background: var(--surface-3);
 }
 
 .rowCurrent,
 .rowCurrent:hover {
-  background: var(--card);
-  box-shadow: var(--shadow-xs);
+  background: var(--nav-on-bg);
+  box-shadow: var(--nav-on-shadow);
 }
 
 .row > .item:hover,
@@ -191,7 +184,7 @@
   }
 }
 
-/* Collapsed rail: 40px icon squares, captions become dashed rules. */
+/* Collapsed rail: 40px icon squares, captions become rules. */
 :global(.sidebar-collapsed) .row {
   flex-direction: column;
 }
@@ -200,6 +193,7 @@
   justify-content: center;
   width: 40px;
   height: 40px;
+  min-height: 0;
   margin-inline: auto;
   padding: 0;
 }
@@ -228,16 +222,16 @@
 }
 
 :global(.sidebar-collapsed) .row > .item:hover {
-  background: var(--bg-soft);
+  background: var(--surface-3);
 }
 
 :global(.sidebar-collapsed) .rowCurrent > .current {
-  background: var(--card);
-  box-shadow: var(--shadow-xs);
+  background: var(--nav-on-bg);
+  box-shadow: var(--nav-on-shadow);
 }
 
-:global(.sidebar-collapsed) .current::before,
-:global(.sidebar-collapsed) .tag {
+:global(.sidebar-collapsed) .tag,
+:global(.sidebar-collapsed) .draftDot {
   display: none;
 }
 
@@ -245,5 +239,5 @@
   height: 0;
   margin: var(--space-2);
   padding: 0;
-  border-top: 1px dashed var(--dash);
+  border-top: 1px solid var(--line);
 }

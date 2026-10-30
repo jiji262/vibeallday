@@ -35,6 +35,9 @@ vi.mock("../../hooks/useIssuesEnabled", () => ({
 vi.mock("../../hooks/useGlobalActiveAgents", () => ({
   useGlobalActiveAgents: () => 0,
 }));
+vi.mock("../../hooks/useActivityBusState", () => ({
+  useActivityBusState: () => ({ connectionState: "connected" }),
+}));
 vi.mock("../../hooks/useRemoteBasePath", () => ({
   useRemoteBasePath: () => "",
 }));
@@ -62,6 +65,8 @@ describe("MorePage", () => {
     state.principal = { username: null, switched: false };
     state.remote = null;
     state.logoutUser.mockClear();
+    localStorage.clear();
+    document.documentElement.removeAttribute("data-theme");
   });
 
   it("keeps superuser destinations from a limited user", () => {
@@ -80,6 +85,16 @@ describe("MorePage", () => {
       screen.getByRole("button", { name: /Stop acting as guest/ }),
     );
     expect(state.logoutUser).toHaveBeenCalledTimes(1);
+  });
+
+  it("switches the skin from the appearance row, OLED included", () => {
+    renderMore();
+    expect(screen.getByText("Connected")).toBeTruthy();
+    fireEvent.click(screen.getByRole("radio", { name: "OLED" }));
+    expect(document.documentElement.getAttribute("data-theme")).toBe(
+      "verydark",
+    );
+    expect(localStorage.getItem("vibeallday-theme")).toBe("verydark");
   });
 
   it("offers host switching only on a remote connection", () => {

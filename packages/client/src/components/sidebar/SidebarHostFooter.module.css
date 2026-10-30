@@ -1,9 +1,7 @@
-/* Pinned below the scrolling session lists. */
-.footer {
+/* Host card under the brand row (design .host). */
+.slot {
   flex-shrink: 0;
-  margin-top: var(--space-2);
-  padding-top: var(--space-3);
-  border-top: 1px dashed var(--dash);
+  margin-bottom: var(--space-3);
 }
 
 .pill {
@@ -12,10 +10,11 @@
   gap: 10px;
   width: 100%;
   min-width: 0;
-  padding: 6px var(--space-3);
-  border: 0;
-  border-radius: var(--radius-md);
-  background: transparent;
+  padding: 9px 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  background: var(--surface);
+  box-shadow: var(--shadow-card);
   color: var(--ink);
   font: inherit;
   text-align: start;
@@ -25,26 +24,16 @@
 }
 
 .pill:hover {
-  background: var(--bg-soft);
+  background: var(--surface-3);
 }
 
 .pill:focus-visible {
-  box-shadow: 0 0 0 3px var(--indigo-soft);
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
 }
 
-.avatar {
-  display: inline-flex;
-  flex-shrink: 0;
-  align-items: center;
-  justify-content: center;
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  background: var(--indigo);
-  color: var(--ink-on);
-  font-size: 13px;
-  font-weight: 600;
-  line-height: 1;
+.dot {
+  flex: none;
 }
 
 .text {
@@ -58,8 +47,8 @@
 
 .name {
   overflow: hidden;
-  font-size: 13px;
-  font-weight: 500;
+  font-size: var(--fs-small);
+  font-weight: 600;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -67,11 +56,14 @@
 .caption {
   overflow: hidden;
   color: var(--ink-3);
-  font-family: var(--label-font);
-  font-size: 10px;
-  letter-spacing: 0.05em;
+  font-size: var(--fs-meta);
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.chevron {
+  flex: none;
+  color: var(--ink-3);
 }
 
 @media (pointer: coarse) {
@@ -80,8 +72,9 @@
   }
 }
 
-:global(.sidebar-collapsed) .footer {
-  padding-top: var(--space-2);
+/* The rail keeps only the status dot, centred in a 40px square. */
+:global(.sidebar-collapsed) .slot {
+  margin-bottom: var(--space-2);
 }
 
 :global(.sidebar-collapsed) .pill {
@@ -90,4 +83,8 @@
   height: 40px;
   margin-inline: auto;
   padding: 0;
+}
+
+:global(.sidebar-collapsed) .chevron {
+  display: none;
 }

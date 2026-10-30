@@ -1,34 +1,66 @@
+/* Brand row (design .brand / .brand-mark): mark, wordmark, version, toggle. */
 .header {
   display: flex;
   flex-shrink: 0;
   align-items: center;
   justify-content: space-between;
   gap: var(--space-2);
-  min-height: 44px;
+  min-height: 36px;
   margin-bottom: var(--space-3);
-  padding: 0 var(--space-1) var(--space-4);
-  border-bottom: 1px dashed var(--dash);
+  padding: 2px 4px;
 }
 
 /*
- * The brand anchor wraps an inline-flex logo. A flex anchor has no line box,
- * so it is exactly the logo's height and the row centers on the tile.
+ * The brand anchor is a flex container. A flex anchor has no line box, so it
+ * is exactly the mark's height and the row centres on the tile.
  */
 .brandLink {
   display: flex;
   align-items: center;
+  gap: 10px;
   min-width: 0;
-  border-radius: var(--radius-md);
-  color: inherit;
+  border-radius: var(--r-sm);
+  color: var(--ink);
   text-decoration: none;
 }
 
 .brandLink:focus-visible {
-  box-shadow: 0 0 0 3px var(--indigo-soft);
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
 }
 
-.brandLink:hover {
-  --brand-wordmark-color: var(--indigo-ink);
+.mark {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--r-sm);
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+.brandLink .wordmark {
+  --brand-wordmark-size: 17px;
+
+  overflow: hidden;
+  font-family: var(--font-ui);
+  font-stretch: var(--display-stretch);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+
+.brandLink:hover .wordmark {
+  --brand-wordmark-color: var(--accent-ink);
+}
+
+.version {
+  flex: none;
+  color: var(--ink-3);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  white-space: nowrap;
 }
 
 .toggle:global(.sidebar-toggle),
@@ -37,13 +69,13 @@
   flex-shrink: 0;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
+  width: var(--icon-btn);
+  height: var(--icon-btn);
   padding: 0;
-  border: 0;
-  border-radius: var(--radius-md);
+  border: 1px solid transparent;
+  border-radius: var(--r-icon-btn);
   background: transparent;
-  color: var(--ink-3);
+  color: var(--ink-2);
   cursor: pointer;
   transition:
     background-color var(--duration-fast) var(--ease-standard),
@@ -52,18 +84,15 @@
 
 .toggle:global(.sidebar-toggle):hover,
 .close:hover {
-  background: var(--bg-soft);
+  background: var(--surface-3);
   color: var(--ink);
-}
-
-.close {
-  width: 36px;
-  height: 36px;
 }
 
 .toggle:global(.sidebar-toggle):focus-visible,
 .close:focus-visible {
-  box-shadow: 0 0 0 3px var(--indigo-soft);
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+  box-shadow: none;
 }
 
 /* Collapsed rail: the toggle centred, the minimize control in the corner. */
@@ -83,10 +112,10 @@
   right: -4px;
   width: 16px;
   height: 16px;
-  color: var(--ink-4);
+  color: var(--ink-3);
 }
 
 .minimize:global(.sidebar-minimize):hover {
-  background: var(--bg-soft);
+  background: var(--surface-3);
   color: var(--ink);
 }

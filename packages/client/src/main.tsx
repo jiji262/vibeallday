@@ -121,6 +121,16 @@ const ProjectsPage = lazy(() =>
     default: ProjectsPage,
   })),
 );
+const ProjectHomePage = lazy(() =>
+  import("./pages/ProjectHomePage").then(({ ProjectHomePage }) => ({
+    default: ProjectHomePage,
+  })),
+);
+const TriagePage = lazy(() =>
+  import("./pages/TriagePage").then(({ TriagePage }) => ({
+    default: TriagePage,
+  })),
+);
 const SessionPage = lazy(() =>
   import("./pages/SessionPage").then(({ SessionPage }) => ({
     default: SessionPage,
@@ -361,6 +371,10 @@ if (import.meta.env.DEV && window.location.port === String(__VITE_DEV_PORT__)) {
                       element={routeModule(<IssuesPage />)}
                     />
                     <Route path="/inbox" element={routeModule(<InboxPage />)} />
+                    <Route
+                      path="/triage"
+                      element={routeModule(<TriagePage />)}
+                    />
                     <Route path="/more" element={routeModule(<MorePage />)} />
                     <Route
                       path="/settings"
@@ -370,6 +384,10 @@ if (import.meta.env.DEV && window.location.port === String(__VITE_DEV_PORT__)) {
                       path="/settings/:category"
                       element={routeModule(<SettingsLayout />)}
                     />
+                    <Route
+                      path="/settings/:category/:itemId"
+                      element={routeModule(<SettingsLayout />)}
+                    />
                     {/* Project-scoped pages */}
                     <Route
                       path="/projects/:projectId/app"
@@ -377,7 +395,7 @@ if (import.meta.env.DEV && window.location.port === String(__VITE_DEV_PORT__)) {
                     />
                     <Route
                       path="/projects/:projectId"
-                      element={<Navigate to="/sessions" replace />}
+                      element={routeModule(<ProjectHomePage />)}
                     />
                     <Route
                       path="/git-status"

@@ -106,6 +106,22 @@ describe("initial remote route preloading", () => {
     },
   );
 
+  it("treats the redesign's triage and project home routes as app pages", () => {
+    expect(getInitialRemoteRouteModuleKeys("/triage", "/")).toEqual([
+      "remoteApp",
+      "layouts",
+      "triagePage",
+    ]);
+    expect(
+      getInitialRemoteRouteModuleKeys("/-/relay/host/projects/project-1", "/"),
+    ).toEqual([
+      "remoteApp",
+      "relayConnectionGate",
+      "layouts",
+      "projectHomePage",
+    ]);
+  });
+
   it("preloads the legacy redirect without the authenticated page graph", () => {
     expect(
       getInitialRemoteRouteModuleKeys("/old-host/projects/project-1", "/"),

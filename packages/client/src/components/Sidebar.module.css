@@ -1,13 +1,13 @@
 /*
- * Garden Console sidebar: sunken column, brand row, project switcher and new
- * session above a scrolling column of navigation and session sections, with
- * the host pill pinned at the bottom. The same aside renders as the desktop
- * column, the collapsed rail and the overlay drawer.
+ * App sidebar (design .side): brand row, host card, New Session and search
+ * above a scrolling column of navigation and session sections, with Settings
+ * and the appearance menu pinned at the bottom. The same aside renders as the
+ * desktop column, the collapsed rail and the overlay drawer.
  */
 .console {
-  padding: max(20px, env(safe-area-inset-top, 0px)) var(--space-3)
+  padding: max(14px, env(safe-area-inset-top, 0px)) 12px
     max(var(--space-4), env(safe-area-inset-bottom, 0px));
-  background: var(--bg-2);
+  background: var(--side-bg);
 }
 
 :global(.sidebar-collapsed) .console {
@@ -18,18 +18,47 @@
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
-  margin-bottom: var(--space-2);
+  gap: 8px;
+  margin-bottom: var(--space-3);
   padding-top: var(--sidebar-actions-padding-top, 0);
+}
+
+/* Primary block button (design .btn-primary .btn-block). */
+.newSession:global(.sidebar-nav-item),
+.newSession:global(.sidebar-nav-item):hover {
+  justify-content: center;
+  gap: 8px;
+  min-height: var(--btn-h);
+  padding: 0 var(--btn-px);
+  border-radius: var(--r-btn);
+  background: var(--accent);
+  box-shadow: none;
+  color: var(--on-accent);
+  font-size: var(--fs-btn);
+  font-weight: 600;
+}
+
+.newSession:global(.sidebar-nav-item):hover {
+  background: var(--accent-hover);
+}
+
+.newSession :global(.sidebar-nav-text) {
+  flex: 0 1 auto;
+}
+
+:global(.sidebar-collapsed) .newSession:global(.sidebar-nav-item) {
+  padding: 0;
+  border-radius: var(--r-icon-btn);
 }
 
 /* The scroller reaches the sidebar edges so its bar sits on the border. */
 .sessions {
   flex: 1;
   min-height: 0;
-  margin-inline: calc(-1 * var(--space-3));
-  padding: var(--sidebar-sessions-padding-top, 0.25rem) var(--space-3)
-    var(--space-4);
+  margin-inline: -12px;
+  padding: var(--sidebar-sessions-padding-top, 0) 12px var(--space-4);
   overflow-y: auto;
+  scrollbar-width: thin;
 }
 
 :global(.sidebar-collapsed) .sessions {
@@ -43,6 +72,9 @@
 }
 
 .sessionList {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -53,15 +85,14 @@
 }
 
 .sectionHeading {
-  margin: 0 0 var(--sidebar-section-header-gap, 0.5rem);
-  padding: 0 var(--sidebar-navigation-inline-spacing, 0.75rem);
+  margin: 0 0 var(--sidebar-section-header-gap, 4px);
+  padding: 0 10px;
   font: inherit;
 }
 
 /*
- * The name is the control. The button keeps the heading's inset so the name
- * stays on the rows' left edge; the chevron follows the name rather than
- * sitting at the far edge, so the cue reads as part of what is clicked.
+ * The name is the control (design .nav-label). The chevron follows the name
+ * rather than sitting at the far edge, so the cue reads as part of the click.
  */
 .sectionToggle {
   display: flex;
@@ -71,13 +102,13 @@
   min-height: 22px;
   padding: 0;
   border: 0;
-  border-radius: var(--radius-xs);
+  border-radius: var(--r-xs);
   background: transparent;
-  color: var(--ink-4);
-  font-family: var(--label-font);
-  font-size: 10px;
-  font-weight: 500;
-  letter-spacing: var(--eyebrow-tracking);
+  color: var(--ink-3);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.08em;
   text-align: left;
   text-transform: uppercase;
   cursor: pointer;
@@ -85,11 +116,12 @@
 }
 
 .sectionToggle:hover {
-  color: var(--ink-2);
+  color: var(--ink);
 }
 
 .sectionToggle:focus-visible {
-  box-shadow: 0 0 0 3px var(--indigo-soft);
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
 }
 
 /* Category and creator names keep the casing their owner typed. */
@@ -131,19 +163,134 @@
   font-variant-numeric: tabular-nums;
 }
 
-/* Compact session rows: 13px titles, the current row lifts onto a card. */
-.console :global(.session-list-item--compact .session-list-item__title-text) {
-  font-size: 13px;
+/*
+ * Compact session rows as design .side-session: a status dot, the title, and
+ * the project on a meta line below. Only CSS changes here; the row keeps its
+ * DOM. The dot is the row's own ::before, so no element is added per row.
+ */
+.console :global(.session-list-item--compact) {
+  --side-dot-inset: 10px;
+  --side-dot-size: 8px;
+
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 0;
+  padding-inline-start: calc(var(--side-dot-inset) * 2 + var(--side-dot-size));
+  border-radius: var(--r-md);
+}
+
+.console :global(.session-list-item--compact)::before {
+  position: absolute;
+  top: 15px;
+  left: var(--side-dot-inset);
+  box-sizing: border-box;
+  width: var(--side-dot-size);
+  height: var(--side-dot-size);
+  border: 1.5px solid var(--idle);
+  border-radius: 50%;
+  background: transparent;
+  transform: none;
+  content: "";
+}
+
+.console :global(.session-list-item--compact.unread)::before {
+  border: 0;
+  border-radius: 2px;
+  background: var(--ink);
+}
+
+/* Needs you: the row's needs-input badge (approval or question). */
+.console
+:global(.session-list-item--compact):has(
+  > a > :global(.session-badge-needs-input)
+)::before {
+  border: 0;
+  background: var(--attn);
+}
+
+/* Running: the row's thinking indicator, the trailing span that is neither
+   the project name nor a badge. The left dot replaces the trailing one. */
+.console
+:global(.session-list-item--compact):has(
+  > a
+    > span:not(
+      :global(.session-list-item__project-compact),
+      :global(.session-badge)
+    )
+)::before {
+  border: 0;
+  background: var(--run);
+  box-shadow: 0 0 0 3px var(--run-halo);
+}
+
+.console
+  :global(.session-list-item--compact)
+  > a
+  > span:not(
+    :global(.session-list-item__project-compact),
+    :global(.session-badge)
+  ) {
+  display: none;
 }
 
 .console :global(.session-list-item--compact):hover {
-  background: var(--bg-soft);
+  background: var(--surface-3);
 }
 
-.console :global(.session-list-item--compact.current) {
-  border-radius: var(--radius-md);
-  background: var(--card);
-  box-shadow: var(--shadow-xs);
+.console :global(.session-list-item--compact.current),
+.console :global(.session-list-item--compact.current):hover {
+  border-radius: var(--r-md);
+  background: var(--nav-on-bg);
+  box-shadow: var(--nav-on-shadow);
+}
+
+.console :global(.session-list-item--compact) > div {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.console :global(.session-list-item--compact .session-list-item__link) {
+  min-height: 0;
+  padding: 8px 4px 1px 0;
+  color: var(--ink);
+}
+
+.console :global(.session-list-item--compact .session-list-item__title-text) {
+  font-size: var(--fs-small);
+}
+
+.console
+  :global(.session-list-item--compact.unread .session-list-item__title-text),
+.console
+  :global(.session-list-item--compact.current .session-list-item__title-text) {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.console :global(.session-list-item--compact) > span[data-session-accessory] {
+  align-self: center;
+}
+
+/* Meta line: project and needs-you badge under the title. */
+.console :global(.session-list-item--compact) > a {
+  flex: 1 0 100%;
+  order: 2;
+  min-height: 0;
+  padding: 0 10px 8px 0;
+  color: var(--ink-3);
+  font-size: var(--fs-meta);
+}
+
+.console
+  :global(.session-list-item--compact .session-list-item__project-compact) {
+  max-width: none;
+  color: var(--ink-3);
+  font-size: var(--fs-meta);
+}
+
+.console :global(.session-list-item--compact) > ul {
+  flex: 1 0 100%;
+  order: 3;
 }
 
 .pendingQueueRow {
@@ -160,52 +307,45 @@
 .recentMore {
   display: flex;
   align-items: center;
-  min-height: var(--tap-min);
-  padding: var(--space-2) var(--space-3);
-  border-radius: var(--radius-md);
-  color: var(--indigo);
-  font-size: 13px;
+  min-height: 36px;
+  padding: 0 10px;
+  border-radius: var(--r-md);
+  color: var(--link);
+  font-size: var(--fs-small);
   font-weight: 500;
   text-decoration: none;
 }
 
 .recentMore:hover {
-  background: var(--bg-soft);
+  background: var(--surface-3);
 }
 
 .recentMore:focus-visible {
-  box-shadow: 0 0 0 3px var(--indigo-soft);
+  outline: 2px solid var(--focus);
+  outline-offset: -2px;
 }
 
 .empty {
   padding: var(--space-4);
-  color: var(--ink-4);
-  font-family: var(--label-font);
-  font-size: 11px;
-  letter-spacing: var(--meta-tracking);
+  color: var(--ink-3);
+  font-size: var(--fs-meta);
   text-align: center;
-  text-transform: uppercase;
-}
-
-.newSession:global(.sidebar-nav-item) {
-  color: var(--indigo-ink);
-  font-weight: 500;
 }
 
 .hiddenDupsToggle {
   min-height: 28px;
-  padding: var(--space-1) var(--sidebar-navigation-inline-spacing, 0.75rem);
+  padding: var(--space-1) 10px;
   border: 0;
-  border-radius: var(--radius-md);
+  border-radius: var(--r-md);
   background: transparent;
   color: var(--ink-3);
-  font-family: var(--label-font);
+  font-family: var(--font-mono);
   font-size: 11px;
   cursor: pointer;
 }
 
 .hiddenDupsToggle:hover {
-  background: var(--bg-soft);
+  background: var(--surface-3);
   color: var(--ink);
 }
 
@@ -214,4 +354,10 @@
 :global(.sidebar-collapsed) .recentMore,
 :global(.sidebar-collapsed) .empty {
   display: none;
+}
+
+@media (pointer: coarse) {
+  .recentMore {
+    min-height: var(--tap-min);
+  }
 }

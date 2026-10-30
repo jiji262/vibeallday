@@ -30,7 +30,7 @@ const TABS: readonly TabSpec[] = [
     key: "sessions",
     to: "/inbox",
     labelKey: "tabSessions",
-    prefixes: ["/inbox", "/sessions"],
+    prefixes: ["/inbox", "/sessions", "/triage"],
     icon: <InboxIcon size={TAB_ICON_SIZE} />,
   },
   {
@@ -95,7 +95,10 @@ function activeTabFor(path: string, search: string): TabKey | undefined {
   )?.key;
 }
 
-/** Phone navigation shares one Sessions destination for Overview and All. */
+/**
+ * Phone navigation shares one Sessions destination for Overview, All and
+ * Triage; New is the centre accent pill.
+ */
 export function MobileTabBar() {
   const { t } = useI18n();
   const basePath = useRemoteBasePath();
@@ -129,7 +132,15 @@ export function MobileTabBar() {
             }
             data-tab={tab.key}
           >
-            <span className={styles.iconWrap}>{tab.icon}</span>
+            <span
+              className={
+                tab.key === "new"
+                  ? `${styles.iconWrap} ${styles.fab}`
+                  : styles.iconWrap
+              }
+            >
+              {tab.icon}
+            </span>
             <span className={styles.label}>{label}</span>
             {badge > 0 ? (
               <span className={styles.badge} aria-hidden="true">

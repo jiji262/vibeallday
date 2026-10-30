@@ -10,6 +10,7 @@ const DIRECT_APP_ROUTE_SEGMENTS = new Set([
   "projects",
   "sessions",
   "settings",
+  "triage",
 ]);
 
 const RESERVED_REMOTE_ROUTE_SEGMENTS = new Set([

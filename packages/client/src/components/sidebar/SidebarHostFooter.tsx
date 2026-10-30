@@ -7,55 +7,90 @@ import {
 } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import type { RemoteConnectionState } from "../../contexts/RemoteConnectionContext";
-import { useHostIdentity } from "../../contexts/HostIdentityContext";
+import { useActivityBusState } from "../../hooks/useActivityBusState";
 import { useLongPress } from "../../hooks/useLongPress";
-import { useI18n } from "../../i18n";
+import { type MessageKey, useI18n } from "../../i18n";
 import { getRelayBasePath } from "../../lib/remoteRoutePaths";
 import {
   recentRelayHosts,
   type SwitchableRelayHost,
   SwitchHostMenu,
 } from "../SwitchHostMenu";
-import { switchHost, useConnectedHost } from "./connectedHost";
+import { StatusDot, type StatusState } from "../garden/StatusDot";
+import { ChevronsUpDownIcon } from "../garden/icons";
+import {
+  HOST_MODE_LABEL,
+  type HostMode,
+  switchHost,
+  useConnectedHost,
+} from "./connectedHost";
 import styles from "./SidebarHostFooter.module.css";
 
-interface SidebarHostFooterProps {
+interface SidebarHostCardProps {
   basePath: string;
   onNavigate: () => void;
 }
 
-function HostPillBody({ name, caption }: { name: string; caption: string }) {
-  const { icon } = useHostIdentity();
+const SWITCH_ICON_SIZE = 14;
+
+const CONNECTION_STATUS: Record<
+  ReturnType<typeof useActivityBusState>["connectionState"],
+  { state: StatusState; labelKey: MessageKey }
+> = {
+  connected: { state: "ok", labelKey: "shellHostConnected" },
+  reconnecting: { state: "run", labelKey: "shellHostReconnecting" },
+  disconnected: { state: "err", labelKey: "shellHostDisconnected" },
+};
+
+/** Status dot, host name and "mode · connection"; no latency is measured. */
+function HostCardBody({
+  name,
+  mode,
+  switchable,
+}: {
+  name: string;
+  mode: HostMode;
+  switchable: boolean;
+}) {
+  const { t } = useI18n();
+  const { connectionState } = useActivityBusState();
+  const status = CONNECTION_STATUS[connectionState];
   return (
     <>
-      <span className={styles.avatar} aria-hidden="true">
-        {icon ?? name.trim().charAt(0).toUpperCase()}
-      </span>
+      <StatusDot state={status.state} className={styles.dot} />
       <span className={`sidebar-nav-text ${styles.text}`}>
         <span className={styles.name}>{name}</span>
-        <span className={styles.caption}>{caption}</span>
+        <span className={styles.caption}>
+          {`${t(HOST_MODE_LABEL[mode])} · ${t(status.labelKey)}`}
+        </span>
       </span>
+      {switchable ? (
+        <ChevronsUpDownIcon
+          size={SWITCH_ICON_SIZE}
+          className={styles.chevron}
+        />
+      ) : null}
     </>
   );
 }
 
 /**
- * Footer pill naming the machine this app talks to. Remote and relay
- * connections switch hosts from it (hold or right-click lists recent relay
- * hosts); the local app opens Settings.
+ * Card under the brand naming the machine this app talks to. Remote and
+ * relay connections switch hosts from it (hold or right-click lists recent
+ * relay hosts); the local app opens Settings.
  */
-export function SidebarHostFooter({
+export function SidebarHostCard({
   basePath,
   onNavigate,
-}: SidebarHostFooterProps) {
+}: SidebarHostCardProps) {
   const { t } = useI18n();
-  const { remote, name, caption } = useConnectedHost();
+  const { remote, name, mode } = useConnectedHost();
 
   return (
-    <div className={styles.footer}>
+    <div className={styles.slot}>
       {remote ? (
         <RemoteHostPill remote={remote} name={name} onNavigate={onNavigate}>
-          <HostPillBody name={name} caption={caption} />
+          <HostCardBody name={name} mode={mode} switchable />
         </RemoteHostPill>
       ) : (
         <Link
@@ -65,7 +100,7 @@ export function SidebarHostFooter({
           title={name}
           onClick={onNavigate}
         >
-          <HostPillBody name={name} caption={caption} />
+          <HostCardBody name={name} mode={mode} switchable={false} />
         </Link>
       )}
     </div>
@@ -164,7 +199,7 @@ function SwitchHostButton({
       className={`sidebar-nav-item sidebar-switch-host ${styles.pill}`}
       {...(canListHosts ? press.handlers : {})}
       onClick={canListHosts ? press.click(doSwitch) : doSwitch}
-      aria-label={t("sidebarSwitchHostNamed", { host: name })}
+      aria-label={t("shellHostSwitchCurrent", { host: name })}
       title={canListHosts ? t("sidebarSwitchHostTitle") : undefined}
     >
       {children}

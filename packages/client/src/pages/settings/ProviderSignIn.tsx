@@ -1,6 +1,7 @@
 import type { ProviderLoginFlow, ProviderName } from "@vibeallday/shared";
 import { useCallback, useEffect, useState } from "react";
 import { api } from "../../api/client";
+import { ProviderSignInFlow } from "../../components/auth/ProviderSignInFlow";
 import { useToastContext } from "../../contexts/ToastContext";
 import { useI18n } from "../../i18n";
 import styles from "./ProviderSignIn.module.css";
@@ -140,95 +141,18 @@ export function ProviderSignIn({
 
   if (running && flow) {
     return (
-      <div
-        className={styles.panel}
-        data-testid={`provider-sign-in-${provider}`}
-      >
-        {problem && (
-          <p role="alert" className="settings-warning">
-            {problem}
-          </p>
-        )}
-        {flow.url ? (
-          <a
-            className="settings-button settings-button-primary"
-            href={flow.url}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            {t("providersSignInOpenPage", { provider: displayName })}
-          </a>
-        ) : (
-          <p className="settings-hint">{t("providersSignInStarting")}</p>
-        )}
-        {flow.userCode && (
-          <div className={styles.row}>
-            <span className="settings-hint">
-              {t("providersSignInEnterCode")}
-            </span>
-            <code className={styles.userCode}>{flow.userCode}</code>
-            <button
-              type="button"
-              className="settings-button"
-              onClick={() => void copyUserCode(flow.userCode as string)}
-            >
-              {t("providersSignInCopyCode")}
-            </button>
-          </div>
-        )}
-        {flow.acceptsCode && flow.url && !flow.codeSubmitted && (
-          <p className="settings-hint">{t("providersSignInCodeHint")}</p>
-        )}
-        {flow.acceptsCode && flow.url && !flow.codeSubmitted && (
-          <form
-            className={`${styles.row} ${styles.codeRow}`}
-            onSubmit={(event) => {
-              event.preventDefault();
-              void submitCode();
-            }}
-          >
-            <input
-              type="text"
-              className={styles.codeInput}
-              value={code}
-              onChange={(event) => setCode(event.target.value)}
-              placeholder={t("providersSignInCodePlaceholder")}
-              aria-label={t("providersSignInCodePlaceholder")}
-              autoComplete="off"
-              spellCheck={false}
-            />
-            <button
-              type="submit"
-              className="settings-button settings-button-primary"
-              disabled={busy || !code.trim()}
-            >
-              {t("providersSignInSubmitCode")}
-            </button>
-          </form>
-        )}
-        {flow.codeSubmitted && (
-          <p className="settings-hint">{t("providersSignInVerifying")}</p>
-        )}
-        {flow.output && (
-          <pre
-            role="region"
-            className={styles.output}
-            aria-label={t("providerSignInOutput")}
-          >
-            {flow.output}
-          </pre>
-        )}
-        <div className={styles.row}>
-          <button
-            type="button"
-            className="settings-button"
-            onClick={() => void cancel()}
-            disabled={busy}
-          >
-            {t("providersSignInCancel")}
-          </button>
-        </div>
-      </div>
+      <ProviderSignInFlow
+        flow={flow}
+        provider={provider}
+        displayName={displayName}
+        problem={problem}
+        busy={busy}
+        code={code}
+        onCodeChange={setCode}
+        onSubmitCode={() => void submitCode()}
+        onCancel={() => void cancel()}
+        onCopyUserCode={(userCode) => void copyUserCode(userCode)}
+      />
     );
   }
 

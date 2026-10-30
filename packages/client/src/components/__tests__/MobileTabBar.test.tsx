@@ -35,6 +35,8 @@ describe("MobileTabBar active tab", () => {
     ["/remote/host/git-status?projectId=p1", "more"],
     ["/remote/host/sessions?project=p1", "sessions"],
     ["/remote/host/projects", "projects"],
+    ["/remote/host/projects/p1", "projects"],
+    ["/remote/host/triage", "sessions"],
   ])("%s selects %s", (entry, tab) => {
     expect(activeTab(entry)).toBe(tab);
     expect(screen.getAllByRole("link")).toHaveLength(4);

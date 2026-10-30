@@ -11,11 +11,13 @@ import { useServerSettings } from "../../hooks/useServerSettings";
 import { useVersion } from "../../hooks/useVersion";
 import type { MessageKey } from "../../i18n";
 import { bangHistoryViewEnabled } from "../../lib/bangCommandAvailability";
+import { isRemoteClient } from "../../lib/connection";
 import {
   BugIcon,
   CpuIcon,
   FolderIcon,
   GitBranchIcon,
+  GlobeIcon,
   type IconProps,
   InboxIcon,
   ListIcon,
@@ -33,6 +35,7 @@ export type ShellDestinationKey =
   | "issues"
   | "devices"
   | "agents"
+  | "hosts"
   | "settings";
 
 /** Sidebar group, also the More page and palette grouping. */
@@ -49,6 +52,11 @@ export interface ShellDestination {
   Icon: ComponentType<IconProps>;
   /** Shown with a Beta badge in navigation. */
   beta?: boolean;
+  /**
+   * Route at the router root rather than under the relay base path, so links
+   * must not prefix `useRemoteBasePath()`.
+   */
+  appRoot?: boolean;
 }
 
 interface DestinationGates {
@@ -62,20 +70,21 @@ interface DestinationGates {
 /**
  * One table of app destinations in sidebar order. The sidebar, the phone
  * More page and the command palette all read it, so gating lives in one place.
+ * The sidebar draws the System group (Settings) in its footer.
  */
 const SHELL_DESTINATIONS: readonly ShellDestination[] = [
   {
     key: "overview",
     group: "work",
     to: "/inbox",
-    labelKey: "sidebarOverview",
+    labelKey: "shellNavInbox",
     Icon: InboxIcon,
   },
   {
     key: "sessions",
     group: "work",
     to: "/sessions",
-    labelKey: "tabSessions",
+    labelKey: "sidebarAllSessions",
     Icon: ListIcon,
   },
   {
@@ -94,12 +103,12 @@ const SHELL_DESTINATIONS: readonly ShellDestination[] = [
     Icon: GitBranchIcon,
   },
   {
-    key: "bang-commands",
+    key: "agents",
     group: "tools",
-    to: "/bang-commands",
-    labelKey: "sidebarBangCommands",
-    hintKey: "moreBangCommandsHint",
-    Icon: TerminalIcon,
+    to: "/agents",
+    labelKey: "agentsTitle",
+    hintKey: "moreAgentsHint",
+    Icon: CpuIcon,
   },
   {
     key: "issues",
@@ -111,20 +120,20 @@ const SHELL_DESTINATIONS: readonly ShellDestination[] = [
     beta: true,
   },
   {
+    key: "bang-commands",
+    group: "tools",
+    to: "/bang-commands",
+    labelKey: "sidebarBangCommands",
+    hintKey: "moreBangCommandsHint",
+    Icon: TerminalIcon,
+  },
+  {
     key: "devices",
     group: "tools",
     to: "/devices",
     labelKey: "sidebarDevices",
     hintKey: "moreDevicesHint",
     Icon: SmartphoneIcon,
-  },
-  {
-    key: "agents",
-    group: "tools",
-    to: "/agents",
-    labelKey: "agentsTitle",
-    hintKey: "moreAgentsHint",
-    Icon: CpuIcon,
   },
   {
     key: "settings",
@@ -135,6 +144,20 @@ const SHELL_DESTINATIONS: readonly ShellDestination[] = [
     Icon: SettingsIcon,
   },
 ];
+
+/**
+ * The multi-host monitor exists only in the remote build, at the router root
+ * outside any relay host. Callers opt in because they must link it without
+ * the relay base path.
+ */
+const ALL_HOSTS_DESTINATION: ShellDestination = {
+  key: "hosts",
+  group: "tools",
+  to: "/-/monitor",
+  labelKey: "multiHostMonitorTitle",
+  Icon: GlobeIcon,
+  appRoot: true,
+};
 
 function isDestinationAvailable(
   key: ShellDestinationKey,
@@ -160,7 +183,11 @@ function isDestinationAvailable(
  * Destinations the connected server and acting principal can use. Hiding is
  * cosmetic for limited users; the server refuses the same operations anyway.
  */
-export function useShellDestinations(): readonly ShellDestination[] {
+export function useShellDestinations({
+  includeAppRoot = false,
+}: {
+  includeAppRoot?: boolean;
+} = {}): readonly ShellDestination[] {
   const { version } = useVersion();
   const { settings } = useServerSettings();
   const issues = useIssuesEnabled();
@@ -180,10 +207,13 @@ export function useShellDestinations(): readonly ShellDestination[] {
         serverHasCapability(version, DEVICE_BRIDGE_CAPABILITY) ||
         serverHasCapability(version, DEVICE_BRIDGE_DOWNLOAD_CAPABILITY),
     };
-    return SHELL_DESTINATIONS.filter((destination) =>
+    const available = SHELL_DESTINATIONS.filter((destination) =>
       isDestinationAvailable(destination.key, gates),
     );
-  }, [clientDefaults, issues, limited, version]);
+    return includeAppRoot && isRemoteClient()
+      ? [...available, ALL_HOSTS_DESTINATION]
+      : available;
+  }, [clientDefaults, includeAppRoot, issues, limited, version]);
 }
 
 export function destinationsInGroup(

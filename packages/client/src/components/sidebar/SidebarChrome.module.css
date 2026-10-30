@@ -1,0 +1,128 @@
+/* Sidebar search action, footer row and the appearance menu. */
+
+/* Secondary block button (design .btn-secondary .btn-block, start-aligned). */
+.search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-width: 0;
+  height: var(--btn-h);
+  padding: 0 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-btn);
+  background: var(--surface);
+  color: var(--ink-3);
+  font: inherit;
+  font-size: var(--fs-btn);
+  font-weight: 500;
+  text-align: start;
+  cursor: pointer;
+  transition: background-color var(--duration-fast) var(--ease-standard);
+}
+
+.search:hover {
+  background: var(--surface-3);
+}
+
+.search:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.searchIcon {
+  flex: none;
+}
+
+.searchLabel {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.searchKbd {
+  flex: none;
+}
+
+/* Pinned below the scrolling column. */
+.footer {
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  gap: 2px;
+  margin-top: var(--space-2);
+  padding-top: 10px;
+  border-top: 1px solid var(--line);
+}
+
+.footerRow {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+}
+
+.footerItem {
+  flex: 1;
+}
+
+/* Design .icon-btn. */
+.iconButton {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: var(--icon-btn);
+  height: var(--icon-btn);
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: var(--r-icon-btn);
+  background: transparent;
+  color: var(--ink-2);
+  cursor: pointer;
+}
+
+.iconButton:hover {
+  background: var(--surface-3);
+  color: var(--ink);
+}
+
+.iconButton:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.menuOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: default;
+}
+
+.themeMenu {
+  position: fixed;
+  z-index: 1001;
+  min-width: 200px;
+}
+
+/* The rail stacks Settings over the appearance button. */
+:global(.sidebar-collapsed) .search {
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  margin-inline: auto;
+  padding: 0;
+}
+
+:global(.sidebar-collapsed) .footerRow {
+  flex-direction: column;
+}
+
+:global(.sidebar-collapsed) .footerItem {
+  flex: none;
+}

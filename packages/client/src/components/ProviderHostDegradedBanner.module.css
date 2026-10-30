@@ -1,27 +1,24 @@
-/* Full-width danger notice: the provider host is degraded. */
+/* Full-width error notice (design `.notice.err`): the provider host is
+   degraded. It sits in the page flow, so it never covers the header. */
 .root {
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
   gap: 2px;
-  padding: var(--space-3) var(--page-gutter);
-  border-bottom: 1px solid color-mix(in srgb, var(--rose) 28%, transparent);
-  background: var(--rose-soft);
-  color: var(--rose-ink);
+  padding: 12px var(--page-gutter);
+  border-bottom: 1px solid var(--err-line);
+  background: var(--err-soft);
+  color: var(--err-ink);
+  font-size: var(--fs-small);
+  line-height: 1.55;
 }
 
 .title {
   margin: 0;
-  font-family: var(--label-font);
-  font-size: 11px;
-  font-weight: 500;
-  letter-spacing: var(--eyebrow-tracking);
-  text-transform: uppercase;
+  font-weight: 600;
 }
 
 .body {
   max-width: 52rem;
   margin: 0;
-  font-size: 13px;
-  line-height: 1.5;
 }
