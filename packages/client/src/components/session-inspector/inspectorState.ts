@@ -14,8 +14,8 @@ export type InspectorTab = (typeof INSPECTOR_TABS)[number];
 const OPEN_KEY = UI_KEYS.sessionInspectorOpen;
 const TAB_KEY = UI_KEYS.sessionInspectorTab;
 
-/** Closed until the reader opens it, so the transcript keeps its width. */
-const OPEN_BY_DEFAULT = false;
+/** Docked open on wide screens until the reader closes it (design board). */
+const OPEN_BY_DEFAULT = true;
 
 const openStore = createLocalStorageValue<boolean>(
   OPEN_KEY,

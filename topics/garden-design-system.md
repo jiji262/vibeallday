@@ -271,8 +271,8 @@ diffs) stay edge to edge on phones; ordinary prompts and forms pass
   presence is **Show always** (pinned tools stay in the row and have no tray
   copy). Approvals and questions open above the dock while the composer
   collapses. On desktop the session inspector (Changes / Plan / Context /
-  Subagents) is closed by default; its open state and tab are client-local
-  preferences.
+  Subagents) is docked open by default wherever its column fits; its open
+  state and tab are client-local preferences.
 - **New session**: prompt first; provider, model/thinking and permission
   mode are chips (permission mode is a dropdown chip, not a segmented
   control); the project chooser is a full-width row under the composer at

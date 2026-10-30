@@ -517,7 +517,7 @@ button.tool-summary {
 /* icon / name / target, the toolrow grid of the work log. */
 .explored-entry {
   display: grid;
-  grid-template-columns: 0.8rem 3.5rem minmax(0, 1fr);
+  grid-template-columns: 1rem 3.5rem minmax(0, 1fr);
   align-items: baseline;
   gap: 0.5rem;
   min-height: 24px;
@@ -613,7 +613,7 @@ button.tool-summary {
 }
 
 .explored-parent-details {
-  margin: 2px 10px 0 calc(4.3rem + 10px);
+  margin: 2px 10px 0 calc(4.5rem + 10px);
 }
 
 .explored-parent-details-toggle {
@@ -664,7 +664,7 @@ button.tool-summary {
 
 @media (width <= 600px) {
   .explored-entry {
-    grid-template-columns: 0.8rem 2.85rem minmax(0, 1fr);
+    grid-template-columns: 1rem 2.85rem minmax(0, 1fr);
     gap: 0.35rem;
     padding-inline: 6px;
   }
@@ -678,7 +678,7 @@ button.tool-summary {
   }
 
   .explored-parent-details {
-    margin-left: calc(3.65rem + 6px);
+    margin-left: calc(3.85rem + 6px);
   }
 }
 

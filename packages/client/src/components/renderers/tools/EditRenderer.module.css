@@ -1,0 +1,30 @@
+/* The file name gives way so the diff stat stays whole on narrow rows. */
+.summaryButton {
+  min-width: 0;
+}
+
+.fileName {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Design diff stat in the summary row: green additions, red deletions. */
+.delta {
+  white-space: nowrap;
+}
+
+.adds,
+.dels {
+  font-family: var(--font-mono);
+  font-weight: 600;
+}
+
+.adds {
+  color: var(--diff-add-ink);
+}
+
+.dels {
+  color: var(--diff-del-ink);
+}

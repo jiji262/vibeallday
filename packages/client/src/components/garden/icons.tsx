@@ -194,6 +194,14 @@ export const FolderIcon = createIcon(
   <path d="M3 6.5A1.5 1.5 0 0 1 4.5 5H9l2 2.5h8.5A1.5 1.5 0 0 1 21 9v9.5a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 18.5z" />,
 );
 
+export const FileIcon = createIcon(
+  "FileIcon",
+  <>
+    <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z" />
+    <path d="M14 3v5h5" />
+  </>,
+);
+
 export const TerminalIcon = createIcon(
   "TerminalIcon",
   <>

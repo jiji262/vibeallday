@@ -46,6 +46,7 @@ import {
 } from "../../ui/FixedFontMathToggle";
 import { HiddenContentBadge } from "../../ui/HiddenContentBadge";
 import { InnerHtml } from "../../ui/InnerHtml";
+import styles from "./EditRenderer.module.css";
 import {
   captureDiffSelection,
   type DiffSelectionSnapshot,
@@ -231,18 +232,21 @@ function isPlanFile(filePath: string): boolean {
   return filePath.includes(".claude/plans/");
 }
 
+function countLineDelta(structuredPatch: PatchHunk[]) {
+  const lines = structuredPatch.flatMap((h) => h.lines);
+  return {
+    additions: lines.filter((l) => l.startsWith("+")).length,
+    deletions: lines.filter((l) => l.startsWith("-")).length,
+  };
+}
+
 /**
  * Compute change summary from structuredPatch
  */
 function computeChangeSummary(structuredPatch: PatchHunk[]): string | null {
   if (!structuredPatch || structuredPatch.length === 0) return null;
 
-  const additions = structuredPatch
-    .flatMap((h) => h.lines)
-    .filter((l) => l.startsWith("+")).length;
-  const deletions = structuredPatch
-    .flatMap((h) => h.lines)
-    .filter((l) => l.startsWith("-")).length;
+  const { additions, deletions } = countLineDelta(structuredPatch);
 
   if (additions > 0 && deletions > 0) {
     return `Modified ${additions + deletions} lines`;
@@ -254,6 +258,18 @@ function computeChangeSummary(structuredPatch: PatchHunk[]): string | null {
     return `Removed ${deletions} line${deletions !== 1 ? "s" : ""}`;
   }
   return null;
+}
+
+/** Design diff stat: +added −removed, each part only when non-zero. */
+function LineDelta({ structuredPatch }: { structuredPatch: PatchHunk[] }) {
+  const { additions, deletions } = countLineDelta(structuredPatch);
+  return (
+    <>
+      {additions > 0 && <span className={styles.adds}>+{additions}</span>}
+      {additions > 0 && deletions > 0 && " "}
+      {deletions > 0 && <span className={styles.dels}>−{deletions}</span>}
+    </>
+  );
 }
 
 function getPatchFileLineRange(
@@ -1448,16 +1464,21 @@ function EditInteractiveSummary({
       <FileDiffLinkCluster className="source-review-edit-summary">
         <button
           type="button"
-          className="file-link-inline"
+          className={`file-link-inline ${styles.summaryButton}`}
           title={fileTitle}
           onClick={(e) => {
             e.stopPropagation();
             setShowModal(true);
           }}
         >
-          {fileName}
+          <span className={styles.fileName}>{fileName}</span>
           {changeSummary && (
-            <span className="file-line-count-inline">{changeSummary}</span>
+            <span
+              className={`file-line-count-inline ${styles.delta}`}
+              title={changeSummary}
+            >
+              <LineDelta structuredPatch={structuredPatch} />
+            </span>
           )}
           {showValidationWarning && validationErrors && (
             <SchemaWarning toolName="Edit" errors={validationErrors} />

@@ -280,6 +280,10 @@ test("keeps a dragged selection in a windowed transcript", async ({
   await context.grantPermissions(["clipboard-read", "clipboard-write"]);
   await enableAllSelectionActions(page);
   await page.setViewportSize({ width: 1200, height: 700 });
+  // Both drag markers fit on screen only in the full-width column.
+  await page.addInitScript(() =>
+    localStorage.setItem("vibeallday-session-inspector-open", "false"),
+  );
   await page.goto(`/projects/${projectId}/sessions/windowed-selection-001`);
   const lastReply = page
     .locator(".message-list")

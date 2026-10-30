@@ -57,20 +57,15 @@ export const displayExpectations = {
   },
   Edit: {
     "plain-text": plain("Computing diff", "contract.ts"),
-    replacement: ordinary(
-      "Computing diff",
-      "after",
-      "after",
-      "Modified 2 lines",
-    ),
+    replacement: ordinary("Computing diff", "after", "after", "+1 −1"),
     patch: ordinary(
       "*** Begin Patch",
       "Applied patch",
       "*** Begin Patch",
       "contract.ts",
     ),
-    augmented: ordinary("after", "after", "after", "Modified 2 lines"),
-    changes: ordinary("Computing diff", "after", "after", "Modified 2 lines"),
+    augmented: ordinary("after", "after", "after", "+1 −1"),
+    changes: ordinary("Computing diff", "after", "after", "+1 −1"),
     target: ordinary(
       "Computing diff",
       "Applied patch",

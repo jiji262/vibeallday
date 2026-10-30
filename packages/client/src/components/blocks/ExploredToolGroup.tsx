@@ -30,6 +30,8 @@ import { effectiveInvocationError } from "../renderers/tools/prepareDisplay";
 import type { RenderContext } from "../renderers/types";
 import { SessionFilePathLink } from "../SessionFilePathLink";
 import { getToolSummary } from "../tools/summaries";
+import styles from "./ExploredToolGroup.module.css";
+import { ExplorationKindIcon } from "./explorationKindIcon";
 import { ToolCallRow } from "./ToolCallRow";
 import {
   countWorkLog,
@@ -260,8 +262,15 @@ export const ExploredToolGroup = memo(function ExploredToolGroup({
                     data-render-type={parent.item.type}
                     role="listitem"
                   >
-                    <span className="explored-entry-status" aria-hidden="true">
-                      {statusGlyph(parent.item.status)}
+                    <span
+                      className={`explored-entry-status ${styles.status}`}
+                      aria-hidden="true"
+                    >
+                      {parent.item.status === "complete" ? (
+                        <ExplorationKindIcon kind={entry.kind} />
+                      ) : (
+                        statusGlyph(parent.item.status)
+                      )}
                     </span>
                     <span className="explored-entry-tool">
                       {getExplorationEntryDisplayLabel(parent, entry)}
@@ -271,7 +280,7 @@ export const ExploredToolGroup = memo(function ExploredToolGroup({
                         fallback block, and a block inside an inline box
                         paints outside the row instead of being clipped by
                         it. */}
-                    <div className="explored-entry-summary">
+                    <div className={`explored-entry-summary ${styles.summary}`}>
                       {isCanonicalExplorationEntry(parent, entry)
                         ? renderEntrySummary(
                             parent.item,

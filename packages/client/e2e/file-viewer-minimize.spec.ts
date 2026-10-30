@@ -253,6 +253,10 @@ test("finds within the file viewer after a click in its content", async ({
   );
   try {
     await page.setViewportSize({ width: 1200, height: 600 });
+    // The idle find field needs the column the docked inspector would take.
+    await page.addInitScript(() =>
+      localStorage.setItem("vibeallday-session-inspector-open", "false"),
+    );
     await page.goto(`${baseURL}/projects/${projectId}/sessions/${sessionId}`);
     await dismissOnboardingIfVisible(page);
     const absoluteLink = page.locator(

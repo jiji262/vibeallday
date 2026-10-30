@@ -481,3 +481,46 @@ privateTest(
     }
   },
 );
+
+test("keeps the reading place when the window crosses the desktop breakpoint", async ({
+  page,
+  baseURL,
+}) => {
+  await page.setViewportSize({ width: 1200, height: 600 });
+  await page.goto(
+    `${baseURL}/projects/${projectId}/sessions/${scrollMemorySessionId}`,
+  );
+  await dismissOnboardingIfVisible(page);
+  await expect(
+    page.getByRole("main").getByText("Scroll memory fixture"),
+  ).toBeVisible({ timeout: 10_000 });
+  // Read from the middle, away from Follow and from the older-page edge.
+  const reading = await page.locator(".message-list").evaluate((list) => {
+    const port = list.parentElement!;
+    port.dispatchEvent(
+      new WheelEvent("wheel", { bubbles: true, deltaY: -120 }),
+    );
+    port.scrollTop = Math.round((port.scrollHeight - port.clientHeight) / 2);
+    port.dispatchEvent(new Event("scroll"));
+    const top = port.getBoundingClientRect().top;
+    const rows = [...list.querySelectorAll<HTMLElement>("[data-render-id]")];
+    return rows.find((row) => row.getBoundingClientRect().bottom > top + 1)
+      ?.dataset.renderId;
+  });
+  expect(reading).toBeTruthy();
+  const readingRowVisible = () =>
+    page.locator(".message-list").evaluate((list, id) => {
+      const port = list.parentElement!;
+      const row = list.querySelector<HTMLElement>(`[data-render-id="${id}"]`);
+      if (!row || port.scrollTop === 0) return false;
+      const view = port.getBoundingClientRect();
+      const box = row.getBoundingClientRect();
+      return box.bottom > view.top && box.top < view.bottom;
+    }, reading);
+  // Both directions: the layout classes follow the breakpoint a frame later
+  // than the media queries, and that frame must not lose the scroll offset.
+  for (const width of [1000, 1200]) {
+    await page.setViewportSize({ width, height: 600 });
+    await expect.poll(readingRowVisible).toBe(true);
+  }
+});

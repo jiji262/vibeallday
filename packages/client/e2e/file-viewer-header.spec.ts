@@ -12,6 +12,10 @@ test("moves window controls without changing the filename row", async ({
     "base64url",
   );
   await page.setViewportSize({ width: 1200, height: 600 });
+  // The docked inspector would narrow the viewer below its one-row header.
+  await page.addInitScript(() =>
+    localStorage.setItem("vibeallday-session-inspector-open", "false"),
+  );
   await page.goto(
     `${baseURL}/projects/${projectId}/sessions/file-viewer-absolute-001`,
   );
