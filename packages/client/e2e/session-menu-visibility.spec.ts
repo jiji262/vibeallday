@@ -25,6 +25,7 @@ test.afterAll(async () => {
 for (const touch of [false, true]) {
   test(`session menus reveal only the active row on ${touch ? "touch" : "desktop"}`, async ({
     browser,
+    browserName,
   }, testInfo) => {
     const context = await browser.newContext({
       viewport: { width: touch ? 375 : 1000, height: touch ? 812 : 600 },
@@ -84,10 +85,15 @@ for (const touch of [false, true]) {
         "/projects/project/sessions/session-1",
       );
       const cardLink = rows.last().locator(".session-list-item__link");
-      // Establish keyboard modality after the pointer navigation above.
-      // WebKit's default Tab traversal skips links; focus the same link in both engines.
-      if (!touch) await page.keyboard.press("Tab");
       await cardLink.focus();
+      if (!touch) {
+        // Arrive on the link by keyboard after the pointer navigation above:
+        // WebKit gives a scripted focus after a click no :focus-visible, and
+        // its plain Tab skips links (Safari's Option-Tab reaches them).
+        const tab = browserName === "webkit" ? "Alt+Tab" : "Tab";
+        await page.keyboard.press(`Shift+${tab}`);
+        await page.keyboard.press(tab);
+      }
       await expect(cardLink).toBeFocused();
       await expect(rows.last().locator(".session-list-item__menu")).toHaveCSS(
         "opacity",

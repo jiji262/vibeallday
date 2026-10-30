@@ -17,7 +17,7 @@
       "reason": "Legacy generated-content and renderer class vocabulary."
     },
     "packages/client/src/styles/theme.css": {
-      "maxLines": 1287,
+      "maxLines": 1284,
       "reason": "Garden design tokens, themes, self-hosted font faces and base element rules; the single global source of design values. Raised 938 -> 1300 for the redesign skins: per-skin design tokens (Celadon, Night, OLED, auto-dark copy), phone sizes and the skin font faces."
     },
     "packages/client/src/styles/tool-rows.css": {

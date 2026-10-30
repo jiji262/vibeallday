@@ -114,11 +114,13 @@
   background: var(--surface-3);
 }
 
-/* Inspector toggle: the same square as the menu trigger beside it. */
+/* Inspector toggle: the same square as the menu trigger beside it. A fixed
+   size, not a minimum: IconButton's own `--icon-btn` (38px in Celadon) would
+   otherwise outgrow the row and push the bar past `--topbar-height`. */
 .header .inspectorToggle {
   flex-shrink: 0;
-  min-width: var(--header-control-size);
-  min-height: var(--header-control-size);
+  width: var(--header-control-size);
+  height: var(--header-control-size);
 }
 
 .header .menuTrigger {

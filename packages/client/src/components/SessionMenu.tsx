@@ -211,6 +211,20 @@ export function SessionMenu({
   // Close menu when clicking outside or scrolling (mobile)
   useEffect(() => {
     if (!isOpen) return;
+    // Scroll events are dispatched on the next frame, so a scroll that landed
+    // just before the opening click (a list scrolling the trigger into view)
+    // arrives after the menu opened. Only a scroll that moved the trigger away
+    // from where the menu opened may close it.
+    const openedAt = triggerRef.current?.getBoundingClientRect();
+    const triggerMoved = () => {
+      const now = triggerRef.current?.getBoundingClientRect();
+      return (
+        !openedAt ||
+        !now ||
+        now.top !== openedAt.top ||
+        now.left !== openedAt.left
+      );
+    };
     const handleClickOutside = (e: MouseEvent) => {
       const target = e.target as Node;
       // Check both wrapper and dropdown (dropdown may be in portal)
@@ -220,6 +234,11 @@ export function SessionMenu({
         setIsOpen(false);
         triggerRef.current?.blur();
       }
+    };
+    const close = () => {
+      setIsOpen(false);
+      setDropdownPosition(null);
+      triggerRef.current?.blur();
     };
     const handleScroll = (e: Event) => {
       // Only close if scroll happens in an ancestor of the menu trigger
@@ -232,17 +251,16 @@ export function SessionMenu({
       ) {
         return; // Scroll is not in an ancestor of the menu, ignore
       }
-      setIsOpen(false);
-      setDropdownPosition(null);
-      triggerRef.current?.blur();
+      if (!triggerMoved()) return;
+      close();
     };
     document.addEventListener("mousedown", handleClickOutside);
     document.addEventListener("scroll", handleScroll, true);
-    window.addEventListener("resize", handleScroll);
+    window.addEventListener("resize", close);
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
       document.removeEventListener("scroll", handleScroll, true);
-      window.removeEventListener("resize", handleScroll);
+      window.removeEventListener("resize", close);
     };
   }, [isOpen]);
 

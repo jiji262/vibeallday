@@ -669,7 +669,6 @@
   --success-color: var(--mint-ink);
   --warning-color: var(--sand-ink);
   --warning-badge-bg: var(--peach-ink);
-  --patient-queue-action-bg: var(--sand-ink);
   --attention-color: var(--indigo);
   --focus-border: var(--focus);
   --primary-color: var(--indigo);
@@ -914,7 +913,6 @@
   --peach-ink: #f2a27e;
   --peach-soft: rgba(232, 137, 95, 0.16);
   --warning-badge-bg: #c9683f;
-  --patient-queue-action-bg: #a9812b;
   --project-queue-action-bg: #2f6fb8;
   --project-queue-new-session-action-bg: #22548e;
   --app-claude-ivory: #e9eef5;
@@ -1078,7 +1076,6 @@
     --peach-ink: #f2a27e;
     --peach-soft: rgba(232, 137, 95, 0.16);
     --warning-badge-bg: #c9683f;
-    --patient-queue-action-bg: #a9812b;
     --project-queue-action-bg: #2f6fb8;
     --project-queue-new-session-action-bg: #22548e;
     --app-claude-ivory: #e9eef5;

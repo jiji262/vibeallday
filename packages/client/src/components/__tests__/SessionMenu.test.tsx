@@ -397,3 +397,43 @@ describe("SessionMenu sections", () => {
     ).toBe("false");
   });
 });
+
+describe("SessionMenu scroll close", () => {
+  // A scroll event is dispatched a frame after the scroll itself, so a list
+  // that scrolled its row into view just before the opening click delivers
+  // that event to the already-open menu.
+  it("stays open for a scroll that did not move the trigger", () => {
+    const { container } = render(
+      <I18nProvider>
+        <div data-testid="list">
+          <SessionMenu
+            sessionId="session-1"
+            projectId="project-1"
+            isStarred={false}
+            isArchived={false}
+            hasUnread
+            onToggleStar={vi.fn()}
+            onToggleArchive={vi.fn()}
+            onToggleRead={vi.fn()}
+            onRename={vi.fn()}
+            useFixedPositioning
+          />
+        </div>
+      </I18nProvider>,
+    );
+    const list = container.querySelector('[data-testid="list"]')!;
+    const trigger = screen.getByRole("button", { name: "Session options" });
+    let triggerTop = 400;
+    vi.spyOn(trigger, "getBoundingClientRect").mockImplementation(
+      () => new DOMRect(200, triggerTop, 34, 34),
+    );
+
+    fireEvent.click(trigger);
+    fireEvent.scroll(list);
+    expect(screen.getByRole("button", { name: "Mark as read" })).toBeTruthy();
+
+    triggerTop = 380;
+    fireEvent.scroll(list);
+    expect(screen.queryByRole("button", { name: "Mark as read" })).toBeNull();
+  });
+});

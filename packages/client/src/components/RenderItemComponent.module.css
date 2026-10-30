@@ -142,10 +142,16 @@
  * dropped. It keeps its box in the flex layout at zero height rather than
  * leaving the layout: removing the item would change the wrap the budget was
  * measured from, and the drop decision would flap on and off.
+ *
+ * Its bottom margin goes, so the empty box adds no blank band under the
+ * current card that would push it up past the viewport top. The top margin
+ * stays: the budget measures this card's top, and moving it only while dropped
+ * would make the decision flap.
  */
 .activityHeightReserve[data-previous-thinking="dropped"]
 :global(.conversation-thinking-preview[data-preview-slot="previous"]) {
   height: 0;
+  margin-bottom: 0;
   border-width: 0;
   visibility: hidden;
 }

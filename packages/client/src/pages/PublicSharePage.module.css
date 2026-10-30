@@ -59,7 +59,11 @@
   padding: 8px 28px;
 }
 
-/* One 720px reading column for notices, the view switch and the transcript. */
+/* One reading column for notices, the view switch and the transcript. It is
+   the session transcript's width (--content-max-width), not the board's
+   720px: the conversation activity row packs the activity column beside the
+   current thinking card only at that width, and a narrower column wraps the
+   card under the column, where a short window clips its top under follow. */
 .page :global(.public-share-caution),
 .page :global(.public-share-notice),
 .page :global(.public-share-error--inline),
@@ -67,14 +71,14 @@
 .viewBar {
   box-sizing: border-box;
   width: auto;
-  max-width: 720px;
+  max-width: var(--content-max-width);
   margin-inline: auto;
 }
 
 .page :global(.public-share-scroll .message-list) {
   box-sizing: border-box;
   width: 100%;
-  max-width: 720px;
+  max-width: var(--content-max-width);
   margin-inline: auto;
 }
 
