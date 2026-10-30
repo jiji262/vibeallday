@@ -6,7 +6,7 @@ import {
   test,
   waitForRelayStatus,
 } from "./fixtures.js";
-import { moreTab, openMore } from "./support/phone-nav.js";
+import { openMore, tabBar } from "./support/phone-nav.js";
 
 const username = "e2e-issues-route";
 const password = "issues-route-test-password";
@@ -79,13 +79,11 @@ for (const mode of ["direct", "relay"] as const) {
           exact: false,
         }),
       ).toBeVisible();
-      if (phone) {
-        // The tab bar resolves the relay prefix: More stays selected.
-        await expect(moreTab(page)).toHaveAttribute("aria-current", "page");
-      } else {
-        if (!(await issuesLink.isVisible())) await openSidebar.click();
-        await expect(issuesLink).toHaveClass(/\bactive\b/);
-      }
+      // Issues is a deep page, so phones show no tab bar there; the drawer
+      // launcher opens the sidebar, which resolves the relay prefix.
+      if (phone) await expect(tabBar(page)).toHaveCount(0);
+      if (!(await issuesLink.isVisible())) await openSidebar.click();
+      await expect(issuesLink).toHaveClass(/\bactive\b/);
 
       const deepLink = `${remotePreviewURL}${prefix}/issues?sessionId=route-test&projectId=route-project`;
       await page.goto(deepLink);

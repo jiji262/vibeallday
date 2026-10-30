@@ -91,22 +91,23 @@ for (const viewport of [
     page.on("pageerror", (error) => errors.push(error.message));
     await page.setViewportSize(viewport);
     await page.goto(`${baseURL}/inbox?project=${projectId}`);
-    // Overview/All tabs exist only with the phone tab bar; the sidebar lists
+    // Inbox/All views exist only with the phone tab bar; the sidebar lists
     // both destinations everywhere else.
     const views = page.getByRole("navigation", { name: "Session views" });
     const phone = viewport.name === "phone";
     if (phone) {
       await expect(
-        views.getByRole("link", { name: "Overview", exact: true }),
+        views.getByRole("link", { name: "Inbox", exact: true }),
       ).toHaveAttribute("aria-current", "page");
     } else {
       await expect(views).toHaveCount(0);
     }
     await expect(page.locator("#now-tier-needsAttention")).toContainText("26");
     await expect(page.locator("#now-tier-active")).toContainText("1");
-    await expect(
-      page.getByRole("link", { name: "2 unread", exact: true }),
-    ).toBeVisible();
+    // The unread status block is a filter toggle, not a link.
+    const unreadTile = page.locator('[data-summary-tile="unread"]');
+    await expect(unreadTile).toHaveAccessibleName("2 unread");
+    await expect(unreadTile).toHaveAttribute("aria-pressed", "false");
     await expect(
       page
         .getByRole("status")
@@ -129,7 +130,12 @@ for (const viewport of [
       await expect(bar.locator('[data-tab="now"]')).toHaveCount(0);
     }
     await recordUiCapture(page, `session-overview-${viewport.name}`);
-    await page.getByRole("link", { name: "2 unread", exact: true }).click();
+    await unreadTile.click();
+    await expect(unreadTile).toHaveAttribute("aria-pressed", "true");
+    await page
+      .locator("#now-tier-unread")
+      .getByRole("link", { name: "View all unread", exact: true })
+      .click();
     await expect(page).toHaveURL(/\/sessions\?/);
     if (phone) {
       await expect(

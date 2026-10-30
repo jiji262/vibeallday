@@ -20,7 +20,7 @@ test("selecting a settings category clears the search", async ({
 
   await page
     .locator(".settings-category-nav")
-    .getByRole("button", { name: /Speech backends/ })
+    .getByRole("button", { name: /Voice input/ })
     .click();
 
   await expect(page).toHaveURL(/\/settings\/speech$/);
@@ -40,10 +40,12 @@ for (const viewport of [
     const search = page.getByRole("searchbox", { name: "Search settings" });
     await search.fill("theme");
     const theme = page.locator('[data-settings-item="theme"]');
-    await theme.getByRole("button", { name: "Dark", exact: true }).click();
+    await theme.getByRole("button", { name: "Night", exact: true }).click();
     await expect(search).toHaveValue("theme");
     await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
-    await theme.locator("strong").click();
+    // The skin picker row has no title text; its search result jumps through
+    // the breadcrumb button.
+    await theme.getByRole("button", { name: /^Go to Appearance/ }).click();
     await expect(page).toHaveURL(/\/settings\/appearance$/);
     await expect(theme).toHaveClass(/settings-item--jump-flash/);
 

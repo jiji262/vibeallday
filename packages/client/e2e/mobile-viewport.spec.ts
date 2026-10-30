@@ -2,6 +2,9 @@ import { join } from "node:path";
 import { e2ePaths, expect, test } from "./fixtures.js";
 import { recordUiCapture } from "./support/ui-capture.js";
 
+/** Resolved bottom safe-area inset of an edge-to-edge Android browser. */
+const SAFE_AREA_BOTTOM = 24;
+
 for (const degraded of [false, true]) {
   test(`mobile shell stays anchored with safe-area spacing (degraded host: ${degraded})`, async ({
     page,
@@ -35,13 +38,14 @@ for (const degraded of [false, true]) {
 
       // Desktop Chromium has zero native safe-area insets. Supply the same
       // resolved safe-area spacing as an edge-to-edge Android browser. The
-      // tab bar owns that inset, so it must not also separate the composer
-      // from navigation or make the outer document scroll.
+      // tab bar is root-only: on /inbox it owns that inset; on a session
+      // detail there is no tab bar, so the composer sits directly on the
+      // inset. Neither may make the outer document scroll.
       await page.addStyleTag({
-        content: `body, .session-page { padding-bottom: 24px; }
+        content: `body, .session-page { padding-bottom: ${SAFE_AREA_BOTTOM}px; }
           nav[aria-label="Main navigation"] {
-            padding-bottom: 24px;
-            height: calc(var(--tabbar-height) + 24px);
+            padding-bottom: ${SAFE_AREA_BOTTOM}px;
+            height: calc(var(--tabbar-height) + ${SAFE_AREA_BOTTOM}px);
           }`,
       });
       for (const height of [812, 480, 812]) {
@@ -68,19 +72,21 @@ for (const degraded of [false, true]) {
         if (path !== "/inbox") {
           const composer = page.locator("footer.session-input");
           await expect(composer).toBeVisible();
+          await expect(
+            page.getByRole("navigation", { name: "Main navigation" }),
+          ).toHaveCount(0);
           await expect
             .poll(async () => {
               const box = await composer.boundingBox();
-              const navigation = await page
-                .getByRole("navigation", {
-                  name: "Main navigation",
-                })
-                .boundingBox();
-              return box && navigation
-                ? Math.round(navigation.y - box.y - box.height)
+              return box
+                ? Math.round(height - SAFE_AREA_BOTTOM - box.y - box.height)
                 : null;
             })
             .toBe(0);
+        } else {
+          await expect(
+            page.getByRole("navigation", { name: "Main navigation" }),
+          ).toBeVisible();
         }
       }
       await recordUiCapture(

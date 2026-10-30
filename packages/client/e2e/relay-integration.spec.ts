@@ -33,7 +33,7 @@ import {
 } from "./fixtures.js";
 
 import type {} from "../src/lib/resumeDebugger.js";
-import { moreTab, openMore, tabBar } from "./support/phone-nav.js";
+import { openMore, tabBar } from "./support/phone-nav.js";
 import { recordUiCapture } from "./support/ui-capture.js";
 
 // Test credentials
@@ -288,7 +288,10 @@ test.describe("Full Relay Integration", () => {
       await expect(page).toHaveURL(
         `${remotePreviewURL}${relayAppPath("settings")}`,
       );
-      await expect(page.locator(".sidebar")).toBeVisible();
+      // Desktop Settings replaces the app sidebar with its own rail.
+      await expect(
+        page.getByRole("searchbox", { name: "Search settings" }),
+      ).toBeVisible();
 
       // A client-side handoff initially encounters the existing connection.
       // Leaving its route may then release that source's demand.
@@ -919,8 +922,13 @@ test.describe("Full Relay Integration", () => {
           .locator("main")
           .getByRole("heading", { level: 1, name: "Shell history" }),
       ).toBeVisible({ timeout: 10_000 });
-      // The tab bar resolves the relay prefix, so More stays selected here.
-      await expect(moreTab(page)).toHaveAttribute("aria-current", "page");
+      // Shell history is a deep page, so phones show no tab bar there; the
+      // drawer launcher opens the sidebar, which resolves the relay prefix.
+      await expect(tabBar(page)).toHaveCount(0);
+      await page.getByRole("button", { name: "Open sidebar" }).click();
+      await expect(
+        page.locator(`.sidebar a[href="${relayAppPath("bang-commands")}"]`),
+      ).toHaveClass(/\bactive\b/);
     } finally {
       await setBangHistoryVisibility(baseURL, false);
     }
@@ -951,7 +959,7 @@ test.describe("Full Relay Integration", () => {
     }, relayWsURL);
 
     const switchHost = page.getByRole("button", {
-      name: /^Switch host, now /,
+      name: /^Switch host, current /,
     });
     const otherHost = page.getByRole("menuitem", { name: /Windows box/ });
     for (const viewport of [

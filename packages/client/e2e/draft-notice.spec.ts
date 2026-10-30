@@ -68,7 +68,7 @@ test("draft review belongs to its session composer, never the Inbox", async ({
   await page.setViewportSize({ width: 1000, height: 600 });
   await page.goto(`${baseURL}/inbox`);
   await expect(
-    page.getByRole("banner").getByText("Overview", { exact: true }),
+    page.getByRole("banner").getByText("Inbox", { exact: true }),
   ).toBeVisible();
   await expect(
     page.getByRole("status", { name: "Draft needs attention" }),

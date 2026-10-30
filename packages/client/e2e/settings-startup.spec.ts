@@ -3,7 +3,7 @@ import { expect, test } from "./fixtures.js";
 
 test.use({ serviceWorkers: "block", viewport: { width: 1280, height: 800 } });
 
-test("a fresh Settings window starts collapsed without changing the saved preference", async ({
+test("desktop Settings replaces the app sidebar without changing the saved preference", async ({
   page,
   baseURL,
 }) => {
@@ -15,9 +15,8 @@ test("a fresh Settings window starts collapsed without changing the saved prefer
   await expect(
     page.getByRole("searchbox", { name: "Search settings" }),
   ).toBeVisible();
-  await expect(page.locator(".sidebar-desktop")).toHaveClass(
-    /sidebar-collapsed/,
-  );
+  // Desktop Settings draws its own rail in place of the app sidebar.
+  await expect(page.locator(".sidebar-desktop")).toHaveCount(0);
   expect(
     await page.evaluate(
       (key) => localStorage.getItem(key),
@@ -25,7 +24,8 @@ test("a fresh Settings window starts collapsed without changing the saved prefer
     ),
   ).toBe("true");
 
-  await page.goto(`${baseURL}/settings?sidebar=expanded`);
+  await page.goto(`${baseURL}/inbox`);
+  await expect(page.locator(".sidebar-desktop")).toBeVisible();
   await expect(page.locator(".sidebar-desktop")).not.toHaveClass(
     /sidebar-collapsed/,
   );
@@ -49,15 +49,16 @@ test("Settings controls do not wait for sidebar sessions", async ({
     await page.goto(`${baseURL}/settings/appearance`, {
       waitUntil: "domcontentloaded",
     });
-    await expect.poll(() => sessionsRequested).toBe(true);
     await expect(
       page.getByRole("searchbox", { name: "Search settings" }),
     ).toBeVisible();
-    const light = page
+    const celadon = page
       .locator(".settings-content-panel")
-      .getByRole("button", { name: "Light", exact: true });
-    await light.click();
+      .getByRole("button", { name: "Celadon", exact: true });
+    await celadon.click();
     await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
+    // Desktop Settings has no app sidebar, so it never loads sidebar sessions.
+    expect(sessionsRequested).toBe(false);
   } finally {
     release();
     await page.unrouteAll({ behavior: "wait" });
@@ -89,7 +90,7 @@ test("search loads inactive panes without blocking existing editable results", a
     await expect.poll(() => speechRequested).toBe(true);
     const results = page.locator(".settings-search-results");
     await expect(results).toHaveAttribute("aria-busy", "true");
-    await results.getByRole("button", { name: "Light", exact: true }).click();
+    await results.getByRole("button", { name: "Celadon", exact: true }).click();
     await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
     await search.fill("zzzz-no-such-setting");
     await expect(page.locator(".settings-search-no-results")).toHaveCount(0);

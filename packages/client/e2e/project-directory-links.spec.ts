@@ -92,6 +92,12 @@ test("directory mentions resolve per occurrence and session controls stay local"
     .locator('[data-session-toolbar-control="renderMode"]')
     .filter({ visible: true })
     .first();
+  const tray = page.getByRole("button", {
+    name: "More toolbar controls",
+    exact: true,
+  });
+  // Unpinned controls ("first" here) live in the composer + tray.
+  await tray.click();
   await control.click({ button: "right" });
   const menu = page.getByRole("dialog", { name: "Toolbar control actions" });
   const directories = menu.getByRole("combobox", {
@@ -122,9 +128,7 @@ test("directory mentions resolve per occurrence and session controls stay local"
   await page.setViewportSize({ width: 375, height: 812 });
   // Phones fold the render-mode toggle into the composer's overflow tray; the
   // tray copy opens the same control menu.
-  await page
-    .getByRole("button", { name: "More toolbar controls", exact: true })
-    .click();
+  if (!(await control.isVisible())) await tray.click();
   await control.click({ button: "right" });
   await expect(menu).toBeInViewport();
   await recordUiCapture(page, "directory-links-phone");

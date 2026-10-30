@@ -1,8 +1,6 @@
 import { DraftSyncNotice } from "../../src/components/DraftSyncNotice";
-import {
-  SidebarNavItem,
-  SidebarIcons,
-} from "../../src/components/SidebarNavItem";
+import { SessionsIcon } from "../../src/components/garden/icons";
+import { SidebarNavItem } from "../../src/components/SidebarNavItem";
 import { BrowserRouter } from "react-router-dom";
 import {
   LOCAL_CLIENT_SUMMARY_SOURCE_KEY,
@@ -29,9 +27,10 @@ function SessionNavigation() {
     <nav aria-label="Sessions">
       <SidebarNavItem
         to={`${window.location.pathname}${window.location.search}`}
-        icon={SidebarIcons.projects}
+        icon={<SessionsIcon size={18} />}
         label="Synced session"
         hasDraft={draftSessionIds.has(sessionId)}
+        draftLabel="Unsent draft"
       />
     </nav>
   ) : null;

@@ -373,7 +373,9 @@ test("phone send clears an unchanged desktop draft quietly after focus leaves", 
     expect(Math.max(...latencies)).toBeLessThan(100);
     await expect(inputB).toHaveValue("Send from phone", { timeout: 10000 });
     const navigation = a.getByRole("navigation", { name: "Sessions" });
-    await expect(navigation.getByText("Draft", { exact: true })).toBeVisible();
+    // The row's draft marker is a labelled dot, not a "Draft" text tag.
+    const draftMarker = navigation.getByRole("img", { name: "Unsent draft" });
+    await expect(draftMarker).toBeVisible();
     await b.getByRole("button", { name: "Send", exact: true }).click();
     await expect
       .poll(() => api.store.read("", slot).snapshot.payload.fields.text)
@@ -381,16 +383,16 @@ test("phone send clears an unchanged desktop draft quietly after focus leaves", 
     await a.evaluate(() => window.dispatchEvent(new Event("focus")));
     await expect(a.getByRole("status")).toHaveCount(0);
     await expect(inputA).toHaveValue("Send from phone");
-    await expect(navigation.getByText("Draft", { exact: true })).toBeVisible();
+    await expect(draftMarker).toBeVisible();
     await a
       .getByRole("heading", { name: "Session draft", exact: true })
       .click();
     await expect(inputA).toHaveValue("", { timeout: 10000 });
     await expect(a.getByRole("status")).toHaveCount(0);
-    await expect(navigation.getByText("Draft", { exact: true })).toHaveCount(0);
+    await expect(draftMarker).toHaveCount(0);
     await recordUiCapture(a, "draft-cleared-desktop");
     await a.setViewportSize({ width: 375, height: 812 });
-    await expect(navigation.getByText("Draft", { exact: true })).toHaveCount(0);
+    await expect(draftMarker).toHaveCount(0);
     await recordUiCapture(a, "draft-cleared-phone");
     await a.reload();
     await expect(inputA).toHaveValue("");

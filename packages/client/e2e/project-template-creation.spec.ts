@@ -57,16 +57,21 @@ test("template palette preserves sequential input and inline state at desktop an
       .getByRole("button", { name: "Add project", exact: true })
       .click();
     const form = page.getByRole("region", { name: "New project", exact: true });
-    await expect(form.getByRole("radio")).toHaveCount(3);
-    // The superuser's path entry comes first; typing there drops the chooser.
+    // The superuser's local-folder tab comes first; the templates sit in
+    // their own tab, mounted while hidden so either draft survives a switch.
     const pathEntry = page.getByRole("textbox", { name: "Project path" });
+    const folderTab = page.getByRole("tab", { name: "Local folder" });
+    const templateTab = page.getByRole("tab", { name: /From template/ });
+    await expect(form).toBeHidden();
     await recordUiCapture(page, `template-project-open-${viewport.width}`);
     await pathEntry.pressSequentially("~/src");
     await expect(pathEntry).toHaveValue("~/src", { timeout: 100 });
-    await expect(form).toBeHidden();
     await recordUiCapture(page, `template-project-path-${viewport.width}`);
     await pathEntry.fill("");
+    await templateTab.click();
+    await expect(pathEntry).toBeHidden();
     await expect(form).toBeVisible();
+    await expect(form.getByRole("radio")).toHaveCount(3);
     const name = form.getByRole("textbox", { name: "Name", exact: true });
     let typed = "";
     for (const character of "Sketch garden") {
@@ -79,6 +84,11 @@ test("template palette preserves sequential input and inline state at desktop an
       .fill("A place to sketch ideas together");
     await form.getByRole("radio", { name: /Storybook/ }).check();
     await expect(name).toHaveValue("Sketch garden");
+    await folderTab.click();
+    await expect(form).toBeHidden();
+    await templateTab.click();
+    await expect(name).toHaveValue("Sketch garden");
+    await expect(form.getByRole("radio", { name: /Storybook/ })).toBeChecked();
     await form.scrollIntoViewIfNeeded();
     await recordUiCapture(page, `template-project-${viewport.width}`);
     expect(

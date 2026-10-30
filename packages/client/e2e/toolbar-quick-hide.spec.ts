@@ -69,6 +69,14 @@ for (const viewport of [
     await page.setViewportSize(viewport);
     await page.goto(`${baseURL}/projects/${projectId}/sessions/${sessionId}`);
     await dismissOnboardingIfVisible(page);
+    if (!viewport.touch) {
+      // Unpinned controls ("first" here) live in the composer + tray.
+      await page
+        .getByRole("button", { name: "More toolbar controls" })
+        .filter({ visible: true })
+        .first()
+        .click();
+    }
 
     const control = page
       .locator(`[data-session-toolbar-control="${controlKey}"]`)

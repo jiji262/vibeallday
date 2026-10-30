@@ -13,7 +13,7 @@ for (const width of [375, 1000, 1100, 1200, 1400]) {
       width,
       height: width === 375 ? 812 : 600,
     });
-    await page.goto(`${baseURL}/settings/providers`);
+    await page.goto(`${baseURL}/settings/agent-behavior`);
     const firstRow = page.locator(
       '[data-settings-item="providers-subagent-max-depth"]',
     );

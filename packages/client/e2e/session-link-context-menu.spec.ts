@@ -23,10 +23,14 @@ test("session preview links suppress context menus and preserve link gestures", 
     });
   });
   await page.setViewportSize({ width: 1200, height: 600 });
-  await page.goto(`${baseURL}/settings/appearance`);
-  await page
-    .getByRole("button", { name: "Expand sidebar", exact: true })
-    .click();
+  // A non-session page with the app sidebar (desktop Settings draws its own
+  // rail instead), so link gestures that must not navigate stay observable.
+  await page.goto(`${baseURL}/inbox`);
+  const expand = page.getByRole("button", {
+    name: "Expand sidebar",
+    exact: true,
+  });
+  if (await expand.isVisible()) await expand.click();
 
   const link = page.locator(".sidebar .session-list-item__link").first();
   const href = await link.getAttribute("href");
@@ -49,7 +53,7 @@ test("session preview links suppress context menus and preserve link gestures", 
     await link.click(options);
     const popup = await popupPromise;
     await popup.waitForURL(new URL(href!, baseURL).href);
-    expect(new URL(page.url()).pathname).toBe("/settings/appearance");
+    expect(new URL(page.url()).pathname).toBe("/inbox");
     await popup.close();
   }
 

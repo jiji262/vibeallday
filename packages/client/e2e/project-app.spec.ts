@@ -710,17 +710,28 @@ test("project App fills the pane and retains canvas and composer across phone sw
     .poll(async () => (await sessionApp.boundingBox())!.width)
     .toBeLessThan(900);
 
-  // A phone's full view owns the viewport, including the tab-bar space.
-  // Retained sessions must not hide navigation while parked behind a list.
+  // A phone's full view owns the viewport. Session details have no tab bar;
+  // their header links back to the list, a tab-bar root. Retained sessions
+  // must not hide navigation while parked behind that list.
   await page.evaluate(() =>
     localStorage.setItem("vibeallday-session-dom-linger-enabled", "true"),
   );
   await page.setViewportSize({ width: 375, height: 812 });
   await page.reload();
   const navigation = page.getByRole("navigation", { name: "Main navigation" });
+  const fullView = page.locator('[data-app-full-view="true"]');
+  const sessionListUrl = /\/sessions\?project=/;
+  await expect(navigation).toHaveCount(0);
+  // On a phone the open app covers the session header; its Back closes the
+  // pane before the header's back link is reachable.
+  await expect(sessionApp.locator("iframe")).toBeVisible();
+  await sessionApp.getByRole("button", { name: "Back" }).click();
+  await expect(sessionApp).toBeHidden();
+  await page
+    .getByRole("link", { name: "Back to sessions", exact: true })
+    .click();
+  await expect(page).toHaveURL(sessionListUrl);
   await expect(navigation).toBeVisible();
-  await navigation.locator('[data-tab="sessions"]').click();
-  await expect(page).toHaveURL(`${base}/inbox`);
   await page.goBack();
   if (!(await sessionApp.isVisible())) await appButton.click();
   await expect(sessionApp.locator("iframe")).toBeVisible();
@@ -728,7 +739,7 @@ test("project App fills the pane and retains canvas and composer across phone sw
     frame.dataset.kept = "phone";
   });
   await sessionApp.getByRole("button", { name: "Full view" }).click();
-  await expect(navigation).toBeHidden();
+  await expect(fullView).toHaveCount(1);
   await expect
     .poll(async () => {
       const bounds = (await sessionApp.boundingBox())!;
@@ -737,19 +748,19 @@ test("project App fills the pane and retains canvas and composer across phone sw
     .toBe(812);
   await recordUiCapture(page, "project-app-full-phone");
   await page.goForward();
-  await expect(page).toHaveURL(`${base}/inbox`);
+  await expect(page).toHaveURL(sessionListUrl);
   await expect(navigation).toBeVisible();
   await expect(page.locator('iframe[data-kept="phone"]')).toHaveCount(1);
   await expect(page.locator('iframe[data-kept="phone"]')).toBeHidden();
   await page.goBack();
-  await expect(navigation).toBeHidden();
+  await expect(navigation).toHaveCount(0);
   await expect(sessionApp.locator('iframe[data-kept="phone"]')).toBeVisible();
   await sessionApp.getByRole("button", { name: "Back" }).click();
-  await expect(navigation).toBeVisible();
+  await expect(fullView).toHaveCount(0);
   await sessionApp.getByRole("button", { name: "Full view" }).click();
-  await expect(navigation).toBeHidden();
+  await expect(fullView).toHaveCount(1);
   await page.keyboard.press("Escape");
-  await expect(navigation).toBeVisible();
+  await expect(fullView).toHaveCount(0);
   await expect(sessionApp.locator('iframe[data-kept="phone"]')).toBeVisible();
   await recordUiCapture(page, "project-app-restored-phone");
   // Only the app-address configuration changes; the server and app stay live.

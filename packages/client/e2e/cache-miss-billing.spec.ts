@@ -227,7 +227,10 @@ test("filters cache evidence and links events from the same session", async ({
   await expect(page.getByText("64m–128m", { exact: true })).toHaveCount(2);
   await capture(page, "cache-billing-charts-desktop.png");
 
-  const eventsHeading = page.getByRole("heading", { name: "Events" });
+  const eventsHeading = page.getByRole("heading", {
+    name: "Events",
+    exact: true,
+  });
   await eventsHeading.scrollIntoViewIfNeeded();
   await eventsHeading.locator("xpath=following::table[1]").evaluate((table) => {
     if (table.parentElement) table.parentElement.scrollLeft = 0;
@@ -251,7 +254,10 @@ test("filters cache evidence and links events from the same session", async ({
   await expect(mobileChartHeading).toBeVisible();
   await mobileChartHeading.scrollIntoViewIfNeeded();
   await capture(page, "cache-billing-charts-mobile.png");
-  const mobileEventsHeading = page.getByRole("heading", { name: "Events" });
+  const mobileEventsHeading = page.getByRole("heading", {
+    name: "Events",
+    exact: true,
+  });
   await expect(mobileEventsHeading).toBeVisible();
   await mobileEventsHeading.scrollIntoViewIfNeeded();
   await expect

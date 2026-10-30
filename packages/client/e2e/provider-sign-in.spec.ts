@@ -107,7 +107,8 @@ test("signs Claude and Codex in through server-run login flows", async ({
   );
 
   await page.setViewportSize({ width: 1000, height: 600 });
-  await page.goto(`${baseURL}/settings/providers`);
+  // Each provider's sign-in row lives on its own detail page.
+  await page.goto(`${baseURL}/settings/providers/codex`);
   await dismissOnboardingIfVisible(page);
 
   const codex = page.locator('[data-settings-item="provider-codex"]');
@@ -120,6 +121,7 @@ test("signs Claude and Codex in through server-run login flows", async ({
     codex.getByRole("button", { name: "Open in a terminal on the server" }),
   ).toHaveCount(0);
 
+  await page.goto(`${baseURL}/settings/providers/claude`);
   const claude = page.locator('[data-settings-item="provider-claude"]');
   await expect(
     claude.getByText(

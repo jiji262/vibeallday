@@ -16,15 +16,25 @@ test("Appearance slide animations apply immediately and persist for App toggles"
     exact: true,
   });
   const sidebar = page.locator(".sidebar-desktop");
+  // Desktop Settings replaces the app sidebar with its own rail, so the
+  // shell frame's slide duration is the observable there; the sidebar's own
+  // transition is checked on the session route below.
+  const slideDuration = () =>
+    page
+      .locator(".session-page")
+      .first()
+      .evaluate((frame) =>
+        getComputedStyle(frame).getPropertyValue("--panel-slide-duration"),
+      );
   await expect(animationToggle).toBeChecked();
-  await expect(sidebar).toHaveCSS("transition-duration", "0.2s");
+  await expect.poll(slideDuration).toBe("200ms");
   await animationToggle.locator("..").click();
-  await expect(sidebar).toHaveCSS("transition-duration", "0s");
+  await expect.poll(slideDuration).toBe("0ms");
   await animationToggle.locator("..").scrollIntoViewIfNeeded();
   await recordUiCapture(page, "slide-animations-desktop");
   await page.reload();
   await expect(animationToggle).not.toBeChecked();
-  await expect(sidebar).toHaveCSS("transition-duration", "0s");
+  await expect.poll(slideDuration).toBe("0ms");
 
   await page.setViewportSize({ width: 375, height: 812 });
   await page.reload();
@@ -119,6 +129,8 @@ test("Appearance slide animations apply immediately and persist for App toggles"
 
   await page.goto("/settings/appearance");
   await animationToggle.locator("..").click();
+  await expect.poll(slideDuration).toBe("200ms");
+  await page.goto(`/projects/${projectId}/sessions/${sessionId}`);
   await expect(sidebar).toHaveCSS("transition-duration", "0.2s");
 });
 

@@ -300,12 +300,11 @@ test("header preserves identity, overflow actions and rename typing during live 
   await page.setViewportSize({ width: 375, height: 812 });
   await expect(projectLink).toBeInViewport();
   await expect(projectLink).toHaveText("tfc");
+  // The phone tab bar is root-only: a session detail navigates by its back
+  // link, so the composer owns the bottom edge and no launcher is drawn.
   const navigation = page.getByRole("navigation", { name: "Main navigation" });
   const sessionsTab = navigation.locator('[data-tab="sessions"]');
-  await expect(sessionsTab).toHaveAttribute("aria-current", "page");
-  await expect(
-    navigation.getByRole("link", { name: "Projects", exact: true }),
-  ).not.toHaveAttribute("aria-current");
+  await expect(navigation).toHaveCount(0);
   const back = header.getByRole("link", {
     name: "Back to sessions",
     exact: true,
@@ -316,7 +315,6 @@ test("header preserves identity, overflow actions and rename typing during live 
   ).toHaveCount(0);
   const composer = page.locator("[data-composer-input]");
   await composer.focus();
-  await expect(navigation).toBeVisible();
   // Android-style layout shrink exercises the shared keyboard owner. This is
   // browser geometry coverage, not a native software-keyboard qualification.
   await page.setViewportSize({ width: 375, height: 480 });
@@ -415,7 +413,7 @@ test("header preserves identity, overflow actions and rename typing during live 
   }
   expect(Math.max(...composerAckMs)).toBeLessThan(100);
   await page.setViewportSize({ width: 375, height: 812 });
-  await expect(navigation).toBeVisible();
+  await expect(navigation).toHaveCount(0);
   await expect(composer).toHaveValue(draft);
   await composer.evaluate((element) => element.blur());
   await recordUiCapture(page, "session-header-code-phone");
@@ -597,7 +595,11 @@ test("header preserves identity, overflow actions and rename typing during live 
   expect(saves).toEqual([desktopTitle, "Retry title", "Retry title"]);
   await back.click();
   await expect(page).toHaveURL(`${baseURL}/sessions?project=${projectId}`);
+  // The session list is a root page, so the tab bar returns there.
   await expect(sessionsTab).toHaveAttribute("aria-current", "page");
+  await expect(
+    navigation.getByRole("link", { name: "Projects", exact: true }),
+  ).not.toHaveAttribute("aria-current");
   await page
     .locator(
       `a.session-list-item__link[href="/projects/${projectId}/sessions/${sessionId}"]`,

@@ -254,8 +254,11 @@ test("Settings acquires settings and version before the UI runtime executes", as
     releasing = true;
     await Promise.all(held.map((route) => route.continue()));
   }
+  // /settings is the overview: it renders once the held runtime runs.
   await expect(
-    page.locator(".settings-content-panel [data-settings-item]").first(),
+    page
+      .locator(".settings-content-panel")
+      .getByRole("heading", { level: 1, name: "Settings", exact: true }),
   ).toBeVisible();
 });
 

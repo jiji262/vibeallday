@@ -565,15 +565,13 @@ for (const viewport of [
         name: "More toolbar controls",
         exact: true,
       });
-      const foldsIntoTray = viewport.width <= 600;
-      if (foldsIntoTray) {
-        // Phones fold the conversation toggle into the overflow tray. Opening
-        // the tray is itself a toolbar action, so it parks the viewer first.
-        await expect(conversationButton).toHaveCount(0);
-        await tray.click();
-        await expect(viewer).not.toBeVisible();
-        await expect(controller).toBeVisible();
-      }
+      // The conversation toggle lives in the composer + tray unless its
+      // presence is pinned. Opening the tray is itself a toolbar action, so
+      // it parks the viewer first.
+      await expect(conversationButton).toHaveCount(0);
+      await tray.click();
+      await expect(viewer).not.toBeVisible();
+      await expect(controller).toBeVisible();
       await expect(conversationButton).toBeVisible();
       const conversationButtonBox = await conversationButton.boundingBox();
       if (!conversationButtonBox) {
@@ -593,7 +591,7 @@ for (const viewport of [
       );
       expect(conversationButtonIsHitTarget).toBe(true);
       // The tray lists it as a checkable menu item rather than a toggle button.
-      const stateAttribute = foldsIntoTray ? "aria-checked" : "aria-pressed";
+      const stateAttribute = "aria-checked";
       const pressedBefore =
         await conversationButton.getAttribute(stateAttribute);
       await page.mouse.click(
@@ -606,7 +604,7 @@ for (const viewport of [
         stateAttribute,
         pressedBefore === "true" ? "false" : "true",
       );
-      if (foldsIntoTray) await tray.click();
+      await tray.click();
       await controller
         .getByRole("button", { name: /Restore file viewer:/ })
         .click();

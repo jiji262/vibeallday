@@ -107,7 +107,7 @@ test.describe("New Session provider readiness", () => {
       },
     );
 
-    await page.goto(`${baseURL}/settings/providers`);
+    await page.goto(`${baseURL}/settings/providers/codex`);
     await dismissOnboardingIfVisible(page);
     const codexSettings = page.locator('[data-settings-item="provider-codex"]');
     await expect(codexSettings.getByText("Runtime ready")).toBeVisible();

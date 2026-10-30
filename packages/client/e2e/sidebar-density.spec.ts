@@ -61,16 +61,14 @@ test("keeps sidebar density spatial and the create action recognizable", async (
   baseURL,
 }) => {
   await page.addInitScript(() => {
-    window.localStorage.setItem("vibeallday-sidebar-spacing", "comfortable");
+    // Seed once; later navigations keep the density chosen in Settings.
+    if (!window.localStorage.getItem("vibeallday-sidebar-spacing")) {
+      window.localStorage.setItem("vibeallday-sidebar-spacing", "comfortable");
+    }
   });
   await page.setViewportSize({ width: 1920, height: 1080 });
   await page.goto(`${baseURL}/settings/appearance`);
   await dismissOnboardingIfVisible(page);
-
-  // Settings deliberately starts collapsed; density is measured expanded.
-  await page
-    .getByRole("button", { name: "Expand sidebar", exact: true })
-    .click();
 
   const densityRow = page.locator('[data-settings-item="sidebar-density"]');
   await expect(densityRow).toBeVisible();
@@ -83,30 +81,40 @@ test("keeps sidebar density spatial and the create action recognizable", async (
     ),
   ).toHaveCount(0);
 
-  await expect(page.locator(".sidebar-brand")).toBeVisible();
-  await expectRestoredNewSessionAction(page);
+  // Desktop Settings draws its own rail instead of the app sidebar, so the
+  // density is measured on an app page after each change.
+  async function measureOnInbox() {
+    await page.goto(`${baseURL}/inbox`);
+    await expect(page.locator(".sidebar-brand")).toBeVisible();
+    await expectRestoredNewSessionAction(page);
+    return readNavigationMetrics(page);
+  }
 
-  const comfortableMetrics = await readNavigationMetrics(page);
+  const comfortableMetrics = await measureOnInbox();
   expect(comfortableMetrics.paddingInlineStart).toBeCloseTo(
     comfortableMetrics.gap,
     4,
   );
 
+  await page.goto(`${baseURL}/settings/appearance`);
   await densityRow.getByRole("radio", { name: "Compact" }).click();
   await expect(page.locator("html")).toHaveAttribute(
     "data-sidebar-spacing",
     "compact",
   );
-  await expect(page.locator(".sidebar-brand")).toBeVisible();
-  await expectRestoredNewSessionAction(page);
 
-  const compactMetrics = await readNavigationMetrics(page);
+  const compactMetrics = await measureOnInbox();
+  await expect(page.locator("html")).toHaveAttribute(
+    "data-sidebar-spacing",
+    "compact",
+  );
   expect(compactMetrics.paddingInlineStart).toBeCloseTo(compactMetrics.gap, 4);
   expect(compactMetrics.paddingInlineStart).toBeLessThan(
     comfortableMetrics.paddingInlineStart,
   );
   expect(compactMetrics.fontSize).toBe(comfortableMetrics.fontSize);
 
+  await page.goto(`${baseURL}/settings/appearance`);
   await densityRow.getByRole("radio", { name: "Comfortable" }).click();
   await expect(page.locator("html")).toHaveAttribute(
     "data-sidebar-spacing",
