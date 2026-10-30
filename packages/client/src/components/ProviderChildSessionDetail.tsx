@@ -3,7 +3,13 @@ import { api } from "../api/client";
 import { SessionMetadataProvider } from "../contexts/SessionMetadataContext";
 import { useI18n } from "../i18n";
 import type { AgentSession } from "../types";
+import { Status, Tag } from "./garden";
 import { TaskNestedContent } from "./renderers/tools/TaskNestedContent";
+import { ChildSessionTask } from "./session-inspector/ChildSessionTask";
+import {
+  CHILD_STATUS,
+  CHILD_STATUS_LABEL,
+} from "./session-inspector/childTaskFacts";
 import styles from "./ProviderChildSessionDetail.module.css";
 
 interface ProviderChildSessionDetailProps {
@@ -13,6 +19,12 @@ interface ProviderChildSessionDetailProps {
   fallbackTitle?: string;
   actions?: ReactNode;
   headingLevel?: 1 | 2;
+  /** Page mode: parent › 子代理 trail above the title. */
+  breadcrumb?: ReactNode;
+  /** Page mode: the 只读 tag and the parent's task card. */
+  page?: boolean;
+  /** Between the header and the transcript (the sibling switcher). */
+  subheader?: ReactNode;
 }
 
 export function ProviderChildSessionDetail({
@@ -22,6 +34,9 @@ export function ProviderChildSessionDetail({
   fallbackTitle,
   actions,
   headingLevel = 2,
+  breadcrumb,
+  page = false,
+  subheader,
 }: ProviderChildSessionDetailProps) {
   const { t } = useI18n();
   const [content, setContent] = useState<AgentSession | null>(null);
@@ -67,23 +82,19 @@ export function ProviderChildSessionDetail({
     <section className={styles.root}>
       <header className={styles.header}>
         <div className={styles.identity}>
-          <Heading className={styles.title}>{title}</Heading>
+          {breadcrumb}
+          <div className={styles.titleRow}>
+            <Heading className={styles.title}>{title}</Heading>
+            {page && <Tag>{t("providerChildReadOnlyTag")}</Tag>}
+            {content?.status && (
+              <Status state={CHILD_STATUS[content.status]}>
+                {t(CHILD_STATUS_LABEL[content.status])}
+              </Status>
+            )}
+          </div>
           <div className={styles.meta}>
             {content?.agentType && content.agentType !== title && (
               <span>{content.agentType}</span>
-            )}
-            {content?.status && (
-              <span>
-                {t(
-                  content.status === "running"
-                    ? "providerChildStatusRunning"
-                    : content.status === "completed"
-                      ? "providerChildStatusCompleted"
-                      : content.status === "failed"
-                        ? "providerChildStatusFailed"
-                        : "providerChildStatusPending",
-                )}
-              </span>
             )}
             {content?.spawnDepth !== undefined && (
               <span>
@@ -95,6 +106,7 @@ export function ProviderChildSessionDetail({
         <p className={styles.readonly}>{t("providerChildPageReadOnly")}</p>
         {actions && <div className={styles.actions}>{actions}</div>}
       </header>
+      {subheader}
       <div className={styles.content}>
         {loading && (
           <p className={styles.status}>{t("providerChildPageLoading")}</p>
@@ -107,6 +119,7 @@ export function ProviderChildSessionDetail({
             sessionId={sessionId}
             sessionTitle={title}
           >
+            {page && <ChildSessionTask content={content} />}
             {content.messages.length > 0 ? (
               <TaskNestedContent
                 messages={content.messages}

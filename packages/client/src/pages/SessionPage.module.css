@@ -70,6 +70,21 @@
   min-width: 0;
 }
 
+/* Docked inspector: its own column beside the transcript and composer, so
+   it narrows the reading column instead of covering it. */
+.sessionSplit.withInspector {
+  --session-inspector-width: 320px;
+
+  grid-template:
+    "messages inspector" minmax(0, 1fr)
+    "input inspector" auto
+    / minmax(0, 1fr) var(--session-inspector-width);
+}
+
+.inspectorDock {
+  grid-area: inspector;
+}
+
 @media (width < 1100px) {
   .workspace.rightPane .sessionColumn {
     /* Keep all session controls below its sibling drawer and backdrop. */

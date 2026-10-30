@@ -274,11 +274,13 @@ import { isAbsoluteLikePath, shortenPath } from "../lib/text";
 import { getPermissionModeOptions } from "../lib/permissionModes";
 import type { PermissionMode, Project } from "../types";
 import { AttachmentChip } from "./AttachmentChip";
-import { DeliveryGlyph } from "./DeliveryGlyph";
-import { SegmentedControl } from "./controls/SegmentedControl";
 import { FilterDropdown, type FilterOption } from "./FilterDropdown";
 import { LoadingState } from "./garden/LoadingState";
+import { Button } from "./garden/Button";
 import { Sheet } from "./garden/Sheet";
+import { NewSessionAdvancedGroups } from "./NewSessionAdvancedGroups";
+import { NewSessionPermissionChip } from "./NewSessionPermissionChip";
+import { NewSessionStartSplit } from "./NewSessionStartSplit";
 import { FullPaneComposerToggle } from "./FullPaneComposerToggle";
 import { NewSessionFixedLaunch } from "./NewSessionFixedLaunch";
 import { NewSessionProjectQueue } from "./NewSessionProjectQueue";
@@ -4369,86 +4371,89 @@ export function NewSessionForm({
             )}
           </div>
           <div className="new-session-form-toolbar-actions">
-            {toolbarVisibility.projectQueue && showProjectQueueAction && (
+            <NewSessionStartSplit
+              disabled={isStarting}
+              items={
+                toolbarVisibility.projectQueue && showProjectQueueAction
+                  ? [
+                      {
+                        key: "project-queue",
+                        label: describePrefixedDelivery(
+                          t("toolbarProjectQueueLabel"),
+                        ),
+                        hint: describePrefixedTooltip(
+                          projectQueueNewSessionTitle,
+                        ),
+                        disabled:
+                          isStarting ||
+                          creatingTemplateProject ||
+                          templateProjectBusy ||
+                          !canQueueProjectSession,
+                        onSelect: handleQueueProjectSession,
+                      },
+                    ]
+                  : []
+              }
+            >
               <button
                 type="button"
-                onClick={handleQueueProjectSession}
+                onClick={handleStartSession}
                 disabled={
                   isStarting ||
                   creatingTemplateProject ||
                   templateProjectBusy ||
-                  !canQueueProjectSession
+                  !canStart
                 }
-                className="send-button project-queue-button new-session-project-queue-button"
+                className={`send-button new-session-submit-button ${controls.startButton}`}
                 aria-label={describePrefixedDelivery(
-                  t("toolbarProjectQueueLabel"),
+                  launch?.startLabel ??
+                    t(
+                      newProjectSubmission
+                        ? "newSessionCreateAndStartAction"
+                        : "newSessionStartAction",
+                    ),
                 )}
-                title={describePrefixedTooltip(projectQueueNewSessionTitle)}
+                title={describePrefixedTooltip(
+                  launch?.startLabel ??
+                    t(
+                      newProjectSubmission
+                        ? "newSessionCreateAndStartAction"
+                        : "newSessionStartAction",
+                    ),
+                )}
               >
-                <DeliveryGlyph className="send-icon">⇥</DeliveryGlyph>
-                {manualDeliverySpeechPrefix && (
+                {isStarting ? (
+                  <span className="send-spinner" />
+                ) : (
+                  <svg
+                    className="send-icon new-session-submit-icon"
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.25"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M12 19V5" />
+                    <path d="m5 12 7-7 7 7" />
+                  </svg>
+                )}
+                <span className={controls.startLabel}>
+                  {launch?.startLabel ??
+                    t(
+                      newProjectSubmission
+                        ? "newSessionCreateAndStartLabel"
+                        : "newSessionStartLabel",
+                    )}
+                </span>
+                {!isStarting && manualDeliverySpeechPrefix && (
                   <SpeechPrefixActionCue prefix={manualDeliverySpeechPrefix} />
                 )}
               </button>
-            )}
-            <button
-              type="button"
-              onClick={handleStartSession}
-              disabled={
-                isStarting ||
-                creatingTemplateProject ||
-                templateProjectBusy ||
-                !canStart
-              }
-              className={`send-button new-session-submit-button ${controls.startButton}`}
-              aria-label={describePrefixedDelivery(
-                launch?.startLabel ??
-                  t(
-                    newProjectSubmission
-                      ? "newSessionCreateAndStartAction"
-                      : "newSessionStartAction",
-                  ),
-              )}
-              title={describePrefixedTooltip(
-                launch?.startLabel ??
-                  t(
-                    newProjectSubmission
-                      ? "newSessionCreateAndStartAction"
-                      : "newSessionStartAction",
-                  ),
-              )}
-            >
-              {isStarting ? (
-                <span className="send-spinner" />
-              ) : (
-                <svg
-                  className="send-icon new-session-submit-icon"
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.25"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  aria-hidden="true"
-                >
-                  <path d="M12 19V5" />
-                  <path d="m5 12 7-7 7 7" />
-                </svg>
-              )}
-              <span className={controls.startLabel}>
-                {launch?.startLabel ??
-                  t(
-                    newProjectSubmission
-                      ? "newSessionCreateAndStartLabel"
-                      : "newSessionStartLabel",
-                  )}
-              </span>
-              {!isStarting && manualDeliverySpeechPrefix && (
-                <SpeechPrefixActionCue prefix={manualDeliverySpeechPrefix} />
-              )}
-            </button>
+            </NewSessionStartSplit>
           </div>
         </div>
         {pendingFiles.length > 0 && (
@@ -5280,22 +5285,17 @@ export function NewSessionForm({
       <h3 className={styles.visuallyHidden}>
         {sessionDefaultCopy.permission.title}
       </h3>
-      <SegmentedControl<PermissionMode>
-        label={sessionDefaultCopy.permission.title}
+      <NewSessionPermissionChip
+        modes={permissionModeOptions}
         value={effectivePermissionMode}
-        onChange={(value) => {
-          if (!isStarting) handleModeSelect(value);
-        }}
-        options={permissionModeOptions.map((permissionMode) => ({
-          value: permissionMode,
-          label: modeLabels[permissionMode],
-          title: modeDescriptions[permissionMode],
-          disabled: isStarting,
-        }))}
+        labels={modeLabels}
+        descriptions={modeDescriptions}
+        title={sessionDefaultCopy.permission.title}
+        disabled={isStarting}
+        onSelect={handleModeSelect}
+        triggerClassName={styles.chipTrigger}
+        keyClassName={styles.chipLabel}
       />
-      <p className={styles.permissionHint}>
-        {modeDescriptions[effectivePermissionMode]}
-      </p>
     </div>
   ) : null;
   const sandboxSection = canConfigureSessionSandbox ? (
@@ -5414,8 +5414,8 @@ export function NewSessionForm({
       sandboxAvailable={supportsSessionSandboxing}
     />
   ) : null;
-  // Withholding every picker in this slot would otherwise leave its grid area
-  // empty rather than giving the width back, so the layout drops the area.
+  // Withholding every picker leaves no chip row to render; the permission
+  // chip then joins the Advanced row instead.
   const providerSlotFilled = Boolean(
     fixedLaunchSection ||
       (showProviderPicker && providerSection) ||
@@ -5491,20 +5491,15 @@ export function NewSessionForm({
       {/* A launch is introduced by its own surface — the handoff dialog has a
           title — so the new-session prompt would only contradict it. */}
       {!launch && (
-        <div className="new-session-header">
-          <p className="new-session-subtitle">
-            {t("newSessionHeaderSubtitle")}
-          </p>
+        <div className={`new-session-header ${styles.header}`}>
+          <h2 className={styles.heading}>{t("newSessionPromptHeading")}</h2>
+          <p className="new-session-subtitle">{t("newSessionPromptLead")}</p>
         </div>
       )}
 
       {displayDefaultsError}
 
-      <div
-        className={`new-session-top-layout ${styles.optionLayout}${
-          fixedProject ? ` ${styles.optionLayoutWithoutProject}` : ""
-        }${providerSlotFilled ? "" : ` ${styles.optionLayoutWithoutProvider}`}`}
-      >
+      <div className={`new-session-top-layout ${styles.optionLayout}`}>
         <div ref={mainStackRef} className="new-session-main-stack">
           <div
             className={`new-session-input-area${
@@ -5627,31 +5622,41 @@ export function NewSessionForm({
             {showProviderPicker && providerSection}
             {showModelPicker && modelSection}
             {effortSlot}
+            {permissionSegment}
             {showModelPicker && modelCatalogStatus}
           </div>
         )}
-        {permissionSegment}
         <div className={styles.advancedSection}>
+          {!providerSlotFilled && permissionSegment}
           <button
             type="button"
             className={styles.advancedToggle}
+            aria-label={t("newSessionShowAdvancedOptions")}
             aria-haspopup="dialog"
             aria-expanded={advancedOpen}
             aria-controls="new-session-advanced-options"
             onClick={() => setAdvancedOpen(true)}
           >
-            <span>{t("newSessionShowAdvancedOptions")}</span>
+            <svg
+              className={styles.advancedIcon}
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              aria-hidden="true"
+            >
+              <path d="M4 7h9M17 7h3M4 17h3M11 17h9" />
+              <circle cx="15" cy="7" r="2" />
+              <circle cx="9" cy="17" r="2" />
+            </svg>
+            <span>{t("newSessionAdvancedChip")}</span>
             {activeAdvancedOptions.length > 0 && (
               <span className={styles.advancedCount} aria-hidden="true">
                 {activeAdvancedOptions.length}
               </span>
             )}
           </button>
-          {activeAdvancedOptions.length > 0 && (
-            <span className={styles.advancedSummary}>
-              {activeAdvancedOptions.join(" · ")}
-            </span>
-          )}
           <button
             type="button"
             className={styles.captionToggle}
@@ -5670,6 +5675,11 @@ export function NewSessionForm({
           >
             <span aria-hidden="true">?</span>
           </button>
+          {activeAdvancedOptions.length > 0 && (
+            <span className={styles.advancedSummary}>
+              {activeAdvancedOptions.join(" · ")}
+            </span>
+          )}
         </div>
         {advancedOpen && (
           <Sheet
@@ -5681,110 +5691,160 @@ export function NewSessionForm({
               className={styles.secondaryOptions}
               data-new-session-secondary-options="true"
             >
-              {serverHasCapability(
-                versionInfo,
-                SERVER_CAPABILITIES.agentAuthRouter.name,
-              ) &&
-                !launchLock.limited &&
-                !effectiveExecutor &&
-                effectiveSandboxLevel === "none" &&
-                (selectedProvider === "claude" ||
-                  selectedProvider === "codex") && (
-                  <RouterPoolSelector
-                    provider={selectedProvider}
-                    model={selectedModel}
-                    thinking={routerThinking}
-                    data={routerDiscovery.data}
-                    busy={routerDiscovery.busy}
-                    error={routerDiscovery.error}
-                    retry={() => void routerDiscovery.reload()}
-                    sourceKey={clientSummarySourceKey}
-                    value={
-                      routerSelection?.sourceKey === clientSummarySourceKey
-                        ? routerSelection
-                        : null
-                    }
-                    onChange={(selection) => {
-                      hasUserCustomizedDefaultsRef.current = true;
-                      setRouterSelectionCustomized(true);
-                      setRouterPreference(selection);
-                    }}
-                    disabled={isStarting}
-                    showCaption={showOptionCaptions}
-                  />
-                )}
-              {serviceTierSection}
-              {showThinkingSection}
-              {recapSection}
-              {helperSideModelSection}
-              {promptSuggestionSection}
-              {sandboxSection}
-              <MachineControlSessionSelection
-                eligible={machineControlEligible}
-                available={machineControlAvailable}
-                selected={machineControlSelected}
-                onChange={selectMachineControl}
-                disabled={isStarting}
-                showCaption={showOptionCaptions}
+              <NewSessionAdvancedGroups
+                groups={[
+                  {
+                    key: "performance",
+                    title: t("newSessionAdvancedGroupPerformance"),
+                    content: (
+                      <>
+                        {serviceTierSection}
+                        {helperSideModelSection}
+                      </>
+                    ),
+                  },
+                  {
+                    key: "safety",
+                    title: t("newSessionAdvancedGroupSafety"),
+                    content: (
+                      <>
+                        {sandboxSection}
+                        <MachineControlSessionSelection
+                          eligible={machineControlEligible}
+                          available={machineControlAvailable}
+                          selected={machineControlSelected}
+                          onChange={selectMachineControl}
+                          disabled={isStarting}
+                          showCaption={showOptionCaptions}
+                        />
+                      </>
+                    ),
+                  },
+                  {
+                    key: "location",
+                    title: t("newSessionAdvancedGroupLocation"),
+                    content: (
+                      <>
+                        {serverHasCapability(
+                          versionInfo,
+                          SERVER_CAPABILITIES.agentAuthRouter.name,
+                        ) &&
+                          !launchLock.limited &&
+                          !effectiveExecutor &&
+                          effectiveSandboxLevel === "none" &&
+                          (selectedProvider === "claude" ||
+                            selectedProvider === "codex") && (
+                            <RouterPoolSelector
+                              provider={selectedProvider}
+                              model={selectedModel}
+                              thinking={routerThinking}
+                              data={routerDiscovery.data}
+                              busy={routerDiscovery.busy}
+                              error={routerDiscovery.error}
+                              retry={() => void routerDiscovery.reload()}
+                              sourceKey={clientSummarySourceKey}
+                              value={
+                                routerSelection?.sourceKey ===
+                                clientSummarySourceKey
+                                  ? routerSelection
+                                  : null
+                              }
+                              onChange={(selection) => {
+                                hasUserCustomizedDefaultsRef.current = true;
+                                setRouterSelectionCustomized(true);
+                                setRouterPreference(selection);
+                              }}
+                              disabled={isStarting}
+                              showCaption={showOptionCaptions}
+                            />
+                          )}
+                        {/* Executor Selection - only show for providers whose adapter uses it. */}
+                        {supportsRemoteExecutors &&
+                          !executorsLoading &&
+                          remoteExecutors.length > 0 && (
+                            <NewSessionOptionSection
+                              className="new-session-helper-section"
+                              title={t("newSessionRunOnTitle")}
+                              showCaption={showOptionCaptions}
+                            >
+                              <FilterDropdown<string>
+                                label={t("newSessionRunOnTitle")}
+                                options={[
+                                  {
+                                    value: "local",
+                                    label: t("newSessionRunOnLocal"),
+                                    icon: (
+                                      <span className="executor-option-dot executor-local" />
+                                    ),
+                                    description: t("newSessionRunOnLocalDesc"),
+                                    disabled: isStarting,
+                                  },
+                                  ...remoteExecutors.map((host) => ({
+                                    value: `remote:${host}`,
+                                    label: host,
+                                    icon: (
+                                      <span className="executor-option-dot executor-remote" />
+                                    ),
+                                    description: t("newSessionRunOnRemoteDesc"),
+                                    disabled: isStarting,
+                                  })),
+                                ]}
+                                selected={[
+                                  selectedExecutor
+                                    ? `remote:${selectedExecutor}`
+                                    : "local",
+                                ]}
+                                onChange={([value]) => {
+                                  if (isStarting) return;
+                                  setSelectedExecutor(
+                                    value?.startsWith("remote:")
+                                      ? value.slice(7)
+                                      : null,
+                                  );
+                                }}
+                                multiSelect={false}
+                                fullWidth
+                                triggerContent={
+                                  <span className={styles.selectedChoice}>
+                                    <span
+                                      className={`executor-option-dot executor-${selectedExecutor ? "remote" : "local"}`}
+                                      aria-hidden="true"
+                                    />
+                                    <span className={styles.selectedChoiceText}>
+                                      {selectedExecutor ??
+                                        t("newSessionRunOnLocal")}
+                                    </span>
+                                  </span>
+                                }
+                              />
+                            </NewSessionOptionSection>
+                          )}
+                      </>
+                    ),
+                  },
+                  // Not on the board, but these options exist today and stay
+                  // reachable: what the transcript shows and suggests.
+                  {
+                    key: "conversation",
+                    title: t("newSessionAdvancedGroupConversation"),
+                    content: (
+                      <>
+                        {showThinkingSection}
+                        {recapSection}
+                        {promptSuggestionSection}
+                      </>
+                    ),
+                  },
+                ]}
               />
-              {/* Executor Selection - only show for providers whose adapter uses it. */}
-              {supportsRemoteExecutors &&
-                !executorsLoading &&
-                remoteExecutors.length > 0 && (
-                  <NewSessionOptionSection
-                    className="new-session-helper-section"
-                    title={t("newSessionRunOnTitle")}
-                    showCaption={showOptionCaptions}
-                  >
-                    <FilterDropdown<string>
-                      label={t("newSessionRunOnTitle")}
-                      options={[
-                        {
-                          value: "local",
-                          label: t("newSessionRunOnLocal"),
-                          icon: (
-                            <span className="executor-option-dot executor-local" />
-                          ),
-                          description: t("newSessionRunOnLocalDesc"),
-                          disabled: isStarting,
-                        },
-                        ...remoteExecutors.map((host) => ({
-                          value: `remote:${host}`,
-                          label: host,
-                          icon: (
-                            <span className="executor-option-dot executor-remote" />
-                          ),
-                          description: t("newSessionRunOnRemoteDesc"),
-                          disabled: isStarting,
-                        })),
-                      ]}
-                      selected={[
-                        selectedExecutor
-                          ? `remote:${selectedExecutor}`
-                          : "local",
-                      ]}
-                      onChange={([value]) => {
-                        if (isStarting) return;
-                        setSelectedExecutor(
-                          value?.startsWith("remote:") ? value.slice(7) : null,
-                        );
-                      }}
-                      multiSelect={false}
-                      fullWidth
-                      triggerContent={
-                        <span className={styles.selectedChoice}>
-                          <span
-                            className={`executor-option-dot executor-${selectedExecutor ? "remote" : "local"}`}
-                            aria-hidden="true"
-                          />
-                          <span className={styles.selectedChoiceText}>
-                            {selectedExecutor ?? t("newSessionRunOnLocal")}
-                          </span>
-                        </span>
-                      }
-                    />
-                  </NewSessionOptionSection>
-                )}
+              <Button
+                variant="primary"
+                size="lg"
+                block
+                onClick={() => setAdvancedOpen(false)}
+              >
+                {t("newSessionAdvancedDone")}
+              </Button>
             </div>
           </Sheet>
         )}

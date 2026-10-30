@@ -5,13 +5,11 @@
    ========================================================================== */
 
 .code-block {
-  background: var(--bg-code);
-  border: 1px solid var(--border-color);
-  border-radius: 6px;
+  background: var(--code-bg);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
   padding: 0.75rem;
   overflow-x: auto;
-  font-family: "SF Mono", Monaco, "Cascadia Code", "Consolas", monospace;
-  font-size: var(--font-size-base);
   line-height: 1.5;
   margin: 0.5rem 0;
   white-space: pre-wrap;
@@ -20,8 +18,8 @@
 }
 
 .code-block-error {
-  border-color: var(--error-color);
-  background: var(--bg-error, rgba(207, 34, 46, 0.1));
+  border-color: var(--err-line);
+  background: var(--err-soft);
 }
 
 .fixed-font-render-toggle {
@@ -107,7 +105,7 @@
 }
 
 .fixed-font-file-link {
-  color: var(--vscode-textLink-foreground, #3794ff);
+  color: var(--link);
   cursor: pointer;
   text-decoration: underline;
   text-decoration-color: transparent;
@@ -702,7 +700,7 @@
 }
 
 .text-block-copy.copied {
-  color: #4a4;
+  color: var(--ok-ink);
   opacity: 1;
   pointer-events: auto;
 }
@@ -796,24 +794,21 @@
 .streaming-blocks code,
 .streaming-block code,
 .streaming-pending code {
-  font-family: var(--font-mono);
-  font-size: 0.9em;
-  background: var(--bg-code);
+  background: var(--code-inline-bg);
+  box-shadow: inset 0 0 0 1px var(--line);
   padding: 2px 4px;
-  border-radius: var(--radius-sm);
+  border-radius: var(--r-xs);
   overflow-wrap: anywhere;
 }
 
 /* Pre blocks in streaming */
 .streaming-blocks pre,
 .streaming-block pre {
-  background: var(--bg-code);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
+  background: var(--code-bg);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
   padding: var(--space-2);
   overflow-x: auto;
-  font-family: var(--font-mono);
-  font-size: var(--font-size-sm);
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
@@ -821,6 +816,7 @@
 .streaming-blocks pre code,
 .streaming-block pre code {
   background: none;
+  box-shadow: none;
   padding: 0;
 }
 
@@ -1017,28 +1013,26 @@
 }
 
 .text-block code {
-  font-family: var(--font-mono);
-  font-size: 0.9em;
-  background: var(--bg-code);
+  background: var(--code-inline-bg);
+  box-shadow: inset 0 0 0 1px var(--line);
   padding: 2px 4px;
-  border-radius: var(--radius-sm);
+  border-radius: var(--r-xs);
   overflow-wrap: anywhere;
 }
 
 .text-block pre {
-  background: var(--bg-code);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
+  background: var(--code-bg);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
   padding: var(--space-2);
   overflow-x: auto;
-  font-family: var(--font-mono);
-  font-size: var(--font-size-sm);
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
 
 .text-block pre code {
   background: none;
+  box-shadow: none;
   padding: 0;
 }
 
@@ -1342,11 +1336,6 @@ details[open] .collapsible__icon {
 .tool-icon {
   font-family: monospace;
   color: var(--text-muted);
-}
-
-.tool-name {
-  color: var(--text-muted);
-  font-weight: 500;
 }
 
 .tool-content {
@@ -1668,12 +1657,12 @@ details[open] .collapsible__icon {
   align-items: center;
   gap: 0.75rem;
   background: transparent;
-  border: 1px solid var(--vscode-widget-border, #454545);
+  border: 1px solid var(--line);
   border-radius: 4px;
   padding: 0.5rem 0.75rem;
   font-family: "SF Mono", Monaco, monospace;
   font-size: var(--font-size-base);
-  color: var(--vscode-textLink-foreground, #3794ff);
+  color: var(--link);
   cursor: pointer;
   text-align: left;
   transition:
@@ -1682,8 +1671,8 @@ details[open] .collapsible__icon {
 }
 
 .file-link-button:hover {
-  background: var(--vscode-list-hoverBackground, #2a2d2e);
-  border-color: var(--vscode-focusBorder, #007fd4);
+  background: var(--surface-3);
+  border-color: var(--focus);
 }
 
 .file-link-button .file-line-count {
@@ -1701,7 +1690,7 @@ details[open] .collapsible__icon {
   padding: 0;
   font-family: "SF Mono", Monaco, monospace;
   font-size: inherit;
-  color: var(--vscode-textLink-foreground, #3794ff);
+  color: var(--link);
   cursor: pointer;
   text-decoration: underline;
   text-decoration-color: transparent;
@@ -1920,8 +1909,8 @@ details[open] .collapsible__icon {
 
 .diff-hunk {
   margin: 0.5rem 0;
-  border: 1px solid var(--border-color);
-  border-radius: 4px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
   overflow: hidden;
 }
 
@@ -1932,7 +1921,7 @@ details[open] .collapsible__icon {
 .diff-content {
   margin: 0;
   padding: 0;
-  background: var(--bg-code);
+  background: var(--code-bg);
   overflow-x: auto;
   tab-size: var(--tab-size);
 }
@@ -1946,26 +1935,26 @@ details[open] .collapsible__icon {
   background:
     linear-gradient(
       to right,
-      var(--bg-diff-gutter-removed, rgba(207, 34, 46, 0.26)) 0 1.25rem,
+      var(--bg-diff-gutter-removed) 0 1.25rem,
       transparent 1.25rem
     ),
-    var(--bg-diff-removed, rgba(207, 34, 46, 0.15));
-  color: var(--text-diff-removed, var(--error-color));
+    var(--diff-del-bg);
+  color: var(--diff-del-ink);
 }
 
 .diff-added {
   background:
     linear-gradient(
       to right,
-      var(--bg-diff-gutter-added, rgba(26, 127, 55, 0.26)) 0 1.25rem,
+      var(--bg-diff-gutter-added) 0 1.25rem,
       transparent 1.25rem
     ),
-    var(--bg-diff-added, rgba(26, 127, 55, 0.15));
-  color: var(--text-diff-added, var(--success-color));
+    var(--diff-add-bg);
+  color: var(--diff-add-ink);
 }
 
 .diff-context {
-  color: var(--text-muted);
+  color: var(--ink-2);
 }
 
 /* Highlighted diff from shiki */
@@ -1976,8 +1965,8 @@ details[open] .collapsible__icon {
 .highlighted-diff pre.shiki {
   margin: 0;
   padding: 0.5rem;
-  background: var(--bg-code) !important;
-  border-radius: 4px;
+  background: var(--code-bg) !important;
+  border-radius: var(--r-sm);
   overflow-x: auto;
 }
 
@@ -2010,29 +1999,29 @@ details[open] .collapsible__icon {
   background:
     linear-gradient(
       to right,
-      var(--bg-diff-gutter-removed, rgba(207, 34, 46, 0.26)) 0 1.25rem,
+      var(--bg-diff-gutter-removed) 0 1.25rem,
       transparent 1.25rem
     ),
-    var(--bg-diff-removed, rgba(207, 34, 46, 0.15)) !important;
+    var(--diff-del-bg) !important;
 }
 
 .highlighted-diff .line-inserted {
   background:
     linear-gradient(
       to right,
-      var(--bg-diff-gutter-added, rgba(26, 127, 55, 0.26)) 0 1.25rem,
+      var(--bg-diff-gutter-added) 0 1.25rem,
       transparent 1.25rem
     ),
-    var(--bg-diff-added, rgba(26, 127, 55, 0.15)) !important;
+    var(--diff-add-bg) !important;
 }
 
 .highlighted-diff .line-deleted > .diff-prefix {
-  color: var(--error-color);
+  color: var(--diff-del-ink);
   font-weight: 700;
 }
 
 .highlighted-diff .line-inserted > .diff-prefix {
-  color: var(--success-color);
+  color: var(--diff-add-ink);
   font-weight: 700;
 }
 
@@ -2059,10 +2048,10 @@ details[open] .collapsible__icon {
   width: 1.45rem;
   height: 1.45rem;
   padding: 0;
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--line);
   border-radius: 999px;
-  background: color-mix(in srgb, var(--bg-surface) 92%, transparent);
-  color: var(--text-muted);
+  background: var(--surface);
+  color: var(--ink-3);
   font-size: 0.75rem;
   line-height: 1.2;
   cursor: pointer;
@@ -2082,8 +2071,8 @@ details[open] .collapsible__icon {
 
 .diff-copy-button:hover,
 .diff-copy-button.copied {
-  color: var(--text-primary);
-  border-color: var(--border-strong, var(--border-color));
+  color: var(--ink);
+  border-color: var(--line-strong);
 }
 
 .diff-view-container.truncated {
@@ -2098,7 +2087,7 @@ details[open] .collapsible__icon {
   left: 0;
   right: 0;
   height: 4rem;
-  background: linear-gradient(to bottom, transparent, var(--bg-surface));
+  background: linear-gradient(to bottom, transparent, var(--canvas));
   pointer-events: none;
 }
 
@@ -4259,7 +4248,7 @@ pre.code-highlighter-plain code {
 .file-viewer-download-btn {
   padding: 0.5rem 1rem;
   background: var(--primary-color);
-  color: #fff;
+  color: var(--on-accent);
   border: none;
   border-radius: 4px;
   font-size: var(--font-size-base);
@@ -4323,7 +4312,7 @@ pre.code-highlighter-plain code {
   padding: 0;
   font-family: "SF Mono", Monaco, monospace;
   font-size: inherit;
-  color: var(--vscode-textLink-foreground, #3794ff);
+  color: var(--link);
   cursor: pointer;
   text-decoration: underline;
   text-decoration-color: transparent;
@@ -4370,7 +4359,7 @@ pre.code-highlighter-plain code {
 
 .file-path-copy.copied {
   opacity: 1;
-  color: var(--vscode-textLink-foreground, #3794ff);
+  color: var(--link);
 }
 
 .file-path-copy svg {
@@ -4380,7 +4369,7 @@ pre.code-highlighter-plain code {
 
 /* Server-rendered file links (from markdown augments) */
 .file-link {
-  color: var(--vscode-textLink-foreground, #3794ff);
+  color: var(--link);
   cursor: pointer;
   text-decoration: underline;
   text-decoration-color: transparent;
@@ -4503,7 +4492,7 @@ pre.code-highlighter-plain code {
 
 .markdown-view-toggle .toggle-btn.active {
   background: var(--primary-color);
-  color: #fff;
+  color: var(--on-accent);
   border-color: var(--primary-color);
 }
 
@@ -5414,8 +5403,8 @@ pre.code-highlighter-plain,
   font-weight: 600;
   line-height: 16px;
   text-align: center;
-  color: var(--bg-primary, #0d1117);
-  background: var(--success-color);
+  color: var(--on-accent);
+  background: var(--ok);
   border-radius: 8px;
 }
 

@@ -730,21 +730,23 @@ function selectedDropdownValue(label: string): string | null {
   ).textContent;
 }
 
-/** The permission mode the segmented control shows as chosen. */
+/** The permission mode the permission chip shows as chosen. */
 function selectedPermissionMode(): string {
-  const group = screen.getByRole("group", { name: "newSessionModeTitle" });
-  const chosen = within(group)
-    .getAllByRole("button")
-    .find((button) => button.getAttribute("aria-pressed") === "true");
-  const key = chosen?.textContent ?? "";
-  const mode = key.replace(/^mode/, "").replace(/Label$/, "");
-  return mode.charAt(0).toLowerCase() + mode.slice(1);
+  return selectedDropdownValue("newSessionModeTitle") ?? "";
 }
 
 function dropdownOption(label: string, option: string): HTMLButtonElement {
   return within(screen.getByTestId(`filter-${label}`)).getByRole("button", {
     name: option,
   }) as HTMLButtonElement;
+}
+
+/** Opens Start's menu and returns its Queue for project item. */
+function openProjectQueueAction(name: RegExp = /^toolbarProjectQueueLabel/) {
+  fireEvent.click(
+    screen.getByRole("button", { name: "newSessionMoreStartOptions" }),
+  );
+  return screen.getByRole("menuitem", { name });
 }
 
 function openAdvancedOptions(): void {
@@ -3352,10 +3354,8 @@ describe("NewSessionForm", () => {
     fireEvent.change(screen.getByPlaceholderText("newSessionPlaceholder"), {
       target: { value: "queued project work" },
     });
-    const projectQueueButton = screen.getByRole("button", {
-      name: "toolbarProjectQueueLabel",
-    });
-    expect(projectQueueButton.getAttribute("title")).toBe(
+    const projectQueueButton = openProjectQueueAction();
+    expect(projectQueueButton.textContent).toContain(
       "Send after all sessions in this project are idle\nCtrl+Enter",
     );
     fireEvent.click(projectQueueButton);
@@ -3554,9 +3554,7 @@ describe("NewSessionForm", () => {
     fireEvent.change(screen.getByPlaceholderText("newSessionPlaceholder"), {
       target: { value: "queued project work with file" },
     });
-    fireEvent.click(
-      screen.getByRole("button", { name: "toolbarProjectQueueLabel" }),
-    );
+    fireEvent.click(openProjectQueueAction());
 
     await waitFor(() => {
       expect(mockCreateProjectQueueItem).toHaveBeenCalledTimes(1);
@@ -3596,9 +3594,7 @@ describe("NewSessionForm", () => {
       />,
     );
 
-    expect(
-      screen.getByRole("button", { name: "toolbarProjectQueueLabel" }),
-    ).toBeTruthy();
+    expect(openProjectQueueAction()).toBeTruthy();
   });
 
   it("hides the new-session Project Queue action when the project is inactive", () => {
@@ -3614,7 +3610,7 @@ describe("NewSessionForm", () => {
     );
 
     expect(
-      screen.queryByRole("button", { name: "toolbarProjectQueueLabel" }),
+      screen.queryByRole("button", { name: "newSessionMoreStartOptions" }),
     ).toBe(null);
     expect(
       document.querySelector('[data-new-session-project-queue="true"]'),
@@ -3653,7 +3649,7 @@ describe("NewSessionForm", () => {
     );
 
     expect(
-      screen.queryByRole("button", { name: "toolbarProjectQueueLabel" }),
+      screen.queryByRole("button", { name: "newSessionMoreStartOptions" }),
     ).toBe(null);
     expect(
       document.querySelector('[data-new-session-project-queue="true"]'),
@@ -3670,7 +3666,7 @@ describe("NewSessionForm", () => {
     );
 
     expect(
-      screen.queryByRole("button", { name: "toolbarProjectQueueLabel" }),
+      screen.queryByRole("button", { name: "newSessionMoreStartOptions" }),
     ).toBe(null);
   });
 
@@ -4197,10 +4193,10 @@ describe("NewSessionForm", () => {
       primaryHeadings.indexOf("newSessionThinkingEffortTitle"),
     ).toBeGreaterThan(primaryHeadings.indexOf("newSessionModelTitle"));
 
-    // Permission mode joined the core controls; the sheet holds the rest.
-    expect(
-      container.querySelector(".new-session-mode-section h3")?.textContent,
-    ).toBe("newSessionModeTitle");
+    // Permission mode is a chip after thinking; the sheet holds the rest.
+    expect(primaryHeadings.indexOf("newSessionModeTitle")).toBeGreaterThan(
+      primaryHeadings.indexOf("newSessionThinkingEffortTitle"),
+    );
     const secondaryHeadings = Array.from(
       document.querySelectorAll(
         '[data-new-session-secondary-options="true"] h3',
@@ -4208,7 +4204,18 @@ describe("NewSessionForm", () => {
       (element) => element.textContent,
     );
     expect(secondaryHeadings).not.toContain("newSessionModeTitle");
-    expect(secondaryHeadings[0]).toBe("showThinkingTitle");
+    // Performance, Safety, Where it runs, then the conversation options.
+    const groupOrder = [
+      "newSessionAdvancedGroupPerformance",
+      "newSessionAdvancedGroupSafety",
+      "newSessionAdvancedGroupLocation",
+      "newSessionAdvancedGroupConversation",
+    ].map((title) => secondaryHeadings.indexOf(title));
+    expect(groupOrder).toEqual([...groupOrder].sort((a, b) => a - b));
+    expect(groupOrder[0]).toBe(0);
+    expect(secondaryHeadings.indexOf("showThinkingTitle")).toBeGreaterThan(
+      groupOrder[3]!,
+    );
     expect(secondaryHeadings.indexOf("newSessionRecapTitle")).toBeGreaterThan(
       secondaryHeadings.indexOf("showThinkingTitle"),
     );
@@ -4293,9 +4300,9 @@ describe("NewSessionForm", () => {
       voicePropsState.current?.onTranscript?.("queued speech");
     });
 
-    const projectQueueButton = screen.getByRole("button", {
-      name: /toolbarProjectQueueLabel.*\[STT\]/,
-    });
+    const projectQueueButton = openProjectQueueAction(
+      /toolbarProjectQueueLabel.*\[STT\]/,
+    );
     expect(projectQueueButton.textContent).toContain("STT");
     expect(
       screen.getByRole("button", { name: /newSessionStartAction.*\[STT\]/ }),

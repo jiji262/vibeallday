@@ -122,6 +122,11 @@ export interface SessionMenuProps {
   onShare?: () => void | Promise<void>;
   shareLabel?: ReactNode;
   additionalItems?: (close: () => void) => ReactNode;
+  /**
+   * Phone sheet only: session facts (status, project, model) shown above the
+   * menu groups, so the sheet reads as Session Info. Gets the close callback.
+   */
+  sheetSummary?: (close: () => void) => ReactNode;
   triggerClassName?: string;
   /** Additional class for the wrapper */
   className?: string;
@@ -171,6 +176,7 @@ export function SessionMenu({
   onShare,
   shareLabel,
   additionalItems,
+  sheetSummary,
   triggerClassName,
   useEllipsisIcon = false,
   className = "",
@@ -405,6 +411,7 @@ export function SessionMenu({
       style={dropdownStyle}
       data-session-menu-open
     >
+      {sheetLayout && sheetSummary?.(() => handleAction(() => {}))}
       <SessionMenuGroup>
         {onShowInfo && (
           <button type="button" onClick={closeThen(onShowInfo)}>

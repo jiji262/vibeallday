@@ -1,6 +1,7 @@
 .queuedBubble:global(.message-user-prompt) {
   opacity: 0.7;
-  border-left: 3px solid var(--queue-bubble-accent, var(--attention-color));
+  border-style: dashed;
+  border-left: 3px solid var(--queue-bubble-accent, var(--idle));
   padding-left: var(--space-2);
   /* Balance the visible ink while retaining the bubble's overall height. */
   padding-top: calc(0.25rem + 1px);
@@ -17,10 +18,10 @@
   display: inline-block;
   margin-right: 0.5em;
   padding: 0 0.45em;
-  border-radius: var(--radius-pill);
-  background: var(--sand-soft);
-  color: var(--sand-ink);
-  font-family: var(--label-font);
+  border-radius: var(--r-chip);
+  background: var(--queue-soft);
+  color: var(--ink-2);
+  font-family: var(--font-mono);
   font-size: 0.8em;
   font-variant-numeric: tabular-nums;
   line-height: 1.6;

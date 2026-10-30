@@ -32,7 +32,7 @@
 }
 
 .status[data-status="error"] {
-  color: var(--error-color);
+  color: var(--err-ink);
 }
 
 .details > summary {

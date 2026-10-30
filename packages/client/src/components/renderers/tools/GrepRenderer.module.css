@@ -92,7 +92,7 @@
 }
 
 .summaryPatternAction:focus {
-  outline: 1px solid var(--focus-border, #007acc);
+  outline: 1px solid var(--focus);
   outline-offset: 1px;
 }
 
@@ -134,7 +134,7 @@
 }
 
 .summaryScopeText {
-  color: var(--vscode-textLink-foreground, #3794ff);
+  color: var(--link);
 }
 
 .summaryArrow {
@@ -145,7 +145,7 @@
   border: 0;
   padding: 0;
   background: transparent;
-  color: var(--vscode-textLink-foreground, #3794ff);
+  color: var(--link);
   font: inherit;
   cursor: pointer;
   text-decoration: underline;
@@ -196,11 +196,7 @@
 }
 
 .matchHighlight {
-  background: color-mix(
-    in srgb,
-    var(--warning-color, #cca700) 28%,
-    transparent
-  );
+  background: color-mix(in srgb, var(--attn) 28%, transparent);
   color: inherit;
   padding: 0 0.05rem;
 }
@@ -271,7 +267,7 @@ pre.content {
 }
 
 .error {
-  color: var(--error-color);
+  color: var(--err-ink);
   padding: 0.5rem;
   background: var(--bg-error, rgba(207, 34, 46, 0.1));
   border-radius: 4px;

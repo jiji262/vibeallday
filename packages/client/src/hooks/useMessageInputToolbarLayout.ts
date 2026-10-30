@@ -157,6 +157,66 @@ export function getPhoneOverflowKeys(
   return keys;
 }
 
+/**
+ * The composer's primary row: attach, permission mode, model/thinking and the
+ * context ring (send/stop live in the actions group). Every other tool lives
+ * in the "+" tray at all widths unless the user pinned it (Show always).
+ */
+export const COMPOSER_PRIMARY_CONTROLS: ReadonlySet<SessionToolbarVisibilityKey> =
+  new Set<SessionToolbarVisibilityKey>([
+    "attachments",
+    "modeSelector",
+    "thinkingToggle",
+    "contextUsage",
+  ]);
+
+/**
+ * Controls that cannot move into the tray: speech capture owns a live
+ * recorder (and its waveform) that must not unmount when the tray closes, the
+ * status ages are a readout rather than a tool, and recall only appears on the
+ * phone keyboard row.
+ */
+const COMPOSER_INLINE_ONLY_CONTROLS: ReadonlySet<SessionToolbarVisibilityKey> =
+  new Set<SessionToolbarVisibilityKey>([
+    "microphone",
+    "waveform",
+    "sessionStatus",
+    "composerRecall",
+  ]);
+
+/** True for a shown control that belongs in the "+" tray, not the row. */
+export function isComposerTrayControl(
+  key: SessionToolbarVisibilityKey,
+): boolean {
+  return (
+    !COMPOSER_PRIMARY_CONTROLS.has(key) &&
+    !COMPOSER_INLINE_ONLY_CONTROLS.has(key)
+  );
+}
+
+// Narrowing tiers that place a shown tool in the tray. "pin" (Show always)
+// keeps it in the row with no tray copy, as the toolbar settings promise.
+const TRAY_PRIORITIES: ReadonlySet<unknown> = new Set(["first", "mid", "last"]);
+
+/**
+ * Controls kept in the "+" tray regardless of measured room: every shown,
+ * unpinned non-primary tool, plus on phones the controls configured to narrow
+ * first. Deterministic by construction; measurement only folds primary
+ * controls.
+ */
+export function getComposerTrayKeys(
+  layout: ComposerToolbarOverflowLayoutSignatureInput,
+  compact: boolean,
+): SessionToolbarVisibilityKey[] {
+  const values = layout as unknown as Record<string, unknown>;
+  const phoneKeys = new Set(compact ? getPhoneOverflowKeys(layout) : []);
+  return COMPOSER_OVERFLOW_ORDER.filter(
+    (key) =>
+      phoneKeys.has(key) ||
+      (isComposerTrayControl(key) && TRAY_PRIORITIES.has(values[key])),
+  );
+}
+
 export function useMeasuredComposerOverflow({
   layoutKey,
   hasControls,

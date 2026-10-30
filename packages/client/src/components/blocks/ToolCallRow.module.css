@@ -14,14 +14,14 @@
 }
 
 .waitingRow {
-  --timeline-dot-default: var(--timeline-dot-warning);
+  --timeline-dot-default: var(--attn);
 }
 
 .waitingSummary {
   min-width: 0;
   overflow-x: auto;
   white-space: pre;
-  color: var(--timeline-dot-warning);
+  color: var(--attn-ink);
   font: var(--font-size-base) / 1.5 var(--font-mono);
 }
 

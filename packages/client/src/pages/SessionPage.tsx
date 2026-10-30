@@ -99,6 +99,13 @@ import {
   SessionAppAction,
 } from "../components/SessionRightPane";
 import { useSessionRightPane } from "../hooks/useSessionRightPane";
+import { SessionInspectorToggle } from "../components/session-inspector/SessionInspector";
+import {
+  SessionInspectorDockSlot,
+  SessionInspectorHeaderSlots,
+} from "../components/session-inspector/SessionInspectorSlots";
+import { useSessionInspector } from "../components/session-inspector/useSessionInspector";
+import { SessionInfoSummary } from "../components/session-inspector/SessionInfoSummary";
 import { useSessionViewPublication } from "../hooks/useSessionViewPublication";
 import { useSessionThinkingSelection } from "../hooks/useSessionThinkingSelection";
 import { ProjectAppViewer } from "../components/ProjectAppViewer";
@@ -555,7 +562,8 @@ function SessionPageContent({
 }) {
   const { t } = useI18n();
   const { showToast } = useToastContext();
-  const { isWideScreen, setRightPaneExpanded } = useNavigationLayout();
+  const { isWideScreen, setRightPaneExpanded, tabBarNavigation } =
+    useNavigationLayout();
   const basePath = useRemoteBasePath();
   const startNewSessionWithPrefill = useStartNewSessionWithPrefillAction();
   const { project } = useProject(projectId);
@@ -1135,6 +1143,24 @@ function SessionPageContent({
       : undefined,
     showToast,
     onNavigateToParentAside: navigate,
+  });
+  const inspector = useSessionInspector({
+    projectId,
+    sessionId,
+    basePath,
+    sourceControlAvailable: serverHasCapability(
+      versionInfo,
+      GIT_STATUS_ENHANCED_CAPABILITY,
+    ),
+    contextUsage: session?.contextUsage,
+    providerChildren: session?.providerChildren,
+    running: processState === "in-turn",
+    messages,
+    dockAvailable:
+      isWideScreen &&
+      !rightPane.expanded &&
+      !(projectAppEnabled && projectAppOpen) &&
+      !wantBtwSplitLayout,
   });
   const [correctionDraft, setCorrectionDraft] = useState<{
     messageId: string;
@@ -6526,6 +6552,15 @@ function SessionPageContent({
                   />
                 </button>
               )}
+              {!loading && !tabBarNavigation && (
+                <SessionInspectorToggle
+                  pressed={
+                    inspector.dockAvailable ? inspector.dockVisible : undefined
+                  }
+                  onClick={inspector.toggle}
+                  className={sessionHeaderStyles.inspectorToggle}
+                />
+              )}
               {!loading && (
                 <SessionMenu
                   sessionId={sessionId}
@@ -6631,6 +6666,34 @@ function SessionPageContent({
                         )
                       : undefined
                   }
+                  sheetSummary={(close) => (
+                    <SessionInfoSummary
+                      state={headerState}
+                      project={
+                        project?.name
+                          ? {
+                              name: project.name,
+                              href: `${basePath}/sessions?project=${projectId}`,
+                            }
+                          : undefined
+                      }
+                      model={
+                        effectiveProvider
+                          ? {
+                              provider: effectiveProvider,
+                              model: liveBadgeModel,
+                              thinking: effectiveModelConfig?.thinking,
+                              effort: effectiveModelConfig?.effort,
+                            }
+                          : undefined
+                      }
+                      onOpenModel={() => {
+                        setModelPanelInitialTab("model");
+                        setShowModelSwitchModal(true);
+                      }}
+                      close={close}
+                    />
+                  )}
                   useFixedPositioning
                   useEllipsisIcon
                   onOpenChange={(open) => {
@@ -6641,6 +6704,10 @@ function SessionPageContent({
             </div>
           </div>
         </header>
+        <SessionInspectorHeaderSlots
+          inspector={inspector}
+          chips={!!tabBarNavigation && !loading}
+        />
 
         {showHeartbeatModal && (
           <SessionHeartbeatModal
@@ -6833,7 +6900,7 @@ function SessionPageContent({
             wantBtwSplitLayout && btwSidePaneCollapsed
               ? " session-split-aside-collapsed"
               : ""
-          }`}
+          }${inspector.dockVisible ? ` ${styles.withInspector}` : ""}`}
         >
           <main
             className={`${styles.messages} ${transcriptStyles.transcript} session-messages`}
@@ -7436,6 +7503,10 @@ function SessionPageContent({
               )}
             </div>
           </footer>
+          <SessionInspectorDockSlot
+            inspector={inspector}
+            className={styles.inspectorDock}
+          />
         </div>
       </div>
       <SessionRightPane

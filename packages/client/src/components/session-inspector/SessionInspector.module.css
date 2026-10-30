@@ -1,0 +1,347 @@
+/*
+ * Session inspector: a 320px column docked beside the transcript on wide
+ * layouts, the same panels in a sheet elsewhere, and a chip row on phones.
+ */
+.dock {
+  --inspector-pad: 16px;
+
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  border-inline-start: 1px solid var(--line);
+  background: var(--side-bg);
+  overflow: hidden;
+}
+
+.tabs {
+  flex-shrink: 0;
+  padding-inline: 12px;
+}
+
+.panel {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.sheetBody {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.panelBody {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: var(--inspector-pad, 16px);
+}
+
+.hint {
+  margin: 0;
+  color: var(--ink-3);
+  font-size: var(--fs-small);
+}
+
+.meta {
+  color: var(--ink-3);
+  font-size: var(--fs-meta);
+  overflow-wrap: anywhere;
+}
+
+.strong {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.adds,
+.dels {
+  font-family: var(--font-mono);
+  font-weight: 600;
+}
+
+.adds {
+  color: var(--diff-add-ink);
+}
+
+.dels {
+  color: var(--diff-del-ink);
+}
+
+.push {
+  margin-inline-start: auto;
+}
+
+.summary {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: var(--fs-small);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.list,
+.cards,
+.legend {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.list {
+  overflow: hidden;
+  border: 1px solid var(--card-line);
+  border-radius: var(--r-card);
+  background: var(--surface);
+}
+
+.list > li + li {
+  border-top: 1px solid var(--line);
+}
+
+.fileRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: var(--tap-min);
+  padding: 8px 14px;
+}
+
+.fileText {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.fileName {
+  overflow: hidden;
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-size: var(--fs-small);
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.kv {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--ink-3);
+}
+
+.kvKey {
+  flex: 1 1 auto;
+  color: var(--ink-2);
+  font-size: var(--fs-small);
+}
+
+/* Plan steps: marker plus text, the running step tinted. */
+.step {
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr);
+  align-items: start;
+  gap: 8px;
+  padding: 10px 14px;
+  font-size: var(--fs-small);
+}
+
+.step > :first-child {
+  justify-self: center;
+  margin-top: 4px;
+}
+
+.stepText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.stepDone .stepText {
+  color: var(--ink-3);
+  text-decoration: line-through;
+}
+
+.stepActive {
+  background: var(--run-soft);
+  font-weight: 600;
+}
+
+.runText {
+  color: var(--run-ink);
+  font-size: var(--fs-meta);
+  font-weight: 500;
+}
+
+/* Context: ring, totals, stacked bar and legend. */
+.ringRow {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.ring {
+  --p: 0;
+
+  position: relative;
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: conic-gradient(
+    var(--accent) calc(var(--p) * 1%),
+    var(--surface-3) 0
+  );
+}
+
+.ring > b {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--surface);
+  color: var(--ink);
+  font: 600 12px / 1 var(--font-mono);
+}
+
+.totals {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  font-family: var(--font-mono);
+}
+
+.stack {
+  display: flex;
+  gap: 2px;
+  height: 10px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--surface-3);
+}
+
+.stack > span {
+  display: block;
+  height: 100%;
+}
+
+.legend {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.swatch {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+}
+
+.keySystem {
+  background: var(--accent);
+}
+
+.keyFiles {
+  background: var(--run);
+}
+
+.keyConversation {
+  background: var(--idle);
+}
+
+/* Subagents: one card per child, linking to its read-only page. */
+.cards {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.childCard {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: var(--tap-min);
+  padding: 10px 14px;
+  border: 1px solid var(--card-line);
+  border-radius: var(--r-card);
+  background: var(--surface);
+  color: inherit;
+  text-decoration: none;
+}
+
+.childCard:hover {
+  background: var(--surface-3);
+}
+
+.childCard:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/* The right-pane glyph: the shared left-panel icon, mirrored. */
+.toggle svg {
+  transform: scaleX(-1);
+}
+
+/* Phone chip row under the page header. */
+.chips {
+  display: flex;
+  flex-shrink: 0;
+  gap: 8px;
+  min-width: 0;
+  padding: 8px 16px 10px;
+  overflow-x: auto;
+  border-bottom: 1px solid var(--phead-line);
+  background: var(--phead-bg);
+  scrollbar-width: none;
+}
+
+.chip {
+  position: relative;
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 6px;
+  height: var(--chip-h);
+  padding: 0 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-chip);
+  background: var(--surface);
+  color: var(--ink-2);
+  font-size: var(--fs-small);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+/* A 44px touch target around the shorter chip. */
+.chip::after {
+  position: absolute;
+  inset: calc((var(--chip-h) - var(--tap-min)) / 2) 0;
+  content: "";
+}
+
+.chip:hover {
+  background: var(--surface-3);
+  color: var(--ink);
+}
+
+.chip svg {
+  width: 14px;
+  height: 14px;
+}

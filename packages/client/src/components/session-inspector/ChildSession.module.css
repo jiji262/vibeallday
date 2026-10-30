@@ -1,0 +1,134 @@
+/* Child session page pieces: sibling switcher and the parent's task card. */
+.siblings {
+  display: flex;
+  min-width: 0;
+  padding: 8px var(--space-4) 10px;
+  overflow-x: auto;
+  border-bottom: 1px solid var(--line);
+  scrollbar-width: none;
+}
+
+.siblingLabel {
+  display: block;
+  max-width: 12rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.task {
+  overflow: hidden;
+  border: 1px solid var(--card-line);
+  border-radius: var(--r-card);
+  background: var(--surface);
+  box-shadow: var(--shadow-card);
+}
+
+.taskBody {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px var(--pad-card);
+}
+
+.eyebrow {
+  margin: 0;
+  color: var(--ink-3);
+  font-size: var(--fs-meta);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.prompt {
+  display: -webkit-box;
+  margin: 0;
+  padding-inline-start: 12px;
+  overflow: hidden;
+  border-inline-start: 2px solid var(--line-strong);
+  color: var(--ink-2);
+  font-size: var(--fs-small);
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 6;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  margin: 0;
+  border-top: 1px solid var(--line);
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  padding: 12px var(--pad-card);
+}
+
+.stat + .stat {
+  border-inline-start: 1px solid var(--line);
+}
+
+.stat > dt {
+  color: var(--ink-3);
+  font-size: var(--fs-meta);
+}
+
+.stat > dd {
+  display: flex;
+  min-width: 0;
+  margin: 0;
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.mono {
+  overflow: hidden;
+  font-family: var(--font-mono);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Parent › 子代理 trail above the child's title. */
+.crumbs {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  color: var(--ink-3);
+  font-size: var(--fs-small);
+}
+
+.crumbs > a {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--ink-3);
+  text-decoration: none;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.crumbs > a:hover {
+  color: var(--ink);
+}
+
+.crumbs > span {
+  flex: none;
+}
+
+/* Read-only notice where the composer would be. */
+.dock {
+  position: sticky;
+  bottom: 0;
+  z-index: 4;
+  width: 100%;
+  max-width: 760px;
+  margin: auto auto 0;
+  padding: 12px var(--space-4) 16px;
+  background: var(--canvas);
+}

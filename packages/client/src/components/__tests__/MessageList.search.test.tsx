@@ -1705,7 +1705,7 @@ describe("MessageList reverse search", () => {
 
     fireEvent.change(fullInput, { target: { value: "Explored" } });
     expect(await screen.findByText("1/1")).toBeTruthy();
-    expect(screen.getByText("Exploring")).toBeTruthy();
+    expect(screen.getByText("Working")).toBeTruthy();
 
     fireEvent.change(fullInput, {
       target: { value: "UserTurnNavigator.tsx" },

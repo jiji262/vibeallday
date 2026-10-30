@@ -1,7 +1,7 @@
 import type { ProviderName } from "@vibeallday/shared";
 import type { MouseEvent } from "react";
 import { useI18n } from "../i18n";
-import { Badge, type BadgeTone } from "./garden/Badge";
+import { Status, type StatusState } from "./garden/StatusDot";
 import { ProviderBadge } from "./ProviderBadge";
 import styles from "./SessionHeaderMeta.module.css";
 
@@ -29,18 +29,18 @@ const STATE_CLASS: Record<SessionHeaderState, string | undefined> = {
   external: styles.external,
 };
 
-const STATE_TONE: Record<SessionHeaderState, BadgeTone> = {
-  running: "mint",
-  "needs-you": "rose",
-  idle: "grey",
-  stopped: "outline",
-  external: "sand",
+/** Design status: needs-you is attn, a running turn is run, the rest idle. */
+export const SESSION_HEADER_STATUS: Record<SessionHeaderState, StatusState> = {
+  running: "run",
+  "needs-you": "attn",
+  idle: "idle",
+  stopped: "idle",
+  external: "idle",
 };
 
 /**
- * Wide-header state pill after the title: mint pulse while a turn runs, rose
- * when the session waits on the reader, grey when idle. Narrow headers carry
- * the same word in their mono meta line instead.
+ * Wide-header status pill after the title (colour plus marker shape). Narrow
+ * headers carry the same word in their mono meta line instead.
  */
 export function SessionHeaderStateBadge({
   state,
@@ -50,15 +50,10 @@ export function SessionHeaderStateBadge({
   className?: string;
 }) {
   const { t } = useI18n();
-  const live = state === "running" || state === "needs-you";
   return (
-    <Badge
-      tone={STATE_TONE[state]}
-      dot={state === "running" ? "pulse" : live}
-      className={className}
-    >
+    <Status state={SESSION_HEADER_STATUS[state]} className={className}>
       {t(STATE_LABEL_KEY[state])}
-    </Badge>
+    </Status>
   );
 }
 

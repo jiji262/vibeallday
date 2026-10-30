@@ -1,15 +1,26 @@
 // @vitest-environment jsdom
 
-import { cleanup, render, screen, waitFor } from "@testing-library/react";
+import {
+  cleanup,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-const { getAgentSession } = vi.hoisted(() => ({
+const { getAgentSession, getSessionMetadata } = vi.hoisted(() => ({
   getAgentSession: vi.fn(),
+  getSessionMetadata: vi.fn(),
 }));
 
 vi.mock("../../api/client", () => ({
-  api: { getAgentSession },
+  api: { getAgentSession, getSessionMetadata },
+}));
+
+vi.mock("../../hooks/useProcesses", () => ({
+  useProcesses: () => ({ processes: [], terminatedProcesses: [] }),
 }));
 
 vi.mock("../../components/renderers/tools/TaskNestedContent", () => ({
@@ -28,6 +39,7 @@ import { ProviderChildSessionPage } from "../ProviderChildSessionPage";
 describe("ProviderChildSessionPage", () => {
   beforeEach(() => {
     getAgentSession.mockReset();
+    getSessionMetadata.mockReset();
   });
 
   afterEach(() => {
@@ -40,6 +52,25 @@ describe("ProviderChildSessionPage", () => {
       status: "completed",
       agentType: "Explore",
       description: "Search the repo",
+    });
+    getSessionMetadata.mockResolvedValue({
+      session: {
+        title: "Fix the draft restore",
+        providerChildren: [
+          {
+            id: "child-1",
+            parentSessionId: "sess-1",
+            agentType: "Explore",
+            updatedAt: "2026-01-01T00:00:00Z",
+          },
+          {
+            id: "child-2",
+            parentSessionId: "sess-1",
+            agentType: "reviewer",
+            updatedAt: "2026-01-01T00:00:00Z",
+          },
+        ],
+      },
     });
 
     render(
@@ -69,7 +100,8 @@ describe("ProviderChildSessionPage", () => {
       level: 1,
       name: "Search the repo",
     });
-    const parentLink = screen.getByRole("link", {
+    const header = heading.closest("header") as HTMLElement;
+    const parentLink = within(header).getByRole("link", {
       name: "Back to parent session",
     });
     expect(parentLink).toHaveProperty(
@@ -79,5 +111,27 @@ describe("ProviderChildSessionPage", () => {
     expect(heading.closest("header")).not.toBeNull();
     expect(parentLink.closest("header")).toBe(heading.closest("header"));
     expect(screen.queryByRole("textbox")).toBeNull();
+
+    // Parent context comes from one metadata read: breadcrumb and siblings.
+    expect(getSessionMetadata).toHaveBeenCalledWith("proj-1", "sess-1");
+    await waitFor(() => {
+      expect(
+        within(header).getByRole("link", { name: "Fix the draft restore" }),
+      ).toBeTruthy();
+    });
+    const siblings = screen.getByRole("radiogroup", {
+      name: "Subagents of the same parent session",
+    });
+    expect(
+      within(siblings)
+        .getByRole("radio", { name: "Explore" })
+        .getAttribute("aria-checked"),
+    ).toBe("true");
+    // The composer is replaced by a read-only notice that leads back.
+    expect(
+      screen.getByText(
+        "Subagent sessions are read-only. Go back to the parent session to continue.",
+      ),
+    ).toBeTruthy();
   });
 });

@@ -3,6 +3,11 @@
   margin-bottom: 8px;
   font-size: 13px;
 }
+
+/* New Session's composer card has its own inset; a closed gallery adds none. */
+.newSession:empty {
+  margin-bottom: 0;
+}
 .recents button {
   font: inherit;
   color: var(--text-primary);

@@ -103,7 +103,22 @@
   align-items: center;
   min-height: var(--header-control-size);
   max-width: 14rem;
+  padding-inline: 10px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-chip);
+  background: var(--surface);
   transform: none;
+}
+
+.header .modelButton:hover {
+  background: var(--surface-3);
+}
+
+/* Inspector toggle: the same square as the menu trigger beside it. */
+.header .inspectorToggle {
+  flex-shrink: 0;
+  min-width: var(--header-control-size);
+  min-height: var(--header-control-size);
 }
 
 .header .menuTrigger {
@@ -197,7 +212,7 @@
    keep flowing in one row; narrow headers lay them out as two lines. */
 .header:global(.session-header) {
   z-index: var(--z-topbar);
-  background: var(--bg-surface);
+  background: var(--canvas);
   /* A hairline that adds no height to the row. */
   box-shadow: 0 1px 0 var(--line);
 }
@@ -206,12 +221,12 @@
   content: none;
 }
 
+/* One title size at every width: --fs-h2 has no phone override. */
 .header :global(.session-title) {
   color: var(--ink);
-  font-family: var(--font-display);
-  font-size: 17px;
-  font-weight: 600;
-  font-optical-sizing: auto;
+  font-family: var(--font-ui);
+  font-size: var(--fs-h2);
+  font-weight: var(--title-weight);
   letter-spacing: -0.005em;
   line-height: 24px;
 }
@@ -291,5 +306,13 @@
   /* The title itself opens the recent-sessions menu; the chevron repeats it. */
   .header[data-header-layout="narrow"] :global(.session-title-chevron-trigger) {
     display: none;
+  }
+}
+
+/* Phone page header: the shell's translucent page-header fill. */
+@media (width < 768px) {
+  .header:global(.session-header) {
+    background: var(--phead-bg);
+    box-shadow: 0 1px 0 var(--phead-line);
   }
 }

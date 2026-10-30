@@ -18,11 +18,11 @@
     width: 28px;
     height: 28px;
     padding: 0;
-    color: var(--text-muted);
-    background: var(--bg-card);
-    border: 1px solid var(--border-color);
+    color: var(--ink-3);
+    background: var(--surface);
+    border: 1px solid var(--line);
     border-radius: 50%;
-    box-shadow: var(--shadow-xs);
+    box-shadow: var(--shadow-card);
     cursor: pointer;
   }
 
@@ -74,11 +74,11 @@
   width: 32px;
   height: 22px;
   padding: 0;
-  color: var(--text-muted);
-  background: var(--bg-card);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-pill);
-  box-shadow: var(--shadow-xs);
+  color: var(--ink-3);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-chip);
+  box-shadow: var(--shadow-card);
   cursor: pointer;
   transition:
     background 0.15s,
@@ -94,15 +94,15 @@
 
 .fullPaneToggle:hover,
 .fullPaneToggle:focus-visible {
-  color: var(--text-primary);
-  background: var(--bg-hover);
+  color: var(--ink);
+  background: var(--surface-3);
   border-color: var(--line-strong);
   outline: none;
 }
 
 .fullPaneToggle[aria-pressed="true"] {
-  color: var(--indigo);
-  background: var(--indigo-soft);
+  color: var(--accent-ink);
+  background: var(--accent-soft);
   border-color: transparent;
 }
 

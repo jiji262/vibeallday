@@ -8,6 +8,7 @@ import {
 import { useQuestionOtherDrafts } from "../hooks/useDrafts";
 import { useI18n } from "../i18n";
 import type { InputRequest, UserQuestionAnswers } from "../types";
+import { NeedsYouHead } from "./NeedsYouHead";
 import type { AskUserQuestionInput, Question } from "./renderers/tools/types";
 import styles from "./QuestionAnswerPanel.module.css";
 
@@ -17,6 +18,26 @@ function cx(...classNames: (string | false | undefined)[]): string {
   return classNames.filter(Boolean).join(" ");
 }
 type SelectedAnswers = Record<string, string[]>;
+
+/** Drawn radio (single choice) or checkbox (multi-select) mark. */
+function OptionMark({
+  multiSelect,
+  selected,
+}: {
+  multiSelect: boolean | undefined;
+  selected: boolean;
+}) {
+  return (
+    <span
+      className={cx(
+        styles.optionRadio,
+        multiSelect && styles.optionCheck,
+        selected && styles.optionMarkOn,
+      )}
+      aria-hidden="true"
+    />
+  );
+}
 
 function getSelections(
   answers: SelectedAnswers,
@@ -297,170 +318,163 @@ export function QuestionAnswerPanel({
 
       {!collapsed && (
         <div className={styles.panel}>
-          {/* Tab bar — only meaningful with more than one question; a lone
+          <NeedsYouHead title={t("composerAskQuestionHead")} />
+          <div className={styles.body}>
+            {/* Tab bar — only meaningful with more than one question; a lone
               tab is just noise (and an awkward "active" pill), so hide it. */}
-          {questions.length > 1 && (
-            <div className={styles.tabs}>
-              {questions.map((q, idx) => {
-                const isActive = idx === currentTab;
-                const isAnswered = isQuestionAnswered(
-                  getSelections(answers, getQuestionKey(q)),
-                  getQuestionOtherText(q),
-                );
-                return (
-                  <button
-                    key={getQuestionKey(q)}
-                    type="button"
-                    className={cx(
-                      styles.tab,
-                      isActive && styles.active,
-                      isAnswered && styles.answered,
-                    )}
-                    onClick={() => setCurrentTab(idx)}
-                  >
-                    {isAnswered && <span className={styles.tabCheck}>✓</span>}
-                    {q.header}
-                  </button>
-                );
-              })}
-            </div>
-          )}
-
-          {/* Current question */}
-          {currentQuestion && (
-            <div className={styles.content}>
-              <div className={styles.text}>{currentQuestion.question}</div>
-
-              <div className={styles.optionsList}>
-                {currentQuestion.options.map((option) => {
-                  const isSelected = currentSelections.includes(option.label);
+            {questions.length > 1 && (
+              <div className={styles.tabs}>
+                {questions.map((q, idx) => {
+                  const isActive = idx === currentTab;
+                  const isAnswered = isQuestionAnswered(
+                    getSelections(answers, getQuestionKey(q)),
+                    getQuestionOtherText(q),
+                  );
                   return (
                     <button
-                      key={option.label}
+                      key={getQuestionKey(q)}
                       type="button"
                       className={cx(
-                        styles.option,
-                        isSelected && styles.selected,
-                        isSelected && !!option.preview && styles.hasPreview,
+                        styles.tab,
+                        isActive && styles.active,
+                        isAnswered && styles.answered,
                       )}
-                      aria-pressed={isSelected}
-                      onClick={(event) => {
-                        if (
-                          event.target instanceof HTMLElement &&
-                          event.target.closest(`.${styles.optionPreview}`)
-                        ) {
-                          return;
-                        }
-                        handleSelectOption(option.label);
-                      }}
+                      onClick={() => setCurrentTab(idx)}
                     >
-                      <span className={styles.optionRadio}>
-                        {currentQuestion.multiSelect
-                          ? isSelected
-                            ? "☑"
-                            : "☐"
-                          : isSelected
-                            ? "●"
-                            : "○"}
-                      </span>
-                      <div className={styles.optionText}>
-                        <span className={styles.optionLabel}>
-                          {option.label}
-                        </span>
-                        {option.description && (
-                          <span className={styles.optionDesc}>
-                            {option.description}
-                          </span>
-                        )}
-                      </div>
-                      {/* Preview is revealed for the focused (selected) option. */}
-                      {isSelected && option.preview && (
-                        <div className={styles.optionPreview}>
-                          {option.preview}
-                        </div>
-                      )}
+                      {isAnswered && <span className={styles.tabCheck}>✓</span>}
+                      {q.header}
                     </button>
                   );
                 })}
-
-                {/* Other option */}
-                {currentQuestion.isOther !== false && (
-                  <button
-                    type="button"
-                    className={cx(
-                      styles.option,
-                      "other",
-                      isOtherSelected && styles.selected,
-                    )}
-                    aria-pressed={isOtherSelected}
-                    onClick={() => handleSelectOption(OTHER_ANSWER)}
-                  >
-                    <span className={styles.optionRadio}>
-                      {currentQuestion.multiSelect
-                        ? isOtherSelected
-                          ? "☑"
-                          : "☐"
-                        : isOtherSelected
-                          ? "●"
-                          : "○"}
-                    </span>
-                    <div className={styles.optionText}>
-                      <span className={styles.optionLabel}>
-                        {t("questionPanelOther")}
-                      </span>
-                    </div>
-                  </button>
-                )}
-
-                {/* Other text input */}
-                {isOtherSelected && (
-                  <div className={styles.otherInput}>
-                    <input
-                      ref={otherInputRef}
-                      type={currentQuestion.isSecret ? "password" : "text"}
-                      placeholder={t("questionPanelTypeAnswer")}
-                      value={getQuestionOtherText(currentQuestion)}
-                      onChange={(e) => handleOtherTextChange(e.target.value)}
-                    />
-                  </div>
-                )}
               </div>
-            </div>
-          )}
-
-          {/* Actions */}
-          <div className={styles.actions}>
-            <button
-              type="button"
-              className={cx(styles.btn, styles.deny)}
-              onClick={handleDeny}
-              disabled={submitting}
-            >
-              {t("questionPanelCancel")}
-              <kbd>esc</kbd>
-            </button>
-
-            {isLastQuestion ? (
-              <button
-                type="button"
-                className={cx(styles.btn, styles.submit)}
-                onClick={handleSubmit}
-                disabled={!allAnswered || submitting}
-              >
-                {t("questionPanelSubmit")}
-                <kbd>↵</kbd>
-              </button>
-            ) : (
-              <button
-                type="button"
-                className={cx(styles.btn, styles.next)}
-                onClick={advanceToNext}
-                disabled={!currentQuestionAnswered || submitting}
-              >
-                {t("questionPanelNext")}
-                <kbd>↵</kbd>
-              </button>
             )}
+
+            {/* Current question */}
+            {currentQuestion && (
+              <div className={styles.content}>
+                <div className={styles.text}>{currentQuestion.question}</div>
+
+                <div className={styles.optionsList}>
+                  {currentQuestion.options.map((option) => {
+                    const isSelected = currentSelections.includes(option.label);
+                    return (
+                      <button
+                        key={option.label}
+                        type="button"
+                        className={cx(
+                          styles.option,
+                          isSelected && styles.selected,
+                          isSelected && !!option.preview && styles.hasPreview,
+                        )}
+                        aria-pressed={isSelected}
+                        onClick={(event) => {
+                          if (
+                            event.target instanceof HTMLElement &&
+                            event.target.closest(`.${styles.optionPreview}`)
+                          ) {
+                            return;
+                          }
+                          handleSelectOption(option.label);
+                        }}
+                      >
+                        <OptionMark
+                          multiSelect={currentQuestion.multiSelect}
+                          selected={isSelected}
+                        />
+                        <div className={styles.optionText}>
+                          <span className={styles.optionLabel}>
+                            {option.label}
+                          </span>
+                          {option.description && (
+                            <span className={styles.optionDesc}>
+                              {option.description}
+                            </span>
+                          )}
+                        </div>
+                        {/* Preview is revealed for the focused (selected) option. */}
+                        {isSelected && option.preview && (
+                          <div className={styles.optionPreview}>
+                            {option.preview}
+                          </div>
+                        )}
+                      </button>
+                    );
+                  })}
+
+                  {/* Other option */}
+                  {currentQuestion.isOther !== false && (
+                    <button
+                      type="button"
+                      className={cx(
+                        styles.option,
+                        "other",
+                        isOtherSelected && styles.selected,
+                      )}
+                      aria-pressed={isOtherSelected}
+                      onClick={() => handleSelectOption(OTHER_ANSWER)}
+                    >
+                      <OptionMark
+                        multiSelect={currentQuestion.multiSelect}
+                        selected={isOtherSelected}
+                      />
+                      <div className={styles.optionText}>
+                        <span className={styles.optionLabel}>
+                          {t("questionPanelOther")}
+                        </span>
+                      </div>
+                    </button>
+                  )}
+
+                  {/* Other text input */}
+                  {isOtherSelected && (
+                    <div className={styles.otherInput}>
+                      <input
+                        ref={otherInputRef}
+                        type={currentQuestion.isSecret ? "password" : "text"}
+                        placeholder={t("questionPanelTypeAnswer")}
+                        value={getQuestionOtherText(currentQuestion)}
+                        onChange={(e) => handleOtherTextChange(e.target.value)}
+                      />
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Actions */}
+            <div className={styles.actions}>
+              <button
+                type="button"
+                className={cx(styles.btn, styles.deny)}
+                onClick={handleDeny}
+                disabled={submitting}
+              >
+                {t("questionPanelCancel")}
+                <kbd>esc</kbd>
+              </button>
+
+              {isLastQuestion ? (
+                <button
+                  type="button"
+                  className={cx(styles.btn, styles.submit)}
+                  onClick={handleSubmit}
+                  disabled={!allAnswered || submitting}
+                >
+                  {t("questionPanelSubmit")}
+                  <kbd>↵</kbd>
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  className={cx(styles.btn, styles.next)}
+                  onClick={advanceToNext}
+                  disabled={!currentQuestionAnswered || submitting}
+                >
+                  {t("questionPanelNext")}
+                  <kbd>↵</kbd>
+                </button>
+              )}
+            </div>
           </div>
         </div>
       )}

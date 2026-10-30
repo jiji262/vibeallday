@@ -197,7 +197,7 @@ describe("ExploredToolGroup", () => {
       </I18nProvider>,
     );
 
-    expect(screen.getByText("Exploring")).toBeDefined();
+    expect(screen.getByText("Working")).toBeDefined();
     expect(screen.getByText("Read")).toBeDefined();
     expect(screen.getByText("Grep")).toBeDefined();
     expect(screen.getByText("List")).toBeDefined();
@@ -234,6 +234,51 @@ describe("ExploredToolGroup", () => {
     expect(
       screen.getByRole("button", { name: "Expand explored tools" }),
     ).toBeDefined();
+  });
+
+  it("summarizes the work-log head and shows a duration only from timestamps", () => {
+    const grepResult = {
+      content: "",
+      isError: false,
+      structured: { mode: "files_with_matches", filenames: [], numFiles: 0 },
+    } satisfies ToolCallItem["toolResult"];
+    const renderGroup = (items: ToolCallItem[]) =>
+      render(
+        <I18nProvider>
+          <ExploredToolGroup
+            id="explored-head"
+            projection={projectionFor(items)}
+          />
+        </I18nProvider>,
+      );
+
+    const timed = renderGroup([
+      toolCall(
+        "grep-a",
+        "Grep",
+        { pattern: "a" },
+        "2026-05-28T00:00:00.000Z",
+        grepResult,
+      ),
+      toolCall(
+        "grep-b",
+        "Grep",
+        { pattern: "b" },
+        "2026-05-28T00:01:40.000Z",
+        grepResult,
+      ),
+    ]);
+    expect(screen.getByText("Work log")).toBeDefined();
+    expect(screen.getByText("Explored 2")).toBeDefined();
+    expect(screen.getByText("Took 1m40s")).toBeDefined();
+    timed.unmount();
+
+    renderGroup([
+      toolCall("grep-c", "Grep", { pattern: "c" }, "", grepResult),
+      toolCall("grep-d", "Grep", { pattern: "d" }, "", grepResult),
+    ]);
+    expect(screen.getByText("Explored 2")).toBeDefined();
+    expect(screen.queryByText(/^Took /)).toBeNull();
   });
 
   it("compacts Windows project paths in pending explored rows", () => {
@@ -405,8 +450,8 @@ describe("ExploredToolGroup", () => {
       </I18nProvider>,
     );
 
-    expect(screen.getByText("Explored")).toBeDefined();
-    expect(screen.getByText("3 items")).toBeDefined();
+    expect(screen.getByText("Work log")).toBeDefined();
+    expect(screen.getByText("Explored 3 · Ran 1")).toBeDefined();
     expect(screen.getAllByText("Read")).toHaveLength(3);
     expect(screen.getByText("lines 1-100")).toBeDefined();
     expect(screen.getByText("lines 101-200")).toBeDefined();
@@ -606,7 +651,7 @@ describe("ExploredToolGroup", () => {
     const group = container.querySelector<HTMLElement>(
       '[data-render-type="explored"]',
     );
-    expect(screen.getByText("Exploring")).toBeDefined();
+    expect(screen.getByText("Working")).toBeDefined();
     expect(group?.dataset.renderId).toBe(
       "explored-call-stable-parent-call-stable-parent",
     );
@@ -625,7 +670,7 @@ describe("ExploredToolGroup", () => {
     ).toBe("26px");
 
     rerender(renderGroup(durable));
-    expect(screen.getByText("Explored")).toBeDefined();
+    expect(screen.getByText("Work log")).toBeDefined();
     expect(
       screen.getByRole("button", { name: "Expand explored tools" }),
     ).toBeDefined();

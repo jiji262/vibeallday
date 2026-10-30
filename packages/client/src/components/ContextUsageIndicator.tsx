@@ -10,9 +10,12 @@ interface ContextUsageIndicatorProps {
   showLabel?: boolean;
 }
 
+const CONTEXT_ERR_PERCENT = 90;
+const CONTEXT_ATTN_PERCENT = 75;
+
 /**
- * Small pie chart indicator showing context window usage percentage.
- * Displays a gray pie chart that fills based on usage, with percentage label.
+ * Context ring: an accent arc over a quiet track, turning amber near the
+ * window and red when nearly full, with the percentage beside it.
  */
 export function ContextUsageIndicator({
   usage,
@@ -34,11 +37,10 @@ export function ContextUsageIndicator({
   const circumference = 2 * Math.PI * radius;
   const filled = (clampedPercentage / 100) * circumference;
 
-  // Fill color - lighter color that shows usage amount
   const getFillColor = () => {
-    if (clampedPercentage >= 90) return "var(--color-error, #dc3545)";
-    if (clampedPercentage >= 75) return "var(--color-warning, #ffc107)";
-    return "var(--text-muted, #9d9d9d)";
+    if (clampedPercentage >= CONTEXT_ERR_PERCENT) return "var(--err)";
+    if (clampedPercentage >= CONTEXT_ATTN_PERCENT) return "var(--attn)";
+    return "var(--accent)";
   };
 
   const tooltip = usage.contextWindow
@@ -61,16 +63,16 @@ export function ContextUsageIndicator({
         className="context-usage-pie"
         aria-hidden="true"
       >
-        {/* Background circle - darker */}
+        {/* Track */}
         <circle
           cx={size / 2}
           cy={size / 2}
           r={radius}
           fill="none"
-          stroke="var(--border-color, #3c3c3c)"
+          stroke="var(--surface-3)"
           strokeWidth="2"
         />
-        {/* Filled arc - lighter color showing usage, rotated -90deg so it starts from top */}
+        {/* Used arc, rotated -90deg so it starts from the top */}
         <circle
           cx={size / 2}
           cy={size / 2}

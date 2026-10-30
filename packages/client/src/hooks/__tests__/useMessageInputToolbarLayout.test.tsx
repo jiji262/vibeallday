@@ -1,6 +1,10 @@
 import { render, screen } from "@testing-library/react";
 import { afterEach, expect, it, vi } from "vitest";
-import { useMeasuredComposerOverflow } from "../useMessageInputToolbarLayout";
+import {
+  type ComposerToolbarOverflowLayoutSignatureInput,
+  getComposerTrayKeys,
+  useMeasuredComposerOverflow,
+} from "../useMessageInputToolbarLayout";
 
 afterEach(() => {
   vi.restoreAllMocks();
@@ -93,3 +97,59 @@ it.each([true, false])(
     expect(frame).not.toHaveBeenCalled();
   },
 );
+
+it("keeps pinned tools in the session row and trays the other shown tools", () => {
+  const layout: ComposerToolbarOverflowLayoutSignatureInput = {
+    modeSelector: "first",
+    attachments: "first",
+    slashMenu: "mid",
+    thinkingToggle: "mid",
+    renderMode: "last",
+    conversationView: "last",
+    browserDebug: "off",
+    nudge: "off",
+    syntheticDone: "off",
+    sessionStatus: "pin",
+    shortcutsHelp: "last",
+    transcriptSearch: "first",
+    contextUsage: "pin",
+    btw: "pin",
+    steerNow: "pin",
+    topicShift: "off",
+    projectQueue: "last",
+    projectQueueNewSessionShortcut: "off",
+    microphone: "live",
+    waveform: true,
+    send: "send",
+    queue: "off",
+    alternate: false,
+    stop: false,
+    pending: "off",
+  };
+
+  const tray = getComposerTrayKeys(layout, false);
+
+  // Show always (pin) keeps a tool inline with no tray copy.
+  expect(tray).not.toContain("btw");
+  expect(tray).not.toContain("steerNow");
+  // Primary and inline-only controls never move into the tray.
+  expect(tray).not.toContain("attachments");
+  expect(tray).not.toContain("contextUsage");
+  expect(tray).not.toContain("sessionStatus");
+  // Hidden tools stay out of both places.
+  expect(tray).not.toContain("nudge");
+  expect(tray).toEqual(
+    expect.arrayContaining([
+      "slashMenu",
+      "renderMode",
+      "conversationView",
+      "shortcutsHelp",
+      "transcriptSearch",
+      "projectQueue",
+    ]),
+  );
+  // Phones also fold the controls configured to narrow first.
+  expect(getComposerTrayKeys(layout, true)).toEqual(
+    expect.arrayContaining(["attachments", "modeSelector"]),
+  );
+});

@@ -1,4 +1,6 @@
-/* Question Answer Panel - for AskUserQuestion tool with tabbed UI */
+/* Question Answer Panel - for AskUserQuestion tool with tabbed UI. The
+   needs-you card pinned above the composer: amber head (NeedsYouHead), the
+   question, bordered option rows, then Skip and the primary answer action. */
 
 /* Wrapper for the question panel with floating toggle */
 .wrapper {
@@ -18,11 +20,11 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--bg-card);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-pill);
-  box-shadow: var(--shadow-xs);
-  color: var(--text-muted);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-chip);
+  box-shadow: var(--shadow-card);
+  color: var(--ink-3);
   cursor: pointer;
   transition:
     background 120ms ease,
@@ -37,8 +39,8 @@
 }
 
 .toggle:hover {
-  background: var(--bg-hover);
-  color: var(--text-primary);
+  background: var(--surface-3);
+  color: var(--ink);
   border-color: var(--line-strong);
 }
 
@@ -55,26 +57,35 @@
   transform: rotate(180deg);
 }
 
-/* A sheet-like card above the dock; the indigo border says "answer me". */
+/* The card: the amber line says "answer me"; the head stays put while the
+   body scrolls. */
 .panel {
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
   max-width: 44rem;
   margin-inline: auto;
-  padding: var(--space-4);
-  background: var(--bg-card);
-  border: 1px solid var(--indigo);
-  border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-md);
+  overflow: hidden;
+  background: var(--surface);
+  border: 1px solid var(--ask-line);
+  border-radius: var(--r-card);
+  box-shadow: var(--shadow-pop);
   /* Mobile: limit height and enable scrolling when keyboard is open */
   max-height: min(60dvh, 30rem);
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 0;
+  padding: 14px 16px 0;
   overflow-y: auto;
   overscroll-behavior: contain;
 }
 
 .empty {
-  color: var(--text-muted);
+  padding: 14px 16px;
+  color: var(--ink-3);
   font-style: italic;
 }
 
@@ -89,13 +100,13 @@
   display: flex;
   align-items: center;
   gap: var(--space-1);
-  min-height: 36px;
+  min-height: var(--chip-h);
   padding: 0 var(--space-3);
-  background: var(--bg-tertiary);
-  border: 1px solid transparent;
-  border-radius: var(--radius-pill);
-  font-size: var(--font-size-sm);
-  color: var(--text-muted);
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-chip);
+  font-size: var(--fs-small);
+  color: var(--ink-2);
   cursor: pointer;
   transition:
     background 120ms ease,
@@ -103,26 +114,26 @@
 }
 
 .tab:hover {
-  background: var(--bg-hover);
+  background: var(--surface-3);
 }
 
 .tab.active {
-  background: var(--indigo-soft);
-  border-color: var(--indigo);
-  color: var(--indigo);
+  background: var(--accent-soft);
+  border-color: var(--accent-line);
+  color: var(--accent-ink);
   font-weight: 600;
 }
 
 .tab.answered:not(.active) {
-  color: var(--mint-ink);
+  color: var(--ok-ink);
 }
 
 .tabCheck {
-  color: var(--mint-ink);
+  color: var(--ok-ink);
 }
 
 .tab.active .tabCheck {
-  color: var(--indigo);
+  color: var(--accent-ink);
 }
 
 /* Question content */
@@ -133,9 +144,9 @@
 }
 
 .content .text {
-  font-size: 16px;
-  font-weight: 600;
-  color: var(--text-primary);
+  font-size: var(--fs-h3);
+  font-weight: var(--title-weight);
+  color: var(--ink);
   line-height: 1.4;
   /* Cap the reading measure (~45-75 chars is the readability sweet spot) so
      prose never runs to 1000px+ lines on a very wide card. Only shrinks —
@@ -160,11 +171,12 @@
   align-items: start;
   column-gap: var(--space-3);
   row-gap: var(--space-2);
-  min-height: 48px;
-  padding: 12px var(--space-3);
-  background: var(--bg-surface);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-lg);
+  min-height: var(--tap-min);
+  padding: 12px 14px;
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-input);
+  color: var(--ink);
   text-align: left;
   cursor: pointer;
   transition:
@@ -174,45 +186,50 @@
 }
 
 .option:hover {
-  background: var(--bg-hover);
-  border-color: var(--line-strong);
+  background: var(--surface-3);
 }
 
 .option.selected {
-  border-color: var(--indigo);
-  /* Single-cue selection: a tinted fill and a colored border. */
-  background: var(--indigo-soft);
+  /* Single-cue selection: a tinted fill and an accent border. */
+  border-color: var(--accent-line);
+  background: var(--accent-soft);
 }
 
 .option.selected:hover {
-  border-color: var(--indigo);
-  background: var(--indigo-soft);
+  border-color: var(--accent-line);
+  background: var(--accent-soft);
 }
 
+/* Drawn radio: a ring that fills with an accent dot when chosen. */
 .optionRadio {
-  color: var(--text-dimmed);
-  font-family: var(--font-mono);
-  font-size: 1rem;
   flex-shrink: 0;
-  margin-top: 1px;
+  width: 18px;
+  height: 18px;
+  margin-top: 2px;
+  background: var(--surface);
+  border: 1.5px solid var(--line-strong);
+  border-radius: 50%;
+}
+
+/* Multi-select draws a rounded square instead. */
+.optionCheck {
+  border-radius: 5px;
+}
+
+.optionMarkOn {
+  background: var(--accent);
+  border-color: var(--accent);
+  box-shadow: inset 0 0 0 3px var(--surface);
 }
 
 .option .optionLabel {
-  font-weight: 500;
-  color: var(--text-primary);
+  font-weight: 600;
+  color: var(--ink);
 }
 
 .option .optionDesc {
-  font-size: var(--font-size-sm);
-  color: var(--text-muted);
-}
-
-.option.selected .optionRadio {
-  color: var(--indigo);
-}
-
-.option.selected .optionLabel {
-  color: var(--indigo);
+  font-size: var(--fs-small);
+  color: var(--ink-2);
 }
 
 .optionText {
@@ -232,12 +249,12 @@
   grid-column: 1 / -1;
   margin: 0;
   padding: var(--space-2);
-  background: var(--bg-surface);
-  border: 1px solid var(--border-subtle);
+  background: var(--code-bg);
+  border: 1px solid var(--line);
   border-radius: var(--radius-sm);
-  color: var(--text-secondary);
+  color: var(--ink-2);
   font-family: var(--font-mono);
-  font-size: var(--font-size-sm);
+  font-size: var(--fs-code);
   line-height: 1.45;
   white-space: pre;
   overflow: auto;
@@ -264,29 +281,28 @@
 
 /* Other option input */
 .otherInput {
-  margin-left: calc(1rem + var(--space-3));
-  margin-top: var(--space-2);
+  margin-left: calc(18px + var(--space-3) + 14px);
 }
 
 .otherInput input {
   width: 100%;
-  min-height: 48px;
+  min-height: var(--input-h);
   padding: 0 var(--space-3);
-  background: var(--bg-surface);
-  border: 1px solid var(--border-input);
-  border-radius: var(--radius-lg);
-  color: var(--text-primary);
-  font-size: 16px;
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-input);
+  color: var(--ink);
+  font-size: var(--fs-input);
 }
 
 .otherInput input:focus {
   outline: none;
-  border-color: var(--indigo);
-  box-shadow: 0 0 0 3px var(--indigo-soft);
+  border-color: var(--focus);
+  box-shadow: 0 0 0 3px var(--accent-soft);
 }
 
 .otherInput input::placeholder {
-  color: var(--text-muted);
+  color: var(--ink-4);
 }
 
 /* Actions */
@@ -298,10 +314,10 @@
   z-index: 1;
   display: flex;
   justify-content: flex-end;
-  gap: var(--space-2);
-  padding-top: var(--space-2);
-  border-top: 1px solid var(--border-subtle);
-  background: var(--bg-card);
+  gap: 8px;
+  padding: 10px 0 16px;
+  border-top: 1px solid var(--line);
+  background: var(--surface);
 }
 
 .btn {
@@ -309,13 +325,13 @@
   align-items: center;
   justify-content: center;
   gap: var(--space-2);
-  min-height: 48px;
-  padding: 0 var(--space-4);
+  min-height: var(--btn-h);
+  padding: 0 var(--btn-px);
   /* Transparent border on every variant keeps heights aligned whether or not
-     a variant draws a visible border (e.g. the ghost Cancel below). */
+     a variant draws a visible border. */
   border: 1px solid transparent;
-  border-radius: var(--radius-lg);
-  font-size: 15px;
+  border-radius: var(--r-btn);
+  font-size: var(--fs-btn);
   font-weight: 600;
   cursor: pointer;
   transition:
@@ -331,40 +347,40 @@
   cursor: not-allowed;
 }
 
-/* Cancel is the secondary action — a quiet ghost button so the single solid
-   Submit reads as the primary CTA instead of two loud filled buttons. */
+/* Skip is a quiet ghost so the single solid answer action reads as the
+   primary CTA. */
 .btn.deny {
   background: transparent;
-  color: var(--text-secondary);
-  border-color: var(--border-input);
+  color: var(--ink-2);
 }
 
 .btn.deny:hover:not(:disabled) {
-  background: var(--bg-tertiary);
-  color: var(--text-primary);
+  background: var(--surface-3);
+  color: var(--ink);
 }
 
 .btn.next {
-  background: var(--bg-tertiary);
-  color: var(--text-primary);
+  background: var(--surface);
+  border-color: var(--line-strong);
+  color: var(--ink);
 }
 
 .btn.next:hover:not(:disabled) {
-  background: var(--bg-hover);
+  background: var(--surface-3);
 }
 
 .btn.submit {
-  background: var(--indigo);
-  color: var(--ink-on);
+  background: var(--accent);
+  color: var(--on-accent);
 }
 
 .btn.submit:hover:not(:disabled) {
-  background: color-mix(in srgb, var(--indigo) 86%, black);
+  background: var(--accent-hover);
 }
 
 .btn kbd {
   font-family: var(--font-mono);
-  font-size: var(--font-size-xs);
+  font-size: var(--fs-meta);
   font-weight: 400;
   padding: 0.1rem 0.3rem;
   /* Theme-agnostic translucent chip (reads on both the ghost Cancel and the
@@ -381,10 +397,10 @@
   }
 }
 
-/* Mobile adjustments */
+/* Mobile adjustments: Skip keeps its width, the answer action fills. */
 @media (width <= 600px) {
-  .panel {
-    padding: var(--space-3);
+  .body {
+    padding: 14px 14px 0;
   }
 
   .tabs {
@@ -397,6 +413,11 @@
 
   .btn {
     min-width: 70px;
+    min-height: var(--tap-min);
+  }
+
+  .btn.submit,
+  .btn.next {
     flex: 1;
   }
 }

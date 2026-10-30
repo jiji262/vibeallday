@@ -7,6 +7,9 @@
 }
 
 .button {
+  /* Each kind sets --selection-action-tone; the chip derives its ring and
+     fill from that tone over the surface so every skin keeps contrast. */
+  --selection-action-tone: var(--ink-3);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -14,11 +17,16 @@
   width: 30px;
   height: 30px;
   padding: 0;
-  border: 1px solid var(--selection-action-border);
+  border: 1px solid
+    color-mix(in srgb, var(--selection-action-tone) 68%, var(--line));
   border-radius: 999px;
-  background: var(--selection-action-background);
-  color: var(--text-primary);
-  box-shadow: var(--shadow-md);
+  background: color-mix(
+    in srgb,
+    var(--selection-action-tone) 20%,
+    var(--surface)
+  );
+  color: var(--ink);
+  box-shadow: var(--shadow-pop);
   cursor: pointer;
   font-family: var(--font-ui);
   font-size: 10px;
@@ -29,102 +37,35 @@
 
 .button:hover,
 .button:focus-visible {
-  background: var(--selection-action-background-hover);
-  outline: 2px solid var(--focus-border, #007acc);
+  background: color-mix(
+    in srgb,
+    var(--selection-action-tone) 34%,
+    var(--surface)
+  );
+  outline: 2px solid var(--focus);
   outline-offset: 1px;
 }
 
 .text {
-  --selection-action-border: color-mix(
-    in srgb,
-    var(--text-secondary, #8b949e) 68%,
-    var(--border-color, #333)
-  );
-  --selection-action-background: color-mix(
-    in srgb,
-    var(--text-secondary, #8b949e) 20%,
-    var(--bg-secondary, #252525)
-  );
-  --selection-action-background-hover: color-mix(
-    in srgb,
-    var(--text-secondary, #8b949e) 32%,
-    var(--bg-secondary, #252525)
-  );
   font-size: 15px;
 }
 
 .quote {
-  --selection-action-border: color-mix(
-    in srgb,
-    var(--app-accent, #059669) 65%,
-    var(--border-color, #333)
-  );
-  --selection-action-background: color-mix(
-    in srgb,
-    var(--app-accent, #059669) 24%,
-    var(--bg-secondary, #252525)
-  );
-  --selection-action-background-hover: color-mix(
-    in srgb,
-    var(--app-accent, #059669) 36%,
-    var(--bg-secondary, #252525)
-  );
+  --selection-action-tone: var(--accent);
   font-size: 16px;
 }
 
 .source {
-  --selection-action-border: color-mix(
-    in srgb,
-    #268bd2 68%,
-    var(--border-color, #333)
-  );
-  --selection-action-background: color-mix(
-    in srgb,
-    #268bd2 25%,
-    var(--bg-secondary, #252525)
-  );
-  --selection-action-background-hover: color-mix(
-    in srgb,
-    #268bd2 38%,
-    var(--bg-secondary, #252525)
-  );
+  --selection-action-tone: var(--run);
   font-size: 8px;
 }
 
 .rich {
-  --selection-action-border: color-mix(
-    in srgb,
-    #a855f7 68%,
-    var(--border-color, #333)
-  );
-  --selection-action-background: color-mix(
-    in srgb,
-    #a855f7 24%,
-    var(--bg-secondary, #252525)
-  );
-  --selection-action-background-hover: color-mix(
-    in srgb,
-    #a855f7 36%,
-    var(--bg-secondary, #252525)
-  );
+  --selection-action-tone: var(--ink-2);
 }
 
 .newSession {
-  --selection-action-border: color-mix(
-    in srgb,
-    var(--app-accent, #059669) 70%,
-    var(--border-color, #333)
-  );
-  --selection-action-background: color-mix(
-    in srgb,
-    var(--app-accent, #059669) 28%,
-    var(--bg-secondary, #252525)
-  );
-  --selection-action-background-hover: color-mix(
-    in srgb,
-    var(--app-accent, #059669) 42%,
-    var(--bg-secondary, #252525)
-  );
+  --selection-action-tone: var(--accent);
   font-size: 20px;
   font-weight: 600;
 }

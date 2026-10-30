@@ -333,6 +333,7 @@ vi.mock("../../i18n", () => ({
           skillInvocationStillSent: "Text will still be sent.",
           toolbarThinkingTitle: `Click to choose thinking mode. Current: ${params?.current ?? ""}`,
           toolbarThinkingAppliesNextTurn: "Applies next turn",
+          composerModelThinkingChip: `${params?.model ?? ""} · ${params?.thinking ?? ""}`,
           newSessionThinkingOff: "Thinking off",
           newSessionThinkingAuto: "Thinking auto",
           newSessionThinkingOn: `Thinking on ${params?.level ?? ""}`,

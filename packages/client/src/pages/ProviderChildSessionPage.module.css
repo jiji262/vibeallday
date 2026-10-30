@@ -2,15 +2,15 @@
   display: flex;
   min-height: 100%;
   flex-direction: column;
-  background: var(--bg-surface);
+  background: var(--canvas);
 }
 
 .parentLink {
   display: inline-flex;
   align-items: center;
   min-height: var(--tap-min);
-  color: var(--indigo);
-  font-size: 14px;
+  color: var(--link);
+  font-size: var(--fs-small);
   font-weight: 500;
   text-decoration: none;
   white-space: nowrap;
@@ -30,5 +30,13 @@
 .status {
   margin: var(--space-4);
   color: var(--ink-3);
-  font-size: 15px;
+  font-size: var(--fs-body);
+}
+
+/* The dock's back action is a link drawn as the primary button. */
+.dockLink {
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+  text-decoration: none;
 }

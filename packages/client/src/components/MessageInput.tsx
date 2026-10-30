@@ -1,3 +1,4 @@
+import { ComposerQueueHint } from "./ComposerQueueHint";
 import { DraftSyncNotice } from "./DraftSyncNotice";
 import { AudioMemoPanel } from "./AudioMemoPanel";
 import { ComposerRecents } from "./ComposerRecents";
@@ -4760,6 +4761,9 @@ export function MessageInput({
     <>
       {showQuestionAsideHint && (
         <QuestionAsideHint mobile={hasCoarsePointer()} />
+      )}
+      {onQueue && !forkSummaryMode && effectivePrimaryActionKind !== "send" && (
+        <ComposerQueueHint kind={effectivePrimaryActionKind} />
       )}
       {composer}
     </>

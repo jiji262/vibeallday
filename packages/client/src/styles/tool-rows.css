@@ -27,7 +27,7 @@
   top: 16px; /* Just below the dot */
   bottom: -10px; /* Extend into next item's space to meet its dot */
   width: 1px;
-  background: var(--timeline-line-color);
+  background: var(--line);
 }
 
 /* Last item in a turn - hide the line below */
@@ -68,25 +68,28 @@
 
 /* Tool row status-specific dot colors */
 .tool-row.timeline-item.status-pending::before {
-  background: var(--timeline-dot-working);
+  background: var(--run);
   animation: pulse 1.5s ease-in-out infinite var(--activity-play, paused);
 }
 
 .tool-row.timeline-item.status-complete::before {
-  background: var(--timeline-dot-tool);
+  background: var(--idle);
 }
 
+/* Errors read by shape as well as colour: the skin's error marker. */
 .tool-row.timeline-item.status-error::before {
-  background: var(--timeline-dot-error);
+  border-radius: var(--err-marker-radius);
+  background: var(--err);
+  transform: var(--err-marker-transform);
 }
 
 .tool-row.timeline-item.status-aborted::before {
-  background: var(--timeline-dot-warning, #d7ba7d);
+  background: var(--idle);
   opacity: 0.7;
 }
 
 .tool-row.timeline-item.status-incomplete::before {
-  background: var(--timeline-dot-warning, #d7ba7d);
+  background: var(--idle);
   opacity: 0.7;
 }
 
@@ -106,8 +109,8 @@
 }
 
 .timeline-dot-btn:hover {
-  background: var(--bg-hover, rgba(255, 255, 255, 0.08));
-  box-shadow: 0 0 0 1px var(--border-color, #444);
+  background: var(--surface-3);
+  box-shadow: 0 0 0 1px var(--line-strong);
 }
 
 .timeline-dot-btn:focus {
@@ -116,20 +119,15 @@
 }
 
 .timeline-dot-btn:focus-visible {
-  box-shadow: 0 0 0 2px var(--focus-border, #007acc);
+  box-shadow: 0 0 0 2px var(--focus);
 }
 
 /* ==========================================================================
-   Tool Call Rows - VS Code Style
+   Tool Call Rows - toolrow: icon / name / target / result on one mono line
    ========================================================================== */
 
 .tool-row {
   position: relative;
-}
-
-/* Inline tool rendering - bypasses tool-row structure entirely */
-.tool-inline {
-  /* No extra padding or margins - renders like regular content */
 }
 
 /* Fixed-height header - CRITICAL for no-jump during streaming */
@@ -137,10 +135,10 @@
   display: flex;
   align-items: baseline;
   gap: 8px;
-  min-height: 20px;
-  padding: 2px 4px;
+  min-height: 32px;
+  padding: 4px 6px;
   cursor: pointer;
-  border-radius: 2px;
+  border-radius: var(--r-sm);
   transition: background-color 0.1s;
   border: none;
   background: transparent;
@@ -149,34 +147,29 @@
 }
 
 .tool-row-header:hover {
-  background: var(--bg-hover, #2a2a2a);
+  background: var(--surface-3);
 }
 
 .ran-tool-row .tool-row-header {
   width: fit-content;
   max-width: 100%;
   box-sizing: border-box;
-  border: 1px solid
-    color-mix(in srgb, var(--border-color, #333) 70%, transparent);
-  background: color-mix(in srgb, var(--bg-code, #1f1f1f) 52%, transparent);
+  border: 1px solid var(--line);
+  background: var(--code-bg);
 }
 
 .ran-tool-row .tool-row-header:hover {
-  background: color-mix(in srgb, var(--bg-hover, #2a2a2a) 72%, transparent);
+  background: var(--surface-3);
 }
 
-.tool-row-header.has-command-preview {
-  align-items: baseline;
-  flex-wrap: wrap;
-}
-
+.tool-row-header.has-command-preview,
 .tool-row-header.has-result-suffix {
   flex-wrap: wrap;
 }
 
-.tool-row-header:focus {
-  outline: 1px solid var(--focus-border, #007acc);
-  outline-offset: -1px;
+.tool-row-header:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: -2px;
 }
 
 @keyframes pulse {
@@ -194,25 +187,32 @@
 /* Spinner (for pending state) */
 .tool-spinner {
   flex-shrink: 0;
-  color: var(--text-muted, #888);
+  color: var(--ink-3);
   display: flex;
   align-items: center;
 }
 
 .tool-incomplete-icon {
   flex-shrink: 0;
-  color: var(--timeline-dot-warning, #d7ba7d);
+  color: var(--ink-3);
   font-weight: 700;
   width: 14px;
   text-align: center;
 }
 
-/* Tool name */
+/* Tool name: the toolrow's name column, wide enough to align the targets of
+   consecutive Read/Edit/Grep rows. */
 .tool-name {
   flex-shrink: 0;
+  min-width: 3.5rem;
+  font-family: var(--font-mono);
   font-weight: 600;
-  font-size: var(--font-size-base);
-  color: var(--text-primary, #ccc);
+  font-size: var(--fixed-font-size-base);
+  color: var(--ink);
+}
+
+.ran-tool-row .tool-name {
+  min-width: 0;
 }
 
 /* Tool summary - takes remaining space, truncates */
@@ -223,7 +223,7 @@
   font-optical-sizing: var(--output-prose-font-optical-sizing);
   font-variation-settings: var(--output-prose-font-variation-settings);
   font-size: var(--output-prose-font-size);
-  color: var(--text-muted, #888);
+  color: var(--ink-2);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -242,10 +242,11 @@ button.tool-summary {
   white-space: normal;
 }
 
+/* Fixed-font output appearance */
 .ran-tool-row .tool-summary {
-  font-family: "SF Mono", Monaco, "Cascadia Code", "Consolas", monospace;
-  font-size: var(--font-size-base);
-  color: var(--text-primary, #ccc);
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-size: var(--fixed-font-size-base);
 }
 
 .tool-summary-command {
@@ -259,11 +260,11 @@ button.tool-summary {
 }
 
 .tool-summary-command:hover {
-  color: var(--text-primary, #ccc);
+  color: var(--ink);
 }
 
 .tool-summary-command:focus {
-  outline: 1px solid var(--focus-border, #007acc);
+  outline: 1px solid var(--focus);
   outline-offset: -1px;
 }
 
@@ -280,10 +281,10 @@ button.tool-summary {
   flex: 0 0 auto;
   align-items: center;
   padding: 0.05rem 0.35rem;
-  border: 1px solid var(--border-subtle, var(--border-color));
+  border: 1px solid var(--line);
   border-radius: 999px;
-  background: color-mix(in srgb, var(--bg-secondary) 84%, transparent);
-  color: var(--text-muted);
+  background: var(--surface-2);
+  color: var(--ink-3);
   font-family: var(--font-sans);
   font-size: var(--font-size-xs);
   font-weight: 700;
@@ -302,15 +303,15 @@ button.tool-summary {
   display: inline-flex;
   flex: 0 0 auto;
   align-items: center;
-  color: var(--text-muted, #888);
-  font-family: var(--font-sans);
+  color: var(--ink-3);
+  font-family: var(--font-mono);
   font-size: var(--font-size-xs);
   line-height: 1.2;
   white-space: nowrap;
 }
 
 .tool-result-suffix-rc {
-  color: var(--timeline-dot-error, #f85149);
+  color: var(--err-ink);
   font-weight: 600;
 }
 
@@ -322,10 +323,10 @@ button.tool-summary {
   width: 1.35rem;
   height: 1.35rem;
   padding: 0;
-  border: 1px solid var(--border-color, #333);
-  border-radius: var(--radius-sm, 4px);
-  background: color-mix(in srgb, var(--bg-surface, #181818) 86%, transparent);
-  color: var(--text-muted, #888);
+  border: 1px solid var(--line);
+  border-radius: var(--r-xs);
+  background: var(--surface);
+  color: var(--ink-3);
   cursor: pointer;
   opacity: 0;
   pointer-events: none;
@@ -345,17 +346,17 @@ button.tool-summary {
 }
 
 .tool-header-copy:hover {
-  color: var(--text-primary, #ccc);
-  border-color: var(--border-strong, var(--border-color, #333));
+  color: var(--ink);
+  border-color: var(--line-strong);
 }
 
 .tool-header-copy:focus {
-  outline: 1px solid var(--focus-border, #007acc);
+  outline: 1px solid var(--focus);
   outline-offset: -1px;
 }
 
 .tool-header-copy.copied {
-  color: var(--app-accent, #059669);
+  color: var(--ok-ink);
 }
 
 /* Expand chevron */
@@ -364,12 +365,8 @@ button.tool-summary {
   width: 16px;
   text-align: center;
   font-size: var(--font-size-xs);
-  color: var(--text-dimmed, #666);
+  color: var(--ink-3);
   transition: transform 0.15s;
-}
-
-.tool-row.expanded .expand-chevron {
-  transform: rotate(0deg);
 }
 
 /* Collapsed preview area - shown when tool has preview but not expanded */
@@ -391,15 +388,15 @@ button.tool-summary {
   box-sizing: border-box;
   width: 100%;
   height: var(--tool-row-deferred-preview-height, 7rem);
-  border: 1px solid var(--border-color, #333);
+  border: 1px solid var(--line);
   border-radius: 6px;
   background:
     linear-gradient(
       to right,
-      color-mix(in srgb, var(--text-muted) 18%, transparent) 0 2.5rem,
+      color-mix(in srgb, var(--ink-3) 18%, transparent) 0 2.5rem,
       transparent 2.5rem
     ),
-    color-mix(in srgb, var(--bg-code) 72%, transparent);
+    color-mix(in srgb, var(--code-bg) 72%, transparent);
   opacity: 0.35;
 }
 
@@ -408,7 +405,7 @@ button.tool-summary {
   position: relative;
   margin-left: 10px;
   padding: 8px;
-  border-left: 1px solid var(--border-color, #333);
+  border-left: 1px solid var(--line);
   transition: border-left-color 0.1s;
   animation: slideDown 0.15s ease-out;
 }
@@ -431,21 +428,27 @@ button.tool-summary {
 }
 
 .tool-row-collapse-strip:hover {
-  background: var(--bg-hover, rgba(255, 255, 255, 0.05));
+  background: var(--surface-3);
 }
 
 .tool-row-content:has(.tool-row-collapse-strip:hover) {
-  border-left-color: var(--text-dimmed, #666);
+  border-left-color: var(--ink-3);
 }
 
 .tool-row-collapsed-preview:has(.tool-row-collapse-strip:hover)
   .bash-collapsed-preview {
-  border-color: var(--text-dimmed, #666);
+  border-color: var(--ink-3);
 }
 
-/* Grouped read/search/list exploration rows */
+/* Work-log card: grouped read/search/list exploration rows. The header and
+   row heights match estimateExplorationGroupHeightPx (26px head, 24px rows),
+   so the card edge is an inset outline that adds no layout height. */
 .explored-group {
   position: relative;
+  border-radius: var(--r-md);
+  background: var(--surface);
+  outline: 1px solid var(--line);
+  outline-offset: -1px;
 }
 
 .explored-group-header {
@@ -453,35 +456,52 @@ button.tool-summary {
   align-items: center;
   gap: 8px;
   width: 100%;
-  min-height: 20px;
-  padding: 2px 4px;
+  min-height: 26px;
+  padding: 2px 10px 2px 6px;
   border: none;
-  border-radius: 2px;
-  background: transparent;
-  color: var(--text-primary, #ccc);
+  border-radius: var(--r-md);
+  background: var(--surface-2);
+  color: var(--ink-2);
   cursor: pointer;
   font: inherit;
+  font-size: var(--fs-small);
   text-align: left;
 }
 
-.explored-group-header:hover {
-  background: var(--bg-hover, #2a2a2a);
+.explored-group-header[aria-expanded="true"] {
+  border-end-start-radius: 0;
+  border-end-end-radius: 0;
 }
 
-.explored-group-header:focus {
-  outline: 1px solid var(--focus-border, #007acc);
-  outline-offset: -1px;
+.explored-group-header:hover {
+  background: var(--surface-3);
+}
+
+.explored-group-header:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: -2px;
 }
 
 .explored-group-title {
   flex-shrink: 0;
-  font-size: var(--font-size-base);
+  color: var(--ink);
   font-weight: 600;
 }
 
-.explored-group-count {
-  color: var(--text-muted, #888);
-  font-size: var(--font-size-sm);
+.explored-group-count,
+.explored-group-duration {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--ink-3);
+  font-family: var(--font-mono);
+  font-size: var(--fs-meta);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.explored-group-duration {
+  flex-shrink: 0;
+  margin-inline-start: auto;
 }
 
 .explored-group-body {
@@ -489,41 +509,36 @@ button.tool-summary {
   flex-direction: column;
   gap: 2px;
   max-height: 8.5rem;
-  margin-left: 10px;
-  margin-top: 2px;
-  padding: 2px 0 2px 8px;
-  border-left: 1px solid var(--border-color, #333);
+  padding: 2px 0;
   overflow-y: auto;
   scrollbar-width: thin;
 }
 
+/* icon / name / target, the toolrow grid of the work log. */
 .explored-entry {
-  display: flex;
+  display: grid;
+  grid-template-columns: 0.8rem 3.5rem minmax(0, 1fr);
   align-items: baseline;
   gap: 0.5rem;
-  min-height: 1.35rem;
-  padding: 1px 4px;
-  border-radius: 2px;
+  min-height: 24px;
+  padding: 2px 10px;
+  font-family: var(--font-mono);
+  font-size: var(--fixed-font-size-base);
 }
 
 .explored-entry:target,
 .explored-entry:hover {
-  background: color-mix(in srgb, var(--bg-hover, #2a2a2a) 60%, transparent);
+  background: var(--surface-3);
 }
 
 .explored-entry-tool {
-  flex-shrink: 0;
-  width: 3.25rem;
-  color: var(--text-primary, #ccc);
-  font-size: var(--font-size-base);
-  font-weight: 500;
+  color: var(--ink);
+  font-weight: 600;
 }
 
 .explored-entry-summary {
-  flex: 1;
   min-width: 0;
-  color: var(--text-muted, #888);
-  font-size: var(--font-size-base);
+  color: var(--ink-2);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -561,14 +576,14 @@ button.tool-summary {
 
 .explored-entry-range {
   flex-shrink: 0;
-  color: var(--text-dimmed, #666);
-  font-size: var(--font-size-sm);
+  color: var(--ink-3);
+  font-size: var(--fs-meta);
 }
 
 .explored-entry-scope {
   flex: 0 1 45%;
-  color: var(--text-dimmed, #666);
-  font-size: var(--font-size-sm);
+  color: var(--ink-3);
+  font-size: var(--fs-meta);
 }
 
 .explored-entry-path,
@@ -598,7 +613,7 @@ button.tool-summary {
 }
 
 .explored-parent-details {
-  margin: 2px 4px 0 1.3rem;
+  margin: 2px 10px 0 calc(4.3rem + 10px);
 }
 
 .explored-parent-details-toggle {
@@ -608,24 +623,24 @@ button.tool-summary {
   min-height: 1.35rem;
   padding: 1px 4px;
   border: none;
-  border-radius: 2px;
+  border-radius: var(--r-xs);
   background: transparent;
-  color: var(--text-dimmed, #666);
+  color: var(--ink-3);
   cursor: pointer;
   font: inherit;
-  font-size: var(--font-size-sm);
+  font-size: var(--fs-meta);
 }
 
 .explored-parent-details-toggle:hover,
 .explored-parent-details-toggle:focus-visible {
-  background: color-mix(in srgb, var(--bg-hover, #2a2a2a) 60%, transparent);
-  color: var(--text-muted, #888);
+  background: var(--surface-3);
+  color: var(--ink-2);
 }
 
 .explored-parent-raw {
   margin: 2px 0 4px 0.25rem;
   padding-left: 0.5rem;
-  border-left: 1px solid var(--border-color, #333);
+  border-left: 1px solid var(--line);
 }
 
 .explored-parent-raw .tool-row.timeline-item::before,
@@ -635,32 +650,23 @@ button.tool-summary {
 }
 
 .explored-entry-status {
-  flex-shrink: 0;
-  width: 0.8rem;
-  color: var(--text-muted, #888);
+  color: var(--ink-3);
   text-align: center;
 }
 
 .explored-entry.status-pending .explored-entry-status {
-  color: var(--timeline-dot-working, var(--app-spinner-foreground));
+  color: var(--run-ink);
 }
 
 .explored-entry.status-error .explored-entry-status {
-  color: var(--timeline-dot-error, var(--error-color));
+  color: var(--err-ink);
 }
 
 @media (width <= 600px) {
-  .explored-group-body {
-    margin-left: 6px;
-    padding-left: 5px;
-  }
-
   .explored-entry {
+    grid-template-columns: 0.8rem 2.85rem minmax(0, 1fr);
     gap: 0.35rem;
-  }
-
-  .explored-entry-tool {
-    width: 2.85rem;
+    padding-inline: 6px;
   }
 
   .explored-entry-semantic-summary {
@@ -672,7 +678,7 @@ button.tool-summary {
   }
 
   .explored-parent-details {
-    margin-left: 1rem;
+    margin-left: calc(3.65rem + 6px);
   }
 }
 
@@ -688,7 +694,7 @@ button.tool-summary {
 }
 
 .tool-no-result {
-  color: var(--text-muted, #888);
+  color: var(--ink-3);
   font-style: italic;
   font-size: var(--font-size-base);
 }
@@ -702,14 +708,8 @@ button.tool-summary {
    Status-specific styles
    ========================================================================== */
 
-.tool-pending-message {
-  color: var(--text-muted, #888);
-  font-style: italic;
-  font-size: var(--font-size-base);
-}
-
 .tool-row.status-pending .tool-summary {
-  color: var(--text-muted, #888);
+  color: var(--ink-3);
 }
 
 /* Aborted (interrupted) tool styles */
@@ -722,16 +722,16 @@ button.tool-summary {
 }
 
 .tool-row.status-aborted .tool-summary {
-  color: var(--text-muted, #888);
+  color: var(--ink-3);
 }
 
 .tool-row.status-incomplete .tool-summary {
-  color: var(--text-muted, #888);
+  color: var(--ink-3);
 }
 
 .tool-aborted-icon {
   flex-shrink: 0;
-  color: var(--warning-color, #d7ba7d);
+  color: var(--ink-3);
   font-weight: bold;
   font-size: var(--font-size-lg);
   display: flex;
@@ -739,39 +739,11 @@ button.tool-summary {
 }
 
 .tool-aborted-label {
-  color: var(--text-muted, #888);
+  color: var(--ink-3);
   font-style: italic;
 }
 
 .tool-incomplete-label {
-  color: var(--text-muted, #888);
+  color: var(--ink-3);
   font-style: italic;
-}
-
-/* ==========================================================================
-   JSON fallback content
-   ========================================================================== */
-
-.tool-content-json {
-  margin: 0;
-  padding: 8px;
-  background: var(--bg-code, #1e1e1e);
-  border-radius: 4px;
-  overflow-x: auto;
-}
-
-.tool-content-json code {
-  color: var(--text-primary, #ccc);
-}
-
-/* Fixed-font output appearance */
-.ran-tool-row .tool-summary,
-.tool-content-json,
-.tool-content-json code {
-  font-family: var(--font-mono);
-}
-
-.ran-tool-row .tool-summary,
-.tool-content-json {
-  font-size: var(--fixed-font-size-base);
 }

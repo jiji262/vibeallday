@@ -31,6 +31,11 @@ import type { RenderContext } from "../renderers/types";
 import { SessionFilePathLink } from "../SessionFilePathLink";
 import { getToolSummary } from "../tools/summaries";
 import { ToolCallRow } from "./ToolCallRow";
+import {
+  countWorkLog,
+  getWorkLogDurationLabel,
+  type WorkLogCounts,
+} from "./workLogSummary";
 
 interface Props {
   id: string;
@@ -160,13 +165,15 @@ export const ExploredToolGroup = memo(function ExploredToolGroup({
     (parent) => parent.item.status === "pending",
   );
   const title = isPending
-    ? t("explorationTitlePending")
-    : t("explorationTitleComplete");
+    ? t("transcriptWorkLogTitlePending")
+    : t("transcriptWorkLogTitle");
   const entryCount = projection.entries.length;
-  const countLabel = t(
-    entryCount === 1 ? "explorationItemCountOne" : "explorationItemCountMany",
-    { count: entryCount },
-  );
+  const countLabel = formatWorkLogCounts(countWorkLog(projection.parents), t);
+  // A still-running group has no end yet; its span would only grow on the
+  // next tail update, so the duration appears once the group completes.
+  const durationLabel = isPending
+    ? null
+    : getWorkLogDurationLabel(projection.parents);
   const toggleLabel = expanded
     ? t("explorationCollapse")
     : t("explorationExpand");
@@ -226,11 +233,18 @@ export const ExploredToolGroup = memo(function ExploredToolGroup({
             aria-controls={bodyId}
             aria-expanded={expanded}
           >
-            <span className="explored-group-title">{title}</span>
-            <span className="explored-group-count">{countLabel}</span>
             <span className="expand-chevron" aria-hidden="true">
               {expanded ? "▾" : "▸"}
             </span>
+            <span className="explored-group-title">{title}</span>
+            {countLabel && (
+              <span className="explored-group-count">{countLabel}</span>
+            )}
+            {durationLabel && (
+              <span className="explored-group-duration">
+                {t("transcriptWorkLogDuration", { duration: durationLabel })}
+              </span>
+            )}
           </button>
           {expanded && (
             <div className="explored-group-body" id={bodyId} role="list">
@@ -322,6 +336,21 @@ export const ExploredToolGroup = memo(function ExploredToolGroup({
 });
 
 type Translate = ReturnType<typeof useI18n>["t"];
+
+/** 探索 N · 修改 N · 运行 N, omitting the kinds this group does not contain. */
+function formatWorkLogCounts(counts: WorkLogCounts, t: Translate): string {
+  const parts: string[] = [];
+  if (counts.explore > 0) {
+    parts.push(t("transcriptWorkLogExplore", { count: counts.explore }));
+  }
+  if (counts.edit > 0) {
+    parts.push(t("transcriptWorkLogEdit", { count: counts.edit }));
+  }
+  if (counts.run > 0) {
+    parts.push(t("transcriptWorkLogRun", { count: counts.run }));
+  }
+  return parts.join(" · ");
+}
 
 function renderProjectedEntrySummary(
   entry: ExplorationEntry,

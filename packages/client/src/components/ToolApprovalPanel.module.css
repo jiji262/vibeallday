@@ -1,7 +1,7 @@
 /*
- * Tool approval as a sheet-like card above the composer dock: the question in
- * prose, two large Deny / Allow targets side by side, then the quieter
- * alternatives. Rose marks it as waiting on you.
+ * Tool approval as the needs-you card pinned above the composer: amber head
+ * (NeedsYouHead), the question, then Allow / Allow always / Deny in one
+ * wrapping row with the keyboard hint.
  */
 .root {
   position: relative;
@@ -20,11 +20,11 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--bg-card);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-pill);
-  box-shadow: var(--shadow-xs);
-  color: var(--text-muted);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-chip);
+  box-shadow: var(--shadow-card);
+  color: var(--ink-3);
   cursor: pointer;
   transition:
     background 120ms ease,
@@ -39,8 +39,8 @@
 }
 
 .toggle:hover {
-  background: var(--bg-hover);
-  color: var(--text-primary);
+  background: var(--surface-3);
+  color: var(--ink);
   border-color: var(--line-strong);
 }
 
@@ -54,36 +54,28 @@
   transform: rotate(180deg);
 }
 
-/* Collapsed with a request still waiting: the handle turns rose. */
+/* Collapsed with a request still waiting: the handle turns amber. */
 .toggle.hasPending {
-  background: var(--rose-soft);
-  border-color: transparent;
-  color: var(--rose-ink);
+  background: var(--attn-soft);
+  border-color: var(--ask-line);
+  color: var(--attn-ink);
 }
 
 .panel {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
   max-width: 44rem;
   margin-inline: auto;
-  padding: var(--space-4);
-  background: var(--bg-card);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-md);
+  overflow: hidden;
+  background: var(--surface);
+  border: 1px solid var(--ask-line);
+  border-radius: var(--r-card);
+  box-shadow: var(--shadow-pop);
 }
 
-.panel::before {
-  position: absolute;
-  top: 14px;
-  bottom: 14px;
-  left: -1px;
-  width: 3px;
-  border-radius: 0 3px 3px 0;
-  background: var(--rose);
-  content: "";
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px 16px 16px;
 }
 
 .header {
@@ -103,10 +95,10 @@
 .question {
   display: -webkit-box;
   overflow: hidden;
-  color: var(--text-primary);
-  font-size: 16px;
+  color: var(--ink);
+  font-size: var(--fs-body);
   font-weight: 600;
-  line-height: 1.4;
+  line-height: 1.45;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 4;
   overflow-wrap: anywhere;
@@ -117,8 +109,8 @@
   padding: 0;
   background: none;
   border: none;
-  color: var(--indigo);
-  font-size: var(--font-size-sm);
+  color: var(--link);
+  font-size: var(--fs-small);
   cursor: pointer;
   text-align: left;
 }
@@ -129,45 +121,44 @@
 
 .title {
   display: block;
-  color: var(--text-primary);
-  font-family: var(--font-display);
-  font-size: 18px;
-  font-weight: 600;
+  color: var(--ink);
+  font-family: var(--font-ui);
+  font-size: var(--fs-h3);
+  font-weight: var(--title-weight);
 }
 
 .subtitle {
   display: block;
   margin-top: var(--space-1);
-  color: var(--text-muted);
-  font-size: var(--font-size-sm);
+  color: var(--ink-3);
+  font-size: var(--fs-small);
 }
 
-/* Options: a stack by default (plan approval); a Deny | Allow pair for tool
-   approvals, with the alternatives below it, full width. */
+/* Options: a stack for plan approval; one wrapping row for tool approvals,
+   primary first, Deny a quiet ghost. */
 .options {
   display: flex;
   flex-direction: column;
-  gap: var(--space-2);
+  gap: 8px;
 }
 
 .options.pair {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  flex-flow: row wrap;
+  align-items: center;
 }
 
 .option {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: var(--space-3);
-  width: 100%;
-  min-height: 48px;
-  padding: 0 var(--space-4);
-  background: var(--bg-tertiary);
-  border: 1px solid transparent;
-  border-radius: var(--radius-lg);
-  color: var(--text-primary);
-  font-size: 15px;
+  gap: 8px;
+  min-height: var(--btn-h-sm);
+  padding: 0 var(--btn-px);
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-btn);
+  color: var(--ink);
+  font-size: var(--fs-btn);
   font-weight: 600;
   cursor: pointer;
   text-align: center;
@@ -176,9 +167,14 @@
     border-color 120ms ease;
 }
 
+.options:not(.pair) .option {
+  justify-content: flex-start;
+  width: 100%;
+  min-height: var(--btn-h);
+}
+
 .option:hover:not(:disabled) {
-  background: var(--bg-hover);
-  border-color: var(--line-strong);
+  background: var(--surface-3);
 }
 
 .option:disabled {
@@ -187,38 +183,30 @@
 }
 
 .option.primary {
-  background: var(--indigo);
+  background: var(--accent);
   border-color: transparent;
-  color: var(--ink-on);
+  color: var(--on-accent);
 }
 
 .option.primary:hover:not(:disabled) {
-  background: color-mix(in srgb, var(--indigo) 86%, black);
+  background: var(--accent-hover);
+}
+
+.option.deny,
+.option.feedbackToggle {
+  background: transparent;
   border-color: transparent;
+  color: var(--ink-2);
 }
 
-.option.deny {
-  background: var(--rose-soft);
-  color: var(--rose-ink);
+.option.deny:hover:not(:disabled),
+.option.feedbackToggle:hover:not(:disabled) {
+  background: var(--surface-3);
+  color: var(--ink);
 }
 
-.option.deny:hover:not(:disabled) {
-  border-color: var(--rose);
-}
-
-.pair .option {
-  grid-column: 1 / -1;
-  order: 3;
-}
-
-.pair .option.deny {
-  grid-column: 1;
-  order: 1;
-}
-
-.pair .option.primary {
-  grid-column: 2;
-  order: 2;
+.option.feedbackToggle {
+  font-weight: 500;
 }
 
 /* Keycap hints are for hardware keyboards only. */
@@ -226,78 +214,76 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 20px;
-  height: 20px;
+  min-width: 18px;
+  height: 18px;
   background: color-mix(in srgb, currentColor 14%, transparent);
   border-radius: var(--radius-sm);
   font-family: var(--font-mono);
-  font-size: var(--font-size-xs);
+  font-size: var(--fs-meta);
   font-weight: 500;
   flex-shrink: 0;
 }
 
+.keyHint {
+  color: var(--ink-3);
+  font-size: var(--fs-meta);
+}
+
 @media (pointer: coarse) {
-  .option kbd {
+  .option kbd,
+  .keyHint {
     display: none;
   }
-}
 
-.option.feedbackToggle {
-  background: transparent;
-  color: var(--text-muted);
-  font-weight: 500;
-}
-
-.option.feedbackToggle:hover:not(:disabled) {
-  background: var(--bg-hover);
-  color: var(--text-primary);
+  .option {
+    min-height: var(--tap-min);
+  }
 }
 
 /* Feedback input */
 .feedback {
   display: flex;
-  gap: var(--space-2);
-  grid-column: 1 / -1;
-  order: 4;
+  flex: 1 1 100%;
+  gap: 8px;
 }
 
 .feedbackInput {
   flex: 1;
   min-width: 0;
-  min-height: 48px;
+  min-height: var(--input-h);
   padding: 0 var(--space-3);
-  background: var(--bg-surface);
-  border: 1px solid var(--border-input);
-  border-radius: var(--radius-lg);
-  color: var(--text-primary);
-  font-size: 16px;
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-input);
+  color: var(--ink);
+  font-size: var(--fs-input);
 }
 
 .feedbackInput:focus {
   outline: none;
-  border-color: var(--indigo);
-  box-shadow: 0 0 0 3px var(--indigo-soft);
+  border-color: var(--focus);
+  box-shadow: 0 0 0 3px var(--accent-soft);
 }
 
 .feedbackInput::placeholder {
-  color: var(--text-dimmed);
+  color: var(--ink-4);
 }
 
 .feedbackSubmit {
-  min-height: 48px;
-  padding: 0 var(--space-4);
-  background: var(--indigo);
+  min-height: var(--input-h);
+  padding: 0 var(--btn-px);
+  background: var(--accent);
   border: none;
-  border-radius: var(--radius-lg);
-  color: var(--ink-on);
-  font-size: 15px;
+  border-radius: var(--r-btn);
+  color: var(--on-accent);
+  font-size: var(--fs-btn);
   font-weight: 600;
   cursor: pointer;
   transition: background 120ms ease;
 }
 
 .feedbackSubmit:hover:not(:disabled) {
-  background: color-mix(in srgb, var(--indigo) 86%, black);
+  background: var(--accent-hover);
 }
 
 .feedbackSubmit:disabled {
@@ -305,8 +291,13 @@
   cursor: not-allowed;
 }
 
-@media (width <= 600px) {
-  .panel {
-    padding: var(--space-3);
+/* Phones: the row keeps full-width targets, primary first. */
+@media (width < 768px) {
+  .body {
+    padding: 12px 14px 14px;
+  }
+
+  .options.pair .option {
+    flex: 1 1 auto;
   }
 }

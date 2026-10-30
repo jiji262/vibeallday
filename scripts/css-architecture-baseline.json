@@ -13,7 +13,7 @@
       "reason": "Theme-dependent provider badge color tokens shared by every badge surface."
     },
     "packages/client/src/styles/renderers.css": {
-      "maxLines": 5838,
+      "maxLines": 5827,
       "reason": "Legacy generated-content and renderer class vocabulary."
     },
     "packages/client/src/styles/theme.css": {
@@ -21,7 +21,7 @@
       "reason": "Garden design tokens, themes, self-hosted font faces and base element rules; the single global source of design values. Raised 938 -> 1300 for the redesign skins: per-skin design tokens (Celadon, Night, OLED, auto-dark copy), phone sizes and the skin font faces."
     },
     "packages/client/src/styles/tool-rows.css": {
-      "maxLines": 777,
+      "maxLines": 749,
       "reason": "Shared tool-row state and generated renderer composition."
     }
   },

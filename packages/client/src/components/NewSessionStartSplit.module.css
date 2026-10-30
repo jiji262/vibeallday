@@ -1,0 +1,43 @@
+/* Design .split: Start and its menu button share one outline with a seam. */
+.split {
+  display: inline-flex;
+  flex: none;
+  align-items: stretch;
+}
+
+.split[data-has-menu="true"] > :first-child {
+  border-start-end-radius: 0;
+  border-end-end-radius: 0;
+}
+
+.toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 36px;
+  padding: 0 10px;
+  border: 0;
+  border-start-start-radius: 0;
+  border-end-start-radius: 0;
+  border-start-end-radius: var(--r-btn);
+  border-end-end-radius: var(--r-btn);
+  background: var(--accent);
+  color: var(--on-accent);
+  box-shadow: inset 1px 0 0 color-mix(in srgb, currentcolor 22%, transparent);
+  cursor: pointer;
+}
+
+.toggle:hover:not(:disabled) {
+  background: var(--accent-hover);
+}
+
+.toggle:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.toggle:disabled {
+  background: var(--surface-3);
+  color: var(--ink-3);
+  cursor: default;
+}

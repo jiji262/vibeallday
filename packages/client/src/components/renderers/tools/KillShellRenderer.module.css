@@ -30,7 +30,7 @@
 .error {
   padding: 0.5rem;
   border-radius: 4px;
-  color: var(--error-color);
+  color: var(--err-ink);
   background: var(--bg-error, rgba(207, 34, 46, 0.1));
 }
 

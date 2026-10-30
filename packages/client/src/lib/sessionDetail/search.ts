@@ -905,6 +905,11 @@ export function getFullSessionSearchAnchorsForSegment(
       searchText: joinSearchParts([
         "Explored",
         "Exploring",
+        // The group head now reads Work log / Working (工作记录 / 工作中).
+        "Work log",
+        "Working",
+        "工作记录",
+        "工作中",
         `${entryCount} ${entryCount === 1 ? "item" : "items"}`,
         ...rawMultiParentSearchText,
       ]),

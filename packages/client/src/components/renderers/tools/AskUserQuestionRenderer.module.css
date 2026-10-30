@@ -46,7 +46,7 @@
 }
 
 .optionSelected {
-  border-color: #4a4;
+  border-color: var(--ok);
   background: rgba(68, 170, 68, 0.1);
 }
 
@@ -57,7 +57,7 @@
 }
 
 .optionSelected .optionIndicator {
-  color: var(--success-color);
+  color: var(--ok-ink);
 }
 
 .optionContent {
@@ -77,7 +77,7 @@
 }
 
 .error {
-  color: var(--error-color);
+  color: var(--err-ink);
   padding: 0.5rem;
   background: var(--bg-error, rgba(207, 34, 46, 0.1));
   border-radius: 4px;

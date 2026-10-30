@@ -19,7 +19,7 @@
 }
 
 .error {
-  color: var(--error-color);
+  color: var(--err-ink);
 }
 
 .metadata {

@@ -29,7 +29,7 @@
   background: none;
   border: 0;
   box-shadow: none;
-  color: var(--text-muted);
+  color: var(--ink-3);
   font-size: 11px;
   opacity: 1;
 }
@@ -40,7 +40,7 @@
   :global(.composer-status-chip)
   + :global(.composer-status-chip)::before {
   margin-inline-end: 6px;
-  color: var(--text-dimmed);
+  color: var(--ink-3);
   content: "\00b7";
 }
 
@@ -68,12 +68,12 @@
   height: auto;
   flex-wrap: wrap;
   align-items: center;
-  gap: 2px;
-  padding: 6px;
-  background: var(--bg-card);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-md);
+  gap: 4px;
+  padding: 8px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-card);
+  box-shadow: var(--shadow-pop);
   pointer-events: auto;
 }
 
@@ -97,47 +97,46 @@
   :global(.voice-input-button) {
   background: transparent;
   border-color: transparent;
-  border-radius: var(--radius-pill);
-  color: var(--text-muted);
+  border-radius: var(--r-icon-btn);
+  color: var(--ink-2);
 }
 
 .dock :global(.message-input-keyboard-more):global(.is-open) {
-  background: var(--bg-hover);
+  background: var(--surface-3);
   border-color: transparent;
-  color: var(--text-primary);
+  color: var(--ink);
 }
 
 .dock :global(.message-input-keyboard-action) {
-  border-radius: var(--radius-pill);
+  border-radius: var(--r-send);
 }
 
 /* Send is the default primary; steer, queue and project-queue keep their own
    legacy colors. */
 .dock :global(.message-input-keyboard-primary)[data-action-kind="send"] {
-  background: var(--indigo);
-  color: var(--ink-on);
+  background: var(--accent);
+  color: var(--on-accent);
 }
 
 .dock
   :global(.message-input-keyboard-primary)[data-action-kind="send"]:disabled {
-  background: var(--bg-tertiary);
-  color: var(--text-dimmed);
+  background: var(--surface-3);
+  color: var(--ink-4);
   opacity: 1;
 }
 
 /* Collapsed (an approval or question is open above): a slim card of its own. */
 .dock :global(.message-input-collapsed) {
   margin-top: 0;
-  background: var(--bg-card);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-xs);
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-composer);
+  box-shadow: var(--shadow-composer);
   opacity: 1;
 }
 
 .dock :global(.message-input-collapsed):focus-within {
-  border-color: var(--indigo);
-  box-shadow: 0 0 0 3px var(--indigo-soft);
+  border-color: var(--focus);
 }
 
 .dock :global(.message-input-collapsed) :global(.speech-draft-field) {
@@ -158,14 +157,14 @@
 .dock :global(.message-input-collapsed-send) {
   --composer-control-size: 36px;
   --composer-primary-control-size: 36px;
-  background: var(--indigo);
-  border-radius: 50%;
+  background: var(--accent);
+  border-radius: var(--r-send);
   box-shadow: none;
-  color: var(--ink-on);
+  color: var(--on-accent);
 }
 
 .dock :global(.message-input-collapsed-send):disabled {
-  background: var(--bg-tertiary);
-  color: var(--text-dimmed);
+  background: var(--surface-3);
+  color: var(--ink-4);
   opacity: 1;
 }

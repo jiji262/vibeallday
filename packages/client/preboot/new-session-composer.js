@@ -45,62 +45,52 @@ import { restorePrebootComposer } from "../src/lib/prebootComposer";
     `${minimized ? 0 : expanded && innerWidth >= sidebarWidth + 600 ? sidebarWidth : 56}px`,
   );
 
-  // The project-column gap uses rem units. Match the saved UI scale before
-  // the app initializes its fonts (default 115%). Page/card insets use pixels.
-  var storedFontScale = localStorage.getItem("vibeallday-font-size");
-  var legacyFontScales = { small: 85, default: 100, large: 115, larger: 130 };
-  var fontScale =
-    storedFontScale === null
-      ? 115
-      : Object.hasOwn(legacyFontScales, storedFontScale)
-        ? legacyFontScales[storedFontScale]
-        : Number(storedFontScale);
-  fontScale = Number.isFinite(fontScale)
-    ? Math.min(300, Math.max(50, fontScale))
-    : 115;
-  document.documentElement.style.setProperty(
-    "--preboot-page-padding",
-    `${(16 * fontScale) / 100}px`,
-  );
-
   var style = document.createElement("style");
+  // Geometry is literal px: in development the app's stylesheets arrive with
+  // its modules, after this runs. Colours fall back the same way.
   style.textContent =
     // Above page chrome, below the app's modals (1000+), so a blocking
     // dialog raised at this URL (host offline) still shows over it.
     "#vibeallday-preboot-composer{position:fixed;inset:0;z-index:500;display:flex;" +
-    // Roughly where NewSessionForm puts its textarea, so the handoff does not
-    // visibly move the text: below the header and prompt label, beside the
-    // project panel on wide screens.
+    // Where NewSessionForm puts its composer card: below the page header,
+    // the page's top inset, the prompt heading and its lead (two lines in
+    // English at the 760px column).
     // The page reserves a scrollbar gutter wherever scrollbars take room.
-    "align-items:flex-start;padding:95px 18px 18px;overflow-y:auto;" +
-    "scrollbar-gutter:stable;" +
-    "box-sizing:border-box;background:inherit;color:#e6e6e6;" +
-    "font-family:system-ui,-apple-system,sans-serif}" +
-    "html[data-theme=light] #vibeallday-preboot-composer{color:#1f1f1f}" +
+    "justify-content:center;align-items:flex-start;padding:300px 0 18px;" +
+    "overflow-y:auto;scrollbar-gutter:stable;" +
+    "box-sizing:border-box;background:inherit;color:var(--ink,#e6e6e6);" +
+    "font-family:var(--font-ui,system-ui,-apple-system,sans-serif)}" +
+    "html[data-theme=light] #vibeallday-preboot-composer{color:var(--ink,#1f1f1f)}" +
     "@media (prefers-color-scheme:light){html[data-theme=auto] " +
-    "#vibeallday-preboot-composer{color:#1f1f1f}}" +
-    "#vibeallday-preboot-composer>div{width:100%}" +
-    "@media (min-width:900px){#vibeallday-preboot-composer>div{" +
-    "width:calc(100% - 296px)}}" +
-    // Wide screens center the page at the reader's content width.
+    "#vibeallday-preboot-composer{color:var(--ink,#1f1f1f)}}" +
+    // The page column: the page's side inset (NewSessionPage .formColumn).
+    "#vibeallday-preboot-composer>div{box-sizing:border-box;width:100%;" +
+    "padding:0 var(--console-page-inset,clamp(16px,3.2vw,36px))}" +
+    // Wide screens centre the page at the reader's content width.
     "@media (min-width:1100px){#vibeallday-preboot-composer{" +
-    "left:var(--preboot-sidebar-width);justify-content:center;padding-left:0;padding-right:0}" +
-    "#vibeallday-preboot-composer>div{box-sizing:border-box;" +
-    "padding:0 calc(var(--console-page-inset,clamp(16px,3.2vw,36px)) + var(--space-6,24px) + 1px);" +
-    "width:min(100%,var(--content-max-width,830px))}" +
-    "#vibeallday-preboot-composer>div>*{max-width:calc(100% - 280px - var(--preboot-page-padding))}}" +
+    "left:var(--preboot-sidebar-width)}" +
+    "#vibeallday-preboot-composer>div{" +
+    "width:min(100%,var(--content-max-width,830px))}}" +
+    // The composer card: 760 wide at most, centred, with the card's insets
+    // (NewSessionControls .new-session-input-area).
+    "#vibeallday-preboot-composer>div>div{box-sizing:border-box;" +
+    "max-width:760px;margin:0 auto;padding:16px 14px 12px 18px;" +
+    "border:1px solid var(--line-strong,rgba(127,127,127,.35));" +
+    "border-radius:var(--r-composer,16px);background:var(--surface,transparent)}" +
     "#vibeallday-preboot-composer textarea{display:block;width:100%;" +
-    "box-sizing:border-box;padding:.6rem .7rem;border-radius:8px;resize:none;" +
-    "font:inherit;font-size:15px;line-height:1.35;color:inherit;" +
-    "background:rgba(127,127,127,.08);border:1px solid rgba(127,127,127,.35);" +
-    "outline:none}" +
-    "#vibeallday-preboot-composer textarea:focus{border-color:#d97757;" +
-    "box-shadow:0 0 0 2px rgba(217,119,87,.15)}" +
-    "#vibeallday-preboot-composer p{margin:.4rem .1rem 0;font-size:12px;opacity:.6}";
+    "box-sizing:border-box;min-height:132px;padding:0;border:0;resize:none;" +
+    "font:inherit;font-size:calc(var(--fs-prose,15.5px) + 1px);line-height:1.55;" +
+    "color:inherit;background:transparent;outline:none}" +
+    "#vibeallday-preboot-composer p{margin:12px 0 0;font-size:12px;opacity:.6}" +
+    // Phones compose full screen: no heading, no card, a larger prompt.
+    "@media (max-width:767.98px){#vibeallday-preboot-composer{padding-top:72px}" +
+    "#vibeallday-preboot-composer>div>div{padding:0;border:0;background:none}" +
+    "#vibeallday-preboot-composer textarea{min-height:168px;font-size:18px}}";
 
   var overlay = document.createElement("div");
   overlay.id = "vibeallday-preboot-composer";
   var column = document.createElement("div");
+  var card = document.createElement("div");
   var textarea = document.createElement("textarea");
   textarea.rows = 6;
   textarea.placeholder = "Describe what you'd like help with...";
@@ -125,7 +115,8 @@ import { restorePrebootComposer } from "../src/lib/prebootComposer";
   // in the tab's session storage, where prebootComposer.ts also stashes it.
   restorePrebootComposer(textarea, !import.meta.env.VITE_IS_REMOTE_CLIENT);
 
-  column.append(textarea, status);
+  card.append(textarea, status);
+  column.append(card);
   overlay.append(column);
   document.head.append(style);
   document.body.append(overlay);

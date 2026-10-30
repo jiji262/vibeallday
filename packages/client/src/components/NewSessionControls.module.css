@@ -4,44 +4,73 @@
  * the form, its chips and its sheet lives in NewSessionForm.module.css.
  */
 
+/* Prompt-first column (design: 760 wide, centred). The page gives the
+   padding; the form itself is no longer a card. */
 .root:global(.new-session-container) {
   width: 100%;
-  max-width: 1000px;
+  max-width: var(--new-session-column, 760px);
   margin-inline: auto;
-  padding: var(--space-6);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-lg);
-  background: var(--card);
-  box-shadow: var(--shadow-xs);
+  padding: 0;
+  border: 0;
+  background: none;
+  box-shadow: none;
 }
 
 /*
- * Composer: the prompt field is the card, the toolbar sits under it with 44px
- * controls, and Start says what it does.
+ * Composer: one card holds the prompt and its toolbar (design .composer).
+ * The textarea is borderless inside it; the card shows focus. The insets are
+ * mirrored by the pre-boot composer (preboot/new-session-composer.js), so the
+ * text does not move when the app adopts it.
  */
-.root :global(.new-session-form-textarea) {
-  padding: 14px 16px;
+.root :global(.new-session-input-area) {
+  padding: var(--new-session-composer-inset, 16px 14px 12px 18px);
   border: 1px solid var(--line-strong);
-  border-radius: var(--radius-lg);
-  background: var(--bg-card);
-  box-shadow: var(--shadow-xs);
-  font-size: 16px;
-  line-height: 1.45;
+  border-radius: var(--r-composer);
+  background: var(--surface);
+  box-shadow: var(--shadow-card);
 }
 
-.root :global(.new-session-form-textarea):focus {
-  border-color: var(--indigo);
-  box-shadow: 0 0 0 3px var(--indigo-soft);
+.root :global(.new-session-input-area):focus-within {
+  border-color: var(--focus);
+}
+
+/* The field's own frame gives way to the card; the textarea and the speech
+   mirror read their insets and type from these. */
+.root :global(.speech-draft-field) {
+  --speech-draft-padding: 0;
+  --speech-draft-font-size: calc(var(--fs-prose) + 1px);
+  --speech-draft-line-height: 1.55;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.root :global(.new-session-form-textarea) {
+  min-height: 132px;
+  color: var(--ink);
+}
+
+.root :global(.new-session-form-textarea)::placeholder {
+  color: var(--ink-4);
+}
+
+.root :global(.speech-draft-field):focus-within {
+  box-shadow: none;
 }
 
 .root :global(.new-session-form-toolbar) {
-  --composer-control-size: var(--tap-min);
-  --composer-primary-control-size: var(--tap-min);
-  margin-top: var(--space-2);
+  --composer-control-size: var(--icon-btn);
+  --composer-primary-control-size: var(--btn-h);
+  min-height: max(var(--icon-btn), var(--btn-h));
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
 }
 
 .root :global(.new-session-form-toolbar-actions) {
   gap: var(--space-2);
+  margin-inline-start: auto;
 }
 
 .startButton.startButton {
@@ -50,31 +79,52 @@
   justify-content: center;
   gap: var(--space-2);
   width: auto;
-  min-width: var(--tap-min);
-  height: var(--tap-min);
-  padding: 0 var(--space-4) 0 var(--space-3);
+  min-width: var(--btn-h);
+  height: var(--btn-h);
+  padding: 0 var(--btn-px);
   border: 0;
-  border-radius: var(--radius-md);
-  background: var(--indigo);
-  color: var(--ink-on);
-  font-size: 15px;
-  font-weight: 500;
-  box-shadow: var(--shadow-xs);
+  border-radius: var(--r-btn);
+  background: var(--accent);
+  color: var(--on-accent);
+  font-size: var(--fs-btn);
+  font-weight: 600;
+  box-shadow: none;
 }
 
 .startButton.startButton:hover:not(:disabled) {
-  background: var(--indigo-ink);
+  background: var(--accent-hover);
 }
 
 .startButton.startButton:focus-visible {
-  box-shadow: 0 0 0 3px var(--indigo-soft);
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
 }
 
-/* Garden disabled: soft fill, ink-3 text, hairline, no opacity. */
+/* Garden disabled: soft fill, ink-3 text, no opacity. */
 .startButton.startButton:disabled {
-  background: var(--bg-soft);
+  background: var(--surface-3);
   color: var(--ink-3);
-  box-shadow: inset 0 0 0 1px var(--line);
+  box-shadow: none;
+}
+
+/* Phones compose full screen (design NewSession-Phone): the prompt sits on
+   the page without a card, in a larger type. */
+@media (width < 768px) {
+  .root :global(.new-session-input-area) {
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .root :global(.speech-draft-field) {
+    --speech-draft-font-size: 18px;
+  }
+
+  .root :global(.new-session-form-textarea) {
+    min-height: 168px;
+  }
 }
 
 .startLabel {
@@ -89,62 +139,90 @@
   background: none;
 }
 
+/* The project chip (design .chip): name, then the path in the quiet key
+   colour on the same line. */
 .root :global(.new-session-project-summary) {
-  min-height: var(--tap-min);
-  padding: 8px 14px;
+  height: var(--new-session-chip-h, var(--chip-h));
+  padding: 4px 12px;
   border: 1px solid var(--line-strong);
-  border-radius: var(--radius-lg);
-  background: var(--bg-card);
-  box-shadow: var(--shadow-xs);
+  border-radius: var(--r-chip);
+  background: var(--surface);
+  box-shadow: none;
+}
+
+.root :global(.new-session-project-summary):hover {
+  background: var(--surface-3);
+}
+
+.root :global(.new-session-project-summary-body) {
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .root :global(.new-session-project-summary-title) {
+  flex: none;
+  line-height: 1.2;
+  max-width: 60%;
+  color: var(--ink);
   font-family: var(--font-ui);
-  font-size: 15px;
-  font-weight: 500;
+  font-size: var(--fs-small);
+  font-weight: 600;
 }
 
 .root :global(.new-session-project-summary-path) {
+  flex: 1 1 auto;
+  line-height: 1.2;
+  min-width: 0;
+  margin-top: 0;
   color: var(--ink-3);
-  font-family: var(--label-font);
-  font-size: 12px;
+  font-family: var(--font-mono);
+  font-size: var(--fs-meta);
+}
+
+/* Flex, not a line box: the field's height must not follow font metrics,
+   or a web font swapping in would move the chips below it. */
+.root :global(.new-session-project-inline-field) {
+  display: flex;
 }
 
 .root :global(.new-session-project-input) {
-  min-height: var(--tap-min);
+  height: var(--new-session-chip-h, var(--chip-h));
+  padding-block: 0;
+  line-height: 1.2;
   border: 1px solid var(--line-strong);
-  border-radius: var(--radius-lg);
-  background: var(--bg-card);
-  font-size: 16px;
+  border-radius: var(--r-input);
+  background: var(--surface);
+  font-size: var(--fs-input);
 }
 
 .root :global(.new-session-project-input):focus {
-  border-color: var(--indigo);
-  box-shadow: 0 0 0 3px var(--indigo-soft);
+  border-color: var(--focus);
+  box-shadow: 0 0 0 3px var(--accent-soft);
 }
 
 .root :global(.new-session-project-panel) {
   border: 1px solid var(--line-strong);
-  border-radius: var(--radius-lg);
-  background: var(--bg-card);
-  box-shadow: var(--shadow-md);
+  border-radius: var(--r-card);
+  background: var(--surface);
+  box-shadow: var(--shadow-pop);
 }
 
 .root :global(.new-session-project-option) {
   min-height: var(--tap-min);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
-  background: var(--bg-card);
+  border: 1px solid var(--line);
+  border-radius: var(--r-input);
+  background: var(--surface);
 }
 
 .root :global(.new-session-project-option):hover {
-  background: var(--bg-soft);
+  background: var(--surface-3);
 }
 
 .root :global(.new-session-project-option.selected),
 .root :global(.new-session-project-option-custom) {
-  border-color: var(--indigo);
-  background: var(--indigo-soft);
+  border-color: var(--accent-line);
+  background: var(--accent-soft);
 }
 
 .root :global(.new-session-project-option-path) {
@@ -157,18 +235,18 @@
 }
 
 .newProjectButton.newProjectButton {
-  min-height: var(--tap-min);
-  padding: 0 var(--space-4);
-  font-size: 14px;
+  min-height: var(--new-session-chip-h, var(--chip-h));
+  padding: 0 12px;
+  font-size: var(--fs-small);
   border: 1px dashed var(--line-strong);
-  border-radius: var(--radius-lg);
+  border-radius: var(--r-chip);
   background: transparent;
   color: var(--ink-2);
   font-weight: 500;
 }
 
 .newProjectButton.newProjectButton:hover:not(:disabled) {
-  background: var(--bg-soft);
+  background: var(--surface-3);
   color: var(--ink);
 }
 

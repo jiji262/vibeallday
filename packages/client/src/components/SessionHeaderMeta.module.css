@@ -8,7 +8,7 @@
   align-items: center;
   gap: 6px;
   padding: 0;
-  color: var(--text-muted);
+  color: var(--ink-3);
   font-family: var(--font-mono);
   font-size: 12px;
   line-height: 20px;
@@ -19,7 +19,7 @@
 .state::before {
   content: "·";
   margin-inline-end: 6px;
-  color: var(--text-dimmed);
+  color: var(--ink-4);
 }
 
 .model::before {
@@ -42,17 +42,17 @@
 }
 
 .quiet {
-  color: var(--text-muted);
+  color: var(--ink-3);
 }
 
 .running {
-  color: var(--mint-ink);
+  color: var(--run-ink);
 }
 
 .needsYou {
-  color: var(--rose-ink);
+  color: var(--attn-ink);
 }
 
 .external {
-  color: var(--sand-ink);
+  color: var(--ink-3);
 }

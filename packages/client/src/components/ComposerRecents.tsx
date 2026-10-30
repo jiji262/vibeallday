@@ -108,7 +108,9 @@ export function ComposerRecents({
     };
   }, [history.uploads]);
   return (
-    <div className={styles.recents}>
+    <div
+      className={`${styles.recents}${newSession ? ` ${styles.newSession}` : ""}`}
+    >
       {uploadsOpen && (
         <div
           className={styles.gallery}

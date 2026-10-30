@@ -49,6 +49,7 @@ import { useSpeechSourceRuntime } from "../hooks/useSpeechSourceRuntime";
 import {
   type ComposerToolbarOverflowLayoutSignatureInput,
   getComposerToolbarOverflowLayoutSignature,
+  getComposerTrayKeys,
   getPhoneOverflowKeys,
   type MessageInputToolbarLayoutRefs,
   useMeasuredComposerOverflow,
@@ -574,6 +575,8 @@ interface ToolbarThinkingControl {
   onSetShowThinking: (value: ShowThinking) => void;
   /** Provider for resolving the inherited "default" show-thinking cue. */
   provider?: string | null;
+  /** Session model id; the chip reads "model · thinking" when present. */
+  modelLabel?: string | null;
 }
 
 interface ToolbarRenderModeControl {
@@ -789,6 +792,12 @@ export interface MessageInputToolbarViewProps {
   shortcutsControl: ToolbarShortcutsControl;
   actionsControl: ToolbarActionsControl;
   hidePrimaryDeliveryActions?: boolean;
+  /**
+   * Session composer layout: only attach, mode, thinking, context and the
+   * delivery actions stay on the row; every other shown tool sits in the "+"
+   * tray. Off for isolated previews that render a single control.
+   */
+  trayNonPrimaryControls?: boolean;
 }
 
 function ToolbarDoneIcon() {
@@ -1343,7 +1352,12 @@ function ThinkingToolbarControl({
       >
         <ThinkingIcon mode={control.mode} />
         <span className="thinking-toggle-label">
-          {getToolbarThinkingLabel(t, control)}
+          {control.modelLabel
+            ? t("composerModelThinkingChip", {
+                model: control.modelLabel,
+                thinking: getToolbarThinkingLabel(t, control),
+              })
+            : getToolbarThinkingLabel(t, control)}
         </span>
       </button>
       {open && (
@@ -1403,6 +1417,7 @@ export function MessageInputToolbarView({
   shortcutsControl,
   actionsControl,
   hidePrimaryDeliveryActions = false,
+  trayNonPrimaryControls = false,
 }: MessageInputToolbarViewProps) {
   const { escapeInterruptDisabled, setEscapeInterruptDisabled } =
     useEscapeInterruptDisabled();
@@ -1453,7 +1468,7 @@ export function MessageInputToolbarView({
   // keeps each control's inline and menu presentations mutually exclusive.
   const inlineTierClass = (
     key: SessionToolbarVisibilityKey,
-    ...extra: string[]
+    ...extra: (string | undefined)[]
   ): string =>
     [
       ...extra,
@@ -1465,7 +1480,7 @@ export function MessageInputToolbarView({
       .join(" ");
   const menuTierClass = (
     key: SessionToolbarVisibilityKey,
-    ...extra: string[]
+    ...extra: (string | undefined)[]
   ): string => {
     const tierClass = priorityToTierClass(effectivePriority(key));
     return [
@@ -1780,6 +1795,7 @@ export function MessageInputToolbarView({
           "topicShift",
           "send-button",
           "patient-queue-action",
+          toolbarModuleStyles.patientQueueAction,
         )}
         aria-label={t("toolbarTopicShiftLabel")}
         title={t("toolbarTopicShiftTooltip")}
@@ -2024,9 +2040,11 @@ export function MessageInputToolbarView({
   const bottomOverflowLayoutKey = `${getComposerToolbarOverflowLayoutSignature(
     overflowLayoutInput,
   )}|fileViewer:${fileViewerController ? "on" : "off"}|questions:${hasAsyncQuestions}`;
-  const forcedHiddenKey = isCompactStatusMode
-    ? getPhoneOverflowKeys(overflowLayoutInput).join(",")
-    : "";
+  const forcedHiddenKey = trayNonPrimaryControls
+    ? getComposerTrayKeys(overflowLayoutInput, isCompactStatusMode).join(",")
+    : isCompactStatusMode
+      ? getPhoneOverflowKeys(overflowLayoutInput).join(",")
+      : "";
   const forcedHiddenControls = useMemo(
     () => new Set(forcedHiddenKey ? forcedHiddenKey.split(",") : []),
     [forcedHiddenKey],
@@ -2454,7 +2472,22 @@ export function MessageInputToolbarView({
             aria-expanded={bottomOverflowOpen}
             onClick={() => setBottomOverflowOpen((open) => !open)}
           >
-            ...
+            {trayNonPrimaryControls ? (
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                aria-hidden="true"
+              >
+                <path d="M12 5v14M5 12h14" />
+              </svg>
+            ) : (
+              "..."
+            )}
           </button>
           {bottomOverflowOpen && (
             <div className="composer-bottom-overflow-menu" role="menu">
@@ -4032,6 +4065,7 @@ export function MessageInputToolbar({
       onHideControl={hideToolbarControl}
       priority={toolbarPriority}
       isCompactStatusMode={isCompactStatusMode}
+      trayNonPrimaryControls
       fileViewerController={fileViewerController}
       modeControl={
         onModeChange && supportsPermissionMode
@@ -4074,6 +4108,7 @@ export function MessageInputToolbar({
               showThinking,
               onSetShowThinking: setShowThinking ?? (() => {}),
               provider: normalizedThinkingProvider,
+              modelLabel: thinkingModel ?? null,
             }
           : null
       }
