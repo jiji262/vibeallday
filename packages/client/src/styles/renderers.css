@@ -3892,10 +3892,9 @@ details[open] .collapsible__icon {
   min-height: 0;
 }
 
-/* FileViewer.module.css owns header layout; legacy chrome remains here. */
+/* FileViewer.module.css owns header layout and colours; legacy chrome remains here. */
 .file-viewer-header {
   padding: 0.25rem 0.5rem;
-  background: var(--bg-secondary);
   border-bottom: 1px solid var(--border-color);
 }
 
@@ -3936,16 +3935,7 @@ details[open] .collapsible__icon {
   color: var(--text-muted);
 }
 
-.file-viewer-action.copied {
-  color: var(--success-color);
-}
-
 .file-viewer-action.file-viewer-new-session {
-  color: var(--success-color);
-}
-
-.file-viewer-action.file-viewer-new-session:hover {
-  background: color-mix(in srgb, var(--success-color) 14%, transparent);
   color: var(--success-color);
 }
 
