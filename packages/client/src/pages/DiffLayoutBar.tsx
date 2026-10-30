@@ -1,4 +1,7 @@
-import { Segmented, type SegmentedOption } from "../components/garden/Segmented";
+import {
+  Segmented,
+  type SegmentedOption,
+} from "../components/garden/Segmented";
 import type { TranslationFn } from "../i18n";
 import type { DiffViewMode } from "../lib/diffSideBySide";
 import styles from "./DiffLayoutBar.module.css";

@@ -93,5 +93,7 @@ test("history search keeps every key while 400 commands filter", async ({
   // Of those, 12, 120, 124 and 128 failed.
   await expect(count).toHaveText("4 / 400 commands");
   await search.fill("no such command");
-  await expect(page.getByText("No commands match these filters.")).toBeVisible();
+  await expect(
+    page.getByText("No commands match these filters."),
+  ).toBeVisible();
 });
