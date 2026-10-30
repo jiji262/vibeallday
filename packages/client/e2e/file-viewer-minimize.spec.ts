@@ -523,6 +523,22 @@ for (const viewport of [
         page.locator(".message-input-toolbar .send-button-with-help"),
       ).toBeVisible();
     }
+    if (viewport.name === "mobile") {
+      // Lifting the toolbar over the viewer must not re-anchor the floating
+      // status caption: it stays above the card, off the draft's text.
+      const [captionBox, cardBox] = await Promise.all([
+        page
+          .locator(
+            ".message-input-toolbar.status-floats > .composer-status-ages",
+          )
+          .boundingBox(),
+        page.locator(".session-input .message-input").boundingBox(),
+      ]);
+      if (!captionBox || !cardBox) {
+        throw new Error("Expected status caption and composer card boxes");
+      }
+      expect(captionBox.y + captionBox.height).toBeLessThanOrEqual(cardBox.y);
+    }
 
     await capture(page, `${viewport.name}-open`);
     if (viewport.name === "desktop") {

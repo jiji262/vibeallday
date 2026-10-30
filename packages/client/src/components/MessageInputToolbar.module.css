@@ -24,15 +24,12 @@
   margin-left: 0;
 }
 
+/* The toolbar is a flex item of the composer card, so z-index lifts it over
+   the viewer without positioning it. Leaving its position alone keeps the card
+   as the containing block of the floating status caption. */
 .fileViewerOpen {
-  position: relative;
   z-index: 10000;
   pointer-events: none;
-}
-
-:global(.message-input-wrapper) :global(.message-input-toolbar).fileViewerOpen {
-  /* Override the phone layout's static toolbar position so z-index applies. */
-  position: relative;
 }
 
 :global(.navigation-route-layer.is-active):has(.fileViewerOpen) {
