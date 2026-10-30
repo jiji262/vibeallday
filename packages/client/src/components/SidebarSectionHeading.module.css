@@ -1,0 +1,83 @@
+/*
+ * Sidebar section headings: the collapsible name row above each session
+ * section, with its chevron, creator glyph and count. Split from
+ * Sidebar.module.css; nothing there targets these elements.
+ */
+.sectionHeading {
+  margin: 0 0 var(--sidebar-section-header-gap, 4px);
+  padding: 0 10px;
+  font: inherit;
+}
+
+/*
+ * The name is the control (design .nav-label). The chevron follows the name
+ * rather than sitting at the far edge, so the cue reads as part of the click.
+ */
+.sectionToggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  min-height: 22px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--r-xs);
+  background: transparent;
+  color: var(--ink-3);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  text-align: left;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: color var(--duration-fast) var(--ease-standard);
+}
+
+.sectionToggle:hover {
+  color: var(--ink);
+}
+
+.sectionToggle:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/* Category and creator names keep the casing their owner typed. */
+.sectionTitleAsTyped {
+  font-family: var(--font-ui);
+  font-size: 12px;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.sectionChevron,
+.sectionPersonGlyph {
+  flex: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.sectionChevron {
+  width: 8px;
+  height: 8px;
+  stroke-width: 1.4;
+  transition: transform var(--duration-fast) var(--ease-standard);
+}
+
+.sectionChevron[data-expanded="false"] {
+  transform: rotate(-90deg);
+}
+
+.sectionPersonGlyph {
+  width: 10px;
+  height: 10px;
+  stroke-width: 1.1;
+}
+
+.sectionCount {
+  margin-left: auto;
+  font-variant-numeric: tabular-nums;
+}

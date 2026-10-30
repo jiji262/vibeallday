@@ -15,6 +15,7 @@ import {
   providerMetaLine,
 } from "./ProviderDetailHeader";
 import styles from "./ProvidersSettings.module.css";
+import overviewStyles from "./ProvidersSettings.overview.module.css";
 import {
   type ProviderDisplayEntry,
   providerDetailForRow,
@@ -89,7 +90,7 @@ function ProviderCard({ provider }: { provider: ProviderDisplayEntry }) {
         </p>
         <span className={styles.meta}>{providerMetaLine(provider, t)}</span>
       </div>
-      <div className={styles.cardActions}>
+      <div className={overviewStyles.cardActions}>
         <SignInAction provider={provider} />
         <Link
           className={styles.chevronLink}
@@ -161,8 +162,8 @@ export function ProvidersOverview({
   const needsAuth = byReadiness("needs-auth");
   const ready = byReadiness("ready");
   return (
-    <div className={styles.overview}>
-      <div className={styles.toolbar}>
+    <div className={overviewStyles.overview}>
+      <div className={overviewStyles.toolbar}>
         <Button
           size="sm"
           icon={<RefreshIcon />}

@@ -10,6 +10,7 @@ import {
   percentOf,
 } from "./contextBuckets";
 import styles from "./SessionInspector.module.css";
+import contextStyles from "./ContextPanel.module.css";
 
 interface ContextPanelProps {
   sessionId: string;
@@ -21,17 +22,17 @@ const BUCKETS = [
   {
     key: "system",
     label: "sessionInspectorContextSystem",
-    tone: styles.keySystem,
+    tone: contextStyles.keySystem,
   },
   {
     key: "files",
     label: "sessionInspectorContextFiles",
-    tone: styles.keyFiles,
+    tone: contextStyles.keyFiles,
   },
   {
     key: "conversation",
     label: "sessionInspectorContextConversation",
-    tone: styles.keyConversation,
+    tone: contextStyles.keyConversation,
   },
 ] as const;
 
@@ -39,7 +40,7 @@ function Ring({ percent }: { percent: number }) {
   const { t } = useI18n();
   return (
     <span
-      className={styles.ring}
+      className={contextStyles.ring}
       role="img"
       aria-label={t("sessionInspectorContextUsedLabel", { percent })}
       style={{ "--p": percent } as CSSProperties}
@@ -59,7 +60,7 @@ function Composition({ buckets }: { buckets: ContextBuckets }) {
   return (
     <>
       <div
-        className={styles.stack}
+        className={contextStyles.stack}
         role="img"
         aria-label={t("sessionInspectorContextComposition", shares)}
       >
@@ -74,7 +75,7 @@ function Composition({ buckets }: { buckets: ContextBuckets }) {
       <ul className={styles.legend}>
         {BUCKETS.map((bucket) => (
           <li key={bucket.key} className={styles.kv}>
-            <span className={`${styles.swatch} ${bucket.tone}`} />
+            <span className={`${contextStyles.swatch} ${bucket.tone}`} />
             <span className={styles.kvKey}>{t(bucket.label)}</span>
             <span className={styles.meta}>
               {formatTokens(buckets[bucket.key])}
@@ -97,7 +98,7 @@ function Totals({
 }) {
   const { t } = useI18n();
   return (
-    <span className={styles.totals}>
+    <span className={contextStyles.totals}>
       <span className={styles.strong}>
         {formatTokens(used)}
         {max ? ` / ${formatTokens(max)}` : ""}
@@ -140,7 +141,7 @@ export function ContextPanel({ sessionId, usage }: ContextPanelProps) {
     : Math.round(usage?.percentage ?? 0);
   return (
     <div className={styles.panelBody}>
-      <div className={styles.ringRow}>
+      <div className={contextStyles.ringRow}>
         <Ring percent={percent} />
         <Totals used={used} max={max} autoAt={buckets?.autoCompactAt} />
       </div>

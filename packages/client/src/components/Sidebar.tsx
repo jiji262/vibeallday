@@ -58,6 +58,7 @@ import { CompactResumeButton } from "./CompactResumeButton";
 import { SessionListItem } from "./SessionListItem";
 import type { SessionNavigationIntent } from "./SessionListItem";
 import sidebarStyles from "./Sidebar.module.css";
+import sectionHeadingStyles from "./SidebarSectionHeading.module.css";
 import { SidebarIcons, SidebarNavItem } from "./SidebarNavItem";
 import { SidebarBrand } from "./sidebar/SidebarBrand";
 import {
@@ -302,23 +303,25 @@ function SidebarSectionHeader({
   const actionLabel = expanded ? collapseLabel : expandLabel;
 
   return (
-    <h3 className={sidebarStyles.sectionHeading}>
+    <h3 className={sectionHeadingStyles.sectionHeading}>
       <button
         type="button"
-        className={sidebarStyles.sectionToggle}
+        className={sectionHeadingStyles.sectionToggle}
         onClick={onToggle}
         aria-expanded={expanded}
         aria-controls={controlsId}
         aria-label={`${actionLabel}: ${title}`}
       >
         <span
-          className={isPerson ? sidebarStyles.sectionTitleAsTyped : undefined}
+          className={
+            isPerson ? sectionHeadingStyles.sectionTitleAsTyped : undefined
+          }
         >
           {title}
         </span>
         {isPerson && (
           <svg
-            className={sidebarStyles.sectionPersonGlyph}
+            className={sectionHeadingStyles.sectionPersonGlyph}
             viewBox="0 0 10 10"
             aria-hidden="true"
           >
@@ -327,7 +330,7 @@ function SidebarSectionHeader({
           </svg>
         )}
         <svg
-          className={sidebarStyles.sectionChevron}
+          className={sectionHeadingStyles.sectionChevron}
           data-expanded={expanded}
           viewBox="0 0 8 8"
           aria-hidden="true"
@@ -335,7 +338,10 @@ function SidebarSectionHeader({
           <path d="M1 2.5 4 5.5 7 2.5" />
         </svg>
         {!expanded && count !== undefined && (
-          <span className={sidebarStyles.sectionCount} aria-hidden="true">
+          <span
+            className={sectionHeadingStyles.sectionCount}
+            aria-hidden="true"
+          >
             {count}
             {countIsPartial ? "+" : ""}
           </span>

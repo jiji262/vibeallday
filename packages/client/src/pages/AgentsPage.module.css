@@ -43,60 +43,6 @@
   white-space: nowrap;
 }
 
-.sessionCell {
-  min-width: 15rem;
-  max-width: 24rem;
-}
-
-.identity {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  min-width: 0;
-}
-
-.identityText {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 0;
-}
-
-.sessionLink,
-.sessionText {
-  display: block;
-  overflow: hidden;
-  color: var(--ink);
-  font-size: var(--fs-body);
-  font-weight: 600;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.sessionLink {
-  text-decoration: none;
-}
-
-.sessionLink:hover {
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
-
-.sessionLink:focus-visible {
-  border-radius: var(--radius-xs);
-  outline: 2px solid var(--focus);
-  outline-offset: 2px;
-}
-
-.details {
-  display: block;
-  overflow: hidden;
-  color: var(--ink-3);
-  font-size: var(--fs-meta);
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
 .status {
   display: inline-flex;
   flex-wrap: wrap;
@@ -204,57 +150,6 @@
   white-space: pre-line;
 }
 
-.providerChildren {
-  display: flex;
-  flex-direction: column;
-  margin-top: var(--space-2);
-  padding-left: 30px;
-}
-
-.providerChild {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  min-width: 0;
-  min-height: 32px;
-  font-size: var(--fs-small);
-  cursor: pointer;
-}
-
-.providerChild:focus-visible {
-  border-radius: var(--radius-xs);
-  outline: 2px solid var(--focus);
-  outline-offset: 2px;
-}
-
-.providerChildBranch,
-.providerChildType {
-  flex-shrink: 0;
-  color: var(--ink-3);
-}
-
-.providerChildType {
-  font-family: var(--font-mono);
-  font-size: var(--fs-meta);
-}
-
-.providerChildTitle {
-  overflow: hidden;
-  color: var(--ink-2);
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.providerChild:hover .providerChildTitle {
-  color: var(--link);
-}
-
-@media (pointer: coarse) {
-  .providerChild {
-    min-height: var(--tap-min);
-  }
-}
-
 /* Phones: each row is a card — title and Status, CPU and memory lines, PID
    and uptime, then the kill action at full width. */
 @media (width < 768px) {
@@ -265,32 +160,6 @@
 
   .processTable thead {
     display: none;
-  }
-
-  .processRow {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    grid-template-areas:
-      "title status"
-      "cpu cpu"
-      "memory memory"
-      "pid uptime"
-      "actions actions";
-    gap: var(--space-2) var(--space-3);
-    padding: 14px var(--space-4);
-    border-bottom: 1px solid var(--line);
-  }
-
-  /* Grid items are blockified, so cells need no display override. */
-  .processRow > td {
-    padding: 0;
-    border: 0;
-  }
-
-  .sessionCell {
-    grid-area: title;
-    min-width: 0;
-    max-width: none;
   }
 
   .cellStatus {

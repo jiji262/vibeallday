@@ -12,6 +12,7 @@ import { Card } from "../../components/garden/Card";
 import { Table, Td, Th, Tr } from "../../components/garden/DataTable";
 import { useI18n } from "../../i18n";
 import styles from "./UsersSettings.module.css";
+import usageStyles from "./UserUsageTable.module.css";
 
 /**
  * Per-principal usage for Settings → Users.
@@ -87,7 +88,7 @@ export function UserUsageTable({ report }: UserUsageTableProps) {
   };
 
   return (
-    <div className={styles.usage}>
+    <div className={usageStyles.usage}>
       <h3 className={styles.editorTitle}>{t("userUsageTitle")}</h3>
       <p className="settings-hint">
         {report.since === null
@@ -106,13 +107,13 @@ export function UserUsageTable({ report }: UserUsageTableProps) {
             }))}
             value={usageWindow}
             onChange={setUsageWindow}
-            className={styles.usageWindow}
+            className={usageStyles.usageWindow}
           />
-          <Card flush className={styles.usageCard}>
+          <Card flush className={usageStyles.usageCard}>
             <Table>
               {/* The switch above already shows the window; this names the
                   table for assistive technology. */}
-              <caption className={styles.usageWindowLegend}>
+              <caption className={usageStyles.usageWindowLegend}>
                 {windowLabels[usageWindow]}
               </caption>
               <thead>
@@ -131,7 +132,7 @@ export function UserUsageTable({ report }: UserUsageTableProps) {
                   const raw = rawTokenCount(totals.tokens);
                   return (
                     <Tr key={user.username ?? ""}>
-                      <th scope="row" className={styles.usageUser}>
+                      <th scope="row" className={usageStyles.usageUser}>
                         {user.username ?? t("usersSuperuser")}
                       </th>
                       <Td num right>
@@ -224,9 +225,9 @@ function UsageBreakdownTable({
   const named = buckets.filter((bucket) => rawTokenCount(bucket.tokens) > 0);
   if (named.length === 0) return null;
   return (
-    <Card flush className={styles.usageCard}>
+    <Card flush className={usageStyles.usageCard}>
       <Table>
-        <caption className={styles.usageCaption}>{title}</caption>
+        <caption className={usageStyles.usageCaption}>{title}</caption>
         <thead>
           <tr>
             <Th>{nameHeading}</Th>
@@ -238,7 +239,7 @@ function UsageBreakdownTable({
         <tbody>
           {named.map((bucket) => (
             <Tr key={bucket.name}>
-              <th scope="row" className={styles.usageUser}>
+              <th scope="row" className={usageStyles.usageUser}>
                 {bucket.name
                   ? displayName(bucket.name)
                   : t("userUsageUnattributed")}

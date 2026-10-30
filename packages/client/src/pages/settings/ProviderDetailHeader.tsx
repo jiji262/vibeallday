@@ -7,6 +7,7 @@ import {
 } from "../../components/garden";
 import { type TranslationFn, useI18n } from "../../i18n";
 import styles from "./ProvidersSettings.module.css";
+import headerStyles from "./ProviderDetailHeader.module.css";
 import {
   type ProviderDisplayEntry,
   type ProviderReadiness,
@@ -88,11 +89,11 @@ export function ProviderDetailHeader({
 }) {
   const { t } = useI18n();
   return (
-    <header className={styles.detailHeader}>
+    <header className={headerStyles.detailHeader}>
       <ProviderMark provider={provider.id as ProviderName} size="lg" />
-      <div className={styles.detailTitle}>
+      <div className={headerStyles.detailTitle}>
         <div className={styles.nameLine}>
-          <h2 className={styles.detailName}>{provider.displayName}</h2>
+          <h2 className={headerStyles.detailName}>{provider.displayName}</h2>
           <ProviderReadinessStatus provider={provider} />
         </div>
         {provider.userEmail && (
@@ -102,7 +103,7 @@ export function ProviderDetailHeader({
       </div>
       {provider.metadata.website && (
         <a
-          className={styles.ghostLink}
+          className={headerStyles.ghostLink}
           href={provider.metadata.website}
           target="_blank"
           rel="noopener noreferrer"

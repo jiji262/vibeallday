@@ -72,6 +72,7 @@ import { useNavigate } from "react-router-dom";
 import { type SessionOptions, type UploadedFile, api } from "../api/client";
 import { ENTER_SENDS_MESSAGE } from "../constants";
 import controls from "./NewSessionControls.module.css";
+import catalogStyles from "./NewSessionCatalogStatus.module.css";
 import styles from "./NewSessionForm.module.css";
 import { useCurrentSourceRuntime } from "../contexts/SourceRuntimeContext";
 import { useToastContext } from "../contexts/ToastContext";
@@ -4957,15 +4958,15 @@ export function NewSessionForm({
     <div
       className={
         catalogNotice?.warning
-          ? controls.catalogStatus
-          : controls.catalogStatusMuted
+          ? catalogStyles.catalogStatus
+          : catalogStyles.catalogStatusMuted
       }
       role="status"
       aria-live="polite"
       title={routerCatalogNotice ? undefined : modelCatalog?.error}
     >
       <span
-        className={controls.catalogMessage}
+        className={catalogStyles.catalogMessage}
         data-sizing-text={t("newSessionGatewayCatalogUnavailable")}
         title={routerSelection ? undefined : modelCatalog?.error}
       >
@@ -4973,7 +4974,7 @@ export function NewSessionForm({
       </span>
       <button
         type="button"
-        className={controls.catalogAction}
+        className={catalogStyles.catalogAction}
         disabled={
           routerSelection
             ? routerCatalogRefresh === "refreshing"
@@ -5448,11 +5449,11 @@ export function NewSessionForm({
 
   const displayDefaultsError =
     displayDefaultsPending && settingsError ? (
-      <div role="alert" className={controls.catalogStatus}>
+      <div role="alert" className={catalogStyles.catalogStatus}>
         <span>{t("newSessionDefaultsUnavailable")}</span>
         <button
           type="button"
-          className={controls.catalogAction}
+          className={catalogStyles.catalogAction}
           onClick={() => void refetchSettings()}
           disabled={settingsLoading}
         >

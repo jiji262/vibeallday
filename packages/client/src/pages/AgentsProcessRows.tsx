@@ -12,6 +12,7 @@ import {
   providerChildTitle,
 } from "../lib/providerChildSessions";
 import styles from "./AgentsPage.module.css";
+import rowStyles from "./AgentsProcessRows.module.css";
 import { ProcessRowCells, ResourceCells } from "./AgentsProcessRowCells";
 import { getProviderLabel } from "./agentsFormat";
 
@@ -39,7 +40,7 @@ function ProcessDetails({ process }: { process: ProcessInfo }) {
       : null,
   ].filter((part): part is string => part !== null);
   if (parts.length === 0) return null;
-  return <span className={styles.details}>{parts.join(" · ")}</span>;
+  return <span className={rowStyles.details}>{parts.join(" · ")}</span>;
 }
 
 function ProviderChildren({
@@ -59,7 +60,7 @@ function ProviderChildren({
     { count: children.length },
   );
   return (
-    <span className={styles.providerChildren} role="list" aria-label={label}>
+    <span className={rowStyles.providerChildren} role="list" aria-label={label}>
       {children.map((child) => {
         const title = providerChildTitle(child, t("providerChildFallback"));
         const href = providerChildSessionHref(
@@ -71,15 +72,15 @@ function ProviderChildren({
         return (
           <span key={child.id} role="listitem">
             <ProviderChildNavTarget
-              className={styles.providerChild}
+              className={rowStyles.providerChild}
               href={href}
             >
-              <span className={styles.providerChildBranch} aria-hidden>
+              <span className={rowStyles.providerChildBranch} aria-hidden>
                 ↳
               </span>
-              <span className={styles.providerChildTitle}>{title}</span>
+              <span className={rowStyles.providerChildTitle}>{title}</span>
               {child.agentType && child.agentType !== title && (
-                <span className={styles.providerChildType}>
+                <span className={rowStyles.providerChildType}>
                   {child.agentType}
                 </span>
               )}
@@ -113,14 +114,14 @@ export function ProcessRow({
   const { t } = useI18n();
   const live = !terminated;
   return (
-    <Tr className={styles.processRow}>
-      <Td className={styles.sessionCell}>
-        <span className={styles.identity}>
+    <Tr className={rowStyles.processRow}>
+      <Td className={rowStyles.sessionCell}>
+        <span className={rowStyles.identity}>
           <ProviderMark provider={process.provider ?? "claude"} />
-          <span className={styles.identityText}>
+          <span className={rowStyles.identityText}>
             <Link
               to={sessionHref(basePath, process.projectId, process.sessionId)}
-              className={styles.sessionLink}
+              className={rowStyles.sessionLink}
               title={t("agentsSessionTooltip", { id: process.sessionId })}
             >
               {process.sessionTitle || t("agentsUntitled")}
@@ -177,13 +178,13 @@ function ExternalSessionCell({
     <Link
       ref={attachRow}
       to={sessionHref(basePath, projectId, sessionId)}
-      className={styles.sessionLink}
+      className={rowStyles.sessionLink}
       title={tooltip}
     >
       {title}
     </Link>
   ) : (
-    <span ref={attachRow} className={styles.sessionText} title={tooltip}>
+    <span ref={attachRow} className={rowStyles.sessionText} title={tooltip}>
       {title}
     </span>
   );
@@ -213,11 +214,11 @@ export function ExternalProcessRow({
     ? t("agentsSessionTooltip", { id: sessionId })
     : undefined;
   return (
-    <Tr className={styles.processRow}>
-      <Td className={styles.sessionCell}>
-        <span className={styles.identity}>
+    <Tr className={rowStyles.processRow}>
+      <Td className={rowStyles.sessionCell}>
+        <span className={rowStyles.identity}>
           <ProviderMark provider={observation.provider} />
-          <span className={styles.identityText}>
+          <span className={rowStyles.identityText}>
             <ExternalSessionCell
               basePath={basePath}
               observation={observation}
@@ -225,7 +226,7 @@ export function ExternalProcessRow({
               tooltip={tooltip}
               attachRow={attachRow}
             />
-            <span className={styles.details}>{provider}</span>
+            <span className={rowStyles.details}>{provider}</span>
           </span>
         </span>
       </Td>

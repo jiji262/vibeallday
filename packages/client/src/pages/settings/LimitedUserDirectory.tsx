@@ -8,7 +8,7 @@ import { useI18n } from "../../i18n";
 import { getSettingsCategories } from "../../i18n-settings";
 import { limitedUserMaySeeSettingsCategory } from "../../lib/limitedUserSettings";
 import type { SettingsCategory } from "./types";
-import styles from "./UsersSettings.module.css";
+import directoryStyles from "./LimitedUserDirectory.module.css";
 
 /**
  * The settings categories a limited user actually gets on this server: the
@@ -60,19 +60,19 @@ function UserRow({
   return (
     <button
       type="button"
-      className={`${styles.userRow} ${user.disabled ? styles.userChipDisabled : ""}`}
+      className={`${directoryStyles.userRow} ${user.disabled ? directoryStyles.userChipDisabled : ""}`}
       aria-pressed={selected}
       aria-label={user.username}
       aria-describedby={metaId}
       title={user.disabled ? t("usersDisabledTitle") : undefined}
       onClick={onToggle}
     >
-      <span className={styles.avatar} aria-hidden="true">
+      <span className={directoryStyles.avatar} aria-hidden="true">
         {user.username.slice(0, 1).toUpperCase()}
       </span>
-      <span className={styles.userText}>
-        <span className={styles.userName}>{user.username}</span>
-        <span id={metaId} className={styles.userRowMeta}>
+      <span className={directoryStyles.userText}>
+        <span className={directoryStyles.userName}>{user.username}</span>
+        <span id={metaId} className={directoryStyles.userRowMeta}>
           {meta}
         </span>
       </span>
@@ -92,9 +92,9 @@ export function LimitedUserList(props: LimitedUserListProps) {
     count: props.visibleCategoryCount,
   })}`;
   return (
-    <div className={`settings-group ${styles.userList}`}>
+    <div className={`settings-group ${directoryStyles.userList}`}>
       <div
-        className={styles.userBar}
+        className={directoryStyles.userBar}
         role="group"
         aria-label={t("usersListLabel")}
       >
@@ -109,7 +109,7 @@ export function LimitedUserList(props: LimitedUserListProps) {
         ))}
         <button
           type="button"
-          className={`settings-button ${styles.userChip} ${styles.addUser}`}
+          className={`settings-button ${directoryStyles.userChip} ${directoryStyles.addUser}`}
           aria-pressed={props.creating}
           disabled={props.busy}
           onClick={props.onToggleCreate}
@@ -130,12 +130,12 @@ export function LimitedUserVisibleCategories({
   const { t } = useI18n();
   return (
     <section
-      className={`settings-group ${styles.visibleCard}`}
+      className={`settings-group ${directoryStyles.visibleCard}`}
       aria-labelledby="limited-user-visible-title"
     >
       <h3 id="limited-user-visible-title">{t("usersVisibleTitle")}</h3>
       <p>{t("usersVisibleBody", { count: categories.length })}</p>
-      <div className={styles.visibleTags}>
+      <div className={directoryStyles.visibleTags}>
         {categories.map((category) => (
           <Tag key={category.id}>{category.label}</Tag>
         ))}

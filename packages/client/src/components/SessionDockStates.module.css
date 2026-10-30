@@ -1,8 +1,59 @@
 /*
- * Companion to SessionDock.module.css: the dock's status captions, overflow
- * tray, software-keyboard row and collapsed composer (an approval or question
- * is open above). Same `.dock` anchor on the session footer.
+ * Companion to SessionDock.module.css, loaded after it: send and stop, the
+ * enlarged hit targets, the dock's status captions, overflow tray,
+ * software-keyboard row and collapsed composer (an approval or question is
+ * open above). Same `.dock` anchor on the session footer.
  */
+
+/* The primary action: accent to send; stop is a quiet secondary square. */
+.dock :global(.message-input-actions) :global(.send-button),
+.dock :global(.message-input-actions) :global(.stop-button) {
+  border-radius: var(--r-send);
+}
+
+.dock :global(.message-input-actions) :global(.send-button) {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+.dock :global(.message-input-actions) :global(.send-button):disabled {
+  background: var(--surface-3);
+  color: var(--ink-4);
+  opacity: 1;
+}
+
+.dock :global(.message-input-actions) :global(.stop-button) {
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  color: var(--ink);
+}
+
+.dock :global(.message-input-actions) :global(.stop-button):hover {
+  background: var(--surface-3);
+  opacity: 1;
+}
+
+.dock
+  :global(.message-input-actions)
+  :global(.stop-button)
+  :global(.stop-icon) {
+  background: currentColor;
+}
+
+/* Larger invisible targets for the short chip and the 16px context label. */
+.dock :global(.message-input-toolbar) :global(.mode-button)::after {
+  position: absolute;
+  inset: -4px 0;
+  content: "";
+}
+
+.dock
+  :global(.message-input-actions)
+  :global(.context-threshold-quickedit-trigger) {
+  padding: 14px 6px;
+  margin: -14px -6px;
+}
+
 /* Overflow menu: one tray above the card rather than a strip that grows
    sideways off the screen. The card (or the dock's inner box while an approval
    is open) becomes the containing block, and both legacy groups flow into it. */

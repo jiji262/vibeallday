@@ -250,14 +250,6 @@
   color: var(--ink);
 }
 
-/* Model list provenance reads as quiet metadata under the chips. */
-.catalogStatusMuted,
-.catalogStatus {
-  padding: 0 var(--space-1);
-  font-family: var(--label-font);
-  font-size: 12px;
-}
-
 @media (width <= 600px) {
   /* Phones show the chosen project alone; opening the chip reveals the
      search field and the suggestions. */
@@ -266,99 +258,6 @@
     :global(.new-session-project-inline-field) {
     display: none;
   }
-}
-
-/* Model list provenance under the model picker: muted while the list is live
-   and current, warning-toned when it is the built-in fallback or a refresh
-   failed. */
-.catalogStatus,
-.catalogStatusMuted {
-  grid-column: 1 / -1;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-2);
-  font-size: var(--font-size-sm);
-  line-height: 1.35;
-  color: var(--ink-3);
-  padding: 0.55rem 0.65rem;
-  border: 1px solid transparent;
-  border-radius: var(--radius-md);
-}
-
-/* Garden warning Notice: peach hairline over peach-soft, peach-ink text. */
-.catalogStatus {
-  border-color: color-mix(in srgb, var(--peach) 28%, transparent);
-  background: var(--peach-soft);
-  color: var(--peach-ink);
-}
-
-/* Refresh sits on the quiet line instead of centring in the reserved warning
-   height below it. */
-.catalogStatusMuted {
-  align-items: flex-start;
-  justify-content: flex-start;
-  color: var(--ink-4);
-}
-
-/* Reserve the notice's wrapping height before its catalog arrives, in the
-   muted state too: a catalog that lands as the fallback or a failed refresh
-   swaps the quiet line for a wrapped warning, and an unreserved block would
-   push the permission control and Advanced options down as data arrives. The
-   muted and warning states share one gap so the text wraps at the same width
-   in both. */
-.catalogMessage {
-  display: grid;
-}
-
-.catalogMessage::before {
-  content: attr(data-sizing-text);
-  visibility: hidden;
-}
-
-.catalogMessage::before,
-.catalogMessage > span {
-  grid-area: 1 / 1;
-}
-
-.catalogAction {
-  flex: none;
-  min-height: 2rem;
-  padding: 0.3rem 0.6rem;
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-sm);
-  background: var(--bg-surface);
-  color: var(--text-primary);
-  font: inherit;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-/* Centres the button on the first text line. A translate moves only the
-   painted box, so the notice keeps the warning state's height at every width
-   and a catalog that lands as a warning does not move the controls below. */
-.catalogStatusMuted .catalogAction {
-  translate: 0 calc((1lh - 100%) / 2);
-  border-color: transparent;
-  background: none;
-  color: inherit;
-  font-weight: inherit;
-  text-decoration: underline;
-}
-
-.catalogAction:hover:not(:disabled) {
-  border-color: var(--text-dimmed);
-  background: var(--bg-hover);
-}
-
-.catalogStatusMuted .catalogAction:hover:not(:disabled) {
-  background: none;
-  color: var(--text-primary);
-}
-
-.catalogAction:disabled {
-  cursor: wait;
-  opacity: 0.55;
 }
 
 @media (width < 900px) {

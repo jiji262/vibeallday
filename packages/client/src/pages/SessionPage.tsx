@@ -68,6 +68,7 @@ import {
   SessionViewerTranscriptGate,
 } from "../components/SessionManagedViewer";
 import sessionHeaderStyles from "../components/SessionHeader.module.css";
+import headerAccessoryStyles from "../components/SessionHeaderAccessories.module.css";
 import dockStyles from "../components/SessionDock.module.css";
 import dockStateStyles from "../components/SessionDockStates.module.css";
 import transcriptStyles from "../components/SessionTranscript.module.css";
@@ -6030,7 +6031,7 @@ function SessionPageContent({
                 {projectAppEnabled && (
                   <button
                     type="button"
-                    className={sessionHeaderStyles.projectAppButton}
+                    className={headerAccessoryStyles.projectAppButton}
                     aria-pressed={projectAppOpen}
                     aria-label={t("projectAppLabel")}
                     title={t("projectAppFullViewHint")}
@@ -6330,7 +6331,7 @@ function SessionPageContent({
                   <>
                     <button
                       type="button"
-                      className={`session-title session-title-recent-trigger ${sessionHeaderStyles.titleWithBadge}`}
+                      className={`session-title session-title-recent-trigger ${headerAccessoryStyles.titleWithBadge}`}
                       onClick={() => setShowRecentSessions(!showRecentSessions)}
                       title={titleTooltip}
                       aria-haspopup="menu"
@@ -6357,7 +6358,7 @@ function SessionPageContent({
                         return (
                           <button
                             type="button"
-                            className={sessionHeaderStyles.routerAccount}
+                            className={headerAccessoryStyles.routerAccount}
                             title={chip.tooltip}
                             aria-label={chip.tooltip}
                             onClick={() => {
@@ -6469,7 +6470,7 @@ function SessionPageContent({
               {!loading && roomyHeader && (
                 <SessionHeaderStateBadge
                   state={headerState}
-                  className={sessionHeaderStyles.stateBadge}
+                  className={headerAccessoryStyles.stateBadge}
                 />
               )}
             </div>
@@ -6520,7 +6521,7 @@ function SessionPageContent({
                 <SessionChangesButton
                   basePath={basePath}
                   projectId={projectId}
-                  className={sessionHeaderStyles.changesButton}
+                  className={headerAccessoryStyles.changesButton}
                 />
               )}
               {!loading && effectiveProvider && !condensedHeader && (
