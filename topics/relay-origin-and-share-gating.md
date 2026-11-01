@@ -14,13 +14,8 @@ before upgrade; disallowed HTTP origins receive no CORS allow-origin header.
 Missing WebSocket `Origin` remains allowed for server, CLI and native clients.
 An empty, opaque `null`, or malformed origin is refused by a restricted policy.
 
-Production defaults admit `https://vibeallday.navs.dpdns.org`, its HTTPS subdomains,
-`https://vibeallday.navs.dpdns.org`, and the experimental Chrome client origin
-`chrome-extension://mcjncehfogglphgkcbiecchdckhojgbe`. Chrome extension entries
-must use that exact scheme and a lowercase 32-character id in `a`–`p`.
-Extension wildcards, credentials, ports, paths (including a trailing slash),
-queries, fragments and other extension schemes are refused. Admitting one
-extension never admits another extension or an opaque `null` origin.
+Production defaults admit `https://vibeallday.navs.dpdns.org` and its HTTPS
+subdomains. Retired extension origins are not admitted by default.
 
 `RELAY_ALLOWED_ORIGINS` is a comma-separated override, replacing the defaults
 when nonempty. It supports exact HTTP(S) origins, HTTP(S) wildcard subdomains
@@ -31,9 +26,7 @@ production extension does not widen an operator's explicit allowlist.
 Origin admission reduces browser abuse and provides reachability; it creates
 no principal, credential or grant. Non-browser callers can spoof Origin.
 Normal Remote Access continues to authenticate through SRP and encrypt through
-NaCl. The store identity is pinned in the public
-[extension identity](../docs/distribution/chrome-extension/identity.json);
-client packaging and store publication remain experimental pending work.
+NaCl.
 
 ## Public Share Authorization
 

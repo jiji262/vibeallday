@@ -186,4 +186,4 @@ or that a provider reported an exact hidden backend revision.
 
 Related: [tactical](../docs/tactical/122-vibeallday-agent-self-inspection.md),
 [environment boundaries](subprocess-environment.md),
-[provider host](provider-host-api.md), [desktop](desktop-v0.md).
+[provider host](provider-host-api.md), [legacy launcher credentials](security.md#legacy-launcher-credentials).

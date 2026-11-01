@@ -18,14 +18,13 @@
   },
   "packageRules": [
     {
-      "description": "Group stable web/server runtime updates for manual review; provider SDKs and Tauri keep their own audits and groups.",
+      "description": "Group stable web/server runtime updates for manual review; provider SDKs keep their own audits and groups.",
       "matchManagers": ["npm"],
       "matchDepTypes": ["dependencies", "optionalDependencies"],
       "matchPackageNames": [
         "!@anthropic-ai/*",
         "!@agentclientprotocol/*",
-        "!@modelcontextprotocol/*",
-        "!@tauri-apps/*"
+        "!@modelcontextprotocol/*"
       ],
       "matchUpdateTypes": ["minor", "patch"],
       "matchCurrentVersion": "!/^[v=~^]*0\\./",
@@ -38,39 +37,11 @@
       "matchPackageNames": [
         "!@anthropic-ai/*",
         "!@agentclientprotocol/*",
-        "!@modelcontextprotocol/*",
-        "!@tauri-apps/*"
+        "!@modelcontextprotocol/*"
       ],
       "matchUpdateTypes": ["patch"],
       "matchCurrentVersion": "/^[v=~^]*0\\./",
       "groupName": "web runtime (non-major)"
-    },
-    {
-      "description": "Review Android library updates together, leaving Gradle, Kotlin compiler and SDK/toolchain migrations separate.",
-      "matchManagers": ["gradle"],
-      "matchPackageNames": [
-        "androidx.*:*",
-        "com.google.firebase:*",
-        "net.java.dev.jna:*",
-        "org.jetbrains.kotlinx:*"
-      ],
-      "matchUpdateTypes": ["minor", "patch"],
-      "groupName": "Android libraries (non-major)"
-    },
-    {
-      "description": "Group bridge module updates without changing the Go language or toolchain directives.",
-      "matchManagers": ["gomod"],
-      "matchDepTypes": ["require", "indirect"],
-      "matchUpdateTypes": ["minor", "patch"],
-      "matchCurrentVersion": "!/^[v=~^]*0\\./",
-      "groupName": "Go bridge modules (non-major)"
-    },
-    {
-      "description": "Group Rust patches for manual review; Tauri retains its coordinated npm/Cargo groups and 0.x minor upgrades stay separate.",
-      "matchManagers": ["cargo"],
-      "matchPackageNames": ["!/^tauri(?:-|$)/"],
-      "matchUpdateTypes": ["patch"],
-      "groupName": "Rust crates (patch)"
     },
     {
       "description": "Automerge non-major devDependency updates once every check passes. 0.x packages stay manual because their minor releases may break.",
@@ -81,7 +52,7 @@
       "automerge": true
     },
     {
-      "description": "The client and desktop declare different vite majors. A lockfile-only update passes both target versions to one recursive pnpm update, which forces a single version onto both importers and breaks --frozen-lockfile; bumping the ranges keeps each importer on its own major.",
+      "description": "Raise manifest ranges with Vite updates so the client and site retain their supported major versions and patched minimums.",
       "matchManagers": ["npm"],
       "matchPackageNames": ["vite"],
       "rangeStrategy": "bump"
@@ -117,11 +88,6 @@
       "matchDepTypes": ["pnpm-workspace.overrides"],
       "matchUpdateTypes": ["major"],
       "enabled": false
-    },
-    {
-      "description": "Keep Tauri plugins moving together across npm and Cargo. Core Tauri is grouped by monorepo:tauri.",
-      "matchPackageNames": ["@tauri-apps/plugin-*", "tauri-plugin-*"],
-      "groupName": "Tauri plugins"
     },
     {
       "description": "Claude Agent SDK refreshes follow topics/provider-refresh.md and update vibeAllDay.claudeCode.claudeAgentSdkVersion; request them from the Dependency Dashboard.",

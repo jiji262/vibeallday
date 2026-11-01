@@ -107,50 +107,5 @@
     "thirdPartyCookieProbe": "network and script cookies accessible in cross-site iframe",
     "networkFallback": 404,
     "passed": true
-  },
-  "bundledDebugAppFallback": {
-    "browser": "154.0.8037.106",
-    "publicContentTLS": false,
-    "parent": "https://appassets.androidplatform.net",
-    "temporaryParentBuild": true,
-    "thirdPartyCookiesBlocked": null,
-    "platform": "android-phone-bundled-app",
-    "checks": [
-      {
-        "name": "native-scriptless-fallback",
-        "parentOrigin": "https://appassets.androidplatform.net",
-        "sandbox": "allow-same-origin",
-        "scriptsExecuted": false,
-        "managedFrame": false,
-        "imageWidth": 0
-      },
-      {
-        "name": "native-fallback-teardown",
-        "passed": true
-      }
-    ],
-    "errors": [
-      "Loading the stylesheet 'https://appassets.androidplatform.net/projects/L3Zhci9mb2xkZXJzL3F3L3B6cXk5dHA1Ml9zNWY1MTc3OGo2ajh0cjAwMDBnbi9UL3lhLW1hbmFnZWQtYXJ0aWZhY3QtY1k3UEpWL2J1bmRsZQ/sessions/style.css' violates the following Content Security Policy directive: \"style-src 'unsafe-inline'\". Note that 'style-src-elem' was not explicitly set, so 'style-src' is used as a fallback. The action has been blocked.",
-      "Loading the image 'https://appassets.androidplatform.net/projects/L3Zhci9mb2xkZXJzL3F3L3B6cXk5dHA1Ml9zNWY1MTc3OGo2ajh0cjAwMDBnbi9UL3lhLW1hbmFnZWQtYXJ0aWZhY3QtY1k3UEpWL2J1bmRsZQ/sessions/assets/chart.png' violates the following Content Security Policy directive: \"img-src data: blob:\". The action has been blocked.",
-      "Blocked script execution in 'about:srcdoc' because the document's frame is sandboxed and the 'allow-scripts' permission is not set.",
-      "Blocked script execution in 'about:srcdoc' because the document's frame is sandboxed and the 'allow-scripts' permission is not set."
-    ],
-    "publicRelay": true,
-    "androidRelease": "17",
-    "androidApi": "37",
-    "webView": "(com.google.android.webview, 154.0.8037.106)",
-    "apkSHA256": "2fffef678f8c9105f9c08586f98c247eae43df44f924fbe6fdc65f5a500ce7ce",
-    "nativeRegistrationPersisted": true,
-    "nativePairingFlow": "fresh UI",
-    "parentBuildDelivery": "bundled debug APK",
-    "expectedPolicyRefusals": 4,
-    "passed": true,
-    "interactiveArtifactsSupported": false,
-    "isolatedTestPackageRemoved": true,
-    "consolePolicyRefusals": {
-      "stylesheet": 1,
-      "image": 1,
-      "sandboxedScript": 2
-    }
   }
 }

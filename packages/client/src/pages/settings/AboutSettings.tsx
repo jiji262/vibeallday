@@ -18,12 +18,8 @@ import { useSettingsPaneTitle } from "./SettingsPaneTitleContext";
 import { HideInSettingsSearch } from "./SettingsSearchContext";
 import { SettingsSection } from "./SettingsSection";
 import { getRemoteCompatibilityNotices } from "../../lib/remoteCompatibilityNotices";
-import { getDesktopRuntimeMetadata } from "../../lib/desktopRuntime";
 import { Button, ScopeTag, Status } from "../../components/garden";
-import {
-  AboutVersionCard,
-  type DesktopCheckStatus,
-} from "./AboutSettings.version";
+import { AboutVersionCard } from "./AboutSettings.version";
 import styles from "./AboutSettings.module.css";
 
 export function AboutSettings() {
@@ -31,12 +27,9 @@ export function AboutSettings() {
   const sourceKey = useClientSummarySourceKey();
   useSettingsPaneTitle(t("aboutTitle"));
   const { canInstall, isInstalled, install } = usePwaInstall();
-  const desktopRuntime = getDesktopRuntimeMetadata();
-  const {
-    version: versionInfo,
-    loading: versionLoading,
-    error: versionError,
-  } = useVersion({ freshOnMount: !desktopRuntime });
+  const { version: versionInfo, error: versionError } = useVersion({
+    freshOnMount: true,
+  });
   const remoteConnection = useOptionalRemoteConnection();
   const { resetOnboarding } = useOnboarding();
   const currentRelayUsername = remoteConnection?.currentRelayUsername ?? null;
@@ -108,27 +101,6 @@ export function AboutSettings() {
     restoreRemoteCompatibilityNotices(remoteCompatibilityNotices);
   }, [remoteCompatibilityNotices, restoreRemoteCompatibilityNotices]);
 
-  const [desktopCheckStatus, setDesktopCheckStatus] =
-    useState<DesktopCheckStatus>(null);
-  // Only the desktop app updates itself; the server has no update check.
-  const handleCheckUpdates = useCallback(async () => {
-    if (!desktopRuntime) return;
-    if (!desktopRuntime.nativeUpdateCheck) {
-      setDesktopCheckStatus("menu");
-      return;
-    }
-    try {
-      const response = await fetch("/desktop-bootstrap/check-updates", {
-        method: "POST",
-        headers: { "X-VibeAllDay": "true" },
-        credentials: "same-origin",
-      });
-      setDesktopCheckStatus(response.ok ? "opened" : "failed");
-    } catch {
-      setDesktopCheckStatus("failed");
-    }
-  }, [desktopRuntime]);
-
   const restartWarning =
     interruptibleSessionCount > 0 && !restarting
       ? t("developmentInterruptedWarning", {
@@ -141,12 +113,8 @@ export function AboutSettings() {
     <>
       <HideInSettingsSearch>
         <AboutVersionCard
-          desktopRuntime={desktopRuntime}
           versionInfo={versionInfo}
-          versionLoading={versionLoading}
           versionError={!!versionError}
-          desktopCheckStatus={desktopCheckStatus}
-          onCheckUpdates={() => void handleCheckUpdates()}
           notice={
             inlineRemoteCompatibilityNotice && (
               <RemoteCompatibilityNoticeCard

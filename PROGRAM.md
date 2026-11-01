@@ -2,7 +2,7 @@
 
 Build VibeAllDay as a mobile-first, multi-session supervisor for local coding
 agents across providers, with durable server-owned processes and responsive
-browser and native clients that remain useful over direct and end-to-end
+browser clients that remain useful over direct and end-to-end
 encrypted relay connections.
 
 Preserve canonical session identity, provider-native transcript meaning,

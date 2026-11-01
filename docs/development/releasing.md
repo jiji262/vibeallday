@@ -46,25 +46,8 @@ Quick reference:
 scripts/release-website.sh 1.5.3
 ```
 
-## Releasing the Chrome extension
-
-Update and commit `packages/browser-extension/CHANGELOG.md`, then run
-`scripts/release-extension.sh <version>` from a clean `main` checkout. The
-helper bumps the independent extension version and pushes its release tag.
-CI accepts the exact ZIP, submits it through keyless Google authentication,
-and records a GitHub release. Google review remains asynchronous. See
-[Chrome Web Store publication](../distribution/chrome-extension/README.md)
-for setup, read-only verification and listing/privacy requirements.
-
 ## Deploying to Staging
 
 The staging deploy runbook is host-specific and intentionally kept out of this public
 repo. It lives in the private dotfiles repo: `~/code/dotfiles/machines/pi/README.md`. If
 asked to deploy to staging, read the steps there.
-
-## Preparing native mobile stores
-
-See [mobile store preparation](../distribution/mobile/README.md) for shared
-listing copy, existing icons, initial artwork, and the boundary between internal
-testing and public store submission. Private account and credential inventory
-lives in the dotfiles runbooks.

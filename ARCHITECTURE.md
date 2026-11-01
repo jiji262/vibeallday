@@ -41,35 +41,6 @@ alternatives rather than selecting a new runtime contract.
   one-source-at-a-time UI.
 - **Relay** (optional) is a dumb pipe carrying NaCl-encrypted frames between
   client and server when neither has a routable address to the other.
-- **Push broker** (optional, native-app path) is a separate Hono/SQLite service
-  under `packages/push-broker/`. It stores revocable device-delivery
-  capabilities and submits bounded generic notifications through an injected
-  provider. It is not part of provider session routing or the encrypted relay.
-- **Experimental Android host**: a separate [host app](topics/android-host.md) under
-  `packages/android-host` instead runs the existing VIBEALLDAY server/UI and provider
-  CLIs on the phone. Its Alpine payload is shared with a Linux test harness;
-  Android owns the foreground-service lifecycle. It is not a companion rewrite.
-- **Mobile companions** use native platform shells and notification delivery.
-  Android is a first-class Gradle/Kotlin application: native Compose owns
-  login, saved hosts and host management; the bundled WebView is the primary
-  foreground for the full existing web UI. A shared Rust/UniFFI core owns SRP,
-  encryption, direct/relay transport, route candidates and reconnect. Kotlin
-  owns protected credential storage, platform demand and native adapters. The
-  WebView consumes source-scoped native leases through a bounded exact-origin
-  `SourceTransport` adapter without receiving keys or authenticating twice.
-  Paired hosts remain independent even when relay profiles share a mux socket.
-  Native dashboard and Conversation presentation have been removed. The
-  hosted-latest testing channel keeps independent web authentication and has
-  no privileged native data plane. Tauri Mobile has been removed; desktop
-  Tauri is separate. The accepted iOS direction uses SwiftUI/WKWebView with a
-  shared Rust connection core exposed through UniFFI, preserving the existing
-  server protocol. Both native platforms use per-profile sources with independent
-  consumer leases and pooled relay circuits. Host selection is presentation
-  state; iOS suspension retires its foreground runtime. The crypto/build proof is complete;
-  the production Rust core and consumer iOS application are implemented and
-  have owned simulator and unsigned-device evidence. Simulator CI verifies
-  the connection/lifecycle path independently of physical-device signing.
-
 ## Provider runtime ownership and reload
 
 On an enabled, capable Linux or macOS Node source-checkout non-watch development
@@ -162,7 +133,7 @@ that request's data until they close. Details and the owner table are in
   attach-or-start recovery, bounded session turns, receipts, and the
   authenticated Hono adapter.
 - [`topics/agent-command-runtime.sketches.md`](topics/agent-command-runtime.sketches.md) —
-  proposal for one npm/desktop-bundled `vibeallday-agent` dispatcher, per-session PATH
+  proposal for one npm-bundled `vibeallday-agent` dispatcher, per-session PATH
   and scoped-authority projection, private input, and reuse by session-access
   and vibeallday-cron clients without parallel service logic.
 - [`topics/vibeallday-cron.md`](topics/vibeallday-cron.md) — proposal for a generally running
@@ -203,25 +174,12 @@ that request's data until they close. Details and the owner table are in
   transcript projection that preserves user/agent text, media, and important
   failures while summarizing routine per-turn activity; selected as the first
   native session-detail presentation.
-- [`docs/project/mobile-companion-app.md`](docs/project/mobile-companion-app.md)
-  — Android-first native companion product shape, permanent bundled full-web
-  alternative, notification/inbox scope, and later SwiftUI iOS counterpart.
-- [`topics/mobile-server-pairing.md`](topics/mobile-server-pairing.md) —
-  approved boundary between app-local paired-server profiles, durable paired
-  devices, expiring SRP resume credentials, native Kotlin transport,
-  a bundled-web lease over that transport, resume-authenticated direct/relay
-  discovery, and push enrollment; an independent bundled-web session remains
-  a possible later optimization and public installation identity is deferred.
 - [`topics/security-client-audit.md`](topics/security-client-audit.md) —
   unified cross-platform client registration, P-256 continuity keys,
   recognizable audit fingerprints, bounded per-client history plus a
   revocation-surviving server security ledger, legacy web projection,
   cascading revocation, opt-in new-client alerts, native push ownership, and
   future WebAuthn/platform-attestation assurance.
-- [`docs/tactical/080-first-class-android-shell.md`](docs/tactical/080-first-class-android-shell.md)
-  — removal of Tauri Mobile, first-class Gradle/Compose ownership, explicit
-  bundled/hosted WebView channels, and the exact-origin native-host message
-  contract.
 - [`topics/stream-persisted-render-parity.md`](topics/stream-persisted-render-parity.md)
   — graded convergence contract between the active live tail and the durable
   provider transcript: strong structural stability for paired tool calls,
@@ -255,10 +213,7 @@ that request's data until they close. Details and the owner table are in
   consumes through the streaming path.
 - [`docs/project/relay-design.md`](docs/project/relay-design.md) — the
   end-to-end-encrypted relay; the "dumb pipe" contract.
-- [`topics/android-fcm-push.md`](topics/android-fcm-push.md) — approved
-  direction and current credential-free service contract for native Android
-  notification subscriptions, the hosted FCM push broker, privacy modes, and
-  deliberately deferred registration-lifecycle details.
+
 
 ## Bespoke vs. standard — and what to learn from it
 
@@ -441,53 +396,21 @@ cannot discover an off-window row; that accepted limitation remains tracked in
 [`gaps/transcript-render-window-native-find.md`](gaps/transcript-render-window-native-find.md),
 while VIBEALLDAY's in-session search must continue to wake off-window matches.
 
-### Portable transcript compiler / native render boundary
+### Portable transcript compiler and Web rendering boundary
 
-**Problem today.** Provider normalization, transcript reconciliation,
-presentation grouping, and React/DOM rendering are separated incompletely. The
-hosted client can update ahead of installed VIBEALLDAY servers, while future Android and
-iOS clients would otherwise have to duplicate the same provider interpretation
-or embed the web UI. Moving all work to clients is also unacceptable because
-ordinary mobile rendering must never require a full provider transcript.
+Provider normalization, transcript reconciliation and React rendering have
+separate ownership. Keep server ingest responsible for identity, bounded
+window selection and whole-history prefix facts. A shared TypeScript compiler
+owns presentation derivation; the Web renderer owns DOM interaction and layout.
 
-**Proposal.** Keep a stable server ingest kernel responsible for provider
-storage/protocol access, identity, bounded window selection, and whole-history
-prefix facts. Put bounded transcript-to-presentation derivation in a versioned,
-platform-neutral compiler that may run server-side by preference or from a
-client bundle for compatibility. Web, Android, and iOS use separate renderers
-over the same semantic projection. See
-[`topics/portable-transcript-compiler.md`](topics/portable-transcript-compiler.md).
+The current internal foundation maps provider messages into render items with
+explicit cache and rendering adapters. Promoting a versioned projection or
+moving execution to the browser requires parity fixtures, bounded input cost,
+unknown-record filtering and a client/server compatibility review.
 
-**Cost.** High and cross-cutting: new envelope/projection schemas, compatibility
-negotiation, server/client parity fixtures, a web adapter migration, careful
-unknown-record filtering, and eventually native renderers. A whole-session
-rewrite would also duplicate the current session-detail migration, so work must
-land adapter-first in small parity-proven slices.
-
-**Benefit.** Provider presentation fixes can often ship with frequently updated
-clients; compatible servers can still do the expensive/history-aware work;
-mobile compilation remains bounded; and native clients can render real sessions
-without inheriting the DOM-heavy component tree.
-
-**Current checkpoint.** The conservative web-only foundation completed on
-2026-07-19: current `Message[]` input is transformed into the existing internal
-`RenderItem[]` by a browser-free TypeScript compiler, with cache, web
-diagnostics, display-object insertion, reference stabilization, and React
-rendering kept as explicit adapters. The primary session-detail path uses this
-boundary, protected by semantic, browser, private-artifact, and performance
-tripwires. See the completed
-[`foundation plan`](docs/tactical/061-portable-transcript-foundation-plan.md).
-This is useful web architecture but is not yet the versioned envelope or
-platform-neutral projection proposed above.
-
-**Next consumer and decisions.** The 2026-09-12 direction selects a minimal
-multi-server web demo of a [Simple Client API](topics/simple-client-api.md),
-followed closely by Kotlin/Compose and Swift/SwiftUI consumers. It uses finished
-server projections, message-based limits, and a new small client state machine.
-The [three-client plan](docs/tactical/130-simple-client-api-and-three-client-demo.md)
-must settle concrete schemas, history semantics, packaging/runtime, and
-capability/fallback review before protocol implementation. The earlier extraction
-alone does not authorize a public/versioned IR or a client compiler runtime.
+See [portable transcript compiler](topics/portable-transcript-compiler.md),
+[Simple Client API](topics/simple-client-api.md) and its
+[Web demo plan](docs/tactical/130-simple-client-api-and-web-demo.md).
 
 ### Disk-pressure degraded mode
 

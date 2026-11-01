@@ -45,18 +45,6 @@ sketch records shared vocabulary for them without selecting a protocol. Hiding
 controls, selecting a project working directory, or assigning a
 narrower-sounding permission mode would not establish that boundary.
 
-## Mobile SRP Implementation Decision
-
-The maintainer accepted pinned RustCrypto `srp 0.7.0-rc.3` for the shared
-mobile Rust core on 2026-10-01. This changes client implementation, with the
-existing owner principal, SRP credentials, server protocol and authority
-unchanged. The accepted limits and production verification requirements are
-owned by
-[mobile connection ownership](mobile-server-pairing.md#existing-server-compatibility).
-Neither passing compatibility vectors nor an AI engineering review establishes
-a formal cryptographic audit or whole-protocol constant-time behavior. A
-possible future OPAQUE migration remains separate protocol work.
-
 ## Limited Users
 
 Limited users are default-off (`limitedUsersEnabled`) named principals that
@@ -346,9 +334,9 @@ cover public shares, which deliberately use a different plaintext relay path.
 The client is part of the trust root. Malicious JavaScript served by a hosted
 client origin, a privileged browser extension, or a compromised packaged app
 can steal a password or cached resume secret before transport encryption helps.
-Use signed/bundled or locally served client assets when the threat model
-includes compromise of both the relay and live hosted client delivery; see
-[`trusted-client-packaging.md`](trusted-client-packaging.md).
+Use locally built and served Web assets when the threat model includes
+compromise of both the relay and live hosted client delivery. The local
+server and browser remain trusted endpoints.
 
 ## Multiple VIBEALLDAY Servers And Orchestration
 
@@ -407,7 +395,12 @@ host-level access. Restrict or revoke those at the SSH/OS boundary. A future
 remote sandbox claim must be installed and attested by the remote execution
 host before provider-controlled code runs.
 
-## Desktop Loopback
+<a id="desktop-loopback"></a>
+
+## Legacy Launcher Credentials
+
+This compatibility contract remains for existing configured launchers. This
+fork distributes the local server and browser client.
 
 The desktop loopback dashboard is authenticated local content, but a random
 port or a localhost origin is not identity. The native shell must not expose a
@@ -425,20 +418,6 @@ lifetime, 30 invalid attempts per minute, and 32 in-memory desktop sessions
 with a 30-day server-side lifetime. State dies with the bundled server and is
 never persisted. Because v0 serves plain loopback HTTP, its host-only cookie
 cannot use `Secure`; it remains HttpOnly, SameSite=Strict, and path-rooted.
-
-The loopback dashboard is a remote origin from Tauri's perspective and receives
-no custom native-command capability. Packaged Tauri-origin diagnostic surfaces
-receive narrowly scoped commands. See [`desktop-v0.md`](desktop-v0.md) for the
-distribution, compatibility, lifecycle, and same-user-process threat model.
-
-The signed macOS runtime grants `com.apple.security.cs.allow-jit` to Tauri's
-executable signing targets because the bundled Bun/JavaScriptCore sidecar
-cannot expose the JavaScript runtime required by the server under hardened
-runtime without it. Tauri's shared signing configuration also puts the
-entitlement on the native shell; it does not grant it to remote dashboard
-content running in WKWebView. The release must not add the broader
-unsigned-executable-memory, executable-page-protection, or
-disable-library-validation exceptions.
 
 ## Public Read-Only Shares
 

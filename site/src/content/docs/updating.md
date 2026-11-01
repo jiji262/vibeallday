@@ -47,7 +47,7 @@ VIBEALLDAY_PROVIDER_HOST_ENABLED=true pnpm dev
 macOS currently defaults to off while reports of active turns ending during
 long-running test tools are investigated. Its provider host supports agent
 continuity, but process apps still require the Linux project sandbox. This
-option applies to Node.js source launches, not packaged npm or Desktop apps.
+option applies to Node.js source launches, not packaged npm installations.
 
 To disable hosting, use `VIBEALLDAY_PROVIDER_HOST_ENABLED=false pnpm dev`. Changing
 the option requires a full restart of the development launcher. Without
@@ -58,17 +58,6 @@ terminal or launcher, restarting the host, or rebooting the machine stops
 its processes. A host-code update therefore needs a full restart; a web-server
 reload alone cannot install it. Apps require an explicit Start after losing
 their host, and their working files are retained.
-
-## Desktop apps
-
-Use the in-app update check when an update is offered. A manual reinstall from
-the [desktop downloads page](/download) is the v0 recovery path. Desktop
-updates replace the shell, private runtime, and bundled
-VibeAllDay build as one unit while preserving the desktop data directory.
-
-Automatic downgrade is not supported. Keep the installer for a version you
-may need to restore manually, and read its release notes before moving between
-beta builds.
 
 ## Hosted remote compatibility
 

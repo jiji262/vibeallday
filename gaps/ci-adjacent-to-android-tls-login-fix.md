@@ -10,12 +10,6 @@ that run is green for them; keep any that still fail as a narrower gap.
   updated `relay-integration.spec.ts`, not this spec, which filled the field
   before opening Advanced. The reordered spec passes in Chromium here;
   WebKit cannot launch on this host (missing system libraries).
-- **Desktop CI, all three `build-tauri` jobs** on `graehl/vibeallday` only.
-  The fork has no `v*` tags, so the bundled `vibeAllDayVersion` is a bare commit,
-  which the packaged server reports as `unknown` by design; the runtime
-  smoke demanded equality. The smoke now expects
-  `reportedVibeAllDayVersion(vibeAllDayVersion)` (`packages/desktop/scripts/runtime-manifest.mjs`)
-  and prints both values on mismatch. Not built here (no Tauri toolchain).
 - **`packages/server/test/projects/HostedProjectServices.test.ts`, worker-loss
   case:** the service failed with `listen EADDRINUSE 127.0.0.1:40614` once.
   `ProjectServiceProcess` drew its port from 10000–59999, overlapping the

@@ -38,17 +38,17 @@ Related: [optional SQLite](../../topics/optional-sqlite.md),
 [remote compatibility](../../topics/remote-hosted-compatibility.md),
 [compatibility notices](006-remote-compatibility-notices.md),
 [server capabilities](../../topics/server-capabilities.md),
-[desktop runtime](../../topics/desktop-v0.md), and
+[desktop runtime](../../topics/server-runtime.md), and
 [hard development rules](../../topics/hard-development-rules.md).
 
 ## Why Change The Floor
 
 The declared `>=20.12` contract is already costly and partially inaccurate:
 
-- [`gaps/npm-runtime-dependency-node20-floor.md`](../../gaps/npm-runtime-dependency-node20-floor.md)
+- `gaps/npm-runtime-dependency-node20-floor.md`
   records that a fresh npm dependency resolution can select a sanitizer stack
   that requires Node 22.12 and fails on Node 20.
-- [`gaps/node20-recursive-watch-deletion.md`](../../gaps/node20-recursive-watch-deletion.md)
+- `gaps/node20-recursive-watch-deletion.md`
   records a Node 20.12 recursive-watcher crash; browser E2E already uses a later
   Node 20 patch to avoid it.
 - [`gaps/production-dependency-audit-advisories.md`](../../gaps/production-dependency-audit-advisories.md)

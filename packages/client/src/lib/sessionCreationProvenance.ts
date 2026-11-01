@@ -5,7 +5,6 @@ import {
 } from "@vibeallday/shared";
 import type { VersionInfo } from "../api/serverMetadataClient";
 import { getClientVersion } from "./clientVersion";
-import { getDesktopRuntimeMetadata } from "./desktopRuntime";
 
 export function getUiCreationProvenance(
   versionInfo: VersionInfo | null | undefined,
@@ -18,11 +17,9 @@ export function getUiCreationProvenance(
   ) {
     return undefined;
   }
-  const desktopRuntime = getDesktopRuntimeMetadata();
   return {
-    surface: desktopRuntime ? "desktop" : "web",
+    surface: "web",
     clientOrigin: window.location.origin,
     clientVersion: getClientVersion(),
-    ...(desktopRuntime?.commit ? { clientCommit: desktopRuntime.commit } : {}),
   };
 }

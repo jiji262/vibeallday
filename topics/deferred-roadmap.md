@@ -170,6 +170,3 @@ three-phase integration plan. Two tracks:
 - **8.1 Attachment retention / cleanup** — see
   [`attachment-storage.md`](attachment-storage.md) § "Deferred: retention /
   cleanup"; no retention policy yet for uploads.
-- **8.2 Trusted-client packaging verification** — see
-  [`trusted-client-packaging.md`](trusted-client-packaging.md) § "Deferred
-  Verification Setup"; relevant only when pursuing signed/local installs.

@@ -54,15 +54,6 @@ such as with **Local Network Access** or behind your own reverse proxy.
   shows a warning under the sandbox option, because a sandboxed agent that
   reaches VIBEALLDAY could control it.
 
-## Desktop app: Allow Localhost Access
-
-The macOS and Windows apps protect the server with a desktop credential even
-when **Require Password** is off. While it is off, **Allow Localhost Access**
-drops that credential, so other browsers on the computer can connect. It
-admits every request that reaches the server, so with **Local Network Access**
-on it also opens the server to your network. Use **Require Password** instead
-when other devices can reach it.
-
 ## Limited users (preview)
 
 **Settings → Users** creates password-protected accounts for trusted family or

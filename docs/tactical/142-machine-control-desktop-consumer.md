@@ -36,9 +36,9 @@ and dependencies; it is not a preliminary step toward a Rust rewrite.
   already verifies a configured Mac app and helper signatures, adds the helper
   directory to agent PATH, and supplies an exact command path and instructions.
   It neither uses nor changes Computer Control settings.
-- MC's [system map](../../../machine-control/SYSTEM-MAP.md),
-  [distribution topic](../../../machine-control/topics/native-distribution.md),
-  and [desktop product](../../../machine-control/desktop/README.md) own native
+- MC's system map (`../../../machine-control/SYSTEM-MAP.md`),
+  distribution topic (`../../../machine-control/topics/native-distribution.md`),
+  and desktop product (`../../../machine-control/desktop/README.md`) own native
   packaging and lifecycle. Its current Python client invokes repository-local
   platform adapters and shared helpers. Bundling only the tiny launcher leaves
   an incomplete client.
@@ -472,7 +472,7 @@ The original appliance resident stays ready. The helper reaps its resident and
 removes isolated state; the controller restores initial power-off and releases
 its claim. This is MC claim/resident recovery acceptance, not VIBEALLDAY session
 close/crash, native grant expiry, signed app replacement or Windows/Linux
-lifecycle parity. MC's [tactical record](../../../machine-control/docs/tactical/062-installed-agent-cli.md#installed-mac-claim-and-resident-lifecycle-result)
+lifecycle parity. MC's tactical record (`../../../machine-control/docs/tactical/062-installed-agent-cli.md`)
 owns the repeatable helper and evidence scope. The public picker approval and
 legacy retirement gates remain unchanged.
 
@@ -511,7 +511,7 @@ recorded in the existing gap. No new product UI or public contract is added.
 
 ## Installed Mac native grant expiry result
 
-MC's dedicated [native grant-expiry harness](../../../machine-control/tests/macos/cli-grant-expiry.py)
+MC's dedicated native grant-expiry harness (`../../../machine-control/tests/macos/cli-grant-expiry.py`)
 passes through the signed installed client under workstation approval. The
 standing appliance observer visibly approves an observe-only 60-second request.
 An AppKit fixture observation succeeds, then actual deadline expiry reports
@@ -590,7 +590,7 @@ retirement remain open; the Mac replacement result below closes that cell.
 
 ## Published Mac replacement result
 
-MC's [installed update probe](../../../machine-control/docs/tactical/062-installed-agent-cli.md#published-mac-installed-cli-replacement)
+MC's installed update probe (`../../../machine-control/docs/tactical/062-installed-agent-cli.md`)
 now passes with an owned signed 0.5.2 sender fixture and untouched public Mac
 ARM64 0.5.3 receiver from `d5aa271ca93d890325a12b0906432b762a4aaec4`.
 VIBEALLDAY's actual consumer authenticates the product, composes launch context and

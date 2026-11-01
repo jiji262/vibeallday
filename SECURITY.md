@@ -5,8 +5,7 @@ processes. It can expose shell, file, and tool-approval capabilities of the
 underlying provider CLIs, so deployments should treat the server as sensitive
 developer infrastructure.
 
-This document describes security features that are present in upstream
-`kzahel/main`.
+This document describes the local server and Web client security boundaries.
 
 ## Default Exposure
 
@@ -33,8 +32,8 @@ This document describes security features that are present in upstream
   request is HTTPS.
 - Auth state is stored in `auth.json`; on POSIX platforms the server attempts
   to enforce owner read/write-only file permissions.
-- A desktop auth token can act as an additional local app auth path when the
-  desktop integration provides one.
+- Legacy launcher credentials remain accepted for existing configurations;
+  they do not replace normal browser password authentication.
 
 ## Remote Access Transport
 
@@ -78,7 +77,7 @@ host sandboxing where untrusted projects require a stronger boundary.
   recognized media extensions, and resolves symlinks before checking the
   allowed prefixes.
 - Production static HTML responses include a `frame-ancestors` Content Security
-  Policy for the web app and supported desktop origins.
+  Policy for the web app and configured browser origins.
 
 ## Maintenance Practice
 
@@ -94,9 +93,7 @@ host sandboxing where untrusted projects require a stronger boundary.
   boundaries, rendered content, local file access, dependencies, packaging,
   and provider integrations as those surfaces change. These are
   maintainer-led reviews, not independent security certification.
-- The two core maintainers are
-  [Jonathan Graehl (@graehl)](https://github.com/graehl) and
-  [Kyle Graehl (@kzahel)](https://github.com/kzahel).
+- This fork is maintained by [jiji262](https://github.com/jiji262).
 
 ## Reporting
 

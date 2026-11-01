@@ -19,7 +19,7 @@ Related:
 [agent context injection](agent-context-injection.md),
 [vibeallday-cron](vibeallday-cron.md),
 [subprocess environment boundaries](subprocess-environment.md),
-[desktop v0](desktop-v0.md),
+[legacy launcher credentials](security.md#legacy-launcher-credentials),
 [session sandboxing](session-sandboxing.md),
 [attachment storage](attachment-storage.md),
 [security](security.md), and

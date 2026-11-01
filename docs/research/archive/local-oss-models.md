@@ -142,6 +142,6 @@ model_list:
 
 ## Related Documents
 
-- [Multi-Provider Integration Plan](../tasks/multi-provider-integration.md)
-- [Multi-Provider Executive Summary](../tasks/multi-provider-executive-summary.md)
+- Multi-Provider Integration Plan (`../tasks/multi-provider-integration.md`)
+- [Multi-Provider Executive Summary](../../archive/multi-provider-executive-summary.md)
 - [Cross-Provider Subagents](./cross-provider-subagents.md)

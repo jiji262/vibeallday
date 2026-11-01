@@ -2120,46 +2120,30 @@ describe("NewSessionForm", () => {
     );
   });
 
-  it.each(["web", "desktop"] as const)(
-    "marks a %s launch when the server supports provenance",
-    async (surface) => {
-      versionState.version = {
-        capabilities: [SESSION_CREATION_PROVENANCE_CAPABILITY],
-      };
-      if (surface === "desktop") {
-        window.__VIBEALLDAY_DESKTOP_RUNTIME__ = {
-          desktopVersion: "0.3.22",
-          commit: "abc123",
-        };
-      }
-      try {
-        render(
-          <NewSessionForm
-            projectId="project-1"
-            selectedProject={chooserProjects[0]}
-            projects={[...chooserProjects]}
-          />,
-        );
-        fireEvent.change(screen.getByPlaceholderText("newSessionPlaceholder"), {
-          target: { value: "hello" },
-        });
-        fireEvent.click(
-          screen.getByRole("button", { name: "newSessionStartAction" }),
-        );
-        await waitFor(() => expect(mockStartSession).toHaveBeenCalledTimes(1));
-        expect(mockStartSession.mock.calls[0]?.[2]?.creationProvenance).toEqual(
-          {
-            surface,
-            clientOrigin: window.location.origin,
-            clientVersion: "unknown",
-            ...(surface === "desktop" ? { clientCommit: "abc123" } : {}),
-          },
-        );
-      } finally {
-        delete window.__VIBEALLDAY_DESKTOP_RUNTIME__;
-      }
-    },
-  );
+  it("marks a web launch when the server supports provenance", async () => {
+    versionState.version = {
+      capabilities: [SESSION_CREATION_PROVENANCE_CAPABILITY],
+    };
+    render(
+      <NewSessionForm
+        projectId="project-1"
+        selectedProject={chooserProjects[0]}
+        projects={[...chooserProjects]}
+      />,
+    );
+    fireEvent.change(screen.getByPlaceholderText("newSessionPlaceholder"), {
+      target: { value: "hello" },
+    });
+    fireEvent.click(
+      screen.getByRole("button", { name: "newSessionStartAction" }),
+    );
+    await waitFor(() => expect(mockStartSession).toHaveBeenCalledTimes(1));
+    expect(mockStartSession.mock.calls[0]?.[2]?.creationProvenance).toEqual({
+      surface: "web",
+      clientOrigin: window.location.origin,
+      clientVersion: "unknown",
+    });
+  });
 
   it("submits a one-turn modifier as metadata without changing normal thinking", async () => {
     versionState.version = { capabilities: ["turn-effort-modifiers"] };

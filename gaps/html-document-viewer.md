@@ -4,7 +4,7 @@ Status: configured isolated serving and managed first-party relay delivery
 implemented; advanced HTML inspection
 and the broader verification matrix remain open. This gap owns richer
 display of HTML documents and their assets, including ordinary linked files
-and [project mockup exports](ui-mockup-export-bundle.md). A special bundle must
+and project mockup exports (`ui-mockup-export-bundle.md`). A special bundle must
 not become mandatory for a simple HTML document with neighboring resources.
 
 ## Current limitation and existing owners
@@ -114,15 +114,6 @@ fall back to execution on an authenticated VIBEALLDAY origin. For hosted relay
 clients without a tunnel, the service-worker content origin in
 [the relay artifact frame sketch](sketches/relay-artifact-frame.md) replaces
 the static broker candidate.
-
-The [2026-10-16 extension viewer experiment](../research/extension-artifact-spike/README.md)
-also demonstrates a bounded byte adapter for ordinary HTML and local assets,
-inside a packaged extension sandbox over the existing encrypted relay. The
-extension worker did not intercept sandbox subresources; the adapter rewrites
-supported resource references instead. It is a viable alternative for a
-declared artifact subset, with server-enforced grants still required. A similar
-Android viewer is an untested possibility. The managed content origin is now the selected first-party hosted path;
-extension/native adapters remain possible alternatives for other environments.
 
 Static and scripted documents are both part of the target. An initial static
 slice or fully inlined adapter must leave unsupported functionality explicit.

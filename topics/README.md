@@ -1,6 +1,3 @@
-- [On-device Android host](android-host.md) (experimental Alpine/PRoot host,
-  optional ADB direction, distribution research, assistant entry-point research
-  and pinned Buddy/Shizuku/Termux references; assistant device spikes deferred)
 - new session project selection
 - Rich rendering for agent output via vibeallday
 - [Code-fence language renderers](code-fence-renderers.md) (info-string

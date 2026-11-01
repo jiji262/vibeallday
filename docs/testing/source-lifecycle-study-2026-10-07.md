@@ -295,16 +295,6 @@ investigation are also retained under `/tmp/vibeallday-lifecycle-*` on this host
 
 ## First repair: native request errors (2026-10-07)
 
-After the maintainer approved proceeding, the Kotlin connector stopped creating
-HTTP responses for Rust request failures. A request-specific error now passes
-through the connection manager and WebView bridge, retaining a machine-readable
-code. The JavaScript adapter recognizes connection loss without matching text;
-safe reads wait for native readiness and retry once. Writes and uploads are not
-automatically replayed. Timeouts, overload, invalid messages and authentication
-errors keep separate codes; actual HTTP responses retain their meaning.
-The additive bridge contract is documented in
-[mobile server pairing](../../topics/mobile-server-pairing.md#implemented-bridge-contract).
-
 The same real-app pending-read recipe now has zero observed page errors and
 zero synthetic-response logs on direct and mux routes. Updated content was
 observed at approximately one second after restoration in both runs; drafts

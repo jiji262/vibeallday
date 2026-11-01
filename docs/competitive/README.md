@@ -41,24 +41,6 @@ Official apps from AI providers:
 
 See also [Community Projects](community-projects.md) for smaller tools shared on Reddit/forums.
 
-## Android hosts and platform references
-
-The [Android host topic](../../topics/android-host.md) owns VIBEALLDAY's runtime,
-optional ADB direction, distribution assessment and research-only assistant
-entry-point exploration. The 2026-10-18 reviews below use pinned source, with
-no app installation, device investigation or assistant spike.
-
-| Project | Role | Research focus |
-| --- | --- | --- |
-| [Buddy](buddy.md) | Phone-local provider runtime and assistant | Alpine/PRoot, native phone tools, provider sign-in, APK updates and restricted Play flavor |
-| [Shizuku](shizuku.md) | Adjacent Android privilege broker | User-enabled ADB/root service, Binder authorization, wireless setup, lifecycle and rish |
-| [Termux](termux.md) | Adjacent terminal/development environment | Upstream versus Play builds, native execution, system-linker wrapper, package provenance and PRoot |
-
-The [reference map](android-host-references.md) and
-[YAML pins](android-host-references.yaml) bind the nine local research
-checkouts to exact commits. These are source-reading references, not adopted
-runtime dependencies or evidence of VIBEALLDAY store approval.
-
 ## Adjacent: Version Control And Multiplayer Threads
 
 **[Multiplayer AI and collaborative live sessions](multiplayer-ai.md)** —
@@ -89,7 +71,7 @@ forking, and shared sessions; the review names the VIBEALLDAY sketches it motiva
 | [Moltworker](https://github.com/cloudflare/moltworker) | 8.6k | TypeScript | Serverless on Cloudflare Workers |
 | [IronClaw](https://github.com/nearai/ironclaw) | 2.6k | Rust | WASM sandboxing, PostgreSQL, defense-in-depth |
 
-**Why we're different:** Claws are runtimes — they manage LLM API calls, tool execution, and session state. We're a supervisor/relay — we manage existing agents (Claude Code, Codex) that handle their own execution. See the [Seneschal competitive analysis](../../../assistant-data/assistants/scout/docs/seneschal-ideas.md) for detailed positioning.
+**Why we're different:** Claws are runtimes — they manage LLM API calls, tool execution, and session state. We're a supervisor/relay — we manage existing agents (Claude Code, Codex) that handle their own execution. See the Seneschal competitive analysis (`../../../assistant-data/assistants/scout/docs/seneschal-ideas.md`) for detailed positioning.
 
 ## Common Features Across Competitors
 

@@ -1,32 +1,18 @@
-# Simple Client API And Web/Android Demo
+# Simple Client API And Web Demo
 
 Topic: simple-client-api
 Topic: portable-transcript-compiler
 Topic: client-source-runtime-topology
 
-Status: Offline TypeScript/Kotlin contract, shared compiler and bounded live
-Conversation API implemented 2026-09-12. The first deliberate-entry multi-server
-web preview is implemented at `/-/preview`; browser validation is recorded in the
-checkpoint below. The Android Compose preview and direct-server AVD proof are
-implemented; remaining measurement/acquisition gates are open. Raw token assembly is explicitly deferred. iOS remains out of scope.
-
-The mobile foreground decision changed on 2026-09-30: Android now reuses the
-full bundled web UI with native authentication/transport. The duplicate Compose
-Conversation presentation described here is retired by
-[tactical 083](083-android-bundled-web-native-transport.md). Shared contracts,
-compiler/decoder helpers and the web preview remain reusable experiments; their
-remaining gates do not block publishing the mobile shell.
+Status: The shared TypeScript contract, compiler and bounded Conversation API
+are implemented. The deliberate-entry multi-server Web preview is available at
+`/-/preview`; measurement, acquisition and compatibility gates remain open.
 
 ## Outcome
 
-A small web client proves a new VIBEALLDAY server API for simple clients, connecting to
-several real VIBEALLDAY servers and switching its sidebar between machine, project,
-and issue grouping. It becomes testable at an unlisted Latest URL. Android
-Compose follows closely and constrains the same schemas and behavior before
-the API stabilizes. iOS comes later, with separately scoped transport and schema
-consumption work; it does not block this experiment. The product remains
-publishing mobile apps, with the demo providing a faster design and verification
-loop.
+A small Web client exercises the bounded API across several servers, with
+machine, project and issue grouping. It provides a deliberate-entry consumer
+for schema, history and compatibility validation.
 
 The owning proposal is [Simple Client API](../../topics/simple-client-api.md).
 The roadmap's release priority remains authoritative.
@@ -39,11 +25,6 @@ The roadmap's release priority remains authoritative.
   `/-/monitor` route, concurrent secure source controller, and legacy/mux tests
   already exist. Reuse the narrow transport/controller seams rather than
   duplicating SRP or adopting its existing full summary model wholesale.
-- [084 Android runtime](084-android-native-multi-host-runtime.md): native
-  multi-host demand, pairing, summary UI, isolation, and device evidence exist.
-- [083 WebView bridge](083-android-bundled-web-native-transport.md): still needed
-  for the planned seamless full-web mobile handoff, but does not block a
-  read-only web/Android projection proof.
 - [129 issue discovery](129-issue-discovery-and-session-browser.md) and the
   [association contract](../../topics/issue-session-associations.md): reuse
   canonical references and coverage; do not create another indexing system.
@@ -165,48 +146,6 @@ facility for desktop/phone evidence, following [UI testing](../../topics/ui-test
 
 **Exit:** a verified URL and exact source commit are available through the
 existing Latest delivery system, not just a locally rendered screenshot.
-
-### 5 — bring the same vertical slice to Android
-
-Begin Compose consumption during the preceding slices, using the generated
-Kotlin models and shared corpus. Before expanding the web demo beyond overview,
-grouping, and Conversation, Android must consume the live contract through its
-existing Kotlin pairing/authentication/multi-host runtime. The monitor supplies
-web transport and connection ownership, not the demo's summary data model.
-
-Exercise multiple sources, message identities, unknown fallbacks, disabled issue
-coverage, and reconnect/reset outcomes. Match semantic outcomes rather than
-pixel layout or implementation code.
-
-**Exit:** web and Android browse real sessions and independently recover from a
-source failure. Contract changes include fixtures and both decoder checks.
-Android’s decoding spike and first direct-server live Compose proof are complete.
-The AVD checkpoint below records its boundaries; broader grouping, deployed
-relay UI evidence and release acceptance remain open.
-
-iOS is deferred. Its eventual work includes SRP, NaCl, pairing, endpoint/relay
-selection and connection ownership before live SwiftUI consumption, in addition
-to schema generation/decoding. Scope that transport port separately when starting
-iOS; neither a renderer estimate nor offline fixtures substitutes for it.
-
-### 6 — develop shared behavior toward store releases
-
-Before public mobile releases depend on the new API, promote a reviewed contract
-out of `/api/experimental/`. Decide whether and how to version the stable URLs,
-record the support policy, and verify the preview-to-stable transition for all
-participating clients. Preview deployment and generated types do not freeze
-the API.
-
-Add basic reply, stop, and appropriate question answering to the contract and
-web and Android in small slices. iOS joins in a later scoped effort. Then connect
-the existing push work and full-web handoff to the native session identity/
-navigation model. Continue
-signing, update-persistence, internal distribution, and store-publication work
-under the roadmap; do not treat a preview URL or fixture app as release completion.
-
-The first live backend checkpoint now implements HTTP, SSE and both WebSocket
-bindings. Each client still needs its own live consumption/reconnect evidence;
-server binding coverage alone does not complete that gate.
 
 ## Compatibility review to finish before protocol implementation
 
@@ -426,64 +365,3 @@ source isolation, reload, and connection release. Desktop (1000×600) and phone
 (375×812) captures were generated through the artifact capture facility and
 visually inspected. CSS ownership checks pass; the console scan adds no new
 production logging. No Latest deployment or Android-device validation is claimed.
-
-
-### First Android Compose preview — 2026-09-12
-
-Session cards on the existing multi-host native home now open a source-scoped,
-read-only Conversation activity. It uses the generated Kotlin contract and the
-existing native secure runtime, with the same 20-message initial window, anchored
-Show more increments, 100-message cap, Latest behavior and safe content fallbacks
-as the web preview. This slice retains the native home's existing catalog and
-grouping; it does not claim a SourceOverview migration or grouping parity.
-
-Foreground visibility owns a connection lease. Leaving the activity releases it;
-returning acquires a fresh binding after checking capability and exact revision.
-Conversation subscriptions close on transport loss instead of replaying their old
-sequence, while existing summary/activity subscriptions retain their replay
-behavior. Explicit reconnect keeps the previous snapshot visibly stale until a
-fresh sequence-zero snapshot arrives. Full-session handoff preserves the source:
-known direct endpoints open their own deployment in a browser, and relay sources
-open the configured full web client's selected relay sign-in/return route. Web
-authentication remains separate; the native-to-WebView credential bridge is not
-part of this slice. Unknown direct endpoint shapes disable the handoff.
-
-A repeatable instrumentation test pairs through real SRP/encryption with an
-isolated diagnostic server, taps the actual home session card, expands history,
-observes a uniquely identified finalized native append, rotates, verifies the
-external full-session intent, forces a transport disconnect, reconnects, and
-checks lease release in the background and fresh live updates on return. It
-cleans up only its own paired profile. The existing probe now passes app data,
-provider catalog eligibility and Conversation subscription ownership explicitly;
-its optional fixture controls exist only in that disposable loopback process.
-
-Validation used an existing API 34 arm64 phone AVD (1080×2400); portrait and landscape captures were
-visually inspected. This proves direct encrypted transport and the Compose UI on
-an emulator, not a physical-device, store-release or deployed relay UI milestone.
-The native runtime's prior relay/crypto interoperability tests remain applicable.
-Partial-message tokens, reply/approval actions, iOS, rich rendering and indexed
-history acquisition remain deferred.
-
-
-To repeat the native proof, start
-`packages/server/scripts/android-native-secure-probe-server.ts` with
-`VIBEALLDAY_NATIVE_PROBE_CONVERSATION=true`, a disposable `VIBEALLDAY_NATIVE_PROBE_USERNAME` and
-`VIBEALLDAY_NATIVE_PROBE_PASSWORD` (at least eight characters). Its default port is
-38901. Select an AVD explicitly, reverse TCP port 38901 with ADB, and build/install
-`assembleHostedLatestDebug` and `assembleHostedLatestDebugAndroidTest`. Run
-`com.vibeallday.mobile.ui.VibeAllDayConversationInstrumentedTest` with instrumentation
-arguments `vibeAllDayProbeWsUrl=ws://127.0.0.1:38901/api/ws`, `vibeAllDayProbeUsername` and
-`vibeAllDayProbePassword`. Every build permits plain HTTP to loopback; the VIBEALLDAY payload
-still uses native encryption. Captures are under the application's external files
-`conversation-captures` directory; present them through the repository artifact
-capture facility. Stop the probe and remove the ADB reverse mapping afterward.
-
-Final checks: 84 Android JVM tests, Android lint and both debug APK builds
-passed. The new AVD instrumentation test passed, including distinct live appends
-before and after background/foreground. Workspace lint, formatting and typecheck
-passed; final server and client runs passed 5,225 and 5,780 tests respectively.
-The full browser run passed 231 tests with seven skipped; subsequent focused
-checks passed the relay handoff without remembered credentials, fresh relay login
-and remembered-session resumption. The first workspace unit run hit the already
-recorded [filesystem watcher deadline](../../gaps/project-file-completion-watcher-test-deadline.md);
-both its focused rerun and the final full server rerun passed.

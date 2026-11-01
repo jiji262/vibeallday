@@ -1,7 +1,6 @@
 export const DEFAULT_RELAY_ALLOWED_ORIGINS = [
   "https://vibeallday.navs.dpdns.org",
   "https://*.vibeallday.navs.dpdns.org",
-  "chrome-extension://mcjncehfogglphgkcbiecchdckhojgbe",
 ] as const;
 
 export interface ExactRelayOriginRule {

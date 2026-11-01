@@ -72,11 +72,11 @@ WebSocket remains visible as a channel in status/debug snapshots.
 - [`SecureConnection`](../packages/client/src/lib/connection/SecureConnection.ts)
   exposes the same multiplexed surface, with SRP, encryption, session resume,
   and relay support layered around it.
-- [`DirectConnection`](../packages/client/src/lib/connection/DirectConnection.ts)
+- `DirectConnection`
   handles same-origin `fetch`/`fetchBlob` and upload helpers. Its subscription
   methods throw because default localhost subscriptions use the local
   `WebSocketConnection` path.
-- [`useConnection`](../packages/client/src/hooks/useConnection.ts) returns a
+- `useConnection` returns a
   global secure connection when present, otherwise `directConnection`.
 - [`api.fetchJSON`](../packages/client/src/api/client.ts) routes through the
   global secure connection when present, otherwise same-origin fetch.

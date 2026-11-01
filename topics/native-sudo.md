@@ -28,7 +28,7 @@ are no client fields, new routes, provider protocol changes or new VIBEALLDAY to
 
 ## Decision
 
-VIBEALLDAY coordinates agent context; [Machine Control's native helper](../../machine-control/platforms/macos/sudo/README.md)
+VIBEALLDAY coordinates agent context; Machine Control's native helper (`../../machine-control/platforms/macos/sudo/README.md`)
 owns the local password field and system sudo route. The person authenticates
 one command in an AppKit dialog on the agent's Mac. The password never reaches
 VIBEALLDAY, chat, arguments, environment, logs, WebView or an agent tool. Instructions

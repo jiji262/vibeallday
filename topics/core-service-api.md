@@ -18,7 +18,7 @@ See also: [`provider-abstraction.md`](provider-abstraction.md),
 [`openai-compatible-helper-sessions.md`](openai-compatible-helper-sessions.md),
 [`session-liveness.md`](session-liveness.md),
 [`provider-state-machine.md`](provider-state-machine.md),
-[`trusted-client-packaging.md`](trusted-client-packaging.md),
+[`security.md#authenticated-remote-access-and-the-relay`](security.md#authenticated-remote-access-and-the-relay),
 [`agent-session-access.md`](agent-session-access.md)
 (agent-facing scripts as a consumer of this seam),
 [`docs/tactical/053-sessions-route-refactor-ledger.md`](../docs/tactical/053-sessions-route-refactor-ledger.md)
@@ -426,14 +426,6 @@ opinionated and the least load-bearing for the primary (experiment) use case.
   coordination likewise uses an additive, capability-gated namespace rather
   than changing an existing route to mean either local or remote depending on
   a host parameter.
-- **Auth / trust boundary** (`trusted-client-packaging.md`, relay/SRP docs): the
-  default server is localhost-first with auth **off**, so the direct `/api/*`
-  path is *already* unauthenticated — an external localhost client sends no
-  credentials. Cookie/session auth applies only when the operator turns password
-  auth on (and that case reuses the existing `localhostOpen` knob); the relay
-  path's SRP+NaCl is separate. The real invariant for an external client is the
-  *loopback bind*, not a credential; the resolved posture lives in
-  *Documentation deliverable (D3)*.
 - **Session-store coupling**: VIBEALLDAY sessions are jsonl-file-backed and surface in
   the dashboard, index, recents, and liveness. An experiment API that reuses the
   store gets all of that for free but pollutes the user's session list with

@@ -1,6 +1,5 @@
 import { getResumeError } from "./resumeErrors";
 import type {
-  DeviceServerMessage,
   GitWorktreeCoverage,
   RemoteClientMessage,
   StagedAttachmentRef,
@@ -373,13 +372,6 @@ export interface Connection {
    * Optional - only WebSocket-based connections support this.
    */
   sendMessage?(msg: RemoteClientMessage): void;
-
-  /**
-   * Register a handler for emulator signaling messages from the server.
-   * Returns an unsubscribe function.
-   * Optional - only WebSocket-based connections support this.
-   */
-  onDeviceMessage?(handler: (msg: DeviceServerMessage) => void): () => void;
 
   /**
    * Open a dedicated WebSocket-shaped speech transport.

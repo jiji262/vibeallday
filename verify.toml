@@ -30,7 +30,7 @@ name = "test"
 run = "pnpm test"
 timeout = "20m"
 # \b leaves out Node's ExperimentalWarning for its built-in SQLite, which the
-# relay and push-broker use by choice.
+# server and relay use by choice.
 warn = 'not wrapped in act\(|Cannot update a component|\bWarning: '
 
 [[check]]

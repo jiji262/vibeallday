@@ -172,11 +172,11 @@ synthesis was written; the related gaps and plans below were inspected.
 | [Cross-host delegation](cross-host-delegation.md) | Product direction/provisional API; hosts page is a non-functional preview | Separate target-owned worker sessions, directed non-transitive grants, relay-first transport |
 | [Federated super sessions](federated-super-sessions.md) | Proposal with provider portability/ownership gates | Same-session terminal jump, canonical identity and single-writer transfer |
 | [Super-session appliance](../docs/tactical/073-super-session-testbed-appliance.md) | Historical proposed lab/prototype direction, not a shipped federation service | Native OS proving ground and out-of-band recovery; use current Machine Control owners |
-| [Client source runtimes](client-source-runtime-topology.md), [simple client API](simple-client-api.md), [demo plan](../docs/tactical/130-simple-client-api-and-three-client-demo.md) | Source isolation direction plus implemented experimental multi-server web/Android slices | Clients can observe several independent owners without introducing a global server catalog |
+| [Client source runtimes](client-source-runtime-topology.md), [simple client API](simple-client-api.md), [demo plan](../docs/tactical/130-simple-client-api-and-web-demo.md) | Source isolation direction plus implemented experimental multi-server web/Android slices | Clients can observe several independent owners without introducing a global server catalog |
 | [Relay mux](relay-client-mux.md) | Optional compatibility-gated multiplexing contract | Several separately authenticated circuits over one socket; no implicit membership or peer trust |
 | [Optional Computer Control](optional-computer-control.md), [tactical 131](../docs/tactical/131-optional-windows-computer-control.md) | Windows Node/local Codex preview accepted 2026-09-12; release delivery pending | Direct Machine Control IPC, session-selected grants and shared native implementation without a remote worker |
 | [Agent self](agent-self.md), [session access](agent-session-access.md), [ask-session](ask-session.md) | Self-inspection implemented; broader coordination/ask proposals retain their own gates | Agent-facing identity, scoped controls and bounded results |
-| [Workstreams](workstreams.md) and [vibeallday-cron](vibeallday-cron.md) | Proposed lanes; [general scheduler gap](../gaps/sketches/vibeallday-cron-scheduler.md) remains | Workspace parallelism and durable dispatch are adjacent decisions, not consequences of multi-host connectivity |
+| [Workstreams](workstreams.md) and [vibeallday-cron](vibeallday-cron.md) | Proposed lanes; general scheduler gap (`../gaps/sketches/vibeallday-cron-scheduler.md`) remains | Workspace parallelism and durable dispatch are adjacent decisions, not consequences of multi-host connectivity |
 
 Older high-level proposals can lag completed spikes. In particular, the managed
 runner targets topic still contains early missing-protocol language; use
@@ -323,7 +323,7 @@ A useful earlier proof is two VIBEALLDAY services communicating over an isolated
 then exercising relay restart, peer restart, reconnect, credential expiry,
 revocation and duplicate-request recovery. Keep durable peer authorization,
 expiring authentication credentials and per-connection encryption keys separate.
-Current [SRP resume](mobile-server-pairing.md#current-srp-resume-facts) refreshes
+Current [SRP resume](security.md#authenticated-remote-access-and-the-relay) refreshes
 idle validity and derives fresh connection keys, but retains an absolute
 credential lifetime; resuming is not indefinite grant renewal. The
 [peer credential questions](cross-host-delegation.md#identity-connectivity-and-grants)

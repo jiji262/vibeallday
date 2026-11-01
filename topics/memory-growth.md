@@ -116,7 +116,7 @@ allocation that failed in the captured incident.
   trace still aligned 100--200 ms main-thread pulses with the 82-byte session
   and 459-byte global status responses. That is an allocation/layout-churn
   lead, not evidence that those allocations remain live; it is tracked in
-  [`gaps/public-share-status-rerenders-session.md`](../gaps/public-share-status-rerenders-session.md).
+  `gaps/public-share-status-rerenders-session.md`.
 
   The remaining product gap is also independent of leak classification:
   active-window auto-trim stops after **Load older** and while the reader is

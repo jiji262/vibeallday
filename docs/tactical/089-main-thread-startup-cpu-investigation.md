@@ -42,7 +42,7 @@ Related contracts:
 - [`topics/session-defaults.md`](../../topics/session-defaults.md)
 - [`031-client-query-controller.md`](031-client-query-controller.md)
 - [`022-api-response-compression.md`](022-api-response-compression.md)
-- [`091-project-path-cache.md`](091-project-path-cache.md)
+- `091-project-path-cache.md`
 - [`093-provider-session-reconciliation.md`](093-provider-session-reconciliation.md)
 - [`094-new-session-provider-catalog-readiness.md`](094-new-session-provider-catalog-readiness.md)
 - [`095-new-session-recent-project-readiness.md`](095-new-session-recent-project-readiness.md)

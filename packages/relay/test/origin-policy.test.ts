@@ -33,7 +33,7 @@ describe("parseRelayAllowedOrigins", () => {
         "chrome-extension://mcjncehfogglphgkcbiecchdckhojgbe",
         policy,
       ),
-    ).toBe(true);
+    ).toBe(false);
   });
 
   it("admits only the configured extension, without URL.origin's null collapse", () => {

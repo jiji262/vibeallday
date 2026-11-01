@@ -12,7 +12,6 @@ import type { ConversationQuery } from "@vibeallday/shared/experimental/simple-c
  */
 import type {
   ClientCapabilities,
-  DeviceServerMessage,
   GitWorktreeCoverage,
   OriginMetadata,
   RemoteClientMessage,
@@ -1820,10 +1819,6 @@ export class SecureConnection implements Connection {
 
   sendMessage(msg: RemoteClientMessage): void {
     this.send(msg);
-  }
-
-  onDeviceMessage(handler: (msg: DeviceServerMessage) => void): () => void {
-    return this.protocol.onDeviceMessage(handler);
   }
 
   private async waitForUploadBackpressure(): Promise<void> {

@@ -1,4 +1,4 @@
-# 153 — Durable GitHub status and extension merged groups
+# 153 — Durable GitHub status
 
 Status: implemented and locally verified 2026-10-16. Commit requested; no publish.
 
@@ -28,14 +28,6 @@ writes, and keep the existing shared queue and memory bounds. Disabled checks
 still expose cached facts. Explicit cache clear removes status only.
 No GitHub requests or provider reads occur during migration/startup.
 
-### 3 — Extension merged section
-
-Use existing state badges, display merge metadata, and group merged PRs under
-an expandable heading. Add a browser-local collapse preference (default off).
-Keep manual expansion stable across status refreshes. Unknown and closed
-items remain visible. Use at most three short follow-up reads for a pending
-status response, with teardown and no overlapping interval requests.
-
 ### 4 — Compatibility
 
 Optional-feature corpus: local stable v0.9.1 (September 24) and v0.9.2
@@ -52,8 +44,8 @@ This plan and fallback were approved in the originating conversation.
 Exercise migration prefixes and rollback, restart persistence without a new
 merged lookup, failed refreshes, disabled CLI probes, named-account failure,
 settings preservation and capability fallback. Use an isolated VIBEALLDAY data/profile,
-provider histories, relay and Chromium profile for packaged extension
-acceptance. Verify desktop/phone captures, group refresh and sequential typing
+provider histories, relay and Chromium profile for Web
+acceptance. Verify desktop/phone captures, status refresh and sequential typing
 with concurrent updates (100 ms/key). Run required lint, format, typecheck,
 unit tests, capability audit, CSS and console checks. Update owning topic and
 roadmap status, record evidence here, and commit with the required identity

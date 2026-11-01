@@ -16,7 +16,7 @@ advertisement, and a New Session UI remain deferred.
 Related: [command runtime proposal](../../topics/agent-command-runtime.sketches.md),
 [provider host API](../../topics/provider-host-api.md),
 [provider runtime status](../../topics/provider-runtime-status.md),
-[desktop distribution](../../topics/desktop-v0.md), and
+[legacy launcher credentials](../../topics/security.md#legacy-launcher-credentials), and
 [subprocess environment](../../topics/subprocess-environment.md).
 
 ## Verified baseline

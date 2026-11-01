@@ -41,7 +41,6 @@ export {
 } from "./types";
 export type {
   ConnectionSpeechSocket,
-  DeviceSignalingChannel,
   SessionSubscriptionOptions,
   SessionWatchSubscriptionOptions,
   SourceTransport,

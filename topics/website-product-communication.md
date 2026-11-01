@@ -217,8 +217,8 @@ installation or workflow succeeded.
   narrow and that maintainers regularly audit security-sensitive surfaces, but
   must call those reviews maintainer-led rather than implying independent
   certification.
-- The public core maintainer set is Jonathan Graehl (`@graehl`) and Kyle Graehl
-  (`@kzahel`). Link identities to their public GitHub profiles. Link additional
+- This fork is maintained by jiji262 (`@jiji262`). Link the maintainer to the
+  public GitHub profile. Link additional
   professional profiles only when the exact URL has been verified.
 - The homepage points readers to the public security guide and `SECURITY.md`
   remains the operator-facing vulnerability-reporting source of truth.

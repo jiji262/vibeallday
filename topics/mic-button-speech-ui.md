@@ -433,7 +433,7 @@ The client sends at most the last 8000 characters through the existing batch
 `prompt` field; faster-whisper applies its own token context limit. Other
 backends receive no invented text-prompt parameter. Grok's vocabulary-bias
 integration is tracked separately in
-[the unigram gap](../gaps/speech-unigram-vocabulary.md).
+the unigram gap (`../gaps/speech-unigram-vocabulary.md`).
 
 Batch providers produce no streaming drafts and no mid-utterance Smart Turn.
 The default batch result is "wait": insert the whole recognized transcript at

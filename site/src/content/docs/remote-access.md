@@ -70,20 +70,6 @@ authentication, updates, origin restrictions, logs, and abuse controls.
 The public [relay design](https://github.com/jiji262/vibeallday/blob/HEAD/docs/project/relay-design.md)
 documents the protocol and deployment components for self-hosting.
 
-## Why no native mobile app yet?
-
-The responsive browser client already supports the complete VibeAllDay
-workflow on phones and tablets, including approvals, diffs, uploads, voice
-input, notifications, session history, and new sessions. Shipping a native app
-that only wraps this interface would add another installation and release path
-without adding enough user value.
-
-The Android app is in development as a real companion, with iOS planned
-afterward. More reliable background notifications, deep links, trusted packaged
-client code, and a multi-server inbox are the intended native advantages.
-Neither app is published. Use the browser client today; no public APK or
-app-store listing is available.
-
 ## Connection troubleshooting
 
 Check these in order:
@@ -96,3 +82,9 @@ Check these in order:
 
 Continue with [Troubleshooting](/docs/troubleshooting) for log locations and
 safe issue-report evidence.
+
+## Mobile browsers
+
+Use the same responsive web client on your phone or tablet. Saved servers,
+file uploads, session history, and new sessions work in the browser. Browser
+notification support depends on the operating system and granted permissions.

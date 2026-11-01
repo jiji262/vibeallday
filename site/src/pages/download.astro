@@ -5,15 +5,15 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 ---
 
 <BaseLayout
-  title="Download VibeAllDay for desktop"
-  description="Build VibeAllDay from source while independent installers are being prepared."
+  title="Install VibeAllDay from source"
+  description="Run the local server and responsive web client on your own computer."
 >
   <Header />
   <main id="main-content">
     <section class="download-hero">
       <div class="site-container">
         <h1>Build VibeAllDay.</h1>
-        <p class="lede">VibeAllDay is available from source. Independent desktop installers and mobile store releases are being prepared.</p>
+        <p class="lede">Run the local service on macOS, Windows, or Linux. Connect from your computer, phone, or tablet browser.</p>
         <div class="download-help">
           <a href="/docs/install-npm">Build from source</a>
           <a href="https://github.com/jiji262/vibeallday">Open GitHub</a>
@@ -24,8 +24,6 @@ import BaseLayout from "../layouts/BaseLayout.astro";
   </main>
   <Footer />
 </BaseLayout>
-
-
 
 <style>
   .download-hero {
@@ -47,129 +45,6 @@ import BaseLayout from "../layouts/BaseLayout.astro";
     max-width: 730px;
   }
 
-  .download-section {
-    padding: 22px 0 80px;
-  }
-
-  .download-panel {
-    background: var(--bg-secondary);
-    border: 1px solid var(--border);
-    border-radius: 18px;
-    margin: 0 auto;
-    max-width: 830px;
-    padding: clamp(24px, 4vw, 32px);
-  }
-
-  .panel-heading {
-    align-items: flex-start;
-    display: flex;
-    gap: 20px;
-    justify-content: space-between;
-  }
-
-  .panel-heading h2 {
-    font-size: clamp(25px, 4vw, 34px);
-    letter-spacing: -0.035em;
-    line-height: 1.15;
-    margin-top: 8px;
-  }
-
-  .beta-badge {
-    border: 1px solid var(--accent);
-    border-radius: 999px;
-    color: var(--accent-hover);
-    font-size: 12px;
-    font-weight: 700;
-    padding: 4px 10px;
-  }
-
-  .platform-hint, .unsupported-note {
-    color: var(--text-secondary);
-    font-size: 15px;
-    margin: 24px 0 18px;
-  }
-
-  .unsupported-note a, .download-help a, .other-paths a {
-    color: var(--accent-hover);
-  }
-
-  .installer-links {
-    display: grid;
-    gap: 12px;
-    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
-  }
-
-  .installer-links[hidden] {
-    display: none;
-  }
-
-  .installer-link {
-    background: var(--bg-primary);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    color: var(--text-primary);
-    display: flex;
-    flex-direction: column;
-    min-height: 142px;
-    padding: 16px;
-    text-decoration: none;
-  }
-
-  .installer-link:hover {
-    border-color: var(--accent);
-  }
-
-  .installer-link.recommended {
-    border-color: var(--accent);
-    box-shadow: 0 0 0 1px var(--accent);
-    max-width: 410px;
-  }
-
-  .installer-system {
-    color: var(--accent-hover);
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-  }
-
-  .installer-link strong {
-    font-size: 20px;
-    margin-top: 7px;
-  }
-
-  .installer-link > span:nth-child(3) {
-    color: var(--text-secondary);
-    font-size: 13px;
-  }
-
-  .installer-action {
-    color: var(--accent-hover);
-    font-size: 14px;
-    font-weight: 700;
-    margin-top: auto;
-    padding-top: 12px;
-  }
-
-  .other-platforms {
-    margin-top: 24px;
-  }
-
-  .other-platforms summary {
-    align-items: center;
-    color: var(--accent-hover);
-    cursor: pointer;
-    display: inline-flex;
-    font-size: 14px;
-    font-weight: 650;
-    min-height: 44px;
-    width: fit-content;
-  }
-
-  .other-platforms .installer-links {
-    margin-top: 16px;
-  }
-
   .download-help {
     border-top: 1px solid var(--border);
     display: flex;
@@ -179,47 +54,18 @@ import BaseLayout from "../layouts/BaseLayout.astro";
     padding-top: 20px;
   }
 
-  .download-help a, .other-paths a {
+  .download-help a {
     align-items: center;
+    color: var(--accent-hover);
     display: inline-flex;
     font-size: 14px;
     font-weight: 650;
     min-height: 44px;
   }
 
-  .other-paths {
-    display: grid;
-    gap: 32px;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    margin: 46px auto 0;
-    max-width: 830px;
-  }
-
-  .other-paths h2 {
-    font-size: 18px;
-  }
-
-  .other-paths p {
-    color: var(--text-secondary);
-    font-size: 14px;
-    margin: 8px 0;
-  }
-
   @media (max-width: 650px) {
     .download-hero {
       padding: 24px 0;
-    }
-
-    .download-section {
-      padding: 20px 0 60px;
-    }
-
-    .panel-heading {
-      align-items: flex-start;
-    }
-
-    .other-paths {
-      grid-template-columns: 1fr;
     }
   }
 </style>

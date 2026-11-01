@@ -2,13 +2,9 @@
 
 Topic: simple-client-api
 
-Status: The offline TypeScript/Kotlin contract, shared compiler, bounded live
-Conversation API, the multi-server web preview and the first Android Compose
-preview screen are implemented. The web preview is deliberate-entry only and the
-Compose screen opens from the existing multi-host home; indexed history
-acquisition, the SourceOverview operation review, representative cost
-measurements, and stable-contract promotion remain ahead. Partial-message token
-assembly and iOS are deferred.
+Status: The shared TypeScript compiler, bounded Conversation API and deliberate-entry
+multi-server Web preview are implemented. Indexed-history acquisition, operation
+review, representative cost measurements and stable-contract promotion remain ahead.
 
 ## Purpose and first consumers
 
@@ -22,19 +18,15 @@ The first consumer is a minimal experimental web client for rapid iteration.
 It connects to multiple VIBEALLDAY servers from its first useful slice and experiments
 with sidebar grouping by machine, project, and issue. It should be testable at
 an unlisted URL on `latest.vibeallday.navs.dpdns.org` through the existing Latest release
-pipeline. Kotlin/Compose follows closely in small vertical slices and helps
-shape the same contract before it stabilizes. iOS is deferred until a later,
-separately scoped transport and client effort.
-React Native is not the chosen mobile direction.
+pipeline.
 
 The web demo is a real API consumer with its own small state machine. Shared
 transport/authentication primitives and design tokens may be reused, but
 importing the existing session-detail machinery would defeat this experiment.
-Shipping Android and iOS remains the product outcome; the demo is not a new
-full-web rewrite prerequisite.
+The demo remains a bounded Web API consumer.
 
 Implementation sequence and unresolved decisions live in
-[`docs/tactical/130-simple-client-api-and-three-client-demo.md`](../docs/tactical/130-simple-client-api-and-three-client-demo.md).
+[`docs/tactical/130-simple-client-api-and-web-demo.md`](../docs/tactical/130-simple-client-api-and-web-demo.md).
 
 ## Relationship to existing work
 
@@ -49,9 +41,6 @@ Implementation sequence and unresolved decisions live in
   [multi-host monitor](../docs/tactical/066-multi-host-monitor-coexistence-harness.md)
   provide reusable connection ownership and coexistence evidence. Reuse from the
   monitor is transport/lifecycle, not its full existing summary data model.
-- [Android multi-host](../docs/tactical/084-android-native-multi-host-runtime.md)
-  and [mobile pairing](mobile-server-pairing.md) supply existing native
-  connection ownership. An API redesign is not a reason to rewrite crypto.
 - [Issue/session associations](issue-session-associations.md) owns association
   discovery, canonical references, feature enablement, and coverage.
 
@@ -382,7 +371,7 @@ Experimental revisions identify compatible builds; they do not promise a
 long-term version-support policy or a permanent fallback for every experiment.
 The existing supported API retains its compatibility obligations.
 
-Before published mobile apps rely on this as their supported API, explicitly
+Before clients rely on this as their supported API, explicitly
 promote the contract out of `/api/experimental/`: choose its stable namespace
 and any public versioning scheme, document compatibility/support policy, and
 define the preview-to-stable client/server transition. A versioned stable URL
@@ -496,30 +485,3 @@ subscriptions/connections. No background polling or automatic retry loop remains
 when the page closes. Missing capability/revision metadata requires a server
 update; a different revision reports a mismatch. Neither sends experimental
 requests, and healthy peers remain usable.
-
-
-## First Android preview (2026-09-12)
-
-The existing multi-host Compose home now opens a native Conversation activity
-from each session card. Its selected `(profileId, sessionId)` owns the same
-experimental contract through the shared native connection manager. Home summary
-catalog/grouping remains the existing adapter; SourceOverview is still a later
-operation review. The generated schema and API revision are unchanged.
-
-The screen follows the web preview's history limits, plain text rendering,
-condensed activity, failure/media placeholders and opaque unknown fallbacks.
-Pending requests are informational; the full session handles interaction.
-Visibility owns and releases its lease, capability checks precede subscription,
-and reconnect creates a new binding with sequence zero. Conversation bindings
-are deliberately excluded from the connection manager's ordinary event replay.
-Stale snapshots remain marked until replacement; no token assembler is added.
-
-Full-session handoff retains the selected direct deployment or relay URL and
-identity. Direct links use the external browser; relay links use the configured
-full web client with its separate sign-in. An explicit relay login is allowed to
-redirect only when the live connection matches both requested identity and URL,
-including connections without Remember me. No native credentials cross into the
-WebView. An unsupported direct endpoint shape has no guessed handoff URL.
-
-The [tactical checkpoint](../docs/tactical/130-simple-client-api-and-three-client-demo.md#first-android-compose-preview--2026-09-12)
-records AVD evidence and the remaining deployed/physical-device boundaries.

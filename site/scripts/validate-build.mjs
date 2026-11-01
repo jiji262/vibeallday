@@ -91,7 +91,6 @@ for (const requiredRoute of [
   "/features",
   "/docs",
   "/docs/getting-started",
-  "/docs/desktop-apps",
   "/privacy",
 ]) {
   if (!(await resolvesToBuildFile(requiredRoute))) {

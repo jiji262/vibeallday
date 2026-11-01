@@ -1,7 +1,5 @@
 import type {
-  DeviceServerMessage,
   GitWorktreeCoverage,
-  RemoteClientMessage,
   StagedAttachmentRef,
   UploadedFile,
 } from "@vibeallday/shared";
@@ -93,11 +91,6 @@ export interface SourceTransportStatus {
   subscribeVisibilityRestored?(listener: () => void): () => void;
 }
 
-export interface DeviceSignalingChannel {
-  send(msg: RemoteClientMessage): void | Promise<void>;
-  onMessage(handler: (msg: DeviceServerMessage) => void): () => void;
-}
-
 export interface SpeechChannelFactory {
   open(): Promise<ConnectionSpeechSocket>;
 }
@@ -108,9 +101,6 @@ export interface SourceTransportCapabilities {
    * this source. Media consumers branch on this, never on transport kind.
    */
   readonly sameOriginUrls: boolean;
-  /** Fixed isolated shell supplied by the native app; never a fetch grant. */
-  readonly packagedArtifactViewerVersion?: 1;
-  readonly device?: DeviceSignalingChannel;
   readonly speech?: SpeechChannelFactory;
 }
 

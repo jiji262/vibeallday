@@ -3,8 +3,6 @@ export function assessPageRecovery(result) {
   const failures = [];
   if (!result.completed)
     failures.push("Experiment or cleanup did not complete");
-  if (result.client === "android" && !result.instrumentationPassed)
-    failures.push("Native instrumentation did not finish successfully");
   const final = result.final;
   if (!result.firstHealthyAt || result.firstHealthyAt < result.restoredAt)
     failures.push("No complete recovery observed after restoration");
@@ -45,11 +43,6 @@ export function assessPageRecovery(result) {
     if (row.bodyEmpty && !row.initializing)
       failures.push("Page became empty during recovery");
   }
-  if (
-    result.client === "android" &&
-    result.nativeDiagnosticsAvailable === false
-  )
-    failures.push("Native diagnostic evidence is unavailable");
   if (result.surface === "session") {
     const draft = result.expectedDraft ?? "Draft survives outage";
     const keys = result.observer?.keys ?? [];
@@ -74,7 +67,5 @@ export function assessPageRecovery(result) {
     failures.push("Sidebar inspection exposed an error or sign-in");
   if (result.pageErrors?.length)
     failures.push("Uncaught page exception during the experiment");
-  if (result.nativeSyntheticErrors?.length)
-    failures.push("Native fabricated server error responses");
   return { passed: failures.length === 0, failures: [...new Set(failures)] };
 }

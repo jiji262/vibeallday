@@ -128,7 +128,7 @@ Evidence: [runtime][runtime], [providers][acp], [fork implementation][fork],
 [Source Control](../../topics/source-control.md),
 [workstreams](../../topics/workstreams.md),
 [remote-executor gap](../../gaps/sketches/provider-neutral-remote-executors.md),
-[scheduler gap](../../gaps/sketches/vibeallday-cron-scheduler.md), and
+scheduler gap (`../../gaps/sketches/vibeallday-cron-scheduler.md`), and
 [roadmap](../roadmap/README.md).
 
 ## Where bb is particularly strong
@@ -287,11 +287,11 @@ implications.
 2. **Use bb as prior art for the existing scheduling direction.** Its run
    records, restart reconciliation, cancellation and observable workflows are
    relevant to [vibeallday-cron](../../topics/vibeallday-cron.md) and the
-   [open scheduler gap](../../gaps/sketches/vibeallday-cron-scheduler.md). They do not remove the
+   open scheduler gap (`../../gaps/sketches/vibeallday-cron-scheduler.md`). They do not remove the
    management-UI prerequisite or authorize another scheduler implementation.
 3. **Compare multi-machine outcomes, not a boolean feature.** bb has explicit
    host/environment routing and server-matched daemon distribution. VIBEALLDAY's
-   [simple-client demo](../tactical/130-simple-client-api-and-three-client-demo.md)
+   [simple-client demo](../tactical/130-simple-client-api-and-web-demo.md)
    addresses multiple servers, while the
    [remote-executor gap](../../gaps/sketches/provider-neutral-remote-executors.md)
    records a different, provider-limited dispatch path.

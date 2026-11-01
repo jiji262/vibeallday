@@ -98,14 +98,6 @@ export class LocalhostSourceTransport implements SourceTransport {
   readonly kind = "localhost" as const;
   readonly capabilities: SourceTransportCapabilities = {
     sameOriginUrls: true,
-    device: {
-      send: async (msg) => {
-        this.assertNotDisposed();
-        await this.streamConnection.ensureConnected();
-        this.streamConnection.sendMessage(msg);
-      },
-      onMessage: (handler) => this.streamConnection.onDeviceMessage(handler),
-    },
   };
   readonly status: SourceTransportStatus;
 

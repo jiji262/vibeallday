@@ -120,10 +120,10 @@ Full integration tests with real cloud APIs (gated, expensive, pre-release only)
 
 ## Future Roadmap (Post-MVP)
 
-1. **Local/OSS Models:** Self-hosted models via Ollama + LiteLLM proxy (see [research doc](../research/local-oss-models.md))
+1. **Local/OSS Models:** Self-hosted models via Ollama + LiteLLM proxy (see [research doc](../research/archive/local-oss-models.md))
    - Zero-code path: LiteLLM translates OpenAI→Anthropic, existing Claude SDK works
    - Best models: Qwen 2.5 Coder 32B, Devstral Small 2
-2. **Cross-Provider Subagents:** Claude spawns Codex as subagent (see [research doc](../research/cross-provider-subagents.md))
+2. **Cross-Provider Subagents:** Claude spawns Codex as subagent (see [research doc](../research/archive/cross-provider-subagents.md))
 3. **Model Selection:** Pick specific models per provider (o3, gemini-2.5-flash, etc.)
 4. **Unified Session Format:** Optional conversion to common storage format
 
@@ -134,9 +134,9 @@ Full integration tests with real cloud APIs (gated, expensive, pre-release only)
 | Document | Purpose |
 |----------|---------|
 | [Multi-Provider Integration Plan](./multi-provider-integration.md) | Detailed implementation plan with code examples |
-| [Cross-Provider Subagents](../research/cross-provider-subagents.md) | Future: agents spawning other agents |
-| [Golden Conversation Generation](../research/golden-conversation-generation.md) | Test fixture generation guide |
-| [Local/OSS Models](../research/local-oss-models.md) | Self-hosted model integration (Ollama, LiteLLM) |
+| [Cross-Provider Subagents](../research/archive/cross-provider-subagents.md) | Future: agents spawning other agents |
+| [Golden Conversation Generation](../research/archive/golden-conversation-generation.md) | Test fixture generation guide |
+| [Local/OSS Models](../research/archive/local-oss-models.md) | Self-hosted model integration (Ollama, LiteLLM) |
 
 ---
 

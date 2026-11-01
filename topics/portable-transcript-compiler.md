@@ -2,22 +2,17 @@
 
 > A stable server ingest kernel should turn provider history into bounded,
 > identity-safe transcript windows, while a versioned portable compiler turns
-> those windows into a platform-neutral presentation model for web, Android,
-> and iOS renderers without requiring clients to process full transcripts.
+> those windows into a presentation model for Web renderers without requiring clients to process full transcripts.
 
 Topic: portable-transcript-compiler
 
-Status: Architecture direction approved; the internal web-only foundation is
-complete. The 2026-09-12 consumer sequence starts with a minimal multi-server web
-demo of a server-owned Simple Client API, followed closely by Android Compose.
-The offline TypeScript/Kotlin schema and bounded server Conversation producer
-are implemented. The semantic core now lives in the shared package; live
-consumers and compatibility review remain open. iOS is deferred. The
-internal web output is not a published native contract.
+Status: The internal Web foundation and shared server Conversation producer are
+implemented. The shared TypeScript schema and multi-server Web preview remain
+internal consumers; stable-contract promotion still requires compatibility review.
 
 See also:
 
-- [simple-client-api](simple-client-api.md) — current web/Android API direction,
+- [simple-client-api](simple-client-api.md) — current Web API direction,
   message-based limits, and server-owned Conversation views;
 - [provider-output-contract](provider-output-contract.md) — the current
   provider-normalized message contract;
@@ -27,14 +22,8 @@ See also:
   live/durable convergence requirement;
 - [task-list-rendering](task-list-rendering.md) — the motivating whole-history
   fold where a bounded tail needs facts from older records;
-- [trusted-client-packaging](trusted-client-packaging.md) — signed/local mobile
-  client packaging and its trust boundary;
-- [conversation-view](conversation-view.md) — the selected compact native
+- [conversation-view](conversation-view.md) — the selected compact
   session-detail presentation and its visibility/failure semantics;
-- [mobile-companion-app](../docs/project/mobile-companion-app.md) — Android-first
-  native companion product shape and later iOS counterpart;
-- [mobile-server-pairing](mobile-server-pairing.md) — native connection
-  ownership and the independent permanent bundled-web presentation;
 - [hard-development-rules](hard-development-rules.md) — hosted-client protocol
   grace and compatibility policy.
 
@@ -75,9 +64,8 @@ contract, package/runtime target, and compatibility policy.
 The [Simple Client API](simple-client-api.md) is the selected next application
 of this boundary. A minimal web demo provides fast iteration on real multi-VIBEALLDAY
 server summaries, Conversation detail, and machine/project/issue sidebar
-grouping. Kotlin/Compose follows closely as a consumer of the same generated
-schema and fixture corpus, before web behavior stabilizes. iOS follows later
-with separately scoped transport and schema work.
+grouping. The Web consumer exercises the shared TypeScript schema and fixture
+corpus.
 Clients intentionally use a new small state machine rather than adopting the
 existing web session-detail logic.
 
@@ -85,9 +73,9 @@ These clients consume finished server projections. A client-bundled portable
 compiler remains a possible broader architecture, not a prerequisite for this
 experiment. Public limits use logical user/agent message counts, not turns;
 history and reconnect bookkeeping belong below the simple screen-facing API.
-The [implementation plan](../docs/tactical/130-simple-client-api-and-three-client-demo.md)
+The [implementation plan](../docs/tactical/130-simple-client-api-and-web-demo.md)
 owns the exact schema, history-scope, transport, and compatibility decisions.
-This sequencing supersedes the native-first prototype order recorded below.
+The Web consumer remains the implementation scope.
 
 ## Shared Server Consumer Checkpoint (2026-09-12)
 
@@ -105,36 +93,6 @@ windows. The [Simple Client API checkpoint](simple-client-api.md#implemented-pro
 owns its observable behavior and evidence limits. This completes the package
 seam and pure projection portion of plan 130's second step; acquisition,
 subscription lifecycle, compatibility approval and live clients remain ahead.
-
-## Original Native Consumer Direction (2026-08-02)
-
-The real second consumer is now identified: an Android Compose companion whose
-default session detail is the compact Conversation view, followed later by a
-SwiftUI renderer for iOS. The existing bundled web client remains a permanent
-full-fidelity alternative for users who prefer it, full activity, rich tool
-inspection, settings, and other surfaces outside the native companion. It does
-not need to become the native home screen or share the Kotlin transport.
-
-The first native slice is a read-only Compose renderer over saved projection
-fixtures. It should cover user prompts, assistant text, status/boundary rows,
-important failures, media, compact per-turn activity, and bounded generic tool
-fallbacks before adding live transport, approvals, or a composer. Basic text
-response can follow once foreground transport and reconciliation are proven.
-Approvals that need command, diff, or provider-specific context continue into
-the full web presentation until native can support an informed decision.
-
-The shared asset is the versioned semantic contract: projection schemas and
-generated types, stable identities, fixtures, pagination/coverage, action
-meanings, and generic fallbacks. Compose, SwiftUI, and React keep independent
-platform views. Server projection remains the preferred mobile-efficient mode;
-this decision does not authorize Kotlin and Swift ports of provider
-normalization or the current client-internal `RenderItem[]` ABI.
-
-This checkpoint resolves the consumer and product-surface choice only. Before
-source or protocol work begins, a reviewed plan must still choose the minimum
-bounded envelope/projection, package and execution boundary, native
-connection-core ownership, capability/version negotiation, stable-release
-corpus, and exact fallback that makes no unsupported request to an older server.
 
 ## Decision
 
@@ -524,35 +482,13 @@ This document does not authorize changes to reconnect, replay, throttle, or
 catch-up policy. Those remain governed by the existing transport and rendering
 architecture documents.
 
-## Platform Renderers
+## Web Renderer
 
-Platform renderers are intentionally separate implementations:
-
-- **Web:** React/DOM/CSS, browser selection, server HTML augments, current file
-  viewers, and browser scroll behavior.
-- **Android:** native list, text, code/diff, notification, and navigation
-  surfaces appropriate to the selected Android framework.
-- **iOS:** corresponding native surfaces appropriate to the selected iOS
-  framework.
-
-They share:
-
-- projection schemas and generated types;
-- semantic node/action meanings;
-- compiler fixtures and compatibility cases;
-- stable ids, coverage, and pagination semantics;
-- generic fallback rules.
-
-They do not need pixel-identical UI. Each platform may exploit its native
-capabilities while preserving semantic and action parity.
-
-A native client may initially implement only inbox, notification,
-Conversation-view user/assistant text, compact activity, generic tool, media,
-status, and error nodes. Unsupported rich nodes must retain a bounded native
-fallback rather than involuntarily replacing the entire session with a WebView.
-The user may explicitly enter the packaged full-web session for richer detail.
-Approval actions remain there until native presents enough command, diff, and
-provider-specific context for an informed choice.
+The browser consumes the shared projection and owns DOM layout, interaction,
+selection, accessibility and action presentation. Provider interpretation,
+identity and cross-window prefix facts remain in the shared compiler and server
+ingest boundaries. Renderer fallback must preserve the security and incomplete
+window rules below.
 
 ## Graceful Degradation
 
@@ -595,56 +531,10 @@ layer that can establish it without making downstream consumers guess.
 
 ## Implementation Language and Runtime Direction
 
-The schemas and fixtures are language-neutral. Do not bind the architecture to
-one implementation language before a native client or profile justifies it.
-
-The preferred first reference implementation is TypeScript because:
-
-- the current server normalization and client projection logic are TypeScript;
-- Node can import it directly;
-- hosted web can lazy-load it in a Worker;
-- React Native includes a JavaScript runtime;
-- native iOS can host JavaScriptCore without a WebView;
-- modern Android exposes Jetpack JavaScriptEngine for non-interactive
-  JavaScript/WebAssembly evaluation without allocating a WebView on supported
-  devices.
-
-Useful current platform references:
-
-- [Android JavaScriptEngine](https://developer.android.com/develop/ui/views/layout/webapps/jsengine)
-- [Apple JavaScriptCore](https://developer.apple.com/documentation/javascriptcore)
-- [React Native Hermes](https://reactnative.dev/docs/hermes/)
-
-The TypeScript package must target a conservative engine subset and be tested
-against the actual runtimes adopted by clients. Android JavaScriptEngine is a
-capability, not a universal assumption; a native client must detect support and
-retain server/generic fallback.
-
-Rust remains a credible later implementation if both native clients are
-committed or profiling shows a real CPU/memory/engine problem. The same Rust
-source could compile to native mobile libraries and WebAssembly for web/Node,
-but serialization, bindings, build complexity, and rewriting existing
-TypeScript are real costs. This workload is string/object heavy, so WebAssembly
-must be measured rather than presumed faster.
-
-Kotlin Multiplatform is viable for Android/iOS/native logic and has JVM/JS/Wasm
-targets, but it makes the existing Node/web TypeScript system the integration
-edge. Reconsider it only if the native client stack makes Kotlin the dominant
-implementation environment.
-
-Whichever implementation is chosen should expose a narrow serializable ABI:
-
-```text
-compileWindow(envelope) -> projection
-createLiveCompiler(checkpoint) -> handle
-applyEvent(handle, event) -> projection patch
-dispose(handle)
-```
-
-Native app releases should bundle compiler code. Do not make downloaded
-executable compiler modules part of the compatibility contract; that creates
-client-code trust, signing, platform-policy, and rollback concerns beyond this
-architecture.
+The semantic core remains TypeScript, independent of DOM rendering. Keep its
+input/output boundary narrow and compatible with Node.js and browser workers.
+Measure representative input size, latency, memory and bundle cost before
+changing execution location or promoting a public compiler ABI.
 
 ## Migration Strategy
 

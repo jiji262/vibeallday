@@ -83,54 +83,5 @@
     "thirdPartyCookieProbe": "network and script cookies refused in cross-site iframe",
     "networkFallback": 404,
     "passed": true
-  },
-  "bundledDebugAppFallback": {
-    "browser": "124.0.6367.219",
-    "publicContentTLS": false,
-    "parent": "https://appassets.androidplatform.net",
-    "temporaryParentBuild": true,
-    "thirdPartyCookiesBlocked": null,
-    "serverBuild": "feature checkout",
-    "platform": "android-emulator-bundled-app",
-    "checks": [
-      {
-        "name": "native-scriptless-fallback",
-        "parentOrigin": "https://appassets.androidplatform.net",
-        "sandbox": "allow-same-origin",
-        "scriptsExecuted": false,
-        "managedFrame": false,
-        "imageWidth": 0
-      },
-      {
-        "name": "native-fallback-teardown",
-        "passed": true
-      }
-    ],
-    "errors": [],
-    "publicRelay": true,
-    "androidRelease": "15",
-    "androidApi": "35",
-    "webView": "(com.google.android.webview, 124.0.6367.219)",
-    "apkSHA256": "31ccdeb27e2140e7e3a131b8f222a62983cf8a72255109f8fdea34f82acf1385",
-    "nativeRegistrationPersisted": true,
-    "setupWorkaround": "force-stop and cold launcher resume after successful registration; fresh pairing UI remained busy in separate unmodified runs",
-    "parentBuildDelivery": "bundled debug APK",
-    "expectedPolicyRefusals": 4,
-    "passed": true,
-    "consolePolicyRefusals": {
-      "stylesheet": 1,
-      "image": 1,
-      "sandboxedScript": 2
-    },
-    "interactiveArtifactsSupported": false
-  },
-  "freshNativePairingBaseline": {
-    "serverCommit": "9b44f3c67",
-    "androidAndMobileCoreSourceUnchanged": true,
-    "registrationPersisted": true,
-    "passed": false,
-    "observationWindowMs": 45000,
-    "failure": "Pairing remained busy; Open full app stayed disabled.",
-    "coldLauncherResumeReachesViewer": true
   }
 }

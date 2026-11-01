@@ -9,7 +9,6 @@ import {
 } from "@vibeallday/shared";
 import type {
   ClientPing,
-  DeviceServerMessage,
   GitWorktreeCoverage,
   RelayEvent,
   RelayRequest,
@@ -81,8 +80,6 @@ interface ResponseStreamState {
   ackedBytes: number;
   idleTimer: ReturnType<typeof setTimeout> | null;
 }
-
-export type EmulatorMessageHandler = (msg: DeviceServerMessage) => void;
 export type SpeechEventHandler = (msg: RelaySpeechEvent["message"]) => void;
 
 export interface RelayProtocolOptions {
@@ -321,8 +318,6 @@ export class RelayProtocol {
   >();
   /** Streamed response bodies being delivered, by request id. */
   private responseStreams = new Map<string, ResponseStreamState>();
-  /** Registered handlers for emulator signaling messages */
-  private emulatorHandlers = new Set<EmulatorMessageHandler>();
   /** Registered handlers for relayed speech stream messages */
   private speechHandlers = new Set<SpeechEventHandler>();
 
@@ -495,12 +490,11 @@ export class RelayProtocol {
       case "speech_event":
         this.handleSpeechEvent(msg);
         break;
-      // Emulator signaling messages (server → client push)
+      // Retired bridge frames remain harmless for older servers.
       case "device_webrtc_offer":
       case "device_ice_candidate_event":
       case "device_session_state":
       case "device_stream_profile_event":
-        this.handleEmulatorMessage(msg as DeviceServerMessage);
         break;
       default:
         console.warn(
@@ -510,27 +504,10 @@ export class RelayProtocol {
     }
   }
 
-  private handleEmulatorMessage(msg: DeviceServerMessage): void {
-    for (const handler of this.emulatorHandlers) {
-      handler(msg);
-    }
-  }
-
   private handleSpeechEvent(msg: RelaySpeechEvent): void {
     for (const handler of this.speechHandlers) {
       handler(msg.message);
     }
-  }
-
-  /**
-   * Register a handler for emulator signaling messages.
-   * Returns an unsubscribe function.
-   */
-  onDeviceMessage(handler: EmulatorMessageHandler): () => void {
-    this.emulatorHandlers.add(handler);
-    return () => {
-      this.emulatorHandlers.delete(handler);
-    };
   }
 
   onSpeechEvent(handler: SpeechEventHandler): () => void {

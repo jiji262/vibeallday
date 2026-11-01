@@ -214,7 +214,7 @@ Codex's `request_user_input_async`, whose source is in
 `codex-rs/core/src/tools/handlers/request_user_input_async.rs`. It runs in the
 opposite direction from this user-initiated question card. VIBEALLDAY preserves readable
 questions and structured metadata but currently lacks dedicated answer controls;
-see the high-priority [async question UI gap](../gaps/codex-async-question-answer-ui.md).
+see the high-priority async question UI gap (`../gaps/codex-async-question-answer-ui.md`).
 Existing `/btw` support does not establish support for that interaction.
 
 The facility selected above is `thread/inject_items` for retaining Q+A, not

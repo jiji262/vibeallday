@@ -49,13 +49,3 @@ Repository-mutating actions remain deliberately narrow and explicit:
 
 The page does not silently merge, rebase, force-push, discard changes, or
 resolve conflicts.
-
-## Remote device control
-
-Device control is an experimental but separate review surface. It streams
-Android devices/emulators and iOS Simulators over WebRTC so you can inspect and
-control an app from the browser. It is not the unpublished VibeAllDay Android
-client app.
-
-Enable Device Bridge in Settings only when you need it. Real iOS devices are
-not currently supported.

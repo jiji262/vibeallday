@@ -15,9 +15,7 @@ or hosted transcript database.
 
 For npm and source installs, the default data directory is
 `~/.vibeallday/` on macOS and Linux and
-`%USERPROFILE%\.vibeallday\` on Windows. The desktop app keeps a separate
-profile at `~/.vibeallday-desktop/` on macOS or
-`%USERPROFILE%\.vibeallday-desktop\` on Windows. npm and source installs can
+`%USERPROFILE%\.vibeallday\` on Windows. Source installs can
 override their location with `VIBEALLDAY_DATA_DIR`.
 
 Agent requests still go to the provider you configure. Local models keep that

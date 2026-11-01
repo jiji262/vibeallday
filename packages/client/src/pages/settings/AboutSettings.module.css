@@ -70,12 +70,6 @@
   color: var(--attn-ink);
 }
 
-.updateStatus {
-  margin: 0;
-  color: var(--ink-2);
-  font-size: var(--fs-small);
-}
-
 .scopeTag {
   margin-left: var(--space-2);
   vertical-align: 1px;

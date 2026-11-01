@@ -174,7 +174,6 @@ advisories were triaged as not applying and dismissed the same way on
 | `torch` `torch.jit.script` memory corruption (GHSA-rrmf-rvhw-rf47) | same snapshot | Needs crafted input to `torch.jit.script` on the local host; VIBEALLDAY only runs inference and never scripts code | Moving the snapshot to torch ≥ 2.13, which also frees the setuptools pin |
 | `setuptools` sdist MANIFEST.in bypass (GHSA-h35f-9h28-mq5c) | same snapshot | Affects building sdists on macOS filesystems. The snapshot is a Linux runtime env, and `torch==2.12.0` requires `setuptools<82`, so the patched 83 cannot be pinned | Same torch move |
 | `pytorch-lightning` `load_from_checkpoint` pickle loading (GHSA-75m9-98v2-hjpm) | `requirements/stt-nemo.txt` | NeMo 2.0.0 needs `pytorch-lightning==2.4.0`. The NeMo worker loads through `ASRModel.from_pretrained`, never `LightningModule.load_from_checkpoint`. The current NeMo env (`stt-nemo-recent.txt`) resolves 2.6.5 | Retiring the in-place NeMo 2.0.0 add-on |
-| `glib` `VariantStrIter` unsoundness (GHSA-wrw7-89jp-8q8g) | `packages/desktop/src-tauri/Cargo.lock` | gtk-rs 0.18 is the last GTK3 binding and Tauri's Linux backend requires it, so no patched `glib` is reachable. Neither the desktop crate nor its Tauri/GTK dependencies iterate string-array variants | Tauri moves its Linux backend off gtk-rs 0.18 |
 | `rand` unsound with a custom logger (GHSA-cq8v-f236-94qc) | same `Cargo.lock` | `rand 0.7.3` is used only by `phf_generator` during the build. The defect requires a custom `log` logger that itself draws random numbers | `phf_generator` moves off rand 0.7 |
 
 The patched Python pins in that snapshot (`anyio`, `msgpack`, `pip`) were
@@ -190,10 +189,8 @@ security fixes skip both waits. The Dependency Dashboard issue lists
 everything pending.
 
 - Routine runtime updates are grouped for manual review: stable npm
-  web/server dependencies (plus 0.x patches), Android libraries, stable Go
-  bridge modules, and Rust crate patches. Provider SDKs and Tauri retain
-  their separate audit/group boundaries. Android build tools and Go
-  language/toolchain directives stay outside the library groups.
+  web/server dependencies (plus 0.x patches). Provider SDKs retain their
+  separate audit boundaries.
 - Major upgrades and 0.x minor upgrades require dashboard approval before
   creating a PR and never automerge. Request migrations individually;
   approving the entire pending queue defeats that boundary.
@@ -215,11 +212,8 @@ everything pending.
 - Major updates to `pnpm-workspace.yaml` overrides are disabled; see the
   exact `fast-uri` pin above.
 - `vite` updates bump the declared ranges instead of updating only the
-  lockfile. The client and desktop declare different vite majors, and a
-  lockfile-only group update passes both versions to one recursive
-  `pnpm update`, which forces a single version onto both importers and
-  fails `--frozen-lockfile`. Apply the same rule to any other package
-  declared at two majors in the workspace.
+  lockfile, retaining each package's supported major and patched minimum.
+  The client uses pnpm; the website has its own npm manifest and lockfile.
 - `@playwright/test` is held below 1.61. From 1.61 the runner loads test
   files through `module.registerHooks`, and on Node 22.16 through 22.22 and
   on 23.11 that fails to load CommonJS dependencies such as `sanitize-html`

@@ -20,19 +20,14 @@ export const docsNavigation: DocsNavSection[] = [
           "Choose an install, launch VibeAllDay, and open your first session.",
       },
       {
-        path: "/docs/desktop-apps",
-        title: "Desktop apps",
-        description: "Install the beta macOS or Windows desktop release.",
-      },
-      {
         path: "/docs/install-npm",
-        title: "Install from npm",
+        title: "Install from source",
         description: "Install the server and web client from the command line.",
       },
       {
         path: "/docs/updating",
         title: "Updating",
-        description: "Keep npm, source, and desktop installations current.",
+        description: "Keep source installations and browser clients current.",
       },
     ],
   },

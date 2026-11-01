@@ -4,10 +4,9 @@ import { assessPageRecovery } from "./acceptance.mjs";
 
 function recovered() {
   return {
-    client: "android",
+    client: "browser",
     surface: "session",
     completed: true,
-    instrumentationPassed: true,
     faultAt: 10,
     restoredAt: 20,
     firstHealthyAt: 30,
@@ -92,13 +91,7 @@ test("rejects lost drafts, stale views, missing evidence and incomplete cleanup"
       r.completed = false;
     },
     (r) => {
-      r.instrumentationPassed = false;
-    },
-    (r) => {
       r.final.path = "/projects";
-    },
-    (r) => {
-      r.nativeSyntheticErrors = ["Synthetic 503"];
     },
     (r) => {
       r.observer.keys.splice(2, 1);

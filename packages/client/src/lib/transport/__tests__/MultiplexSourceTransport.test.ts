@@ -1,7 +1,5 @@
 import type {
-  DeviceServerMessage,
   GitWorktreeCoverage,
-  RemoteClientMessage,
   StagedAttachmentRef,
   UploadedFile,
 } from "@vibeallday/shared";
@@ -60,10 +58,6 @@ class FakeMultiplexConnection implements Connection {
     this.manager?.markConnected();
   });
   readonly sendPing = vi.fn();
-  readonly sendMessage = vi.fn((_msg: RemoteClientMessage) => undefined);
-  private readonly deviceHandlers = new Set<
-    (msg: DeviceServerMessage) => void
-  >();
 
   constructor(readonly id: string) {}
 
@@ -119,13 +113,6 @@ class FakeMultiplexConnection implements Connection {
   ): Subscription {
     handlers.onOpen?.();
     return { close: () => handlers.onClose?.() };
-  }
-
-  onDeviceMessage(handler: (msg: DeviceServerMessage) => void): () => void {
-    this.deviceHandlers.add(handler);
-    return () => {
-      this.deviceHandlers.delete(handler);
-    };
   }
 
   openSpeechSocket(): Promise<ConnectionSpeechSocket> {

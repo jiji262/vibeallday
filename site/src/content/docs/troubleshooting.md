@@ -1,6 +1,6 @@
 ---
 title: Troubleshooting
-description: Diagnose startup, provider detection, remote connection, notification, and desktop-app problems safely.
+description: Diagnose startup, provider detection, remote connection, notification, and browser problems safely.
 ---
 
 Start with the smallest failing boundary: host server, provider, browser,
@@ -18,8 +18,6 @@ defaults are:
 
 - npm/source on macOS or Linux: `~/.vibeallday/logs/`
 - npm/source on Windows: `%USERPROFILE%\.vibeallday\logs\`
-- desktop app on macOS: `~/.vibeallday-desktop/logs/`
-- desktop app on Windows: `%USERPROFILE%\.vibeallday-desktop\logs\`
 
 Profiles use a suffixed directory such as `.vibeallday-dev` under the user
 home directory. `VIBEALLDAY_DATA_DIR` can override the npm/source location.
@@ -27,7 +25,7 @@ home directory. `VIBEALLDAY_DATA_DIR` can override the npm/source location.
 ## Provider is missing or cannot start
 
 Run the provider's official CLI directly on the same host and user account.
-Confirm it is installed, authenticated, and usable before debugging VibeAllDay. Desktop installs do not bundle Claude Code or Codex credentials.
+Confirm it is installed, authenticated, and usable before debugging VibeAllDay.
 
 If `ENABLED_PROVIDERS` is set, confirm the provider is included. Experimental
 providers may need additional executables, endpoints, or Settings values.
@@ -56,13 +54,6 @@ Check browser site permission, operating-system notification settings, the
 subscribed browser profile, and service-worker status. Use the test-notification
 control before waiting for a real approval event.
 
-## Desktop app cannot open the dashboard
-
-Open **Desktop Diagnostics** and **Server Output** from the tray menu. Record
-the desktop version, bundled VibeAllDay version, operating system, and the
-bounded startup error. A manual reinstall of the current signed release is the
-supported v0 recovery path.
-
 ## File or source action is unavailable
 
 A file path may sit outside configured allowed roots. A Source Control action
@@ -74,7 +65,7 @@ destructive Git command unless you understand the repository state.
 
 Open an issue at [GitHub](https://github.com/jiji262/vibeallday/issues) with:
 
-- VibeAllDay and desktop-app versions, if applicable.
+- VibeAllDay server and browser client versions.
 - Operating system and installation method.
 - Provider and provider version.
 - Exact expected and observed behavior.

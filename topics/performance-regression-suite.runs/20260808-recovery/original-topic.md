@@ -535,7 +535,7 @@ This recovers the rescan and focused-watch ownership legs of P09 structurally.
 The broad activity subscription still forwards every file event to every
 subscriber. The remaining defect and its client/server compatibility boundary
 are tracked in
-[`gaps/global-activity-stream-file-fanout.md`](../gaps/global-activity-stream-file-fanout.md);
+[`gaps/global-activity-stream-file-fanout.md`](../../../gaps/global-activity-stream-file-fanout.md);
 server-side filtering is not claimed by this slice.
 
 ### 2026-08-08 browser-native memory attribution

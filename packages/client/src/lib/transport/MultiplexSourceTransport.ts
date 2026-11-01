@@ -1,7 +1,5 @@
 import type {
-  DeviceServerMessage,
   GitWorktreeCoverage,
-  RemoteClientMessage,
   StagedAttachmentRef,
   UploadedFile,
 } from "@vibeallday/shared";
@@ -44,8 +42,6 @@ interface MultiplexConnection extends Connection {
   close(): void;
   sendPing(id: string): void;
   setConnectionManager?(manager: ConnectionManager | null): void;
-  sendMessage?(msg: RemoteClientMessage): void;
-  onDeviceMessage?(handler: (msg: DeviceServerMessage) => void): () => void;
   openSpeechSocket?(): Promise<ConnectionSpeechSocket>;
   reconnect?(): Promise<void>;
   forceReconnect?(): Promise<void>;
@@ -61,7 +57,6 @@ interface MultiplexTransportConfig<TConnection extends MultiplexConnection> {
   channelName: SourceTransportChannelName;
   managerLabel: string;
   sameOriginUrls: boolean;
-  device: boolean;
   speech: boolean;
   reconnect(connection: TConnection): Promise<void>;
 }
@@ -145,13 +140,6 @@ abstract class MultiplexSourceTransport<TConnection extends MultiplexConnection>
     resolve: (connection: TConnection) => void;
     reject: (error: Error) => void;
   }>();
-  private readonly deviceHandlers = new Set<
-    (msg: DeviceServerMessage) => void
-  >();
-  private readonly deviceUnsubscribers = new Map<
-    (msg: DeviceServerMessage) => void,
-    () => void
-  >();
 
   constructor(
     config: MultiplexTransportConfig<TConnection>,
@@ -170,14 +158,6 @@ abstract class MultiplexSourceTransport<TConnection extends MultiplexConnection>
     this.status = this.mutableStatus;
     this.capabilities = {
       sameOriginUrls: config.sameOriginUrls,
-      ...(config.device
-        ? {
-            device: {
-              send: (msg) => this.sendDeviceMessage(msg),
-              onMessage: (handler) => this.addDeviceHandler(handler),
-            },
-          }
-        : {}),
       ...(config.speech
         ? { speech: { open: () => this.openSpeechSocket() } }
         : {}),
@@ -207,10 +187,7 @@ abstract class MultiplexSourceTransport<TConnection extends MultiplexConnection>
     this.assertNotDisposed();
     if (this.connection && this.connection !== connection) {
       this.connection.setConnectionManager?.(null);
-      this.detachDeviceHandlers();
       this.manager.stop();
-    } else if (this.connection === connection) {
-      this.detachDeviceHandlers();
     }
 
     this.failure = undefined;
@@ -219,7 +196,6 @@ abstract class MultiplexSourceTransport<TConnection extends MultiplexConnection>
     this.slotState = options.state ?? "ready";
     connection.setConnectionManager?.(this.manager);
     this.startPassiveManager();
-    this.attachDeviceHandlers();
     this.resolveAttachWaiters(connection);
     this.mutableStatus.emit();
   }
@@ -227,7 +203,6 @@ abstract class MultiplexSourceTransport<TConnection extends MultiplexConnection>
   detach(): void {
     if (this.disposed) return;
     this.connection?.setConnectionManager?.(null);
-    this.detachDeviceHandlers();
     this.connection = null;
     this.slotState = "detached";
     this.manager.stop();
@@ -354,7 +329,6 @@ abstract class MultiplexSourceTransport<TConnection extends MultiplexConnection>
     this.removeManagerStateListener = null;
     this.removeManagerFailureListener = null;
     this.removeManagerVisibilityListener = null;
-    this.detachDeviceHandlers();
     this.connection?.setConnectionManager?.(null);
     this.connection?.close();
     this.connection = null;
@@ -568,53 +542,6 @@ abstract class MultiplexSourceTransport<TConnection extends MultiplexConnection>
     }
   }
 
-  private async sendDeviceMessage(msg: RemoteClientMessage): Promise<void> {
-    const connection = await this.waitForConnection();
-    if (!connection.sendMessage) {
-      throw new SourceTransportUnsupportedError({
-        kind: this.kind,
-        operation: "device signaling",
-        channel: this.channelName,
-      });
-    }
-    connection.sendMessage(msg);
-  }
-
-  private addDeviceHandler(
-    handler: (msg: DeviceServerMessage) => void,
-  ): () => void {
-    this.deviceHandlers.add(handler);
-    const unsubscribe = this.attachDeviceHandler(handler);
-    if (unsubscribe) this.deviceUnsubscribers.set(handler, unsubscribe);
-    return () => {
-      this.deviceUnsubscribers.get(handler)?.();
-      this.deviceUnsubscribers.delete(handler);
-      this.deviceHandlers.delete(handler);
-    };
-  }
-
-  private attachDeviceHandlers(): void {
-    for (const handler of this.deviceHandlers) {
-      const unsubscribe = this.attachDeviceHandler(handler);
-      if (unsubscribe) this.deviceUnsubscribers.set(handler, unsubscribe);
-    }
-  }
-
-  private detachDeviceHandlers(): void {
-    for (const unsubscribe of this.deviceUnsubscribers.values()) {
-      unsubscribe();
-    }
-    this.deviceUnsubscribers.clear();
-  }
-
-  private attachDeviceHandler(
-    handler: (msg: DeviceServerMessage) => void,
-  ): (() => void) | null {
-    const connection = this.connection;
-    if (!connection?.onDeviceMessage) return null;
-    return connection.onDeviceMessage(handler);
-  }
-
   private async openSpeechSocket(): Promise<ConnectionSpeechSocket> {
     const connection = await this.waitForConnection();
     if (!connection.openSpeechSocket) {
@@ -647,7 +574,6 @@ export class WebSocketSourceTransport extends MultiplexSourceTransport<WebSocket
         channelName: "multiplex-websocket",
         managerLabel: "source-websocket",
         sameOriginUrls: options.sameOriginUrls ?? true,
-        device: true,
         speech: false,
         reconnect: (connection) => connection.reconnect(),
       },
@@ -667,7 +593,6 @@ export class SecureSourceTransport extends MultiplexSourceTransport<SecureConnec
         channelName: "secure-websocket",
         managerLabel: "source-secure",
         sameOriginUrls: false,
-        device: true,
         speech: true,
         reconnect: (connection) => connection.forceReconnect(),
       },

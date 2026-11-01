@@ -14,9 +14,7 @@ Artifact origin: http://<viewer>.usercontent.vibeallday.localhost:<content-port>
 ```
 
 This extends [the existing content-origin spike](../relay-artifact-frame-spike/spike.mjs)
-and [relay proposal](../../gaps/sketches/relay-artifact-frame.md). The earlier
-[extension experiment](../extension-artifact-spike/README.md) used an opaque
-extension sandbox whose subresources bypassed its worker. Here the artifact
+and [relay proposal](../../gaps/sketches/relay-artifact-frame.md). The artifact
 runs on a separate ordinary web origin under its own worker's scope, so native
 browser resource loading works without HTML/CSS/module rewriting.
 

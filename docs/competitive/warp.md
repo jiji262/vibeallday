@@ -427,7 +427,7 @@ when the developer keeps their existing terminal or supervisor.
 Scheduled runs use cron, fixed prompts, fresh sessions, pause/update/delete,
 and optional self-hosted worker selection. This is concrete competition for
 VIBEALLDAY's [vibeallday-cron direction](../../topics/vibeallday-cron.md), whose generally running
-scheduler remains an [open gap](../../gaps/sketches/vibeallday-cron-scheduler.md).
+scheduler remains an open gap (`../../gaps/sketches/vibeallday-cron-scheduler.md`).
 VIBEALLDAY's existing Project Queue is not equivalent to recurring unattended jobs.
 [Scheduled agents][schedules-doc].
 
@@ -627,7 +627,7 @@ execution, collaboration and workspace documents below already own that work.
 4. **Use workflow receipts as scheduling prior art.** Factory questions,
    approvals, PR reviews and automatic resolution illustrate attention that
    follows work through a lifecycle. This informs [vibeallday-cron](../../topics/vibeallday-cron.md)
-   and its [gap](../../gaps/sketches/vibeallday-cron-scheduler.md), without authorizing a
+   and its gap (`../../gaps/sketches/vibeallday-cron-scheduler.md`), without authorizing a
    factory engine or displacing the required scheduling UI design.
 5. **Keep ownership explicit in multi-machine work.** Viewer access, managed
    worker execution, transcript continuation and session migration differ.

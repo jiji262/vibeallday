@@ -1,6 +1,5 @@
 import type {
   ClientCapabilities,
-  DeviceServerMessage,
   GitWorktreeCoverage,
   RemoteClientMessage,
   StagedAttachmentRef,
@@ -382,10 +381,6 @@ export class WebSocketConnection implements Connection {
 
   sendMessage(msg: RemoteClientMessage): void {
     this.send(msg);
-  }
-
-  onDeviceMessage(handler: (msg: DeviceServerMessage) => void): () => void {
-    return this.protocol.onDeviceMessage(handler);
   }
 
   close(): void {

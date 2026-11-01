@@ -3,8 +3,7 @@
 This fork focuses on a local server and a responsive browser client shared by
 computers, phones and tablets. Native Android/iOS applications, desktop shells,
 browser extensions, device streaming and native push delivery are retired from
-the active product and build. Their older tactical documents record historical
-designs, not current release commitments.
+the active product and build. Platform-specific design and delivery documents have been retired.
 
 ## Current scope
 

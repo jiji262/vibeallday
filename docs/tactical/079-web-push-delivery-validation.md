@@ -1,11 +1,9 @@
-# Notification Delivery Validation And Native Readiness
+# Web Push Delivery Validation
 
-Status: active. Browser implementation and the three defects found during live
-verification are fixed; bounded failure cases and the native-destination
-readiness review remain in progress.
+Status: The browser implementation and the three defects found during live
+verification are fixed; bounded browser failure cases remain in scope.
 
 Topic: notifications
-Topic: android-fcm-push
 
 ## Origin
 
@@ -17,12 +15,9 @@ browser delivery mechanism, and organized Settings around **This browser**,
 
 Automated contracts cover server audience selection and service-worker
 presentation decisions, and the replacement has now been walked end to end in
-a real desktop browser. Native Android enrollment will extend the same Settings
-surface and server event policy from that proven browser baseline rather than
-introduce a second parallel notification UI.
+a real desktop browser.
 
-This document is the durable execution ledger for that baseline and the
-handoff into native work. Record observed outcomes here; do not treat a passing
+This document preserves the browser baseline evidence. Do not treat a passing
 unit test or an accepted provider request as proof that the operating system
 displayed a notification.
 
@@ -34,15 +29,9 @@ displayed a notification.
   deployment prerequisites.
 - [Browser-profile devices](../../topics/browser-profile-devices.md) owns the
   identity currently shared by browser connections and Web Push.
-- [Android FCM push](../../topics/android-fcm-push.md) owns broker/Firebase
-  lifecycle evidence and retry policy.
-- [Android wrapper and notification integration](071-android-wrapper-notification-integration.md)
-  owns native secrets, bridge permissions, enrollment, and tap behavior.
-- [Mobile companion app](../project/mobile-companion-app.md) owns the eventual
-  Compose Conversation-view direction.
 - [Server capabilities](../../topics/server-capabilities.md) and
   [remote-hosted compatibility](../../topics/remote-hosted-compatibility.md)
-  govern the future native enrollment API.
+  govern browser enrollment compatibility.
 
 ## Live-System Safety Boundary
 
@@ -239,48 +228,6 @@ retained activity subscriptions on `pagehide`. In a fresh standalone profile,
 `pagehide` and navigation reached zero immediately, `pageshow` restored one,
 and three full reloads never exceeded one registration.
 
-### 6 — freeze the native-unification seam
-
-Record the client/server proposal before changing the contract:
-
-- [x] **Events from this server** remains one server-owned policy shared by
-  every notification transport.
-- [x] Browser and native recipients use distinct durable identities; an
-  Android installation is never represented as a `browserProfileId`.
-- [x] The Settings view model can merge discriminated browser/native
-  destinations with common display, status, test, and remove operations while
-  retaining transport-specific details.
-- [x] The first Settings section is context-aware: **This browser** uses Web
-  Push; an Android wrapper with the approved bridge uses **This Android app**.
-- [x] Server event controls are gated by any eligible destination, not by Web
-  Push subscription count alone.
-- [x] Existing browser routes and storage remain compatible; native enrollment
-  uses a new capability and sends no unsupported request to older servers.
-- [x] Event observers emit semantic intents; Web Push and native broker
-  adapters own their different payload privacy and provider behavior.
-- [x] Browser-only diagnostic options do not masquerade as native options;
-  Android permission/channel state remains device-owned.
-
-Recorded 2026-08-02 in the owning notification topics and wrapper plan. The
-native foundation implements only device-owned status, permission, channel,
-and broker-installation lifecycle. The discriminated Settings destination and
-exact VIBEALLDAY-server capability/routes remain the next compatibility-reviewed
-implementation rather than being implied by this completed design seam.
-
-### 7 — approve the native implementation handoff
-
-Native foundation work may begin independently, but the hosted client/server
-enrollment contract is ready to implement only when:
-
-- [ ] the live browser delivery baseline has no unexplained failure;
-- [ ] any unrun manual matrix case has an explicit safe harness or justified
-  release deferral;
-- [ ] the native destination/UI seam above is recorded in the owning topic;
-- [ ] the stable-release compatibility corpus, capability, routes, fallback,
-  and revocation order have been presented for maintainer approval; and
-- [ ] the implementation order preserves ordinary Web Push behavior when the
-  native bridge or server capability is absent.
-
 ## Exit Result
 
 At completion, summarize separately:
@@ -288,8 +235,7 @@ At completion, summarize separately:
 1. what a real browser and macOS visibly proved;
 2. what only automated tests proved;
 3. what remains blocked or deliberately isolated;
-4. whether the existing browser baseline needs a fix before native work; and
-5. the exact approved first native implementation slice.
+4. whether the browser baseline still needs a fix.
 
 ## 2026-08-02 Disposable-System Cleanup
 

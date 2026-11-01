@@ -4,7 +4,7 @@ Status: experimental live operation, 2026-09-12. This schema is the source for t
 mounted `/api/experimental/conversation` routes, the optional capability
 `experimental-simple-client-conversation` (permanent ID 69), and the web and Android
 Compose previews that consume them; see
-[plan 130](../../../docs/tactical/130-simple-client-api-and-three-client-demo.md) and
+[plan 130](../../../docs/tactical/130-simple-client-api-and-web-demo.md) and
 the [owning topic](../../../topics/simple-client-api.md). The contract stays
 experimental and may change incompatibly: it is not a stable namespace, a supported
 public API, or a shipped mobile client.

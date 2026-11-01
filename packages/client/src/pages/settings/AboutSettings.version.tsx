@@ -1,11 +1,7 @@
 import type { ReactNode } from "react";
 import type { VersionInfo } from "../../api/client";
-import { Button, Card } from "../../components/garden";
+import { Card } from "../../components/garden";
 import { useI18n } from "../../i18n";
-import {
-  formatDesktopBuildVersion,
-  type getDesktopRuntimeMetadata,
-} from "../../lib/desktopRuntime";
 import {
   formatRemoteServerVersion,
   parseSemver,
@@ -13,8 +9,6 @@ import {
 import styles from "./AboutSettings.module.css";
 
 type Translate = ReturnType<typeof useI18n>["t"];
-type DesktopRuntime = NonNullable<ReturnType<typeof getDesktopRuntimeMetadata>>;
-export type DesktopCheckStatus = "opened" | "failed" | "menu" | null;
 
 const COMMIT_PREVIEW_LENGTH = 12;
 
@@ -106,47 +100,17 @@ function BrowserVersionFacts({
   );
 }
 
-function DesktopVersionFacts({ runtime }: { runtime: DesktopRuntime }) {
-  const { t } = useI18n();
-  return (
-    <>
-      <VersionFact label={t("aboutDesktopVersion")}>
-        {formatDesktopBuildVersion(runtime.desktopVersion)}
-      </VersionFact>
-      <VersionFact label={t("aboutBundledVibeAllDayVersion")}>
-        {formatDesktopBuildVersion(
-          runtime.bundledVibeAllDayVersion ?? __APP_VERSION__,
-        )}
-      </VersionFact>
-    </>
-  );
-}
-
-const DESKTOP_STATUS_KEYS = {
-  opened: "aboutDesktopUpdateOpened",
-  menu: "aboutDesktopUpdateMenu",
-  failed: "aboutDesktopUpdateFailed",
-} as const;
-
 interface AboutVersionCardProps {
-  desktopRuntime: DesktopRuntime | null;
   versionInfo: VersionInfo | null;
-  versionLoading: boolean;
   versionError: boolean;
-  desktopCheckStatus: DesktopCheckStatus;
-  onCheckUpdates: () => void;
   /** Inline remote-compatibility notice (dismissed banners restore here). */
   notice?: ReactNode;
 }
 
-/** Version card (design .abd): brand, version facts, update check. */
+/** Version card: brand, server revision and browser client version. */
 export function AboutVersionCard({
-  desktopRuntime,
   versionInfo,
-  versionLoading,
   versionError,
-  desktopCheckStatus,
-  onCheckUpdates,
   notice,
 }: AboutVersionCardProps) {
   const { t } = useI18n();
@@ -157,24 +121,10 @@ export function AboutVersionCard({
           <span className={styles.brand}>VibeAllDay</span>
           <h2 className={styles.versionHeading}>{t("aboutVersionTitle")}</h2>
         </div>
-        {desktopRuntime && (
-          <Button size="sm" onClick={onCheckUpdates} disabled={versionLoading}>
-            {versionLoading ? t("aboutChecking") : t("aboutCheckUpdates")}
-          </Button>
-        )}
       </div>
       <div className={styles.facts}>
-        {desktopRuntime ? (
-          <DesktopVersionFacts runtime={desktopRuntime} />
-        ) : (
-          <BrowserVersionFacts versionInfo={versionInfo} />
-        )}
+        <BrowserVersionFacts versionInfo={versionInfo} />
       </div>
-      {desktopCheckStatus && (
-        <p role="status" className={styles.updateStatus}>
-          {t(DESKTOP_STATUS_KEYS[desktopCheckStatus])}
-        </p>
-      )}
       {versionError && (
         <p className="settings-warning">{t("aboutUnableRefresh")}</p>
       )}

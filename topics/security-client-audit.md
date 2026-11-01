@@ -9,26 +9,23 @@
 
 Topic: security-client-audit
 
-Status: The unified v1 server registry, continuity verification, legacy-web
-projection, bounded security ledger, revocation cascade, and Android
-registration/check-in are implemented; the physical Pixel checkpoint passed
-on 2026-08-02. Capable-web registration, the security dashboard, new-client
-alerts, and native push remain pending. Native push is an optional child
-capability. Hardware/platform attestation, WebAuthn step-up, cookie continuity
-proof, and native desktop key ownership remain future extensions rather than
-v1 requirements.
+Status: The server registry, continuity verification, legacy Web projection,
+bounded ledger and revocation cascade are implemented. Capable-Web enrollment,
+its dashboard and step-up work remain separate proposals. Stored native client
+descriptors remain readable compatibility data; native delivery is retired.
 
 Related:
 
-- [Mobile server pairing](mobile-server-pairing.md)
-- [Android FCM push](android-fcm-push.md)
 - [Browser profile devices](browser-profile-devices.md)
 - [WebSocket auth state](../docs/project/ws-auth-state-model.md)
 - [Server capabilities](server-capabilities.md)
 - [Remote hosted compatibility](remote-hosted-compatibility.md)
 - [Hard development rules](hard-development-rules.md)
 - [Vanilla defaults](vanilla-defaults.md)
-- [Security-client and native-push implementation](../docs/tactical/082-security-client-registration-and-native-push.md)
+
+
+This fork keeps the security-client registry and persisted legacy descriptors
+readable. Native applications and native push delivery are retired.
 
 ## Product Contract
 
@@ -384,89 +381,6 @@ pruning is deferred from the initial implementation and must never remove a
 key-verified native client or any push-holding client. The server-wide ledger
 retains a compact pruning event after the record disappears.
 
-## Native Push Child Contract
-
-The permanent exact capability `native-push-subscriptions-v1` (ID 111,
-introduced in VIBEALLDAY `0.9.4`) owns:
-
-```text
-PUT    /api/security/clients/:clientId/native-push-subscription
-DELETE /api/security/clients/:clientId/native-push-subscription
-POST   /api/security/clients/:clientId/native-push-subscription/test
-GET    /api/security/clients/:clientId/native-push-subscription/destination?sessionId=...
-```
-
-Only a current key-verified native client may install its own subscription.
-The strict `PUT` body is:
-
-```json
-{
-  "subscriptionId": "opaque broker id",
-  "sendSecret": "one-time broker send capability",
-  "privacyMode": "generic"
-}
-```
-
-The server stores the capability as an owner-only secret child of the security
-client and never returns it. Android gives it to the server after creating the
-broker subscription and does not retain the send secret after acknowledged
-installation. Disable/test/revoke operate only on that child.
-
-`/api/version` includes `nativePush` only with the exact native-push capability:
-
-```json
-{
-  "nativePush": {
-    "protocolVersion": 1,
-    "brokerUrl": "https://vibeallday-push.navs.dpdns.org/",
-    "privacyModes": ["generic"]
-  }
-}
-```
-
-The server reads `VIBEALLDAY_NATIVE_PUSH_BROKER_URL`, defaulting to the official
-endpoint, normalizes and advertises that exact value, and never accepts a
-client-chosen broker URL. Android enables enrollment only when protocol v1 and
-the advertised endpoint exactly match its build configuration. Broker
-credentials remain bound to their exact origin; an endpoint change never sends
-an old credential to a new broker or silently reroutes delivery.
-
-There is no durable native-push queue or retry loop. The existing notification
-settings map approval, question, completed, and failed edges to
-`approval_required`, `input_required`, `session_completed`, and
-`session_failed`. New-client/security-event alerts remain deferred. A broker
-`404` disables the invalid subscription; a transient failure waits for a later
-real event or explicit test.
-
-Generic delivery carries only the intent, opaque subscription/session/event ids,
-and an explicit test marker. Project ids, paths, names and transcript content
-never reach the broker. Before submitting an event, VIBEALLDAY retains at most 64
-session-to-project destinations in the private push child. The authenticated
-`GET destination` route returns a safe local session path only to that same
-current native client. Native taps select credentials through their protected
-subscription-to-profile binding, resume and check continuity, then fetch this
-path. Unknown/expired mappings open the host without a session destination.
-These retained mappings survive restart and are redacted from public summaries;
-they are not a delivery queue.
-
-The server enrollment/delivery implementation landed after the original
-contract was reserved. Support is an explicit optional bit, advertised only
-when the native adapter and child routes are mounted. The current optional
-release corpus is v0.9.0, v0.9.1 and v0.9.2; none provides these routes or the
-version descriptor. Absent support sends no enrollment request and preserves
-normal native SRP/WebView use. The existing security-client audit capability
-keeps its original meaning.
-
-Enrollment requires the current connection's registered/check-in native client,
-not merely an authenticated owner or a body-supplied client id. Send capabilities
-remain in owner-only security-client state and never enter public projections.
-Revocation deletes the child before socket/session cascades. Delivery permits
-at most sixteen in-flight submissions, one per client, with a ten-second bound;
-busy/transient failures await a later real event or explicit test. Broker 404
-removes only the unchanged child, so a stale completion cannot disable a newer
-enrollment. Shutdown cancels pending provider calls. Native delivery works without
-VAPID; browser policy and subscription storage remain independent.
-
 ## Compatibility Decision
 
 This is optional functionality. The stable release corpus reviewed on
@@ -567,25 +481,3 @@ The initial implementation deliberately leaves these separately reviewable:
    using Android/native-plus-bundled-web eviction and restart evidence. Session
    evictions must already be audited; any default change remains an explicit
    security/deployment decision.
-
-## iOS Native Client Acceptance
-
-The iOS shell implements the existing capability-gated registry contract using
-per-profile P-256 SecKey continuity keys labeled ios-keychain. The key is a
-software Keychain item; no Secure Enclave, attestation or hardware-backed proof
-is asserted. Native Rust retains the authenticated session id and exact wire
-transport nonce for registration/check-in transcripts; these values and signing
-operations are unavailable to the source/control JavaScript bridge.
-
-Simulator acceptance verifies post-registration storage failure and idempotent
-recovery of the same client id/request/key, stable resumed check-in, changed
-transport nonce and server-side revocation followed by refusal to re-enroll the
-revoked local binding. Owner SRP authentication remains distinct from continuity
-verification: a fresh owner login does not silently erase a revoked installation.
-Native profile/credential writes are atomic and protected-data failures disable
-catalog mutation. Native Forget performs server revocation before tombstoned
-local cleanup; explicit Forget Anyway acknowledges an unreachable server and
-cannot claim remote revocation. Failed cleanup cannot resume or be resurrected
-by a late credential callback. The optional notification adapter owns OS permission, FCM and
-protected broker installation credentials. Shared per-server push enrollment,
-physical delivery and publication remain pending, as in the existing plan.

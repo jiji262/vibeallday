@@ -13,7 +13,7 @@ You need Claude or Codex installed and signed in on the same computer. The
 easiest path is the provider's desktop app; existing Claude Code or Codex CLI
 installs work too.
 
-VibeAllDay's desktop app does not install or sign in to a provider for you.
+Install and sign in to each provider separately on the server host.
 
 Subscription plans are supported. Sign the official provider tool into an
 eligible Claude or ChatGPT plan and VibeAllDay uses that provider-managed
@@ -24,14 +24,11 @@ see [Providers](/docs/providers#use-your-subscription-plan) for details.
 
 | Installation | Best for | Status |
 | --- | --- | --- |
-| [Desktop app](/download) | A one-click app, tray controls, and bundled updates on macOS or Windows | Source build; installers pending |
 | [npm install](/docs/install-npm) | Linux, servers, terminals, and full configuration control | Not published yet |
 | Source checkout | Contributors and anyone who wants to fork, customize, or follow `main` | Available, development-oriented |
 
-There is no published Android or iOS app yet. Android is in development and iOS
-is planned afterward. The complete client works in a mobile browser and does
-not require an app-store install. See
-[why the browser is the supported mobile experience](/docs/remote-access#why-no-native-mobile-app-yet).
+The same responsive web client runs in computer, tablet, and phone browsers.
+See [mobile browser access](/docs/remote-access#mobile-browsers).
 
 ## Open VibeAllDay
 
@@ -45,8 +42,7 @@ pnpm build
 pnpm start
 ```
 
-Then open `http://localhost:3400` on the host computer. A desktop installation
-opens its bundled dashboard for you.
+Then open `http://localhost:3400` on the host computer.
 
 VibeAllDay detects installed providers. If Claude Code or Codex is missing,
 install and authenticate it using that provider's official setup, then restart

@@ -154,29 +154,14 @@ Consequences:
   rendering passes but a larger fetch after navigation/reload remains an
   unresolved failure. The report preserves the fixture and exact limits; this
   is not production file-viewer integration or native mobile acceptance.
-- A separate [extension artifact viewer experiment](../../research/extension-artifact-spike/README.md)
-  on 2026-10-16 opened local HTML and assets inside the real VIBEALLDAY UI over the
-  encrypted relay, localhost and LAN, using a packaged sandbox and bounded byte
-  adapter. Sandbox subresource requests bypassed the extension worker, so this
-  did not provide transparent interception. It remains a viable alternative
-  for a declared artifact subset; a corresponding Android adapter is a possible
-  follow-up, not yet tested. The report preserves source, measured support,
-  isolation/lifecycle results and outstanding grant requirements. No delivery
-  architecture is selected by that experiment.
 - The managed Worker is deployed on real wildcard DNS/TLS; actual VIBEALLDAY-pane
   acceptance passes with blocked third-party cookies. Explicit worker restart,
   cancellation, distinct origins/storage, unregister/post-close refusal, native
   resource types and bounded fragment helpers are measured in
   [the host report](../../artifact-host/README.md). Worker-memory registration
   maps are unnecessary. Old-server and custom-origin fallbacks are covered.
-- Natural browser idle termination, all supported mobile engines/native
-  WebViews, and WebKit's larger-fetch failure still need qualification. New
+- Natural browser idle termination, all supported mobile browser engines, and WebKit's larger-fetch failure still need qualification. New
   versions must retain the versioned bootstrap/worker protocol for live viewers.
-- Later: carry the read path over a WebRTC data channel to save relay
-  bandwidth. The relay already carries WebRTC signaling for device streaming
-  (`device_webrtc_offer` and ICE in
-  `packages/client/src/lib/connection/RelayProtocol.ts`). Fingerprints must be
-  exchanged over the encrypted relay so DTLS remains end to end.
 
 This supersedes the static-preview asset-broker candidate in
 [the HTML viewer gap](../html-document-viewer.md) for the relay case.
