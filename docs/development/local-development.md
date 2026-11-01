@@ -24,7 +24,7 @@ For everyday use of a source checkout with fewer browser requests, run
 manual reload, serves cached production chunks, and keeps the source backend
 and provider-host reload support. Client edits wait for a successful reload
 and browser refresh. Plain `pnpm dev` keeps HMR. See
-[built-client lifecycle](../../topics/reload-safe-provider-runtimes.md#built-client-for-everyday-source-checkout-use)
+[built-client lifecycle](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/reload-safe-provider-runtimes.md#built-client-for-everyday-source-checkout-use)
 for build failure and asset retention behavior.
 
 ## Commands
@@ -134,7 +134,7 @@ Environment variables:
 - `VIBEALLDAY_PROVIDER_HOST_ENABLED` - Set to `true` or `false` to control shared
   provider hosting. It defaults to `false` on macOS and `true` on Linux.
   macOS remains opt-in while the
-  [active-turn interruption issue](../../gaps/macos-provider-host-turn-interruptions.md)
+  [active-turn interruption issue](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/gaps/macos-provider-host-turn-interruptions.md)
   is investigated.
   Disabled sessions use ordinary in-backend provider ownership and are not
   reported as a degraded host. The setting takes effect on the next full dev

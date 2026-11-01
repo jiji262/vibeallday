@@ -9,7 +9,7 @@ detailed doc. Update this file when the high-level picture changes; update the
 linked docs when the details change.
 
 For work spanning machines, start with
-[Working Across Machines](topics/multi-machine-architecture.md): a discussion
+[Working Across Machines](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/multi-machine-architecture.md): a discussion
 map of ownership, deployment, grants, transport and machine lifecycle, linking
 existing VIBEALLDAY spikes, Machine Control and external architectures. It records
 alternatives rather than selecting a new runtime contract.
@@ -36,7 +36,7 @@ alternatives rather than selecting a new runtime contract.
   reconnect across multiple subscriptions. Distributed hook-and-context state
   (no Redux/Zustand). Streaming text and markdown go through ref-based DOM
   updates with adaptive 100–750 ms throttling, not React state per token.
-  [`topics/client-source-runtime-topology.md`](topics/client-source-runtime-topology.md)
+  [`topics/client-source-runtime-topology.md`](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/client-source-runtime-topology.md)
   records the desired next source-runtime boundary above the current
   one-source-at-a-time UI.
 - **Relay** (optional) is a dumb pipe carrying NaCl-encrypted frames between
@@ -54,7 +54,7 @@ safe-restart behavior applies.
 `VIBEALLDAY_PROVIDER_HOST_ENABLED` is the operator gate. Linux defaults enabled;
 macOS defaults disabled pending resolution of the observed active-turn
 interruptions tracked in
-[`gaps/macos-provider-host-turn-interruptions.md`](gaps/macos-provider-host-turn-interruptions.md).
+[`gaps/macos-provider-host-turn-interruptions.md`](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/gaps/macos-provider-host-turn-interruptions.md).
 An explicit `true` or `false` wins. Intentional disablement is not host
 degradation and does not show the degraded-host warning. The former
 Codex-native setting remains accepted and stored for compatibility, but is
@@ -78,8 +78,8 @@ turns, and the authenticated Hono adapter are implemented. Worker sockets
 remain private; auxiliary clients submit through the incumbent worker queue,
 never acknowledge Hono's replay stream, and never become a second Hono
 controller. See
-[`topics/provider-host-api.md`](topics/provider-host-api.md) and
-[`topics/reload-safe-provider-runtimes.md`](topics/reload-safe-provider-runtimes.md).
+[`topics/provider-host-api.md`](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/provider-host-api.md) and
+[`topics/reload-safe-provider-runtimes.md`](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/reload-safe-provider-runtimes.md).
 
 Single-user / small-team scale is assumed throughout — see the cleanups
 section below for what would have to change at higher fan-out.
@@ -96,54 +96,54 @@ carries a comment naming its bound. Never add a timer per session, project, or
 cache. Long-lived async resources (watches, intervals, sockets, workers) must
 be created outside request-scoped `AsyncLocalStorage` contexts, or they retain
 that request's data until they close. Details and the owner table are in
-[`topics/server-performance-observability.md`](topics/server-performance-observability.md#bounded-retention).
+[`topics/server-performance-observability.md`](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/server-performance-observability.md#bounded-retention).
 
 ## Detailed docs
 
-- [`docs/project/server-message-routing.md`](docs/project/server-message-routing.md)
+- [`docs/project/server-message-routing.md`](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/docs/project/server-message-routing.md)
   — provider event → Process → fan-out → wire; late-join replay; the small
   per-file cleanup proposals.
 - [`packages/client/RENDERING_PERFORMANCE.md`](packages/client/RENDERING_PERFORMANCE.md)
   — the React render/update pipeline, what's coalesced, what stays immediate,
   the streaming-markdown ref pattern, and the review checklist.
-- [`topics/client-source-runtime-topology.md`](topics/client-source-runtime-topology.md)
+- [`topics/client-source-runtime-topology.md`](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/client-source-runtime-topology.md)
   — vision for explicit per-source client runtimes so local/direct/relay VIBEALLDAY
   servers can own their API transport, activity stream, summary stores, and
   session-detail services without hidden current-source globals.
-- [`topics/managed-remote-executors.md`](topics/managed-remote-executors.md)
+- [`topics/managed-remote-executors.md`](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/managed-remote-executors.md)
   — default-off manual-SSH baseline for controller-owned remote sessions:
   injected provider-neutral runners, controller-prepared Git workspaces,
   Codex-first validation, and fetched incoming heads without target upstream
   credentials; staged implementation is tracked in
-  [`docs/tactical/119-managed-ssh-executor-baseline.md`](docs/tactical/119-managed-ssh-executor-baseline.md).
-- [`topics/managed-runner-execution-targets.md`](topics/managed-runner-execution-targets.md)
+  [`docs/tactical/119-managed-ssh-executor-baseline.md`](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/docs/tactical/119-managed-ssh-executor-baseline.md).
+- [`topics/managed-runner-execution-targets.md`](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/managed-runner-execution-targets.md)
   — broader target-provider proposal extending managed remote execution with
   Machine Control discovery, claims, VM lifecycle, and location-correct project
   UI boundaries; its implementation tactical is deferred until the manual-SSH
   baseline works.
-- [`topics/federated-super-sessions.md`](topics/federated-super-sessions.md)
+- [`topics/federated-super-sessions.md`](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/federated-super-sessions.md)
   — proposal for one canonical, single-writer VIBEALLDAY session that can transfer a
   provider-specific portable bundle and active ownership between trusted VIBEALLDAY
   peers while the client follows the same session identity.
-- [`topics/reload-safe-provider-runtimes.md`](topics/reload-safe-provider-runtimes.md)
+- [`topics/reload-safe-provider-runtimes.md`](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/reload-safe-provider-runtimes.md)
   — implemented wrapper-lifetime provider ownership, Hono reattachment,
   replay, cleanup, availability gates, and verification matrix.
-- [`topics/provider-host-api.md`](topics/provider-host-api.md) — current private
+- [`topics/provider-host-api.md`](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/provider-host-api.md) — current private
   host/worker protocols, stable same-user discovery, headless bootstrap,
   attach-or-start recovery, bounded session turns, receipts, and the
   authenticated Hono adapter.
-- [`topics/agent-command-runtime.sketches.md`](topics/agent-command-runtime.sketches.md) —
+- [`topics/agent-command-runtime.sketches.md`](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/agent-command-runtime.sketches.md) —
   proposal for one npm-bundled `vibeallday-agent` dispatcher, per-session PATH
   and scoped-authority projection, private input, and reuse by session-access
   and vibeallday-cron clients without parallel service logic.
-- [`topics/vibeallday-cron.md`](topics/vibeallday-cron.md) — proposal for a generally running
+- [`topics/vibeallday-cron.md`](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/vibeallday-cron.md) — proposal for a generally running
   scheduler/CLI with provider-host-integrated and standalone variants. Only the
   integrated variant owns VIBEALLDAY queues, atomic project admission, canonical
   session dispatch, and the retained launch request usable by Project Queue.
-- [`topics/provider-installation-updates.md`](topics/provider-installation-updates.md)
+- [`topics/provider-installation-updates.md`](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/provider-installation-updates.md)
   — shared installation-family lifecycle for provider update mutation,
   runtime leases, verified generations, and catalog/cache convergence.
-- [`topics/cross-host-delegation.md`](topics/cross-host-delegation.md) — broad
+- [`topics/cross-host-delegation.md`](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/cross-host-delegation.md) — broad
   product direction for browser-known hosts, directed server-to-server grants,
   and separate native worker sessions as a useful step before session
   migration.
@@ -151,36 +151,36 @@ that request's data until they close. Details and the owner table are in
   proposal vocabulary for principals, credential sources, target-enforced
   grants, local policy and execution boundaries across limited users, hosted
   issuance and peer delegation; no protocol or implementation is approved.
-- [`topics/session-id-remap.md`](topics/session-id-remap.md) — problem
+- [`topics/session-id-remap.md`](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/session-id-remap.md) — problem
   statement for startup-time temporary session IDs that later canonicalize,
   including the activity event and client summary-store merge shape needed to
   avoid duplicate sidebar/list rows.
-- [`topics/source-transport.md`](topics/source-transport.md) — proposal for a
+- [`topics/source-transport.md`](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/source-transport.md) — proposal for a
   source-bound transport facade that makes localhost, plain multiplex
   WebSocket, and secure/relay modes explicit without hiding channel status.
-- [`topics/relay-client-mux.md`](topics/relay-client-mux.md) — compatibility-
+- [`topics/relay-client-mux.md`](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/relay-client-mux.md) — compatibility-
   gated optional transport carrying several independently authenticated VIBEALLDAY host
   circuits over one browser-to-relay WebSocket while preserving `/ws`.
-- [`topics/session-detail-data-layer.md`](topics/session-detail-data-layer.md)
+- [`topics/session-detail-data-layer.md`](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/session-detail-data-layer.md)
   — lower-level vision for a canonical client session-detail data layer
   between provider stream/REST inputs and transcript DOM rendering; see the
   linked tactical plan before reshaping `useSession`, `useSessionMessages`,
   transcript augments, subagents, or same-tab message caches.
-- [`topics/portable-transcript-compiler.md`](topics/portable-transcript-compiler.md)
+- [`topics/portable-transcript-compiler.md`](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/portable-transcript-compiler.md)
   — approved direction for a stable server ingest kernel, bounded transcript
   windows with prefix facts, and a versioned presentation compiler shared by
   web, Android, and iOS while platform renderers remain native to each surface.
-- [`topics/conversation-view.md`](topics/conversation-view.md) — compact default
+- [`topics/conversation-view.md`](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/conversation-view.md) — compact default
   transcript projection that preserves user/agent text, media, and important
   failures while summarizing routine per-turn activity; selected as the first
   native session-detail presentation.
-- [`topics/security-client-audit.md`](topics/security-client-audit.md) —
+- [`topics/security-client-audit.md`](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/security-client-audit.md) —
   unified cross-platform client registration, P-256 continuity keys,
   recognizable audit fingerprints, bounded per-client history plus a
   revocation-surviving server security ledger, legacy web projection,
   cascading revocation, opt-in new-client alerts, native push ownership, and
   future WebAuthn/platform-attestation assurance.
-- [`topics/stream-persisted-render-parity.md`](topics/stream-persisted-render-parity.md)
+- [`topics/stream-persisted-render-parity.md`](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/stream-persisted-render-parity.md)
   — graded convergence contract between the active live tail and the durable
   provider transcript: strong structural stability for paired tool calls,
   bounded optimistic/live-only detail near the tail, and no VIBEALLDAY shadow
@@ -188,30 +188,30 @@ that request's data until they close. Details and the owner table are in
 - [`topics/project-directory-storage.md`](topics/project-directory-storage.md)
   — app-data-only default for VIBEALLDAY-managed state, explicit global project-local
   opt-in, the complete project/Git writer audit, and hosted capability rollout.
-- [`topics/storage-settings.md`](topics/storage-settings.md) — first-pass
+- [`topics/storage-settings.md`](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/storage-settings.md) — first-pass
   Storage Settings contract: VIBEALLDAY data directory vs. project `.vibeallday`, lazy media
   by default, and unbounded preservation of new managed-session images as a
   separate opt-in.
-- [`topics/session-media-handles.md`](topics/session-media-handles.md) —
+- [`topics/session-media-handles.md`](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/session-media-handles.md) —
   authenticated lazy transcript media handles, default-off durable
   preservation, and the correction to unconditional project materialization.
-- [`topics/disk-full-degraded-mode.md`](topics/disk-full-degraded-mode.md)
+- [`topics/disk-full-degraded-mode.md`](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/disk-full-degraded-mode.md)
   — problem statement and latent proposal for keeping relay/local control
   paths alive when optional disk writers hit `ENOSPC`.
-- [`docs/project/connection-matrix.md`](docs/project/connection-matrix.md) —
+- [`docs/project/connection-matrix.md`](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/docs/project/connection-matrix.md) —
   the four client transport modes (Direct / WS / SecureConnection /
   SecureConnection-via-relay) and which auth/encoding each uses.
-- [`docs/project/ws-auth-state-model.md`](docs/project/ws-auth-state-model.md)
+- [`docs/project/ws-auth-state-model.md`](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/docs/project/ws-auth-state-model.md)
   — admission policy (`local_unrestricted` / `local_cookie_trusted` /
   `srp_required`) and the SRP transport state machine.
-- [`topics/active-content-security.md`](topics/active-content-security.md) —
+- [`topics/active-content-security.md`](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/active-content-security.md) —
   confirmed browser-assisted privilege path from same-origin agent-authored
   HTML, the source-first active-file contract, and the isolated-origin
   requirement for executable project applications.
-- [`docs/project/2026-01-05-server-side-rendering.md`](docs/project/2026-01-05-server-side-rendering.md)
+- [`docs/project/2026-01-05-server-side-rendering.md`](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/docs/project/2026-01-05-server-side-rendering.md)
   — server-rendered markdown / diff / file-highlight augments that the client
   consumes through the streaming path.
-- [`docs/project/relay-design.md`](docs/project/relay-design.md) — the
+- [`docs/project/relay-design.md`](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/docs/project/relay-design.md) — the
   end-to-end-encrypted relay; the "dumb pipe" contract.
 
 
@@ -380,7 +380,7 @@ rows loaded while replacing off-window runs with height-model spacers. Search,
 recall, route restoration, keyboard turn navigation, and the turn rail wake a
 target row before aligning against real DOM geometry. Live quote anchors remain
 mounted as sparse islands. See
-[`topics/transcript-virtualization.md`](topics/transcript-virtualization.md).
+[`topics/transcript-virtualization.md`](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/transcript-virtualization.md).
 
 **Cost.** Medium for semantic window trimming because pagination, scroll
 following, and message-associated maps must change atomically. Higher for row
@@ -393,7 +393,7 @@ since mount, while full provider history remains recoverable through Load older.
 **Accepted trade-off.** A 360-turn trace reduced the final mounted state from
 722 rows and 18,985 elements to eight rows and 435 elements. Native browser Find
 cannot discover an off-window row; that accepted limitation remains tracked in
-[`gaps/transcript-render-window-native-find.md`](gaps/transcript-render-window-native-find.md),
+[`gaps/transcript-render-window-native-find.md`](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/gaps/transcript-render-window-native-find.md),
 while VIBEALLDAY's in-session search must continue to wake off-window matches.
 
 ### Portable transcript compiler and Web rendering boundary
@@ -408,9 +408,9 @@ explicit cache and rendering adapters. Promoting a versioned projection or
 moving execution to the browser requires parity fixtures, bounded input cost,
 unknown-record filtering and a client/server compatibility review.
 
-See [portable transcript compiler](topics/portable-transcript-compiler.md),
-[Simple Client API](topics/simple-client-api.md) and its
-[Web demo plan](docs/tactical/130-simple-client-api-and-web-demo.md).
+See [portable transcript compiler](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/portable-transcript-compiler.md),
+[Simple Client API](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/simple-client-api.md) and its
+[Web demo plan](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/docs/tactical/130-simple-client-api-and-web-demo.md).
 
 ### Disk-pressure degraded mode
 
@@ -422,7 +422,7 @@ the process is alive.
 **Proposal.** Treat optional diagnostics as degradable, fail upload/user-action
 writes explicitly, and surface disk-pressure state through diagnostics when the
 same policy starts appearing across multiple writers. See
-[`topics/disk-full-degraded-mode.md`](topics/disk-full-degraded-mode.md).
+[`topics/disk-full-degraded-mode.md`](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/disk-full-degraded-mode.md).
 
 **Cost.** Small for stream hardening; larger if VIBEALLDAY adds log rotation, shared
 persistence policy, or remote-visible disk health.

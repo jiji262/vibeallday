@@ -67,7 +67,7 @@ You can run your own relay or place VibeAllDay behind an HTTPS reverse proxy.
 This is an operator workflow: you are responsible for certificates,
 authentication, updates, origin restrictions, logs, and abuse controls.
 
-The public [relay design](https://github.com/jiji262/vibeallday/blob/HEAD/docs/project/relay-design.md)
+The public [relay design](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/docs/project/relay-design.md)
 documents the protocol and deployment components for self-hosting.
 
 ## Connection troubleshooting

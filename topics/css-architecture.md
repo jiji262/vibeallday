@@ -26,23 +26,23 @@ bounded part of the same verification surface.
 
 ## Migration tracking
 
-[`docs/tactical/070-css-modules-migration.md`](../docs/tactical/070-css-modules-migration.md)
+[`docs/tactical/070-css-modules-migration.md`](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/docs/tactical/070-css-modules-migration.md)
 is the closed campaign record. It no longer carries a priority queue. This
 topic is the binding architecture, candidate-selection protocol, and reusable
 runbook.
 
-[`docs/tactical/072-source-css-ownership-map.md`](../docs/tactical/072-source-css-ownership-map.md)
+[`docs/tactical/072-source-css-ownership-map.md`](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/docs/tactical/072-source-css-ownership-map.md)
 records the ownership evidence for the file viewer, source review, source
 control, and blame regions: which classes are generated and stay global, which
 component owns each rule, every cross-owner reach-in a slice must convert, and
 the rules verified dead. It is reference data, not policy.
 
-[`docs/tactical/074-mixed-model-css-paydown.md`](../docs/tactical/074-mixed-model-css-paydown.md)
+[`docs/tactical/074-mixed-model-css-paydown.md`](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/docs/tactical/074-mixed-model-css-paydown.md)
 is the stopped bounded-campaign ledger. It records the final campaign counts,
 verification evidence, and the known ownership-sink false positive left for
 tooling follow-up.
 
-[Tactical 076](../docs/tactical/076-css-module-contracts-and-tooling.md) is the
+[Tactical 076](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/docs/tactical/076-css-module-contracts-and-tooling.md) is the
 closed tooling-hardening record for the Biome upgrade, module lint and usage
 contracts, touched-component guidance, and on-demand health summary. It does
 not carry a migration queue.

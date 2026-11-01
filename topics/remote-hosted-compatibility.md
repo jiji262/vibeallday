@@ -160,7 +160,7 @@ encrypted envelope: an 8-byte outbound sequence number, the 16-byte request
 UUID, then the bytes. It is not advertised in `formats`: a server sends it
 only for a request that set `stream: true`, which a client sets only on an
 encrypted connection that can decode it. The contract is in
-[relay transfer size](media-rendering-and-routing.md#relay-transfer-size).
+[relay transfer size](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/media-rendering-and-routing.md#relay-transfer-size).
 The 2026-10-04 review checked the core corpus `v0.8.0`, `v0.8.1`, `v0.9.0`,
 `v0.9.1` and `v0.9.2` (and `v0.7.0`). Each reads only a request's `id`,
 `method`, `path`, `headers` and `body`, so it ignores `stream` and answers
@@ -172,7 +172,7 @@ server version. Standing maintainer compatibility authorization applies.
 
 On 2026-10-17 the maintainer approved a coordinated unreleased-native beta
 change: `stream: "connection"` selects the shared body window described in
-[relay transfer size](media-rendering-and-routing.md#relay-transfer-size).
+[relay transfer size](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/media-rendering-and-routing.md#relay-transfer-size).
 It does not add a request/response echo negotiation or an old-native support
 layer. Browser requests continue to select `stream: true`; no browser SRP
 authentication, hosted-client compatibility floor or capability meaning changes.

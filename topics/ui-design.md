@@ -69,7 +69,7 @@ pnpm --filter @vibeallday/client exec playwright test --config playwright.artifa
 
 Playwright Chromium must be installed for export/capture. The relay test also
 requires OpenSSL and the relay workspace's native dependencies; see the
-[isolated relay recipe](media-rendering-and-routing.md#interactive-artifact-relay-verification)
+[isolated relay recipe](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/media-rendering-and-routing.md#interactive-artifact-relay-verification)
 for the temporary-home wrapper and browser cache setting. The source/dev and
 viewer servers used by tests are fresh, use unused ports, and are closed
 by the tests. No test restarts the operator's VIBEALLDAY server.
@@ -267,7 +267,7 @@ expiry is reported as unknown.
 
 ### Standard handoff
 
-With [Tool commentary](acli-commentary.md) enabled and a supporting VIBEALLDAY server,
+With [Tool commentary](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/acli-commentary.md) enabled and a supporting VIBEALLDAY server,
 the JSON-producing call itself fulfills the artifact handoff: VIBEALLDAY presents the
 following links and both image previews beside the tool output, including a
 collapsed code-mode `Exec` row. Image expansion follows the existing inline
@@ -339,7 +339,7 @@ returned `url` on the configured artifact domain, with its expiry. Select
 the local/public audience appropriate to the user's connection. Verify that
 URL in a browser, including its assets and an interaction, before calling it
 usable. Ordinary taps on configured artifact links inside an authenticated
-session open its [managed viewer](parked-file-viewer.md#interactive-artifact-links),
+session open its [managed viewer](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/parked-file-viewer.md#interactive-artifact-links),
 keeping the session and composer mounted on mobile as well as desktop. Prefer
 that interaction for review; deliberate browser new-tab gestures remain
 available. A parent policy that blocks embedding requires a frontend restart
@@ -353,7 +353,7 @@ stops it. Interactive HTML artifacts must be enabled in Local Access, with
 a reachable separate artifact origin. Local access can use
 `artifacts.localhost` on the forwarded VIBEALLDAY port; hosted clients need a configured
 public HTTPS artifact address. The exact configuration, grant, expiry, and
-security contract lives in [active content security](active-content-security.md#interactive-html-artifacts).
+security contract lives in [active content security](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/active-content-security.md#interactive-html-artifacts).
 Any required restart of a live VIBEALLDAY server belongs to the operator.
 
 Source/scriptless viewing remains available when interactive delivery is
@@ -388,7 +388,7 @@ Chromium on Linux is verified. The tests use portable Node filesystem/server
 APIs; macOS, Windows, and WebKit remain unverified. The relay gateway explicitly
 skips when OpenSSL is unavailable. These local-service tests do not attest to
 a particular public tunnel or published hosted-client build. Broader HTML
-inspection controls remain owned by [the HTML viewer gap](../gaps/html-document-viewer.md).
+inspection controls remain owned by [the HTML viewer gap](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/gaps/html-document-viewer.md).
 
 ## Design decisions
 
@@ -403,4 +403,4 @@ inspection controls remain owned by [the HTML viewer gap](../gaps/html-document-
   over a minimal download. It does not install applications or launch servers.
 - **Reuse the existing artifact isolation**, versus new hosting machinery:
   source authoring and document delivery remain separate concerns. The broader
-  [Interactives](interactives.md) proposal is not required for mockup review.
+  [Interactives](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/interactives.md) proposal is not required for mockup review.

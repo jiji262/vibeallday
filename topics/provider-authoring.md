@@ -9,15 +9,15 @@ Topic: provider-authoring
 
 See also: [provider-output-contract](provider-output-contract.md) (the
 normalized-output half of this map: the spec for what a provider's
-normalization must produce), [provider-abstraction](provider-abstraction.md)
+normalization must produce), [provider-abstraction](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/provider-abstraction.md)
 (when to promote a
 provider/model conditional to the `AgentProvider` seam — distinct from *how to
-add a provider*), [stream-persisted-render-parity](stream-persisted-render-parity.md)
-(a contract every provider must satisfy), [provider-state-machine](provider-state-machine.md),
-[provider-installation-updates](provider-installation-updates.md) (mandatory
+add a provider*), [stream-persisted-render-parity](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/stream-persisted-render-parity.md)
+(a contract every provider must satisfy), [provider-state-machine](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/provider-state-machine.md),
+[provider-installation-updates](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/provider-installation-updates.md) (mandatory
 coordination before a provider gains an in-app installer/updater),
-[provider-session-tree](provider-session-tree.md), [codex-sessions](codex-sessions.md),
-[pi-provider](pi-provider.md). Dev doc:
+[provider-session-tree](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/provider-session-tree.md), [codex-sessions](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/codex-sessions.md),
+[pi-provider](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/pi-provider.md). Dev doc:
 `docs/project/multi-provider-integration.md` (the kzahel-organized architecture
 overview — interface, per-provider session formats/storage, comparison table).
 
@@ -84,7 +84,7 @@ candidates and then apply the launch mechanism's stronger requirements:
 
 If VIBEALLDAY can mutate the installation, discovery and launch are also readers of a
 shared installation family. The updater must use the coordinator in
-[provider-installation-updates](provider-installation-updates.md); do not add an
+[provider-installation-updates](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/provider-installation-updates.md); do not add an
 independent `update()` method to one provider row when aliases may share the
 same executable.
 
@@ -100,7 +100,7 @@ with startup.
 
 The live and reader halves are two producers of the *same* session, so they
 must strongly converge for items present in both — see
-[stream-persisted-render-parity](stream-persisted-render-parity.md). Concretely,
+[stream-persisted-render-parity](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/stream-persisted-render-parity.md). Concretely,
 structured facts that define a durable tool call's identity, ordering,
 grouping, parameters, result, or settled layout must be recoverable into the
 same fields on reload. Useful live-only tail events may render transiently;

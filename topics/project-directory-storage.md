@@ -12,9 +12,9 @@ contains the policy yet. Source Review mutable state is revision-safe across
 repeated mode changes. The pre-correction writer audit remains below as release
 and compatibility history.
 
-Settings surface: [Storage Settings](storage-settings.md).
+Settings surface: [Storage Settings](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/storage-settings.md).
 
-[rendez uploads](rendez.md) have a separate explicit opt-in: enabling a
+[rendez uploads](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/rendez.md) have a separate explicit opt-in: enabling a
 project's `.rendez` watcher authorizes that upload destination and its delivered
 snapshots even in app-data mode. It does not change browser attachment storage
 or authorize other project-local VIBEALLDAY state.
@@ -56,7 +56,7 @@ One narrow exception is approved but not implemented: a deliberate
 post-creation name or caption edit writes that project's
 `.project-identity.json`, in either mode, and authorizes no other
 project-local storage. Its contract is
-[project captions § Approved project-local identity extension](project-captions.md#approved-project-local-identity-extension-not-implemented).
+[project captions § Approved project-local identity extension](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/project-captions.md#approved-project-local-identity-extension-not-implemented).
 
 The alternative global mode is **Store VIBEALLDAY assets with projects**. It is an
 explicit opt-in. It authorizes eligible VIBEALLDAY-managed features to use one
@@ -290,7 +290,7 @@ Tool-result preservation has a separate permanent
 that historical reads never create copies, preservation applies only to new
 managed-session results, and preserved copies are not pruned automatically.
 The exact Settings presentation and absent-capability behavior are in
-[Storage Settings](storage-settings.md).
+[Storage Settings](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/storage-settings.md).
 
 ## Implementation Acceptance
 
@@ -313,10 +313,10 @@ checkout.
 
 ## Related Topics
 
-- [Attachment storage](attachment-storage.md)
-- [Session media handles](session-media-handles.md)
-- [Storage settings](storage-settings.md)
-- [Source Review → New Session](source-review-to-session.md)
+- [Attachment storage](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/attachment-storage.md)
+- [Session media handles](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/session-media-handles.md)
+- [Storage settings](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/storage-settings.md)
+- [Source Review → New Session](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/source-review-to-session.md)
 - [Server capabilities](server-capabilities.md)
 - [Vanilla defaults](vanilla-defaults.md)
 - [Hard development rules](hard-development-rules.md)

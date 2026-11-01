@@ -5,15 +5,15 @@
 > blocks onto one canonical presentation (Claude's `Read`/`Edit`/`Write`
 > vocabulary plus a uniform diff augment) without dictating how any model edits.
 
-See also: [`provider-abstraction.md`](provider-abstraction.md) (the
+See also: [`provider-abstraction.md`](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/provider-abstraction.md) (the
 `AgentProvider` seam), [`ui-architecture.md`](ui-architecture.md) (the render
 boundary principle this normalization obeys),
-[`opencode-backend.md`](opencode-backend.md) and [`pi-provider.md`](pi-provider.md)
-(per-backend tool normalization), [`codex-api-provider.md`](codex-api-provider.md)
-(Codex protocol), [`relative-filenames.md`](relative-filenames.md) (file-path
-display these blocks feed), [`collapse-expand-mode.md`](collapse-expand-mode.md)
+[`opencode-backend.md`](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/opencode-backend.md) and [`pi-provider.md`](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/pi-provider.md)
+(per-backend tool normalization), [`codex-api-provider.md`](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/codex-api-provider.md)
+(Codex protocol), [`relative-filenames.md`](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/relative-filenames.md) (file-path
+display these blocks feed), [`collapse-expand-mode.md`](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/collapse-expand-mode.md)
 (outline grouping that consumes this canonical mapping), and
-[`codex-code-mode-render-convergence.md`](codex-code-mode-render-convergence.md)
+[`codex-code-mode-render-convergence.md`](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/codex-code-mode-render-convergence.md)
 (the planned one-command-to-many-actions extension for Codex code mode).
 
 Topic: provider-read-edit-disciplines

@@ -4,7 +4,7 @@
 > attached to the data or render boundary that produces it, rather than patching
 > generated DOM after the fact.
 
-See also: [`injected-message-visibility.md`](injected-message-visibility.md) —
+See also: [`injected-message-visibility.md`](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/injected-message-visibility.md) —
 how VIBEALLDAY-injected, non-user text (compaction commands, summaries, skill/resume
 init text) is hidden or given the system/boundary contract instead of rendering
 as a normal turn.
@@ -50,7 +50,7 @@ different set or sequence than narrowing removed, or where a boundary width
 oscillates. Near-equality thresholds also need slack/hysteresis so measured
 feedback (an item returning changes the measurement) cannot latch or
 flip-flop; see the compact-signal traps in
-[`composer-bottom-bar-overflow.md`](composer-bottom-bar-overflow.md).
+[`composer-bottom-bar-overflow.md`](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/composer-bottom-bar-overflow.md).
 
 Worked instance: the composer bottom-bar overflow engine
 (`useMeasuredComposerOverflow` in `MessageInputToolbar.tsx`) walks a fixed
@@ -174,7 +174,7 @@ window; leaving Settings restores the saved sidebar mode.
 
 A tab opened directly on the new-session page or reloaded there honors the
 saved expanded, collapsed or minimized mode. With no saved choice, it starts
-expanded. The [pre-boot composer](early-typing-handoff.md#pre-boot-composer)
+expanded. The [pre-boot composer](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/early-typing-handoff.md#pre-boot-composer)
 reserves the same sidebar space so adopting early typing does not require
 hiding navigation; `?sidebar=expanded` still wins.
 
@@ -223,7 +223,7 @@ of their rendered content.
 Structured explanatory tooltips use the same timing coordinator explicitly.
 Interactive help panels remain popovers with their own state. The observable
 contract and native fallback are in
-[tooltip-interactions](tooltip-interactions.md).
+[tooltip-interactions](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/tooltip-interactions.md).
 
 ## Desktop Dropdown Panel Placement
 
@@ -335,9 +335,9 @@ retains lazy acquisition and the normal route boundaries.
 Dynamic route assets remain part of one deployed entrypoint generation. Old
 loaded entrypoints must be able to acquire chunks they name after a deployment,
 or recover once through a state-preserving fresh entry. The delivery contract
-is in [`client-asset-delivery.md`](client-asset-delivery.md); the implementation
+is in [`client-asset-delivery.md`](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/client-asset-delivery.md); the implementation
 handoff is
-[`docs/tactical/096-client-route-module-loading.md`](../docs/tactical/096-client-route-module-loading.md).
+[`docs/tactical/096-client-route-module-loading.md`](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/docs/tactical/096-client-route-module-loading.md).
 
 Implementation status: both browser entries apply this boundary to their page,
 navigation-layout, service-worker, and elective floating-action modules. The

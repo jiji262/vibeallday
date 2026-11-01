@@ -116,7 +116,10 @@ export const features = [
     category: "supervise",
     status: "stable",
     docsPath: "/docs/sessions-and-approvals",
-    sourceRefs: ["CLAUDE.md", "topics/session-reactivation.md"],
+    sourceRefs: [
+      "CLAUDE.md",
+      "site/src/content/docs/sessions-and-approvals.md",
+    ],
   },
   {
     id: "push-notifications",
@@ -127,7 +130,7 @@ export const features = [
     status: "stable",
     docsPath: "/docs/notifications-and-voice",
     availability: "Browser Web Push on supported desktop and mobile browsers.",
-    sourceRefs: ["topics/notifications.md"],
+    sourceRefs: ["site/src/content/docs/notifications-and-voice.md"],
   },
   {
     id: "uploads",
@@ -137,7 +140,10 @@ export const features = [
     category: "supervise",
     status: "stable",
     docsPath: "/docs/sessions-and-approvals",
-    sourceRefs: ["README.md", "topics/attachment-storage.md"],
+    sourceRefs: [
+      "README.md",
+      "site/src/content/docs/sessions-and-approvals.md",
+    ],
   },
   {
     id: "voice-input",
@@ -147,7 +153,10 @@ export const features = [
     category: "supervise",
     status: "stable",
     docsPath: "/docs/notifications-and-voice",
-    sourceRefs: ["README.md", "topics/pluggable-speech-recognition.md"],
+    sourceRefs: [
+      "README.md",
+      "site/src/content/docs/notifications-and-voice.md",
+    ],
   },
   {
     id: "localized-client",
@@ -174,7 +183,10 @@ export const features = [
       alt: "The session navigation and attention inbox",
     },
     featured: true,
-    sourceRefs: ["README.md", "topics/inbox.md"],
+    sourceRefs: [
+      "README.md",
+      "site/src/content/docs/sessions-and-approvals.md",
+    ],
   },
   {
     id: "search-and-recaps",
@@ -184,7 +196,10 @@ export const features = [
     category: "coordinate",
     status: "stable",
     docsPath: "/docs/sessions-and-approvals",
-    sourceRefs: ["site/src/pages/spring-2026.astro", "topics/recaps.md"],
+    sourceRefs: [
+      "site/src/pages/spring-2026.astro",
+      "site/src/content/docs/sessions-and-approvals.md",
+    ],
   },
   {
     id: "steer-and-queue",
@@ -196,10 +211,7 @@ export const features = [
     docsPath: "/docs/sessions-and-approvals",
     providers: ["claude", "codex"],
     featured: true,
-    sourceRefs: [
-      "topics/message-control-steer-queue-btw-later-interrupt.md",
-      "topics/steer-queue-provider-differences.md",
-    ],
+    sourceRefs: ["site/src/content/docs/sessions-and-approvals.md"],
   },
   {
     id: "project-queue",
@@ -211,7 +223,7 @@ export const features = [
     docsPath: "/docs/project-queue",
     availability:
       "Optional: entry controls are opt-in and capability-gated for hosted clients.",
-    sourceRefs: ["topics/project-queue.md"],
+    sourceRefs: ["site/src/content/docs/project-queue.md"],
   },
   {
     id: "global-activity",
@@ -221,7 +233,10 @@ export const features = [
     category: "coordinate",
     status: "stable",
     docsPath: "/docs/sessions-and-approvals",
-    sourceRefs: ["README.md", "docs/project/differentiators.md"],
+    sourceRefs: [
+      "README.md",
+      "site/src/content/docs/sessions-and-approvals.md",
+    ],
   },
   {
     id: "session-forks",
@@ -234,8 +249,7 @@ export const features = [
     providers: ["claude", "codex"],
     sourceRefs: [
       "README.md",
-      "topics/fork-from-turn.md",
-      "topics/provider-fork-support.md",
+      "site/src/content/docs/sessions-and-approvals.md",
     ],
   },
   {
@@ -263,7 +277,7 @@ export const features = [
     featured: true,
     sourceRefs: [
       "site/src/pages/subscription-access-approaches.astro",
-      "topics/provider-subscription-usage.md",
+      "site/src/content/docs/providers.md",
       "packages/server/src/sdk/providers/claude.ts",
       "packages/server/src/sdk/providers/codex.ts",
     ],
@@ -277,7 +291,7 @@ export const features = [
     status: "stable",
     docsPath: "/docs/providers",
     providers: ["claude", "codex"],
-    sourceRefs: ["README.md", "docs/project/differentiators.md"],
+    sourceRefs: ["README.md", "site/src/content/docs/providers.md"],
   },
   {
     id: "model-controls",
@@ -290,7 +304,7 @@ export const features = [
     providers: ["claude", "codex"],
     sourceRefs: [
       "site/src/pages/spring-2026.astro",
-      "topics/permission-mode.md",
+      "site/src/content/docs/providers.md",
     ],
   },
   {
@@ -303,10 +317,8 @@ export const features = [
     docsPath: "/docs/providers",
     providers: ["opencode", "grok", "gemini", "pi"],
     sourceRefs: [
-      "topics/opencode-backend.md",
-      "topics/grok.md",
+      "site/src/content/docs/providers.md",
       "packages/server/src/sdk/providers/gemini.ts",
-      "topics/pi-provider.md",
     ],
   },
   {
@@ -346,8 +358,7 @@ export const features = [
     docsPath: "/docs/files-and-source-control",
     featured: true,
     sourceRefs: [
-      "topics/source-control.md",
-      "topics/source-review-to-session.md",
+      "site/src/content/docs/files-and-source-control.md",
       "site/src/pages/spring-2026.astro",
     ],
   },
@@ -363,7 +374,7 @@ export const features = [
       "Opt-in: link holders and the current relay operator can read shared content.",
     sourceRefs: [
       "site/src/pages/spring-2026.astro",
-      "topics/relay-origin-and-share-gating.md",
+      "site/src/content/docs/security-and-privacy.md",
     ],
   },
   {
@@ -375,10 +386,7 @@ export const features = [
     status: "stable",
     docsPath: "/docs/remote-access",
     featured: true,
-    sourceRefs: [
-      "docs/project/relay-design.md",
-      "topics/relay-origin-and-share-gating.md",
-    ],
+    sourceRefs: ["site/src/content/docs/remote-access.md"],
   },
   {
     id: "direct-access",
@@ -388,7 +396,7 @@ export const features = [
     category: "connect",
     status: "stable",
     docsPath: "/docs/remote-access",
-    sourceRefs: ["README.md", "docs/project/remote-access.md"],
+    sourceRefs: ["README.md", "site/src/content/docs/remote-access.md"],
   },
   {
     id: "self-hosted-relay",
@@ -398,7 +406,7 @@ export const features = [
     category: "connect",
     status: "stable",
     docsPath: "/docs/remote-access",
-    sourceRefs: ["docs/project/relay-design.md", "README.md"],
+    sourceRefs: ["site/src/content/docs/remote-access.md", "README.md"],
   },
   {
     id: "local-data",

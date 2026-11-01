@@ -8,7 +8,7 @@ Topic: architecture-mandates
 
 See also:
 
-- [`session-catalog-observation.md`](session-catalog-observation.md)
+- [`session-catalog-observation.md`](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/session-catalog-observation.md)
 
 ## Resource Quiescence
 

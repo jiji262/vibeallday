@@ -7,14 +7,14 @@
 
 Topic: provider-refresh
 
-Related topics: [claude](claude.md), [grok](grok.md),
-[opencode-backend](opencode-backend.md),
-[pi-provider](pi-provider.md),
-[provider-installation-updates](provider-installation-updates.md),
+Related topics: [claude](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/claude.md), [grok](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/grok.md),
+[opencode-backend](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/opencode-backend.md),
+[pi-provider](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/pi-provider.md),
+[provider-installation-updates](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/provider-installation-updates.md),
 [provider-version-support](provider-version-support.md),
-[provider-state-machine](provider-state-machine.md),
-[provider-model-glyphs](provider-model-glyphs.md),
-[cost-efficiency](cost-efficiency.md).
+[provider-state-machine](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/provider-state-machine.md),
+[provider-model-glyphs](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/provider-model-glyphs.md),
+[cost-efficiency](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/cost-efficiency.md).
 
 ## Contract
 
@@ -42,11 +42,11 @@ actually changed.
 Cost and credential boundaries still apply during refresh work. Do not turn a
 subscription-backed provider into an API-billed provider, or pass an ambient API
 key to a CLI that normally uses browser/subscription auth, unless the user made
-that choice explicit. See [cost-efficiency](cost-efficiency.md).
+that choice explicit. See [cost-efficiency](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/cost-efficiency.md).
 
 This maintainer audit is not the runtime provider updater. Any VIBEALLDAY command that
 mutates a user's installed provider software follows
-[provider-installation-updates](provider-installation-updates.md), including
+[provider-installation-updates](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/provider-installation-updates.md), including
 its runtime leases, verification, and cache-generation contract.
 
 ## Generic Refresh Loop
@@ -86,7 +86,7 @@ session JSONL assumptions were checked. It is an audited-through marker, not a
 pin or minimum version.
 
 After updating Pi, run the opt-in installed-binary check documented in
-[pi provider](pi-provider.md#installed-binary-compatibility-check). Compare the
+[pi provider](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/pi-provider.md#installed-binary-compatibility-check). Compare the
 matching upstream release tags when the version changed; the real zero-token
 probe covers the production model-discovery command but intentionally does not
 exercise authenticated assistant events or persisted sessions.
@@ -135,10 +135,10 @@ Windows launch descriptor targets, still exists and reports 1.1.0. Pi 0.99
 adds a `disposition` to successful `prompt` responses. A `handled` prompt starts
 no run and is never followed by `agent_settled`, so a user-typed extension
 command used to leave the VIBEALLDAY turn busy indefinitely. VIBEALLDAY now reads the prompt
-response and ends such a turn ([pi-provider](pi-provider.md#settled-turn-boundary--compatible-through-pi-110)).
+response and ends such a turn ([pi-provider](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/pi-provider.md#settled-turn-boundary--compatible-through-pi-110)).
 A real `PiProvider` session against 1.1.0 ended a handled command's turn 5 ms
 after the user message. Remaining optional adoptions are in
-[pi-provider sketches](pi-provider.sketches.md#pi-1x-adoption-candidates).
+[pi-provider sketches](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/pi-provider.sketches.md#pi-1x-adoption-candidates).
 Root compatibility is recorded through Pi 1.1.0.
 
 Previous refresh, 2026-08-20: official `v0.82.1..v0.84.2` preserves Pi's
@@ -218,7 +218,7 @@ Difference detectors:
   usage notifications change shape.
 - `turn/start` approval, `sandboxPolicy`, or named `permissions` fields change
   shape or sticky-default semantics in a way that could break
-  [codex-permission-mode](codex-permission-mode.md).
+  [codex-permission-mode](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/codex-permission-mode.md).
 - Server startup warns that detected Codex version differs from
   `expectedVersion`; this alone is a trigger to run the checks above.
 
@@ -276,7 +276,7 @@ Previous source refresh, 2026-10-15 (0.163.0, generated types only):
 - Cold resume now restores a thread's saved permission profile, but honors
   explicit caller overrides (upstream `7c9bfb910`, `bf4ca52b6`). VIBEALLDAY sends
   `approvalPolicy` and `sandbox` on every start/resume and the full pair on
-  every `turn/start` ([codex-permission-mode](codex-permission-mode.md)), so
+  every `turn/start` ([codex-permission-mode](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/codex-permission-mode.md)), so
   its mode stays authoritative.
 - Not consumed: background compaction is behind the opt-in `AsyncCompaction`
   feature; `cli_daybreak` defaulting on is TUI-only; thread read-state
@@ -447,7 +447,7 @@ Previous source refresh, 2026-09-24 (0.156.1):
   `pnpm codex:protocol:check` failed on the missing `ThreadRollbackResponse`.
   That fork now resolves the anchor's turn and passes it as
   `thread/fork.lastTurnId`, the boundary typed forks already used
-  ([provider fork support](provider-fork-support.md#codex)). The rollback types
+  ([provider fork support](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/provider-fork-support.md#codex)). The rollback types
   leave the checked-in subset. `thread/revert` and `ThreadForkParams`'
   `lastTurnId`/`beforeTurnId` are unchanged.
 - The other generated changes are additive or deprecations VIBEALLDAY does not use.
@@ -474,7 +474,7 @@ Previous source refresh, 2026-09-24 (0.156.1):
   records 272,000 tokens for the whole GPT-6 family. VIBEALLDAY now ranks them after
   Astra in upstream's priority order, applies the 272K window to every
   `gpt-6-` model, and renders them as `Cd So` and `Cd Lu`
-  ([provider model glyphs](provider-model-glyphs.md)). Both stay out of the
+  ([provider model glyphs](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/provider-model-glyphs.md)). Both stay out of the
   discovery-failure fallbacks, like Astra. Codex's catalog carries no prices,
   so `model-prices.ts` takes their standard short-context rates from
   OpenAI's API pricing page (read 2026-09-24): Sol $2 input, $0.20 cached,
@@ -490,7 +490,7 @@ persisted-JSONL census once a 0.156.1 rollout exists.
 Subset extension, 2026-09-19 (still 0.154.0 source, 0.155.1 binary): the
 checked-in subset gained `ThreadRevertParams`, `ThreadRevertResponse`, and
 `ThreadRevertedNotification` for the in-place `thread/revert` rewind
-([session-rewind](session-rewind.md)). All three exist unchanged in the pinned
+([session-rewind](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/session-rewind.md)). All three exist unchanged in the pinned
 `rust-v0.154.0` source (`app-server-protocol/src/protocol/v2/thread.rs`,
 `common.rs`) and in the installed 0.155.1 generator, so no other generated
 file moved and no version marker changes; `pnpm codex:protocol:check` is
@@ -794,7 +794,7 @@ Current source refresh, 2026-08-29:
   sample. Re-run the census once a 0.151.0 session has written one.
 
 The current observable contracts are [provider output](provider-output-contract.md)
-and [provider runtime status](provider-runtime-status.md).
+and [provider runtime status](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/provider-runtime-status.md).
 
 Status: Codex 0.151.0 app-server protocol, error taxonomy, error-detail
 surfacing, persisted and standalone tool output, MCP text display, and active
@@ -1238,7 +1238,7 @@ Difference detectors:
   reaches a published retirement boundary, starts rejecting requests, or
   silently resolves to another id. Compare those changes with the opt-in
   previous-model registry in
-  [older-claude-models](older-claude-models.md).
+  [older-claude-models](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/older-claude-models.md).
 
 Previous-model registry review:
 
@@ -1380,7 +1380,7 @@ Previous source refresh, 2026-10-08 (Claude Code 2.1.293 / SDK 0.3.293):
   `fable` is a native alias. The concrete rows add `claude-haiku-4-5-20251001`
   and `claude-sonnet-5`. `mergeClaudeModels()` now marks every concrete
   `claude-*` row it does not fold as additional, and the direct catalog shows
-  them only when opted in ([older-claude-models](older-claude-models.md)). The
+  them only when opted in ([older-claude-models](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/older-claude-models.md)). The
   registry gains `claude-fable-5`, `claude-opus-5` and `claude-sonnet-5`. The
   2.1.283 gap is closed, narrowed to the family-only keying in
   `gaps/claude-reported-model-keyed-by-family.md`. `plugin-authoring` and
@@ -1445,7 +1445,7 @@ Previous source refresh, 2026-09-26 (Claude Code 2.1.283 / SDK 0.3.283):
   `mergeClaudeModels()` let that later row overwrite the stable `fable` row
   with Fable 5 metadata. It now folds only the first Fable-family row. Showing
   previous versions as primary rows conflicts with
-  [older-claude-models](older-claude-models.md) and is recorded in
+  [older-claude-models](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/older-claude-models.md) and is recorded in
   `gaps/claude-live-catalog-lists-previous-models.md`. Plugin skills are now
   listed by bare name, with the namespaced form kept as an alias. `/focus` is
   new, and `/goal` and `/loop` remain native. The usage response has the same
@@ -1698,7 +1698,7 @@ compatibility is refreshed. A live `gpt-5.6-sol` request crossed the former
 200K local boundary with 205,104 active input/cache tokens and reported the
 catalog-derived 400K runtime window; details and the metadata-less runtime
 recheck boundary are in
-[resume-compaction](resume-compaction.md#claude-gateway-runtime-context-and-compaction-windows).
+[resume-compaction](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/resume-compaction.md#claude-gateway-runtime-context-and-compaction-windows).
 
 Current source refresh, 2026-07-25:
 
@@ -1855,7 +1855,7 @@ Current read-only/local audit, 2026-06-14:
   checks `--version` for usability, and relies on SDK/live catalog probes for
   model and command surfaces.
 - The 2.1.177 behavior VIBEALLDAY currently depends on is already recorded in
-  [claude](claude.md) and [session-ownership](session-ownership.md): `--resume`
+  [claude](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/claude.md) and [session-ownership](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/session-ownership.md): `--resume`
   appends to the same transcript file, live processes do not re-read external
   appends, concurrent writers fork the `parentUuid` chain, and later resume can
   silently drop one branch. No provider source change is indicated by this
@@ -2004,7 +2004,7 @@ Current compatibility audit, 2026-10-16 (1.0.60, no adapter change):
 Design candidates, none required: map `x.ai/mcp/elicit` onto VIBEALLDAY's pending
 input; decide whether VIBEALLDAY should set `GROK_DISABLE_AUTOUPDATER=1`, which the
 official agent SDKs inject into spawned non-leader agents, against
-[provider-installation-updates](provider-installation-updates.md); adopt
+[provider-installation-updates](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/provider-installation-updates.md); adopt
 `session/set_config_option` for mid-session model/effort and `session/close`
 for shutdown.
 
@@ -2087,7 +2087,7 @@ Primary sources:
 - `packages/server/src/sdk/providers/opencode.ts`;
 - `packages/server/src/sessions/opencode-reader.ts`;
 - `packages/shared/src/opencode-schema/`;
-- [opencode-backend](opencode-backend.md) coverage tables.
+- [opencode-backend](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/opencode-backend.md) coverage tables.
 
 Routine probes:
 
@@ -2100,7 +2100,7 @@ opencode acp --help
 
 When transcript/rendering compatibility is the question, sample real exports
 and SSE fixtures, then count part/event types against visible VIBEALLDAY block coverage
-as described in [opencode-backend](opencode-backend.md). Keep both raw coverage
+as described in [opencode-backend](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/opencode-backend.md). Keep both raw coverage
 and coverage after excluding deliberate metadata-only parts.
 
 Difference detectors:
@@ -2114,13 +2114,13 @@ Difference detectors:
 - `opencode acp` becomes mature enough to justify a design comparison against
   the current HTTP/SSE provider.
 - Model ids become misleading in the model indicator UI; that belongs with
-  [provider-model-glyphs](provider-model-glyphs.md), not necessarily the
+  [provider-model-glyphs](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/provider-model-glyphs.md), not necessarily the
   provider runtime.
 
 Current read-only audit, 2026-06-05:
 
 - Installed OpenCode is still `1.15.13`, matching the existing
-  [opencode-backend](opencode-backend.md) local sample version.
+  [opencode-backend](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/opencode-backend.md) local sample version.
 - `opencode models` returns a current dynamic catalog including new Copilot,
   OpenAI, Claude, Gemini, Hugging Face, and `local-glm` entries; this is
   runtime data and the provider already queries it dynamically.

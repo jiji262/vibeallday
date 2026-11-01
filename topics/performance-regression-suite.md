@@ -8,7 +8,7 @@
 Topic: performance-regression-suite
 
 Historical surveys and recovery measurements live in the
-[`performance-regression-suite.runs`](performance-regression-suite.runs/README.md)
+[`performance-regression-suite.runs`](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/performance-regression-suite.runs/README.md)
 ledger. This document owns only the current harness and interpretation
 contract.
 
@@ -302,7 +302,7 @@ the fleet append 5 ms route ceiling alongside a 40 ms metadata ceiling. Older
 execution revisions retain their original combined route clock.
 
 The specialized public-share byte budget includes safe assistant Markdown HTML
-introduced by `ced769acc` (see [public transcript media](media-rendering-and-routing.md#read-only-shares)).
+introduced by `ced769acc` (see [public transcript media](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/media-rendering-and-routing.md#read-only-shares)).
 CI run [34479361388](https://github.com/jiji262/vibeallday/actions/runs/34479361388)
 measured 19.114 MiB for all three eight-response herds, versus the pre-feature
 13.107 MiB baseline. The 24 MiB ceiling replaces that obsolete 16 MiB budget;

@@ -7,7 +7,7 @@
 
 Topic: glossary-tooltips
 
-See also: [relay head-of-line blocking](../docs/project/relay-head-of-line-blocking.md).
+See also: [relay head-of-line blocking](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/docs/project/relay-head-of-line-blocking.md).
 
 Status: Implemented 2026-08-04. The shared grammar, resolver, capability-gated
 delivery, tab-local cache,
@@ -291,7 +291,7 @@ round trip per render would be the wrong cost. Where the pattern set is instead
 large, open, and filesystem-derived, and the match can be baked once into
 content the server is already producing, the annotation ships and the matcher
 stays server-side; project path links
-([project-path-links](project-path-links.md)) are that case, and the two are
+([project-path-links](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/project-path-links.md)) are that case, and the two are
 not evidence for each other.
 
 Runtime matching uses one compiled multi-pattern phrase automaton per governing
@@ -362,7 +362,7 @@ the rendered source directory and its parents through the project root, or the
 referring-directory/project-root bases for an explicit include. It never needs
 a complete project index first. Sparse positive and exact-negative path facts
 are shared with path linkification. See
-[project-path-links](project-path-links.md) for that index's contract.
+[project-path-links](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/project-path-links.md) for that index's contract.
 
 The path trie distinguishes unknown, present, and exact absent components; a
 directory additionally records whether its immediate listing is complete and
@@ -426,7 +426,7 @@ in 75 ms, and installed watches across an entire unrelated tree — roughly
 names.
 
 These are deliberately not the directory watches of the project path index
-([project-path-links](project-path-links.md)), which keep best-effort cached
+([project-path-links](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/project-path-links.md)), which keep best-effort cached
 facts honest and are torn down whenever byte-budget eviction releases their
 project. A glossary subscriber needs its watch to last as long as the
 subscription, so the subscription manager owns these for the reference-counted

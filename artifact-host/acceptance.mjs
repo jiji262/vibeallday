@@ -18,7 +18,7 @@ import { hostname, tmpdir } from "node:os";
 import { dirname, resolve, join } from "node:path";
 import { randomUUID } from "node:crypto";
 import { InstallService } from "../packages/server/src/services/InstallService.ts";
-import { files } from "../research/content-worker-localhost-spike/fixture.mjs";
+import { files } from "./fixtures/resource-files.mjs";
 import {
   writeCapturePreview,
   emitCapturePreview,

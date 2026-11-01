@@ -13,7 +13,7 @@ page, stops if row count does not progress, and cancels old-source continuations
 Keep at least three pages in the integration fixture, with an old pending ask
 and unread records only on the final page. See
 `packages/client/e2e/session-workbench.spec.ts` and
-[the workbench contract](../../topics/session-workbench.md).
+[the workbench contract](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/session-workbench.md).
 
 ## Phone session cards need shrinkable grid tracks and links
 

@@ -54,7 +54,7 @@ export const providers = [
     notes:
       "Permissions, questions, tools, images, and history are supported; capability parity varies.",
     runtimeIds: ["opencode"],
-    sourceRefs: ["topics/opencode-backend.md"],
+    sourceRefs: ["site/src/content/docs/providers.md"],
   },
   {
     id: "grok",
@@ -65,7 +65,7 @@ export const providers = [
       "Includes prompt suggestions, effort controls, approvals, and steering where upstream supports them.",
     runtimeIds: ["grok"],
     sourceRefs: [
-      "topics/grok.md",
+      "site/src/content/docs/providers.md",
       "packages/server/src/sdk/providers/grok-acp.ts",
     ],
   },
@@ -80,7 +80,7 @@ export const providers = [
     runtimeIds: ["claude-ollama"],
     sourceRefs: [
       "packages/server/src/sdk/providers/claude-ollama.ts",
-      "topics/claude.md",
+      "site/src/content/docs/providers.md",
     ],
   },
   {
@@ -108,7 +108,7 @@ export const providers = [
     runtimeIds: ["pi"],
     sourceRefs: [
       "packages/server/src/sdk/providers/pi.ts",
-      "topics/pi-provider.md",
+      "site/src/content/docs/providers.md",
     ],
   },
 ] as const satisfies readonly PublicProvider[];

@@ -10,8 +10,8 @@ workflow; applicable topic-reading triggers still apply.
 [AGENTS.md](AGENTS.md) supplies the agent entry rules.
 
 This file owns the common rules and reading triggers. Contributor procedures
-live in [docs/development/](docs/development/README.md); product behavior and
-technical contracts live in their owning `topics/` documents. Follow direct
+live in [docs/development/](docs/development/README.md); specialist development
+rules live in the retained `topics/` documents. Follow direct
 links for the task at hand; reading the whole development directory is not
 required.
 
@@ -25,8 +25,8 @@ access uses SRP authentication and end-to-end NaCl encryption.
 
 The server/web core needs no hosted account or Firebase dependency. The browser client uses Web Push for notifications. Native application shells,
 browser extensions and native push delivery are outside this fork's scope.
-See [project context](docs/project/) for detail, [historical vision](docs/archive/)
-for background, and `~/code/dotfiles/projects/README.md` for cross-project context.
+The root [README](README.md) covers setup and current scope. Historical design
+documents and investigation notes remain available in Git history.
 
 ## Quick Start
 
@@ -166,7 +166,7 @@ are not a requirement to read every neighboring document.
 | Any provider refresh, transcript schema, or tool-result schema change | [Provider development](docs/development/providers.md) and the applicable [provider refresh](topics/provider-refresh.md) sections; preserve audited-through version markers and run schema validation. |
 | SQLite adapter changes, SQL callers, statement lifetimes, or test ceilings | [Runtime-portable SQLite](topics/optional-sqlite.md#runtime-portable-sqlite): use the shared runtime intersection, reuse prepared statements, and obtain maintainer consensus before widening the boundary. |
 | Dependencies, install scripts, lockfile updates, or audit findings | [Dependency maintenance](docs/development/dependencies.md): install-script allowlist and advisory justifications/revisit triggers. |
-| Creating/editing tactical plans or retiring completed plans/gaps | [Documentation and plans](docs/development/documentation.md): descriptive step names and durable-content migration before retirement. |
+| Documentation changes | [Documentation rules](docs/development/documentation.md): minimal scope, accurate usage instructions and historical references. |
 | Creating a commit | [Commit conventions](docs/development/commits.md): motivation, wrapping, provenance, and series trailers. |
 | Local instances, ports, profiles, or provider/feature environment configuration | [Local development](docs/development/local-development.md). |
 | Server/client logs or maintenance diagnostics | [Debugging](docs/development/debugging.md). |
@@ -187,14 +187,13 @@ Before committing, checks must be warning-free; follow
 recording debt that cannot safely be isolated. Preserve unrelated concurrent
 edits and format only the exact files changed by the task.
 
-## Observable Behavior Contracts
+## Documentation Scope
 
-Before an implementation is complete, verify that every intentional observable
-behavior it adds or changes is covered by a contract in the owning
-`topics/*.md`; update or create that contract when it is not. State externally
-testable outcomes and constraints, including deliberate failure or fallback
-behavior, rather than implementation narration. Tests and commit messages are
-evidence and history, not substitutes for the product contract.
+Keep observable behavior, failure handling and compatibility expectations
+explicit in the change description and meaningful regression coverage. Update
+existing usage instructions when behavior changes make them inaccurate. Create
+new documentation only when requested; follow the
+[documentation rules](docs/development/documentation.md).
 
 ## Keeping This Guide Small
 

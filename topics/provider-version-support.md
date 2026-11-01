@@ -8,11 +8,11 @@
 Topic: provider-version-support
 
 Related topics: [provider-refresh](provider-refresh.md) (the maintainer audit
-that moves the tip markers), [provider-installation-updates](provider-installation-updates.md)
+that moves the tip markers), [provider-installation-updates](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/provider-installation-updates.md)
 (any VIBEALLDAY command that mutates an installation),
-[backward-compat](backward-compat.md) (VIBEALLDAY's own public surfaces, a separate
-concern), [pi-provider](pi-provider.md), [claude](claude.md),
-[codex-sessions](codex-sessions.md).
+[backward-compat](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/backward-compat.md) (VIBEALLDAY's own public surfaces, a separate
+concern), [pi-provider](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/pi-provider.md), [claude](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/claude.md),
+[codex-sessions](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/codex-sessions.md).
 
 ## Support Contract
 
@@ -27,7 +27,7 @@ version it should.
 - **VIBEALLDAY does not force an update.** It runs the user's installed executable
   where the provider is user-installed, reports an available update, and
   mutates an installation only under an explicit user choice
-  ([provider-installation-updates](provider-installation-updates.md)).
+  ([provider-installation-updates](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/provider-installation-updates.md)).
 - **Gate when it is cheap and the behavior differs.** If a newer protocol
   shape would make an older harness hang, misreport state, or silently do the
   wrong thing, and VIBEALLDAY already knows or can cheaply probe the installed
@@ -50,7 +50,7 @@ decision matters; Pi's startup refusal below is the model.
 | Provider | Executable VIBEALLDAY runs | Version knowledge | Update behavior |
 |---|---|---|---|
 | Claude | The Claude Code binary bundled with VIBEALLDAY's `@anthropic-ai/claude-agent-sdk` dependency, unless `CLAUDE_CODE_EXECUTABLE` / `CLAUDE_CODE_PATH` names another; the PATH `claude` only when no bundled binary resolves (`resolveLocalClaudeCodeExecutable`) | Moves with VIBEALLDAY's SDK dependency, so the user's own `claude` version normally does not matter | Updated by VIBEALLDAY dependency refreshes, never at runtime |
-| Codex | The user's installed `codex` (configured path, then discovery; [windows-codex-cli-detection](windows-codex-cli-detection.md)) | Probed `codex --version`; startup logs an advisory warning when it differs from `expectedVersion` | `codexUpdatePolicy` defaults to `notify`; `auto` or a confirmed prompt runs the npm update |
+| Codex | The user's installed `codex` (configured path, then discovery; [windows-codex-cli-detection](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/windows-codex-cli-detection.md)) | Probed `codex --version`; startup logs an advisory warning when it differs from `expectedVersion` | `codexUpdatePolicy` defaults to `notify`; `auto` or a confirmed prompt runs the npm update |
 | Pi | The user's installed `pi` (`PI_EXECUTABLE` / `PI_PATH`, then configured path, then common install paths, then PATH) | Probed `pi --version` before every RPC start | No VIBEALLDAY updater |
 
 An environment override wins over a newly updated package. A server whose
@@ -66,7 +66,7 @@ contract; their topics own their specifics.
 - **Pi turn boundary.** `PI_AGENT_SETTLED_MIN_VERSION` (0.80.4): newer Pi ends a
   VIBEALLDAY turn on `agent_settled`, older Pi on `agent_end`. An unrecognized version
   string fails startup rather than guessing, because either guess can hang or
-  prematurely settle a session ([pi-provider](pi-provider.md)).
+  prematurely settle a session ([pi-provider](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/pi-provider.md)).
 - **Codex discovery-failure model fallbacks.** `codex-model-catalog.ts`
   `CODEX_CLI_*_MIN_VERSION` constants choose which fallback catalog to show
   when authenticated `model/list` discovery fails, so an older CLI is not

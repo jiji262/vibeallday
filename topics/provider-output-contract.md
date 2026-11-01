@@ -11,16 +11,16 @@ See also:
 [provider-authoring](provider-authoring.md) (the workflow map — *how to add*
 a provider; this topic is the output half, *what a provider should attempt
 to produce*),
-[provider-abstraction](provider-abstraction.md) (when a provider/model
+[provider-abstraction](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/provider-abstraction.md) (when a provider/model
 conditional gets promoted to the `AgentProvider` seam),
-[stream-persisted-render-parity](stream-persisted-render-parity.md) (the
+[stream-persisted-render-parity](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/stream-persisted-render-parity.md) (the
 convergence contract between the two delivery paths),
-[stream-durable-id-dedup](stream-durable-id-dedup.md) (id stability across
+[stream-durable-id-dedup](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/stream-durable-id-dedup.md) (id stability across
 stream and durable copies),
-[provider-state-machine](provider-state-machine.md) (the status half of the
+[provider-state-machine](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/provider-state-machine.md) (the status half of the
 contract),
-[provider-session-tree](provider-session-tree.md) (lineage capability audit),
-[transcript-display-objects](transcript-display-objects.md) (display-only
+[provider-session-tree](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/provider-session-tree.md) (lineage capability audit),
+[transcript-display-objects](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/transcript-display-objects.md) (display-only
 objects that are *not* provider output).
 
 ## Rule: normalize in the provider layer, against this spec
@@ -30,7 +30,7 @@ session reader, the stream adapter, and their normalization helpers — and
 produces the shapes named here. Routes, renderers, and the client must not
 carry provider conditionals that repair output shape; a shape defect in what
 a provider emits is fixed in that provider's normalization helper, behind
-this contract. ([provider-abstraction](provider-abstraction.md) governs when
+this contract. ([provider-abstraction](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/provider-abstraction.md) governs when
 an existing scattered conditional gets promoted into the seam.)
 
 Where normalization lives today:
@@ -59,12 +59,12 @@ downstream of them.
 
 A session reaches the UI live from the **stream** and again later
 re-read from **persisted** storage. Both feed the same render pipeline, and
-[stream-persisted-render-parity](stream-persisted-render-parity.md) requires
+[stream-persisted-render-parity](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/stream-persisted-render-parity.md) requires
 items with durable counterparts to converge — same semantic tool calls and
 *structured* result fields, not merely similar visible text. Useful live-only
 tail events are allowed; they do not justify a VIBEALLDAY-owned shadow transcript.
 Message ids must match deterministically across the two paths wherever the
-provider allows ([stream-durable-id-dedup](stream-durable-id-dedup.md)); a
+provider allows ([stream-durable-id-dedup](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/stream-durable-id-dedup.md)); a
 provider whose ids genuinely cannot align sets the `needsApproxMessageDedup`
 capability and accepts the tight content+timestamp reconcile backstop.
 
@@ -525,12 +525,12 @@ obligations, not just plumbing:
 Known debt: today the client `Message` model retains wire-shaped blocks,
 so inline base64 rides through to render and into the session-detail
 transcript cache. The measured retention charges
-([session-detail-data-layer](session-detail-data-layer.md)) count that
+([session-detail-data-layer](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/session-detail-data-layer.md)) count that
 payload at true weight, which contains the damage but does not fix the
 representation. The intended client seam is the session-detail ingest
 boundary once the store-authoritative migration completes, consuming the
 server-served refs above (which also cut transcript transfer to mobile
-clients). [`session-media-handles.md`](session-media-handles.md) records
+clients). [`session-media-handles.md`](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/session-media-handles.md) records
 the problem statement, measured local evidence, and a possible opaque
 media-id lookup model. When it lands, resume/replay and the offline Zod
 validation paths must reconstitute or tolerate handles.
@@ -538,7 +538,7 @@ validation paths must reconstitute or tolerate handles.
 ## Status
 
 The status half of the contract is
-[provider-state-machine](provider-state-machine.md): `processState`
+[provider-state-machine](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/provider-state-machine.md): `processState`
 (`idle`/`in-turn`/`waiting-input`), `sessionLiveness.derivedStatus`,
 compacting, and ownership. Providers supply raw process/stream events; the
 seam derives these normalized states — the same
@@ -564,7 +564,7 @@ surfaces**. Capability flags describe the latter only: Pi natively maintains
 a tree (`/tree`, per-entry `parentId`) while VIBEALLDAY reads just the active-leaf
 path, so Pi's `supportsDag` is `false` without contradicting Pi's data
 model. The audit and the proposed `sessionTree` capability live in
-[provider-session-tree](provider-session-tree.md).
+[provider-session-tree](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/provider-session-tree.md).
 
 **Traversal rule**: any parent-link traversal — linearization, reorder
 repair, walk-to-root, tree projection — uses the shared facility in

@@ -10,7 +10,8 @@ Topic: glossary
 
 - `GLOSSARY.md` lives at repo root and contains one sorted table with columns
   `| term | definition | topic / refs |`.
-- Topic-linked rows correspond to non-companion `topics/<name>.md` files.
+- Topic-linked rows correspond to current or archived non-companion
+  `topics/<name>.md` files. Archived references use an immutable Git revision.
   Their definitions should come from the topic doc's blockquote lede when the
   topic has one.
 - Every term surface is bold Markdown. A topic-linked term starts with its
@@ -38,6 +39,10 @@ When a topic doc lacks a lede, either keep a concise curated row in
 `GLOSSARY.md` or normalize the topic doc by adding a body-preserving lede from
 its first paragraph. Do the full normalization pass separately when it would
 make the glossary materially more accurate.
+
+Preserve existing definitions for archived topics even when their source is
+no longer in the working tree; documentation cleanup must not erase runtime
+glossary vocabulary.
 
 Vernacular rows without a topic link are preserved by hand. If a term is a
 tentative resolution of user wording, mark it with

@@ -9,11 +9,11 @@ Topic: subprocess-environment
 
 This topic is the cross-cutting contract for environment propagation and
 environment-dependent subprocess tests. The catalog and naming rules for
-individual VIBEALLDAY variables remain in [vibeallday-env-vars.md](vibeallday-env-vars.md).
+individual VIBEALLDAY variables remain in [vibeallday-env-vars.md](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/vibeallday-env-vars.md).
 
 ## Runtime contracts
 
-- Opt-in [`vibeallday-agent self`](agent-self.md) injects `AGENT_VIBEALLDAY_API_URL` and
+- Opt-in [`vibeallday-agent self`](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/agent-self.md) injects `AGENT_VIBEALLDAY_API_URL` and
   `AGENT_VIBEALLDAY_API_TOKEN` plus the owning runtime's private command directory.
   Ambient self credentials are stripped by the child filter before eligible
   Claude/Codex launches receive their own grant. `AGENTCTL_SESSION_ID` is an
@@ -117,7 +117,7 @@ individual VIBEALLDAY variables remain in [vibeallday-env-vars.md](vibeallday-en
   reader-first migration to canonical `AGENT_*` pairs is tracked in
   `gaps/agent-facing-env-markers.md`. Tests must cover chaining, quoting, and
   initially known resume ids without depending on the developer's own bridge.
-- A [session-sandboxed](session-sandboxing.md#session-environment-bridge)
+- A [session-sandboxed](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/session-sandboxing.md#session-environment-bridge)
   Claude or Codex launch keeps its bridge in host temp, which the sandbox's
   private `/tmp` hides, so the sandbox mounts that one directory read-only at
   a fixed private path and the bridge writes that path into `BASH_ENV` and
@@ -173,13 +173,13 @@ individual VIBEALLDAY variables remain in [vibeallday-env-vars.md](vibeallday-en
 
 ## Related topics
 
-- [vibeallday-env-vars.md](vibeallday-env-vars.md) — names, aliases, and consume-and-strip
+- [vibeallday-env-vars.md](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/vibeallday-env-vars.md) — names, aliases, and consume-and-strip
   rules.
-- [env-vars-config.md](env-vars-config.md) — proposed operator visibility and
+- [env-vars-config.md](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/env-vars-config.md) — proposed operator visibility and
   future child-process overrides.
-- [cost-efficiency.md](cost-efficiency.md) — credential filtering and the
+- [cost-efficiency.md](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/cost-efficiency.md) — credential filtering and the
   metered-billing footgun.
-- [claude.md](claude.md) and [session-liveness.md](session-liveness.md) — the
+- [claude.md](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/claude.md) and [session-liveness.md](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/session-liveness.md) — the
   local agentctl session-id bridge and its coordination-only semantics.
 
 ## Native sudo opt-in
@@ -187,4 +187,4 @@ individual VIBEALLDAY variables remain in [vibeallday-env-vars.md](vibeallday-en
 `VIBEALLDAY_MC_SUDO_APP` and `VIBEALLDAY_MC_SUDO_TEAM_ID` are operator launch configuration,
 not client-supplied session fields. Eligible local launches verify signatures
 before adding the native resources directory to agent PATH. Restart the
-provider host after changing its environment. See [native sudo](native-sudo.md).
+provider host after changing its environment. See [native sudo](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/native-sudo.md).

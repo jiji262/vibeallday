@@ -10,7 +10,7 @@ Topic: optional-sqlite
 
 Verified: 2026-10-11
 
-See also: [VIBEALLDAY environment variables](vibeallday-env-vars.md) for `VIBEALLDAY_DATA_DIR`.
+See also: [VIBEALLDAY environment variables](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/vibeallday-env-vars.md) for `VIBEALLDAY_DATA_DIR`.
 
 ## Startup policy
 
@@ -59,7 +59,7 @@ treated as local disk, so the check can cost a working install nothing.
 
 Callers must not turn a large corpus into one transaction per item. Even on
 local disk that is a lock per item; on a share it is the failure above. The
-[issue/session association](issue-session-associations.md) catalog sweep is the
+[issue/session association](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/issue-session-associations.md) catalog sweep is the
 worked example: it reads the set of sessions a write could affect once, rather
 than opening a write transaction per catalog row.
 
@@ -171,7 +171,7 @@ on applicable versions is not suppressed by the service.
 
 ## Personal draft data
 
-[Draft synchronization](draft-synchronization.md) stores current snapshots,
+[Draft synchronization](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/draft-synchronization.md) stores current snapshots,
 operation receipts, recovery copies and file ownership in migration 008 of the
 existing database. These are durable personal data, not rebuildable discovery
 indexes. Backups and migrations
@@ -194,8 +194,8 @@ The initial schema reserves a VIBEALLDAY application identity (`0x56414449`, ASC
 its receipts/counts/staging tables. The remaining vocabulary state table is no
 longer used: active learning settings and counts live in their separate JSON and
 `speech-vocabulary.sqlite` files. See
-[learned vocabulary](pluggable-speech-recognition.md#learned-vocabulary-contract).
-Versions 4 through 7 add [issue/session associations](issue-session-associations.md):
+[learned vocabulary](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/pluggable-speech-recognition.md#learned-vocabulary-contract).
+Versions 4 through 7 add [issue/session associations](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/issue-session-associations.md):
 durable issue/evidence tables, tracker confirmation, learned Jira prefix/site
 mappings, and operational indexing/resolution/deletion state. Migration 7 only
 schedules its URL-learning and candidate backfill; bounded post-startup worker
@@ -332,5 +332,5 @@ Node 20 is no longer a supported main-server runtime; an old running server
 remains compatible with the hosted frontend. See [server runtimes](server-runtime.md).
 
 Related: [server capabilities](server-capabilities.md),
-[VIBEALLDAY environment variables](vibeallday-env-vars.md),
-[OpenCode storage](opencode-backend.md).
+[VIBEALLDAY environment variables](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/vibeallday-env-vars.md),
+[OpenCode storage](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/opencode-backend.md).

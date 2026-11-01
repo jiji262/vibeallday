@@ -35,7 +35,7 @@ session when they supply the required launch information. This lets automation
 wake an agent without keeping a browser open. The authenticated HTTP API can
 submit turns to running sessions, but cannot launch or wake a stopped session.
 For request formats, feature negotiation and approval handling, see the
-[provider host API](https://github.com/jiji262/vibeallday/blob/HEAD/topics/provider-host-api.md).
+[provider host API](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/provider-host-api.md).
 
 Linux development launches enable it by default. To opt in on macOS, run from
 the checkout root:

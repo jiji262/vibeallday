@@ -78,7 +78,7 @@ Maintainer has authorized the exact exception.
 
 ## Known Exceptions
 
-The **session read/unread shortcuts** ([inbox](inbox.md#readunread-keyboard-actions))
+The **session read/unread shortcuts** ([inbox](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/inbox.md#readunread-keyboard-actions))
 are always available, authorized on 2026-10-18 after the maintainer requested
 single-key session triage. Unmodified `r` and `u` explicitly set read state for
 the focused session; they leave typing, menus, dialogs and viewers alone. Their
@@ -89,11 +89,11 @@ first-party hosted client, authorized 2026-10-16. Opening agent-generated HTML
 with its local assets is an expected file-viewing action; users need no domain
 or tunnel setup. It uses isolated content origins and the existing encrypted
 connection, preserves explicit custom deployments, and falls back on older
-servers. See [active-content security](active-content-security.md#managed-first-party-relay-previews).
+servers. See [active-content security](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/active-content-security.md#managed-first-party-relay-previews).
 
 
 The New Session **model-list provenance line**
-([session-defaults](session-defaults.md#provider-catalog-readiness)) shows by
+([session-defaults](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/session-defaults.md#provider-catalog-readiness)) shows by
 default under the model picker, authorized by graehl on 2026-10-06 after
 choosing the muted "updated Xm ago · Refresh" form. A built-in fallback list
 can omit or misname current models, so the user must be able to tell it from a
@@ -101,20 +101,20 @@ live list without opening settings. The live state is one muted line; only a
 fallback or failed refresh uses warning styling. It sends nothing to the
 provider until Refresh is clicked.
 
-The **context breakdown** ([context-breakdown](context-breakdown.md)) shows by
+The **context breakdown** ([context-breakdown](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/context-breakdown.md)) shows by
 default in the existing context-usage popover, authorized by graehl on
 2026-10-01 after accepting its mockup. It mirrors Claude Code's `/context`,
 appears only when the user opens that popover, and adds no visible chrome; it
 renders nothing for sessions whose provider cannot report one.
 
-The **last file chevron** ([parked-file-viewer](parked-file-viewer.md#last-file-after-close))
+The **last file chevron** ([parked-file-viewer](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/parked-file-viewer.md#last-file-after-close))
 is default-visible in spare session right margins, authorized by graehl on
 2026-09-30 after accepting its mockup. It remembers only the last file-view
 route per session ID in browser storage, survives Close and reload, and opens
 the ordinary viewer only when clicked. It hides on narrow layouts and while
 the existing viewer is open or minimized.
 
-The **`/v` / `/view` view command** ([view-command](view-command.md)) ships
+The **`/v` / `/view` view command** ([view-command](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/view-command.md)) ships
 always-on wherever the server supports it, authorized by graehl on
 2026-09-30. It acts only when the user types it, opens the file viewer a link
 click already opens, and sends nothing to the provider. Its only default-
@@ -126,7 +126,7 @@ unchanged.
 by graehl on 2026-09-29 to keep Markdown copy accessible on mobile while native
 Copy and `Ctrl/Cmd+C` copy visible text. Its blue copy icon sits above quote
 reply on mobile; an explicit saved visibility choice remains authoritative.
-See [rich-text rendering](rich-text-rendering.md).
+See [rich-text rendering](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/rich-text-rendering.md).
 
 The server runtime upgrade notice is default-visible and nonblocking, authorized
 by the Maintainer on 2026-09-08 so remote users can arrange a runtime upgrade
@@ -139,7 +139,7 @@ transcript search, which otherwise needs Ctrl+R-style keys. It takes the
 lowest narrowing tier, so it shows only where the bottom row has spare width
 and otherwise sits in `...`; opening search is its only effect. Toolbar settings
 can hide it. See
-[composer-bottom-bar-overflow](composer-bottom-bar-overflow.md).
+[composer-bottom-bar-overflow](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/composer-bottom-bar-overflow.md).
 
 Structured Codex async questions and their toolbar reminders ship default-on,
 explicitly authorized by graehl on 2026-09-07. They make an existing provider
@@ -150,7 +150,7 @@ stages; zero hides toolbar reminders while transcript answering remains
 available. There is no separate enable setting. See
 [provider-output-contract](provider-output-contract.md#asynchronous-codex-questions).
 
-[provider-runtime-status](provider-runtime-status.md) gives Codex
+[provider-runtime-status](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/provider-runtime-status.md) gives Codex
 `serverOverloaded` turns a built-in, bounded same-model retry. Codex itself
 ends these turns, but the failure is transient and the recovery adds no new
 user concept or submitted text: VIBEALLDAY resamples the already-recorded turn after
@@ -168,17 +168,17 @@ VIBEALLDAY inject no override. An explicit Claude or Grok depth value in VIBEALL
 environment still wins. The control identifies its actual provider coverage
 and applies only to newly started or resumed processes; it never mutates
 provider configuration files. Authorized by graehl on 2026-08-16 as a
-deliberate quota-protection exception. See [claude](claude.md),
-[codex-sessions](codex-sessions.md), and [grok](grok.md).
+deliberate quota-protection exception. See [claude](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/claude.md),
+[codex-sessions](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/codex-sessions.md), and [grok](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/grok.md).
 
 Claude Gateway's **Disable plan mode** setting defaults on. Gateway-routed
 copilot-api models can otherwise drift into Claude Code's plan workflow, so VIBEALLDAY
 removes only `EnterPlanMode` and `ExitPlanMode` from the Agent SDK launch.
 Regular Claude and task tracking remain unchanged, the setting is explicitly
 opt-outable, and a stored false stays authoritative. Authorized by graehl on
-2026-08-17 as a deliberate Gateway reliability exception. See [claude](claude.md).
+2026-08-17 as a deliberate Gateway reliability exception. See [claude](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/claude.md).
 
-[source-review-to-session](source-review-to-session.md) defaults review
+[source-review-to-session](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/source-review-to-session.md) defaults review
 history and outcome visibility on for new installs. A review is already an
 explicit user action; the default makes its submitted history and eventual
 agent response discoverable in Source Control and Inbox. With no submitted
@@ -187,7 +187,7 @@ available, explicit stored false remains authoritative, and old stored false
 values are not migrated because they cannot be distinguished from an earlier
 untouched default. Authorized by graehl on 2026-08-11.
 
-[composer-full-pane-editing](composer-full-pane-editing.md) adds a visible
+[composer-full-pane-editing](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/composer-full-pane-editing.md) adds a visible
 full-pane toggle to the New Session, editable handoff, and in-session
 composers. The in-session top-right control remains available in the one-line
 composer and is currently a live placement prototype. Authorized by graehl on
@@ -195,15 +195,15 @@ composer and is currently a live placement prototype. Authorized by graehl on
 in-session composer because the mode remains entirely user-invoked; ordinary
 composer behavior and draft submission are unchanged until the user enters it.
 
-[tooltip-interactions](tooltip-interactions.md) Themed tooltips ship default-on
+[tooltip-interactions](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/tooltip-interactions.md) Themed tooltips ship default-on
 for browsers without an explicit saved mode. Explicit Native and Themed choices
 remain authoritative. Authorized by graehl on 2026-08-04 after the
 pointer-generated touch-focus reopen defect that motivated the temporary Native
 default was fixed; the shared layer now provides fast scanning, selectable text,
 and readable glossary definitions without changing control activation.
 
-**`!!` bang commands** ([bang-commands](bang-commands.md); recall drawer
-in [composer-recall-drawer](composer-recall-drawer.md)) run a local shell
+**`!!` bang commands** ([bang-commands](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/bang-commands.md); recall drawer
+in [composer-recall-drawer](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/composer-recall-drawer.md)) run a local shell
 command from the composer instead of sending the line to the provider.
 Under the established-convention carve-out above — shell-escape is
 familiar (Claude Code `!` bash mode), the `!!` prefix is typed
@@ -212,9 +212,9 @@ the Ctrl+Up recall drawer ship always-on; only the discoverable "!!
 Commands" sidebar section stays default-off. Authorized by graehl
 (2026-07-25) as an explicit amendment reversing an earlier default-off
 decision, and canonized here (and in the commit) for kzahel's review
-given the default-disabled preference ([kzahel-disabled](kzahel-disabled.md)).
+given the default-disabled preference ([kzahel-disabled](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/kzahel-disabled.md)).
 
-[prompt-cache-keepalive](prompt-cache-keepalive.md) is a deliberate
+[prompt-cache-keepalive](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/prompt-cache-keepalive.md) is a deliberate
 default-on exception for active-enough live clients, but only where a provider
 exposes a no-context-move refresh path. The default must not create visible
 session rows, future-visible provider context, or autonomous server upkeep for
@@ -225,10 +225,10 @@ remain explicit per-provider choices.
 Authorized by graehl on 2026-09-09: it is an explicit successor-session
 start from a selected in-memory turn, copies that session's launch
 options, and does not change ordinary send or Conversation view
-presentation. See [fork-from-turn](fork-from-turn.md) and
-[conversation-view](conversation-view.md).
+presentation. See [fork-from-turn](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/fork-from-turn.md) and
+[conversation-view](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/conversation-view.md).
 
-[conversation-view](conversation-view.md) and its Session Toolbar control ship
+[conversation-view](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/conversation-view.md) and its Session Toolbar control ship
 default-on. The condensed projection keeps user/agent conversation, media, and
 important failures visible while preserving one-click access to every routine
 activity in original order. This was approved by graehl on 2026-07-28,
@@ -237,7 +237,7 @@ condensed conversation presentation users already encounter in the Codex and
 Claude harnesses. Existing browser-local mode and toolbar-presence choices
 remain authoritative.
 
-[mic-button-speech-ui](mic-button-speech-ui.md) ships the configurable live
+[mic-button-speech-ui](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/mic-button-speech-ui.md) ships the configurable live
 microphone waveform default-on, with toolbar-button backgrounds at 70% opacity
 over it by default. It appears only during an explicit VIBEALLDAY-controlled microphone
 capture, uses real audio samples, and changes no submitted text or provider
@@ -246,7 +246,7 @@ hide it or set button backgrounds anywhere from fully transparent to fully
 opaque. Authorized by graehl on 2026-08-11 so microphone feedback is
 discoverable without requiring users to predict the useful opacity first.
 
-[media-rendering-and-routing](media-rendering-and-routing.md) compact
+[media-rendering-and-routing](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/media-rendering-and-routing.md) compact
 multi-image galleries ship default-on as a browser-local Appearance preference.
 For an assistant turn with at least two eligible images, the preference enables
 one turn gallery while preserving every original text link and full-size target.
@@ -262,7 +262,7 @@ an already-requested automatic presentation, adds only a contextual action on
 multi-image turns otherwise, and avoids burdening new users with another
 preference.
 
-[agents-process-observability](agents-process-observability.md) ships
+[agents-process-observability](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/agents-process-observability.md) ships
 default-on in the existing Agents view. Sampling is request-driven and occurs
 only while that view is open and visible; a Performance setting disables it,
 and a user can also avoid the work simply by not opening Agents. The browser
@@ -273,7 +273,7 @@ explicit product decision: Agents is already the process-inventory surface,
 and standard process metrics plus independently launched agent processes make
 that purpose useful without changing session or provider behavior elsewhere.
 
-[steer-queue-provider-differences](steer-queue-provider-differences.md)
+[steer-queue-provider-differences](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/steer-queue-provider-differences.md)
 promotes Claude's existing **Steer now** preference to default-on when no stored
 preference exists. An explicit false remains authoritative and restores the
 `next` lane. Authorized by graehl on 2026-08-08 after live Claude 2.1.223 probes
@@ -301,9 +301,9 @@ on/off probe confirmed the flag had broken. Any mention of `instant_interrupt`
 in the user's `$CODEX_HOME/config.toml` stays authoritative and suppresses the
 override. Authorized by graehl on 2026-10-23 after a session lost four
 multi-minute writes to steers. See
-[steer-queue-provider-differences](steer-queue-provider-differences.md).
+[steer-queue-provider-differences](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/steer-queue-provider-differences.md).
 
-[mic-button-speech-ui](mic-button-speech-ui.md) treats conservative
+[mic-button-speech-ui](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/mic-button-speech-ui.md) treats conservative
 mid-sentence capitalization smoothing as built-in speech-input behavior, with
 no preference. Some recognizers title-case every finalized phrase after a
 pause; VIBEALLDAY lowercases only an allowlist of ordinary continuation words on a
@@ -314,7 +314,7 @@ decision after observing the pause-boundary behavior interactively.
 
 ## Known exception: default speech annotation
 
-[mic-button-speech-ui](mic-button-speech-ui.md) offers a browser-local
+[mic-button-speech-ui](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/mic-button-speech-ui.md) offers a browser-local
 **Speech message prefix** selector with `🎤`, `[ASR]`, `[STT]`, `[Dictation]`,
 Custom, and Off choices. The selector defaults to `🎤`, so Smart Turn and
 spoken `send` prepend the microphone emoji plus one separating space. An
@@ -325,14 +325,14 @@ remain authoritative. Graehl authorized this provider-text exception on
 
 ## Worked instances: queued-turn delivery
 
-[compose-time-context-anchors](compose-time-context-anchors.md)
+[compose-time-context-anchors](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/compose-time-context-anchors.md)
 prepended `(Ns ago)` / `(Ms later)` staleness markers to queued turns at
 delivery, so an agent would not misread a stale queued comment as
 referring to its most recent output. The benefit was believed but
 untested, and the mechanism rewrote provider input — the provider saw
 text the user did not type. Upstream removed it outright
 (`25e7f5d1`, "Keep queued messages verbatim"). The resolution under this
-theory and [kzahel-disabled](kzahel-disabled.md): preserved behind
+theory and [kzahel-disabled](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/kzahel-disabled.md): preserved behind
 `VIBEALLDAY_COMPOSE_ANCHORS=1`, default off.
 
 Batched deferred flush is the sibling instance: merging several queued
@@ -358,18 +358,18 @@ VIBEALLDAY-novel and may scale with an externally controlled directory tree, so 
 Linux default is a deliberate measured exception rather than a general
 promotion. Hard watcher ceilings and resource-exhaustion fallback remain
 mandatory wherever native watchers run. See
-[source-control](source-control.md) and
-[live-worktree-resource-safety](../docs/tactical/113-live-worktree-resource-safety.md).
+[source-control](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/source-control.md) and
+[live-worktree-resource-safety](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/docs/tactical/113-live-worktree-resource-safety.md).
 
 ## Related topics
 
 - [hard-development-rules](hard-development-rules.md) — explicit user
   configuration is authoritative; trust-sensitive defaults need opt-in
   or migration paths.
-- [kzahel-disabled](kzahel-disabled.md) — upstream disablement of a
+- [kzahel-disabled](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/kzahel-disabled.md) — upstream disablement of a
   speculative feature is a product signal; prefer configurable
   default-off preservation over silent code stripping, with the
   maintainer choosing the resolution.
-- [session-ui-customization](session-ui-customization.md) — the
+- [session-ui-customization](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/session-ui-customization.md) — the
   visibility/enablement configuration surface that default-off UI
   features typically live behind.

@@ -193,7 +193,7 @@ keeps >= 4.5:1 against its skin's page.
 - `/`, a relay host root and the post-login default all land on `/inbox`
   (Inbox); an explicit return target still wins. Desktop and phone share one
   Sessions destination with **Inbox / All** secondary navigation;
-  [session workbench](session-workbench.md) owns the view behavior.
+  [session workbench](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/session-workbench.md) owns the view behavior.
 
 ## Components
 
@@ -252,7 +252,7 @@ diffs) stay edge to edge on phones; ordinary prompts and forms pass
   **Manage queue**. No large all-clear headline. Old pending asks stay
   visible. **Triage** walks the needs-you sessions one at a time and answers
   approvals and one-tap questions on the card, from a bottom decision bar on
-  phones. Partial catalog discovery is explicit. See [session workbench](session-workbench.md).
+  phones. Partial catalog discovery is explicit. See [session workbench](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/session-workbench.md).
 - **Sessions / All**: sticky search field, quick chips (Unread, Needs you,
   Running; the last two set `activity`), a Filters button opening a sheet that
   also holds Starred and Archived, and existing bulk controls. Advanced
@@ -285,7 +285,7 @@ diffs) stay edge to edge on phones; ordinary prompts and forms pass
   security, Projects & integrations, Data & about) and Advanced & debug last
   (folded into one entry row on phones); on desktop the index is an overview
   of category cards with status lines. The category-to-group map lives in
-  [settings placement](settings-ui-placement.md#settings-home-host-quick-controls-groups).
+  [settings placement](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/settings-ui-placement.md#settings-home-host-quick-controls-groups).
   Rows carry a 本机 / 服务器 scope tag. Changes apply immediately; the first
   change that makes a pane undoable shows a toast (`Changed {page}` with
   **Undo**) beside the header Undo button. Controls share one vocabulary:
@@ -321,7 +321,7 @@ diffs) stay edge to edge on phones; ordinary prompts and forms pass
   `.session-list-item*`, diff/Shiki vocabulary). New design classes are added
   beside them.
 - Composer typing stays isolated from transcript rendering
-  ([065](../docs/tactical/065-session-composer-input-latency.md)); no
+  ([065](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/docs/tactical/065-session-composer-input-latency.md)); no
   keystroke may be dropped or take more than 100 ms to appear.
 - Reduced motion is respected; animations are 120-200 ms and only answer user
   actions.

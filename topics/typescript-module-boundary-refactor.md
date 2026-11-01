@@ -8,14 +8,14 @@
 Topic: typescript-module-boundary-refactor
 
 Related topics: [architecture mandates](architecture-mandates.md),
-[source transport](source-transport.md),
-[session detail data layer](session-detail-data-layer.md),
+[source transport](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/source-transport.md),
+[session detail data layer](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/session-detail-data-layer.md),
 [console chatter](console-chatter.md), and
 [hard development rules](hard-development-rules.md).
 
 Tactical worklog: the slice ledger, baseline gate, and large-file inventory
 live in
-[`docs/tactical/058-typescript-module-boundary-refactor.md`](../docs/tactical/058-typescript-module-boundary-refactor.md).
+[`docs/tactical/058-typescript-module-boundary-refactor.md`](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/docs/tactical/058-typescript-module-boundary-refactor.md).
 This topic is the binding contract; the tactical doc records progress against
 it. When the two disagree, this topic wins and the tactical doc gets fixed.
 

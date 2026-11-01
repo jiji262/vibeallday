@@ -211,10 +211,10 @@ does not claim their execution or Windows Desktop manual validation.
 Bun 1.3.14's Vitest VM loader currently fails shared-source collection with
 `undefined is not an object (evaluating 'z.string')`; the same compiled module
 graph works in the packaged server. The
-[test-harness gap](../gaps/bun-vitest-shared-zod-loader.md) retains this
+[test-harness gap](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/gaps/bun-vitest-shared-zod-loader.md) retains this
 limitation. Packaged scripts use Bun's real ESM loader rather than presenting
 Node-run Vitest results as Bun runtime evidence.
 
 Lint and i18n checks are warning-free. The console scan stays within its
 unchanged budget; workspace package-manager/deployment diagnostics are recorded
-in the [tooling warning gap](../gaps/runtime-cutover-tooling-warnings.md).
+in the [tooling warning gap](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/gaps/runtime-cutover-tooling-warnings.md).

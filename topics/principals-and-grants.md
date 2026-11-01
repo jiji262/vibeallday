@@ -122,8 +122,8 @@ system.
 Maintainer direction, 2026-09-30: design trusted-colleague collaboration so an
 initial session invitation can eventually converge on local or hosted accounts,
 including URL and email invitations. The
-[Participatory Live Share sketch](relay-origin-and-share-gating.sketches.md#participatory-live-share)
-owns the product actions; [session notes and discussion](session-notes-and-discussion.md)
+[Participatory Live Share sketch](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/relay-origin-and-share-gating.sketches.md#participatory-live-share)
+owns the product actions; [session notes and discussion](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/session-notes-and-discussion.md)
 owns human-only content. Neither adds project-wide authority or requires a
 hosted identity provider.
 
@@ -204,7 +204,7 @@ ordering remains a product and implementation-plan decision.
 
 - [[security]] — the current superuser/limited-user authority and trust boundaries.
 - [[limited-users]] — delivered local-user policy and remaining proposals.
-- [Participatory Live Share](relay-origin-and-share-gating.sketches.md#participatory-live-share)
+- [Participatory Live Share](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/relay-origin-and-share-gating.sketches.md#participatory-live-share)
   and [[session-notes-and-discussion]] — proposed session participation.
 - [[multi-machine-architecture]] — optional hosted discovery and grant
   issuance.

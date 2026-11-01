@@ -50,7 +50,7 @@ narrower-sounding permission mode would not establish that boundary.
 Limited users are default-off (`limitedUsersEnabled`) named principals that
 the superuser creates in Settings → Users. The product contract, including
 every route decision, is
-[`limited-users.md` § Delivery v1](limited-users.md#delivery-v1--settings--users).
+[`limited-users.md` § Delivery v1](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/limited-users.md#delivery-v1--settings--users).
 This section states the boundary that layer claims and what lies outside it.
 
 **Login.** A limited user authenticates with their own password: a direct
@@ -108,7 +108,7 @@ authorize the supplied project themselves, persist the authenticated creator,
 refuse replacement or release of another creator's mapping, and confine all
 served paths to that project's canonical root. Incoming requests recheck the
 creator's current grants. Other artifact and public-file-share routes remain
-refused. See [file vhosts](active-content-security.md#file-vhosts).
+refused. See [file vhosts](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/active-content-security.md#file-vhosts).
 
 **Execution.** Every provider process a limited user starts or resumes runs
 in the project-write sandbox on this host, under the user's
@@ -166,7 +166,7 @@ processes, or an SSH-backed provider. Turning off **Home folder** therefore does
 not prevent an authenticated operator from asking an ordinary agent to read a
 home-directory file. Pinning `ALLOWED_FILE_PATHS` makes the viewer policy
 read-only in Settings; it still does not create an agent sandbox. See
-[`docs/tactical/018-file-access-scoping.md`](../docs/tactical/018-file-access-scoping.md).
+[`docs/tactical/018-file-access-scoping.md`](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/docs/tactical/018-file-access-scoping.md).
 
 The separate **Sandbox session / Project writes only** launch option is the
 intended host-enforced boundary. On supported local Linux Claude-family and
@@ -242,7 +242,7 @@ The separate archive is never an automatic resume source or a portable backup.
 The opted-in console helper returns metadata and bounded outcomes, never keys,
 and probes with normal server-proof verification and protocol pinning. This adds
 no permissions or authentication bypass. Same-origin script access to stored
-keys is the existing storage risk extended in time. The [SourceTransport contract](source-transport.md#optional-rejected-session-diagnosis)
+keys is the existing storage risk extended in time. The [SourceTransport contract](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/source-transport.md#optional-rejected-session-diagnosis)
 owns the storage and probe lifecycle; the [debugging runbook](../docs/development/debugging.md#rejected-srp-resume-credentials)
 owns operation. Server refusal reasons remain local and structured; public
 responses do not disclose validity details.
@@ -270,8 +270,8 @@ does not authorize an operator request. With the firewall enabled it also
 cannot reach the listener, local-network services, provider control sockets,
 or host abstract sockets. Public remote services remain reachable, so network
 confidentiality, credential isolation, and exfiltration resistance remain
-outside this boundary. See [`session-sandboxing.md`](session-sandboxing.md) and
-[`session-sandbox-network-boundary.md`](session-sandbox-network-boundary.md).
+outside this boundary. See [`session-sandboxing.md`](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/session-sandboxing.md) and
+[`session-sandbox-network-boundary.md`](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/session-sandbox-network-boundary.md).
 
 Agent-authored active documents are therefore significant defense-in-depth
 hardening—important, but not a new general trust boundary—specifically for a
@@ -295,7 +295,7 @@ policy across local, project, upload, and public-share routes. The classifier
 uses only MIME type and extension; it does not scan or sanitize contents.
 Additional precautionary sanitization that is computationally heavy is
 reserved for enforced project-write sandbox sessions. See
-[`active-content-security.md`](active-content-security.md).
+[`active-content-security.md`](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/active-content-security.md).
 
 ## Authenticated Remote Access And The Relay
 
@@ -444,7 +444,7 @@ viewer must not navigate into `/api/local-file`, `/api/local-image`, or
 `/projects/.../file` directly, because those routes are authenticated/local app
 surfaces and cause public viewers to fall into Remote Access login.
 
-See [`attachment-storage`](attachment-storage.md) for the current legacy
+See [`attachment-storage`](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/attachment-storage.md) for the current legacy
 project-relative `.attachments/` path and the app-data-only target. Physical
 attachment location does not broaden these `/api/local-image` and
 `/api/local-file` routes or constitute public authorization.
@@ -511,7 +511,7 @@ Interim UI contract: public share viewers warn that visible assistant
 read/edit/command output should be considered public, with stronger wording for
 live shares. Longer-term design should add content-aware censorship before
 public share bodies are sent to unauthenticated viewers; see
-[`public-share-content-censorship.md`](public-share-content-censorship.md).
+[`public-share-content-censorship.md`](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/public-share-content-censorship.md).
 
 ## Public Share Relay Privacy
 
@@ -526,7 +526,7 @@ plaintext requests and responses; WSS authenticates only the browser-to-relay
 hop. Public shares should therefore be described as unguessable bearer-link
 read-only views, not as relay-operator-private or end-to-end authenticated
 views. See
-[`topics/relay-origin-and-share-gating.md`](relay-origin-and-share-gating.md).
+[`topics/relay-origin-and-share-gating.md`](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/relay-origin-and-share-gating.md).
 
 ## Review Contract
 
@@ -543,31 +543,31 @@ contract.
 
 ## Related Notes
 
-- [`active-content-security.md`](active-content-security.md) records the
+- [`active-content-security.md`](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/active-content-security.md) records the
   confirmed same-origin active-document execution path, the scriptless file
   contract, and the isolated-origin requirement for agent-built applications.
-- [`docs/tactical/000-relay-origin-and-share-gating.md`](../docs/tactical/000-relay-origin-and-share-gating.md)
+- [`docs/tactical/000-relay-origin-and-share-gating.md`](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/docs/tactical/000-relay-origin-and-share-gating.md)
   records the current public-share relay, opt-in, and revocation decisions.
-- [`public-share-content-censorship.md`](public-share-content-censorship.md)
+- [`public-share-content-censorship.md`](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/public-share-content-censorship.md)
   records the proposed content-aware redaction layer for public transcript
   output.
-- [`session-sandboxing.md`](session-sandboxing.md) defines the implemented
+- [`session-sandboxing.md`](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/session-sandboxing.md) defines the implemented
   Linux project-write mechanism, its localhost authentication invariant, and
   the additional admission work a future interactive “locked to this session”
   share would require.
-- [`relay-client-mux.md`](relay-client-mux.md) keeps each host's authentication
+- [`relay-client-mux.md`](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/relay-client-mux.md) keeps each host's authentication
   and encryption independent while sharing a physical relay connection.
-- [`managed-runner-execution-targets.md`](managed-runner-execution-targets.md)
+- [`managed-runner-execution-targets.md`](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/managed-runner-execution-targets.md)
   records the default-off controller/subordinate trust shape, target-side
   runner lease, credential boundaries, and future restricted collaborator
   requirements.
-- [`managed-remote-executors.md`](managed-remote-executors.md) defines the
+- [`managed-remote-executors.md`](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/managed-remote-executors.md) defines the
   manual-SSH-first subordinate runner, controller-mediated Git transfer,
   no-forwarded-credential baseline, and target-account trust boundary.
-- [`cross-host-delegation.md`](cross-host-delegation.md) and
-  [`federated-super-sessions.md`](federated-super-sessions.md) record the
+- [`cross-host-delegation.md`](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/cross-host-delegation.md) and
+  [`federated-super-sessions.md`](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/federated-super-sessions.md) record the
   proposed server-to-server trust and orchestration shapes.
-- [`docs/project/remote-executors.md`](../docs/project/remote-executors.md)
+- [`docs/project/remote-executors.md`](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/docs/project/remote-executors.md)
   records the current SSH executor behavior and limitations.
 - [`SECURITY.md`](../SECURITY.md) is the public security-policy entry point for
   reporting vulnerabilities and should stay operator-facing rather than carrying

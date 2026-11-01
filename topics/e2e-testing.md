@@ -74,8 +74,8 @@ do not pay for a server per case without evidence that the boundary needs it.
 When probing a pair with two workers, use one copy of each file per invocation.
 `--repeat-each` can schedule two copies of the same file concurrently on the
 shared server, so it does not repeat the same pairwise experiment safely.
-The [E2E suite plan](../docs/tactical/135-e2e-suite-cost-ratchet.md) tracks the
-isolation work and the [open gap](../gaps/e2e-shared-server-isolation.md) records
+The [E2E suite plan](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/docs/tactical/135-e2e-suite-cost-ratchet.md) tracks the
+isolation work and the [open gap](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/gaps/e2e-shared-server-isolation.md) records
 the observed failure.
 
 ## Adding or expanding a case
@@ -133,7 +133,7 @@ mutate.
 Compare the slower shard's wall time with the single-job gate and also report
 the sum of shard job times as runner cost. A partial local run stopped by the
 failure limit is not a valid speed comparison; the current measurements are in
-[the E2E cost ledger](../docs/testing/e2e-ci-cost-ledger.md).
+[the E2E cost ledger](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/docs/testing/e2e-ci-cost-ledger.md).
 
 ### Worker-owned services
 
@@ -261,7 +261,7 @@ Review the slowest specs and any retrying case first, but prioritize removable
 duplication over an expensive case with unique boundary coverage. Compare CI
 history before changing timeouts; [test time budgets](test-time-budgets.md)
 owns timeout evidence. The current reduction sequence and its baseline live in
-[the E2E suite ratchet plan](../docs/tactical/135-e2e-suite-cost-ratchet.md).
+[the E2E suite ratchet plan](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/docs/tactical/135-e2e-suite-cost-ratchet.md).
 
 ### Fixed-source CI comparisons
 

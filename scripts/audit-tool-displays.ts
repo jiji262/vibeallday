@@ -31,7 +31,7 @@ Each file runs in a separate worker with a 120-second default timeout.
 Exit 0: complete audit; 1: findings with --fail-on-findings; 2: incomplete scan
 or invalid arguments. A --limit run is explicitly incomplete if files remain.
 Findings are candidates, not proof of a UI regression. No media is fetched or
-preserved and no providers/server/indexes are started. See topics/rich-text-rendering.md.
+preserved and no providers/server/indexes are started.
 `;
 
 export interface AuditOptions {

@@ -26,7 +26,7 @@ observer runs, for the per-project rendez table. The optional review on
 Without the capability the table shows no watching or waiting status and makes
 no status request. ID 131 was renamed from `rendezvous-uploads` to
 `rendez-uploads` before release; its meaning is unchanged. Standing maintainer
-compatibility authorization applies. See [rendez](rendez.md#enable-monitoring).
+compatibility authorization applies. See [rendez](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/rendez.md#enable-monitoring).
 
 `vhost-file-site-replacement` (permanent ID 109, explicit optional bit) gates
 the file-address replacement checkbox and limited-user file-address access.
@@ -45,7 +45,7 @@ while `VIBEALLDAY_AGENT_SELF` is enabled. The 2026-10-06 optional release review
 checked v0.9.0, v0.9.1 and v0.9.2; none has the routes. Without the bit,
 clients report nothing and make no request. No existing capability changes
 meaning. Standing maintainer compatibility authorization applies. See
-[view inspection](agent-self.md#view-inspection).
+[view inspection](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/agent-self.md#view-inspection).
 
 ## Most remaining router policy
 
@@ -57,21 +57,21 @@ per-session `routerPolicy` override, plus admission-refresh metadata and cached
 ranking evidence. The client offers whatever the server reports; a server
 without the bit may refuse an override at launch. The optional 2026-10-04
 corpus v0.9.0–v0.9.2 lacks AAR routes. No released capability changes meaning.
-See [the router contract](agent-auth-router.md#most-remaining-and-admission-refresh).
+See [the router contract](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/agent-auth-router.md#most-remaining-and-admission-refresh).
 
 ## Source Of Truth
 
 `agent-auth-router-owned-pools` (permanent ID 116, explicit optional bit)
 adds `canManagePools` metadata and owner/use authority handling. False hides
 integration editing; old-router editing remains the fallback. See the
-[ownership contract](agent-auth-router.md#router-owned-pool-compatibility).
+[ownership contract](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/agent-auth-router.md#router-owned-pool-compatibility).
 
 `agent-auth-router-pools` (permanent ID 115, explicit optional bit) gates owner
 POST overview/refresh and pool save/remove routes, plus new-session
 `routerPoolId`/`routerPolicy` fields. The 2026-10-03 optional corpus v0.9.0–v0.9.2
 lacks AAR. Without the bit the client retains manual account controls and sends
 no pool requests. Existing capabilities keep their meaning. AAR additionally
-must advertise `pools-v1`. See [pools and overview](agent-auth-router.md#pools-and-quota-overview).
+must advertise `pools-v1`. See [pools and overview](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/agent-auth-router.md#pools-and-quota-overview).
 
 `agent-auth-router-recovery` (permanent ID 114, explicit optional bit) gates
 owner-only `GET /api/agent-auth-router/recovery` and
@@ -81,14 +81,14 @@ authorized this follow-up to the opt-in manual router integration. Without the
 new bit, clients use only the original router controls and requests; the
 existing `agent-auth-router` capability is not broadened. Recovery controls
 remain hidden when the original integration is unavailable. See
-[router recovery](agent-auth-router.md#status-and-recovery).
+[router recovery](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/agent-auth-router.md#status-and-recovery).
 
 `project-app-deletion` (permanent ID 110, explicit optional bit) owns
 administrator DELETE `/api/projects/:projectId/app`. The 2026-10-01 release
 review checked the approved v0.9.0–v0.9.2 corpus, which lacks project-app
 routes. Without the bit clients hide app/project cleanup controls and show
 update guidance. Existing project deletion retains its meaning. See
-[app inventory](project-service.md#app-address-in-project-settings).
+[app inventory](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/project-service.md#app-address-in-project-settings).
 
 `patient-topic-shift` (permanent ID 132, version-implied from 0.9.4) owns the
 `patientSource` and `compactAboveContextPercent` message metadata, both
@@ -98,7 +98,7 @@ queue summary's `compactionGate`, and POST
 v0.9.0–v0.9.2 drop unknown metadata; without the capability clients hide the
 action and settings and send ordinary patient items. No existing capability
 changes meaning; the maintainer's standing compatibility approval covers the
-gate. See [patient topic shifts](patient-topic-shift.md#compatibility).
+gate. See [patient topic shifts](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/patient-topic-shift.md#compatibility).
 
 `project-app-auto-start` (permanent ID 130, version-implied from 0.9.4) owns
 the optional `autoStart` field on GET `/api/projects/:projectId/app/address`
@@ -106,7 +106,7 @@ and POST `/api/projects/:projectId/app/address/auto-start`. v0.9.0–v0.9.2
 lack both; without the capability clients hide the auto-start checkbox and
 send no request. No existing capability changes meaning; the maintainer's
 standing compatibility approval covers the gate. See
-[auto-start on visit](project-service.md#auto-start-on-visit).
+[auto-start on visit](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/project-service.md#auto-start-on-visit).
 
 `process-service-tier-change` (permanent ID 118, version-implied from 0.9.4)
 owns the `serviceTier` request and response field on
@@ -114,7 +114,7 @@ owns the `serviceTier` request and response field on
 process info and accept it on create and queue but ignore it on that route.
 Without the capability the client shows the tier read-only in Session Info and
 sends no tier change. No existing capability changes meaning. The maintainer
-approved this gate on 2026-10-06. See [service tier](service-tier.md#compatibility).
+approved this gate on 2026-10-06. See [service tier](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/service-tier.md#compatibility).
 
 `mcp-app-views` (permanent ID 120, version-implied from 0.9.4) owns the
 `mcpAppViews` server setting, the `_mcpApp` tool_use field,
@@ -122,7 +122,7 @@ approved this gate on 2026-10-06. See [service tier](service-tier.md#compatibili
 artifact-origin proxy path. v0.9.0–v0.9.2 lack all of them; without the
 capability clients hide the setting and every view button and send no view
 request. No existing capability changes meaning; the maintainer's standing
-compatibility approval covers the gate. See [MCP Apps](mcp-apps.md#compatibility).
+compatibility approval covers the gate. See [MCP Apps](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/mcp-apps.md#compatibility).
 
 `project-creation-git-choice` (permanent ID 121, version-implied from 0.9.4)
 owns the `gitInit` request field on `POST /api/projects`: `false` creates a
@@ -130,20 +130,20 @@ missing folder without a repository. v0.9.0–v0.9.2 always initialize Git in a
 folder they create and ignore the field; without the capability New session
 shows Git initialization checked and disabled and sends no field. No existing
 capability changes meaning; the maintainer's standing compatibility approval
-covers the gate. See [project names](project-names.md).
+covers the gate. See [project names](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/project-names.md).
 
 `context-usage-breakdown` (permanent ID 108, version-implied from 0.9.4) owns
 `GET /api/sessions/:sessionId/context-breakdown`. v0.9.0–v0.9.2 lack the
 route; without the capability the context-usage popover shows only its
 existing rows and sends no breakdown request. The maintainer approved this
-gate on 2026-10-01. See [context breakdown](context-breakdown.md#wire-contract).
+gate on 2026-10-01. See [context breakdown](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/context-breakdown.md#wire-contract).
 
 Optional `GitFileRevision.githubLink` metadata supplies file-menu GitHub
 permalinks and push status. The maintainer approved field-presence gating on
 2026-09-30 after checking v0.9.0, v0.9.1, and v0.9.2, which lack the field.
 Older responses omit the menu item; clients use only the already-gated
 file-revision and file-owner endpoints. No existing capability meaning changes.
-See [Copy GitHub link](source-control.md#copy-github-link-from-a-file-menu).
+See [Copy GitHub link](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/source-control.md#copy-github-link-from-a-file-menu).
 
 The optional `session.effectiveLaunchSettings` response snapshot uses field
 presence rather than a new capability or handshake, approved by the maintainer
@@ -152,14 +152,14 @@ v0.9.2 lacks that snapshot. Without it, the client retains the previous resume
 request mapping and browser-local fallback. With it, dormant controls use the
 saved values and resume sends only deliberate overrides through existing
 request fields. No new endpoint or existing capability meaning changes. See
-[session defaults](session-defaults.md#per-session-live-picks-vs-global-defaults).
+[session defaults](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/session-defaults.md#per-session-live-picks-vs-global-defaults).
 
 `project-file-view-command` (permanent ID 107, version-implied from 0.9.4)
 owns `GET /api/projects/:projectId/file-view-search` and the `/v` / `/view`
 composer command. v0.9.0–v0.9.2 lack the route; clients neither advertise nor
 intercept `/v` without it, so the typed text reaches the provider and no
 search request is made. The maintainer approved this gate on 2026-09-30. See
-[view command](view-command.md#compatibility).
+[view command](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/view-command.md#compatibility).
 
 `vhost-file-sites` (permanent ID 105, version-implied from 0.9.4) owns the
 `vhostSites` artifact configuration/status field and the owner routes
@@ -167,26 +167,26 @@ search request is made. The maintainer approved this gate on 2026-09-30. See
 `DELETE /api/artifacts/vhost-sites/:name`. v0.9.0–v0.9.2 lack them; clients
 hide the vhost Serves selector and the share dialog's address section and send
 neither without it. See
-[file vhosts](active-content-security.md#file-vhosts).
+[file vhosts](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/active-content-security.md#file-vhosts).
 
 `local-source-browse` (permanent ID 104, version-implied from 0.9.4) owns the
 `root` query and response field on
 `GET /api/projects/:projectId/git/working-tree-files`. Older servers ignore
 `root` and would list the session project instead, so clients hide **Open in
 Source Control** on outside paths and send no `root` request. See
-[source control](source-control.md#browsing-a-path-outside-the-project).
+[source control](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/source-control.md#browsing-a-path-outside-the-project).
 
 `limited-user-path-grants` (permanent ID 96, version-implied from 0.9.4) owns
 the `pathGrants` field on `POST`/`PATCH /api/users` and in user records.
 Older servers ignore the field, so a directory grant would look saved and
 grant nothing; clients hide the directory editor and never send it. See
-[limited users § Authorization](limited-users.md#authorization).
+[limited users § Authorization](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/limited-users.md#authorization).
 
 `session-creation-provenance` (permanent ID 84, version-implied from v0.9.3)
 owns the optional `creationProvenance` field on session starts, restarts, and
 forks, plus its session summary/detail projections. Hosted clients omit the
 request field and hide creation-source filtering without it. See
-[session creation provenance](session-creation-provenance.md).
+[session creation provenance](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/session-creation-provenance.md).
 
 `file-source-editing` (permanent ID 82, version-implied from 0.9.1) owns
 authenticated GET/PUT `/api/file-edit`, source revisions and conditional saves,
@@ -194,7 +194,7 @@ and artifact source-target resolution. The maintainer approved this additive
 contract on 2026-09-22 after checking stable v0.8.1 and v0.9.0. Both lack it;
 clients hide Edit and make no new requests while preserving read/comment
 behavior. No existing capability changes meaning. See
-[file source editing](file-source-editing.md).
+[file source editing](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/file-source-editing.md).
 
 `speech-backend-setup` (permanent ID 74, version-implied from 0.8.2) owns
 the Speech settings local-backend table: `speechVoiceBackends` on
@@ -204,7 +204,7 @@ the Speech settings local-backend table: `speechVoiceBackends` on
 v0.8.0 (2026-08-31) and v0.8.1 (2026-09-05); both lack these routes and the
 settings field. Without the capability, clients hide the table and make no
 setup, install, or speech-restart request. Existing capability meanings are
-unchanged. See [pluggable speech recognition](pluggable-speech-recognition.md).
+unchanged. See [pluggable speech recognition](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/pluggable-speech-recognition.md).
 
 `session-content-search` (permanent ID 73, version-implied from 0.8.2) owns
 `POST /api/sessions/content-search` and its bounded match batches and coverage
@@ -212,7 +212,7 @@ fields. The maintainer approved the optional compatibility plan on 2026-09-14:
 v0.8.0 (2026-08-31) and v0.8.1 (2026-09-05) keep title-only search, disable
 Ass./User with upgrade guidance, and receive no new-route requests. Existing
 capabilities retain their meanings. See
-[All Sessions search](all-session-content-search.md).
+[All Sessions search](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/all-session-content-search.md).
 
 `non-human-user-turn` (permanent ID 72, version-implied from 0.8.2) owns
 `messageMetadata.sourceSessionId`, the pending `nonHumanUserTurn` summary and
@@ -221,7 +221,7 @@ metadata-event projection, and exact-turn acknowledgement through mark-seen's
 2026-09-14 after checking v0.8.0 (2026-08-31) and v0.8.1 (2026-09-05); both
 lack it. Clients connected to either horizon hide delivery flags and send no
 new acknowledgement fields. Existing capability meanings remain unchanged.
-See [Inbox delivery attention](inbox.md#cross-session-delivery-attention).
+See [Inbox delivery attention](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/inbox.md#cross-session-delivery-attention).
 
 `session-async-questions` (permanent ID 60, version-implied from 0.8.2)
 owns the optional bounded `asyncQuestions` projection on session lists, Inbox,
@@ -539,7 +539,7 @@ class. VIBEALLDAY has no current plan to introduce a version-implied capability 
 expects may be withdrawn; anticipated experimental, removable, host-dependent,
 or configuration-dependent support uses `optional-bit`. A possible later
 reduction in routine negative-bit traffic is kept in
-[Server Capability Sketches](server-capabilities.sketches.md).
+[Server Capability Sketches](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/server-capabilities.sketches.md).
 
 Every capability string advertised from `/api/version` should have a registry
 entry, including permanent static features and dynamic environment/state
@@ -767,7 +767,7 @@ and no `limitedUsersEnabled` write. The same review added the additive
 `limitedUsersEnabled` boolean to `GET /api/auth/status` without a capability:
 only the local login page reads it, served by the same server, and an absent
 field hides the limited-user Username field. See
-[limited users](limited-users.md#login-switching-and-logout).
+[limited users](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/limited-users.md#login-switching-and-logout).
 
 `project-names` (ID 80, permanent, version-implied from 0.8.2) owns the
 `name` and `codeName` request fields on `POST /api/projects`,
@@ -775,7 +775,7 @@ field hides the limited-user Username field. See
 2026-09-20 optional-feature horizon is v0.8.0 and v0.8.1; neither has any of
 these. Without the capability the Projects add form is path-only and the
 client sends neither field, since an older server would silently add the
-project under its path name. See [project names](project-names.md).
+project under its path name. See [project names](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/project-names.md).
 
 `project-captions` (ID 79, permanent, version-implied from 0.8.2) owns the
 additive `caption` field on project list, detail, and create responses,
@@ -783,7 +783,7 @@ additive `caption` field on project list, detail, and create responses,
 event. The 2026-09-20 optional-feature horizon is v0.8.0 and v0.8.1; neither
 has any of these. Without the capability the client shows no caption on
 project cards or the session breadcrumb tooltip, hides the caption editor,
-and makes no caption request. See [project captions](project-captions.md).
+and makes no caption request. See [project captions](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/project-captions.md).
 
 `session-rewind` (ID 78, permanent, version-implied from 0.8.2) gates the
 same-session rewind route, the `/clearloop` start and cancel routes, the
@@ -792,7 +792,7 @@ same-session rewind route, the `/clearloop` start and cancel routes, the
 is v0.8.0 and v0.8.1; neither has any of these. Without the capability the
 client hides the turn-menu Clear entries, marks `/clear N`, `/fork N`, and
 `/clearloop` unavailable, hides the inactivity setting, and makes no rewind
-or clearloop request. See [session-rewind](session-rewind.md).
+or clearloop request. See [session-rewind](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/session-rewind.md).
 
 `speech-vocabulary` (ID 65, optional bit from 0.8.2) owns GET/PUT
 `/api/speech/vocabulary` and POST `.../scan` and `.../reset`. It is advertised
@@ -800,7 +800,7 @@ only when SQLite is ready. The maintainer approved the v0.8.0/v0.8.1 optional
 corpus on 2026-09-08: both lack these endpoints. Without the capability,
 clients hide the vocabulary controls and issue no vocabulary requests. Existing
 speech and capability meanings remain unchanged. See
-[learned speech vocabulary](pluggable-speech-recognition.md#learned-vocabulary-contract).
+[learned speech vocabulary](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/pluggable-speech-recognition.md#learned-vocabulary-contract).
 
 `local-speech-model-selection` gates per-request Whisper model overrides and
 recent Parakeet presets, including unified English on the isolated NeMo
@@ -821,7 +821,7 @@ all stable releases from the preceding 14 days). Neither has the new route.
 Clients without the capability use existing clone/resume/read routes for
 answers and an attributed ordinary user turn for Save, making no unsupported
 context request. Existing capabilities retain their meanings. See
-[synthetic-turn injection](synthetic-turn-injection.md) for the receipt and
+[synthetic-turn injection](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/synthetic-turn-injection.md) for the receipt and
 provider-fallback contract.
 
 ## When To Add One
@@ -985,7 +985,7 @@ before negotiation, and no existing capability meaning is broadened.
 
 The five-part finite stream and its failure, authorization and publication
 contracts are defined in
-[session catalog observation](session-catalog-observation.md#retained-project-discovery-owner).
+[session catalog observation](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/session-catalog-observation.md#retained-project-discovery-owner).
 An invalid or interrupted event stream fails its missing parts instead of
 silently replaying the bundle as legacy requests. Both local and authenticated
 hosted New Session startup use this negotiation. Streamed hosted requests use
@@ -1003,7 +1003,7 @@ none provides this contract. Standing compatibility approval applies. Clients
 bind transport to the requested source and use the read preference below
 without awaiting version acquisition. Other retained
 collection capabilities keep their existing meanings. See
-[retained project discovery](session-catalog-observation.md#retained-project-discovery-owner).
+[retained project discovery](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/session-catalog-observation.md#retained-project-discovery-owner).
 
 `retained-recents` (permanent ID 123, version-implied from 0.9.4) separately
 owns `summaryMode=retained` on `GET /api/recents`, its `visits` and `catalog`
@@ -1012,7 +1012,7 @@ v0.8.0, v0.8.1, v0.9.0, v0.9.1 and v0.9.2; none has this contract. The
 maintainer's standing compatibility approval applies. Older servers and older
 clients keep the complete response. The
 existing retained-session-collections capability retains its original meaning.
-See [retained recent visits](session-catalog-observation.md#retained-recent-visits).
+See [retained recent visits](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/session-catalog-observation.md#retained-recent-visits).
 
 For these two existing GET endpoints only, an unknown source version does not
 delay collection acquisition: clients send `summaryMode=retained` as a read
@@ -1049,7 +1049,7 @@ continues using complete requests. `progressive-session-catalog` still means
 only the existing global collection revision/`knownGeneration` contract;
 neither its meaning nor that of `session-async-questions` changes.
 The execution and lifecycle contract is in
-[Session Catalog Observation](session-catalog-observation.md#retained-global-sessions-and-inbox).
+[Session Catalog Observation](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/session-catalog-observation.md#retained-global-sessions-and-inbox).
 
 Tool-result preservation is independently gated by the proposed permanent
 `tool-result-media-preservation-policy` capability. It owns `GET
@@ -1066,7 +1066,7 @@ the field and shows a read-only update-required explanation; it does not infer
 safe on-demand semantics because an unadvertised post-`0.7.0` source build may
 contain the unconditional materializer. Existing capability meanings remain
 unchanged. The complete UI and timing contract is in
-[Storage Settings](storage-settings.md).
+[Storage Settings](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/storage-settings.md).
 
 ## Server Use
 
@@ -1177,7 +1177,7 @@ settings or session tool. Authenticated legacy routes return 410 migration
 guidance; true old session selections are rejected before provider launch.
 Installed Machine Control uses distinct ID 112 and an optional launch field.
 An older host advertising 70/71 does not receive new readiness requests or
-installed selections without 112. [Computer Control](optional-computer-control.md)
+installed selections without 112. [Computer Control](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/optional-computer-control.md)
 owns the bounded cleanup and intentional authority change.
 
 ## GitHub status controls
@@ -1190,7 +1190,7 @@ Without the bit clients retain legacy issue behavior and send no new settings
 or cache-clear requests. Optional merge metadata remains field-presence gated.
 Older-client settings saves preserve omitted new policy values. Existing ID 68
 and remote compatibility levels keep their meaning. The maintainer approved
-this plan in the originating request. See [tracker status](issue-session-associations.md#tracker-status).
+this plan in the originating request. See [tracker status](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/issue-session-associations.md#tracker-status).
 
 ## Experimental issue/session associations
 
@@ -1202,14 +1202,14 @@ ready SQLite and the indexing owner, independently of the default-off opt-in.
 Absent support hides settings/sidebar/session controls and sends no issue requests.
 Existing capabilities and protocol levels keep their meanings. The unpublished v1
 contract may evolve before release; released changes need the usual review. See
-[issue/session associations](issue-session-associations.md#compatibility-and-migrations)
+[issue/session associations](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/issue-session-associations.md#compatibility-and-migrations)
 for exact routes, fields and source-switch behavior.
 
 The additive `trackerStatus` item field and `statusRefreshing` result flag on
 `GET /api/issues` are self-gated response fields, not a widening of ID 68.
 Every released server lacks them; a current client then shows no state badge
 and sends no new request, and older clients ignore them. The maintainer
-approved this fallback on 2026-10-13 ([tracker status](issue-session-associations.md#tracker-status)).
+approved this fallback on 2026-10-13 ([tracker status](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/issue-session-associations.md#tracker-status)).
 
 ## Installed Machine Control compatibility
 
@@ -1219,7 +1219,7 @@ approved this fallback on 2026-10-13 ([tracker status](issue-session-association
 The optional support corpus v0.9.0, v0.9.1 and v0.9.2 lacks this interface;
 clients hide its picker and send no new request or field without the bit.
 The maintainer's resumed end-to-end implementation follows the presented plan
-in [tactical 142](../docs/tactical/142-machine-control-desktop-consumer.md#session-picker-compatibility-decision).
+in [tactical 142](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/docs/tactical/142-machine-control-desktop-consumer.md#session-picker-compatibility-decision).
 The bit means the readiness route is mounted on a supported host; installed
 product availability is reported separately and verified again at launch.
 

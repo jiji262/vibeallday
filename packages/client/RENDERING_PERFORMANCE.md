@@ -74,7 +74,7 @@ stable component identity, and lower update cadence.
   work pending as a nested update and throws "Maximum update depth exceeded"
   after 50 in a row, so a replay or busy turn that commits once per event
   freezes the tab and can blank it; no effect loop is needed. See
-  [`topics/client-stream-dispatch-coalescing.md`](../../topics/client-stream-dispatch-coalescing.md).
+  [`topics/client-stream-dispatch-coalescing.md`](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/client-stream-dispatch-coalescing.md).
 - Light-load queue/ack/status UI should remain immediate. Backpressure belongs
   on token/render/freshness paths, not on user message acceptance.
 - Transcript projection and DOM commits are non-urgent work. They consume a
@@ -183,7 +183,7 @@ stable component identity, and lower update cadence.
 
 ## Transcript Layout Stability
 
-See also: [`topics/scrollback-view-stability.md`](../../topics/scrollback-view-stability.md)
+See also: [`topics/scrollback-view-stability.md`](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/scrollback-view-stability.md)
 for the scrolled-back anchor target (content position, sub-item granularity, the
 ~20% soft target with boundary snap) and the known regressions.
 
@@ -321,7 +321,7 @@ objects from roughly 26,500 to 451–454. Full-projection typing maxima fell fro
 The result is not uniform: full-mode scroll frame p95 rose from 16.8 to 33.4 ms,
 though maximum frames remained 33.4–50.1 ms with no long task. The complete
 identity, limitations, and augmentation control are in the
-[`2026-08-29 system-observed follow-up`](../../topics/performance-regression-suite.runs/20260829-system-observed-followups.md).
+[`2026-08-29 system-observed follow-up`](https://github.com/jiji262/vibeallday/blob/e64c8b4ffb737da273152d02280fb69a2cddfc88/topics/performance-regression-suite.runs/20260829-system-observed-followups.md).
 
 ## Review Checklist
 

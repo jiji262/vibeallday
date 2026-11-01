@@ -61,7 +61,7 @@ export function PushNotificationToggle() {
             )}
             <p style={{ marginTop: "0.5rem" }}>
               <a
-                href="https://github.com/jiji262/vibeallday/blob/HEAD/docs/push-notifications.md"
+                href="https://github.com/jiji262/vibeallday/blob/HEAD/site/src/content/docs/notifications-and-voice.md"
                 target="_blank"
                 rel="noopener noreferrer"
               >

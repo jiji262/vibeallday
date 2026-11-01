@@ -14,13 +14,13 @@ root unless stated otherwise.
 | [Client development](client.md) | UI translations and console budgets; links to CSS and visual verification owners. |
 | [Provider development](providers.md) | Codex audit approval, pinned reference source, compatibility markers, and schema validation. |
 | [Dependency maintenance](dependencies.md) | Audits, overrides, allowed install scripts, and advisory revisit triggers. |
-| [Documentation and plans](documentation.md) | Document ownership, tactical step names, and retiring completed plans/gaps. |
+| [Documentation](documentation.md) | Minimal documentation scope, usage corrections and historical references. |
 | [Commit conventions](commits.md) | Commit motivation, formatting, provenance, and series threading. |
 | [Debugging](debugging.md) | Server/client logs and the maintenance server. |
 | [Releasing](releasing.md) | npm publishing, website releases, and the private staging runbook. |
 
-Product behavior and durable technical contracts stay in their existing
-`topics/` owners. In particular, use [CSS architecture](../../topics/css-architecture.md),
+Specialist development rules stay in their existing `topics/` owners.
+In particular, use [CSS architecture](../../topics/css-architecture.md),
 [UI design](../../topics/ui-design.md), [UI testing](../../topics/ui-testing.md),
 [server capabilities](../../topics/server-capabilities.md#minimum-compatibility-horizons),
 and [performance measurement](../../topics/performance-regression-suite.md#performance-measurement-hosts)
