@@ -51,8 +51,6 @@
     "vitest": "^4.1.12"
   },
   "dependencies": {
-    "tssrp6a": "^3.0.0",
-    "tweetnacl": "^1.0.3",
     "zod": "^4.6.7"
   }
 }

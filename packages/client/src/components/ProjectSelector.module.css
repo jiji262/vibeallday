@@ -15,9 +15,8 @@
  *
  * `slideUp` is duplicated here rather than shared: CSS Modules scopes
  * keyframe names, and the global copy in `styles/index.css` still
- * animates `.mode-selector-sheet`. `FilterDropdown.module.css` and
- * `BulkActionBar.module.css` carry their own copies for the same
- * reason.
+ * animates `.mode-selector-sheet`. `FilterDropdown.module.css`
+ * carries its own copy for the same reason.
  */
 
 .container {

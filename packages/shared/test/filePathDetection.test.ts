@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { detectFilePaths, splitTextWithFilePaths } from "../filePathDetection";
+import {
+  detectFilePaths,
+  splitTextWithFilePaths,
+} from "../src/filePathDetection.js";
 
 describe("detectFilePaths", () => {
   describe("absolute paths", () => {

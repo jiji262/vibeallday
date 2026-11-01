@@ -1,10 +1,9 @@
 export {
-  SessionView,
   getSessionDisplayTitle,
   SESSION_TITLE_MAX_LENGTH,
   sanitizeSessionTitle,
   truncateSessionTitle,
-} from "./SessionView.js";
+} from "./title.js";
 
 export type {
   ClaudeSessionFile,

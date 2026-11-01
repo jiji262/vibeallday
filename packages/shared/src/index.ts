@@ -1171,7 +1171,6 @@ export {
 
 // Session utilities
 export {
-  SessionView,
   getSessionDisplayTitle,
   SESSION_TITLE_MAX_LENGTH,
   sanitizeSessionTitle,

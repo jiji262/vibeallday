@@ -4588,13 +4588,6 @@ body.session-transcript-selection-active .reload-banner * {
   padding: var(--space-2) 0;
 }
 
-/* Status */
-.status-indicator {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
 /* External session warning banner. Kept compact (small font, tight leading
    and padding) so a multi-line warning doesn't eat the top of a phone screen. */
 .external-session-warning {
@@ -7804,8 +7797,6 @@ body.session-transcript-selection-active .reload-banner * {
   height: 16px;
   cursor: pointer;
 }
-
-/* Bulk action bar styles live in components/BulkActionBar.module.css */
 
 @media (width <= 768px) {
   .session-list-header {
