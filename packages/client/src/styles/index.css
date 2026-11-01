@@ -3,7 +3,6 @@
 @import "./provider-colors.css";
 @import "./renderers.css";
 @import "./tool-rows.css";
-@import "./emulator.css";
 
 .page {
   max-width: 800px;

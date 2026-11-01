@@ -115,7 +115,6 @@ import { SESSION_COOKIE_NAME } from "./auth/routes.js";
 import { getCookie as getRequestCookie } from "hono/cookie";
 import { levelFor, satisfies } from "./auth/limitedUserPolicy.js";
 import type { DesktopBootstrapService } from "./desktop/DesktopBootstrapService.js";
-import type { DeviceBridgeService } from "./device/DeviceBridgeService.js";
 import type { FrontendProxy } from "./frontend/index.js";
 import type {
   SessionDiscoveryIndexRegistry,
@@ -180,7 +179,6 @@ import type {
   RemoteSessionService,
 } from "./remote-access/index.js";
 import { createRemoteAccessRoutes } from "./remote-access/index.js";
-import { createAndroidHostSummaryRoutes } from "./routes/android-host-summary.js";
 import { createActivityRoutes } from "./routes/activity.js";
 import { createBrowserProfilesRoutes } from "./routes/browser-profiles.js";
 import { createBrowserSettingsBackupRoutes } from "./routes/browser-settings-backup.js";
@@ -192,7 +190,6 @@ import { createClientLogsRoutes } from "./routes/client-logs.js";
 import { createConnectionsRoutes } from "./routes/connections.js";
 import { createDevRoutes } from "./routes/dev.js";
 import { createDesktopBootstrapRoutes } from "./routes/desktop-bootstrap.js";
-import { createDeviceRoutes } from "./routes/devices.js";
 import { createFilesRoutes } from "./routes/files.js";
 import { canonicalizeManagedAttachmentPath } from "./uploads/attachmentAccess.js";
 import { createBangCommandsRoutes } from "./routes/bang-commands.js";
@@ -295,8 +292,6 @@ import { type UploadDeps, createUploadRoutes } from "./routes/upload.js";
 import { createSpeechRoutes } from "./routes/speech.js";
 import type { SpeechBackendInstallService } from "./services/voice/speechBackendInstall.js";
 import { createSecurityClientRoutes } from "./routes/security-clients.js";
-import { createNativePushRoutes } from "./routes/native-push.js";
-import type { NativePushService } from "./push/NativePushService.js";
 import { DiscoverySqliteService } from "./storage/discovery-sqlite.js";
 import { createVersionRoutes } from "./routes/version.js";
 import { createProviderHostRoutes } from "./routes/provider-host.js";
@@ -488,7 +483,6 @@ export interface AppOptions {
   remoteSessionService?: RemoteSessionService;
   /** Signed continuity-key registry and security audit service. */
   securityClientService?: SecurityClientService;
-  nativePushService?: NativePushService;
   /** RelayClientService for relay connection status (optional) */
   relayClientService?: RelayClientService;
   /**
@@ -562,8 +556,6 @@ export interface AppOptions {
   modelInfoService?: ModelInfoService;
   /** PublicShareService for secret-link read-only session shares */
   publicShareService?: PublicShareService;
-  /** DeviceBridgeService for Android emulator streaming */
-  deviceBridgeService?: DeviceBridgeService;
   /** If non-empty, only these provider names are exposed via the API. */
   enabledProviders?: string[];
   /** Explicit Codex CLI path supplied by an embedding runtime such as desktop. */
@@ -1101,14 +1093,6 @@ export function createApp(options: AppOptions): AppResult {
 
   if (options.securityClientService) {
     app.route("/", createSecurityClientRoutes(options.securityClientService));
-    if (options.nativePushService)
-      app.route(
-        "/",
-        createNativePushRoutes(
-          options.securityClientService,
-          options.nativePushService,
-        ),
-      );
   }
 
   // Create dependencies
@@ -2466,22 +2450,6 @@ export function createApp(options: AppOptions): AppResult {
       }),
       browserSettingsBackupAvailable: !!options.browserSettingsBackupService,
       securityClientAuditAvailable: !!options.securityClientService,
-      nativePush: options.nativePushService?.version(),
-      getDeviceBridgeState: () => {
-        if (!options.deviceBridgeService) return "unavailable";
-        return options.deviceBridgeService.hasBinary()
-          ? "available"
-          : "downloadable";
-      },
-      getDeviceBridgeStatus: ({ forceRefresh } = {}) => {
-        if (!options.deviceBridgeService) {
-          return Promise.resolve({ state: "unavailable" as const });
-        }
-        return options.deviceBridgeService.getBridgeStatus({ forceRefresh });
-      },
-      isDeviceBridgeEnabled: () =>
-        options.serverSettingsService?.getSetting("deviceBridgeEnabled") ??
-        false,
       voiceInputEnabled: options.voiceInputEnabled,
       getEnabledVoiceBackends: () =>
         options.speechBackendRegistry?.enabledIds() ?? [],
@@ -2518,7 +2486,6 @@ export function createApp(options: AppOptions): AppResult {
           options.serverPort ??
           0,
         installId: options.installId,
-        deviceBridgeAvailable: !!options.deviceBridgeService?.hasBinary(),
       }),
     );
   }
@@ -3824,17 +3791,6 @@ export function createApp(options: AppOptions): AppResult {
     );
   }
 
-  // Emulator streaming routes (Android emulator remote control)
-  if (options.deviceBridgeService) {
-    app.route(
-      "/api/devices",
-      createDeviceRoutes({
-        deviceBridgeService: options.deviceBridgeService,
-        serverSettingsService: options.serverSettingsService,
-      }),
-    );
-  }
-
   // Upload routes (WebSocket file uploads)
   if (options.upgradeWebSocket) {
     app.route(
@@ -3898,13 +3854,6 @@ export function createApp(options: AppOptions): AppResult {
   // This native-only count stream is paired with the app-private Android runtime.
   // Hosted clients never depend on it; older staged payloads yield HTTP 404.
   if (process.env.VIBEALLDAY_ANDROID_SAF_SOCKET && options.eventBus) {
-    app.route(
-      "/api/android-host",
-      createAndroidHostSummaryRoutes({
-        supervisor,
-        eventBus: options.eventBus,
-      }),
-    );
   }
 
   // Activity routes (file watching)

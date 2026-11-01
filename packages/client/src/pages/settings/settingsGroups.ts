@@ -44,7 +44,7 @@ export const SETTINGS_GROUPS: readonly SettingsGroupDefinition[] = [
   {
     id: "notifications",
     titleKey: "settingsGroupNotifications",
-    categoryIds: ["notifications", "devices", "emulator"],
+    categoryIds: ["notifications", "devices"],
   },
   {
     id: "access",
@@ -60,7 +60,6 @@ export const SETTINGS_GROUPS: readonly SettingsGroupDefinition[] = [
       "project-templates",
       "apps",
       "webhooks",
-      "browser-extension",
     ],
   },
   {

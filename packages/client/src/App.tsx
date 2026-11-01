@@ -7,7 +7,6 @@ import { BottomOverscrollReload } from "./components/BottomOverscrollReload";
 import { CacheMissBillingToasts } from "./components/CacheMissBillingToasts";
 import { ClientLogRecordingBadge } from "./components/ClientLogRecordingBadge";
 import { ConnectionBar } from "./components/ConnectionBar";
-import { DesktopProviderNotice } from "./components/DesktopProviderNotice";
 import { StorageFilesystemBanner } from "./components/StorageFilesystemBanner";
 import { ReloadBanner, ReloadBannerStack } from "./components/ReloadBanner";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
@@ -134,7 +133,6 @@ function AppContent({ children }: Props) {
     <>
       <ConnectionBar />
       {canAdministerHost && <StorageFilesystemBanner />}
-      {canAdministerHost && <DesktopProviderNotice />}
       {!authLoading &&
         (!authEnabled || isAuthenticated) &&
         canAdministerHost && <LocalRuntimeNotice />}

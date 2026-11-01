@@ -21,7 +21,6 @@
       "!**/tasks",
       "!**/docs/tasks",
       "!**/branding",
-      "!**/packages/desktop",
       "!**/packages/server/generated/codex-app-server",
       "!**/packages/server/src/sdk/providers/codex-protocol/generated"
     ]
@@ -33,16 +32,6 @@
         "rules": {
           "correctness": {
             "noUnusedImports": "off",
-            "noUnusedVariables": "off"
-          }
-        }
-      }
-    },
-    {
-      "includes": ["packages/device-bridge/cmd/bridge/web/**/*.html"],
-      "linter": {
-        "rules": {
-          "correctness": {
             "noUnusedVariables": "off"
           }
         }
@@ -68,14 +57,18 @@
           "nursery": {
             "noExcessiveSelectorClasses": {
               "level": "error",
-              "options": { "maxClasses": 4 }
+              "options": {
+                "maxClasses": 4
+              }
             }
           },
           "style": {
             "noDescendingSpecificity": "error",
             "noExcessiveLinesPerFile": {
               "level": "warn",
-              "options": { "maxLines": 600 }
+              "options": {
+                "maxLines": 600
+              }
             },
             "noValueAtRule": "error"
           },
@@ -91,7 +84,13 @@
     "indentStyle": "space",
     "indentWidth": 2
   },
-  "assist": { "actions": { "source": { "organizeImports": "off" } } },
+  "assist": {
+    "actions": {
+      "source": {
+        "organizeImports": "off"
+      }
+    }
+  },
   "linter": {
     "enabled": true,
     "rules": {

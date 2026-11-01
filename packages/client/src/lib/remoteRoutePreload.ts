@@ -4,7 +4,6 @@ export type RemoteRouteModuleKey =
   | "agentsPage"
   | "bangCommandsPage"
   | "directLoginPage"
-  | "emulatorPage"
   | "filePage"
   | "gitStatusPage"
   | "globalSessionsPage"
@@ -64,9 +63,6 @@ function selectedAppPageModules(pathname: string): RemoteRouteModuleKey[] {
   if (pathname === "/git-status") return [...modules, "gitStatusPage"];
   if (pathname === "/bang-commands") {
     return [...modules, "bangCommandsPage"];
-  }
-  if (pathname === "/devices" || pathname.startsWith("/devices/")) {
-    return [...modules, "emulatorPage"];
   }
   if (pathname === "/settings" || pathname.startsWith("/settings/")) {
     return [...modules, "settings"];

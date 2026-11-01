@@ -4,7 +4,6 @@ import { join } from "node:path";
 import { mkdir, writeFile } from "node:fs/promises";
 import { afterEach, expect, it } from "vitest";
 import type { AppResult } from "../../src/app.js";
-import type { DeviceBridgeService } from "../../src/device/DeviceBridgeService.js";
 import { RecentsService } from "../../src/recents/RecentsService.js";
 import { ServerSettingsService } from "../../src/services/ServerSettingsService.js";
 import { MockClaudeSDK } from "../../src/sdk/mock.js";
@@ -166,18 +165,14 @@ it("streams prepared route facts while version discovery is held", async () => {
     dataDir,
     serverSettingsService,
     recentsService,
-    // The version part waits on the device bridge probe; holding it holds
-    // version discovery while the other parts stream.
-    deviceBridgeService: {
-      hasBinary: () => false,
-      getBridgeStatus: async () => {
-        await held;
-        return { state: "unavailable" };
-      },
-    } as unknown as DeviceBridgeService,
     projectsDir,
   });
   apps.push(instance);
+  const originalFetch = instance.app.fetch;
+  instance.app.fetch = async (...args) => {
+    if (new URL(args[0].url).pathname === "/api/version") await held;
+    return originalFetch(...args);
+  };
   try {
     const response = await instance.app.request(
       "/api/settings?bootstrap=new-session-v1",

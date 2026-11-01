@@ -65,11 +65,6 @@ const BangCommandsPage = lazy(() =>
     default: BangCommandsPage,
   })),
 );
-const EmulatorPage = lazy(() =>
-  import("./pages/EmulatorPage").then(({ EmulatorPage }) => ({
-    default: EmulatorPage,
-  })),
-);
 const FilePage = lazy(() =>
   import("./pages/FilePage").then(({ FilePage }) => ({ default: FilePage })),
 );
@@ -409,14 +404,7 @@ if (import.meta.env.DEV && window.location.port === String(__VITE_DEV_PORT__)) {
                       path="/bang-commands"
                       element={routeModule(<BangCommandsPage />)}
                     />
-                    <Route
-                      path="/devices"
-                      element={routeModule(<EmulatorPage />)}
-                    />
-                    <Route
-                      path="/devices/:deviceId"
-                      element={routeModule(<EmulatorPage />)}
-                    />
+
                     <Route
                       path="/new-session"
                       element={routeModule(<NewSessionPage />)}

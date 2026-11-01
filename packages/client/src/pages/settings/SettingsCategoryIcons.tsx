@@ -47,7 +47,6 @@ export const settingsCategoryEmojiIcons: Record<string, string> = {
   "cache-miss-billing": "🧾",
   "message-delivery": "📨",
   "source-control": "🔎",
-  "browser-extension": "🧩",
   storage: "🗄️",
   "agent-context": "📋",
   "agent-behavior": "🧭",
@@ -65,7 +64,6 @@ export const settingsCategoryEmojiIcons: Record<string, string> = {
   "remote-executors": "🖥️",
   environment: "⚙️",
   about: "ℹ️",
-  emulator: "🤖",
   development: "🛠️",
 };
 
@@ -169,13 +167,6 @@ export const settingsCategoryIcons: Record<string, ReactNode> = {
       <circle cx="10" cy="10" r="6" />
       <path d="m14.5 14.5 5 5" />
       <path d="M7 10h6" />
-    </Icon>
-  ),
-
-  "browser-extension": (
-    <Icon>
-      {/* Puzzle piece, Chrome's own extension glyph. */}
-      <path d="M19.4 13a2 2 0 1 0 0-3H18V6a1 1 0 0 0-1-1h-4V3.6a2 2 0 1 0-3 0V5H6a1 1 0 0 0-1 1v4h1.4a2 2 0 1 1 0 3H5v5a1 1 0 0 0 1 1h4v-1.4a2 2 0 1 1 3 0V19h4a1 1 0 0 0 1-1v-5Z" />
     </Icon>
   ),
 
@@ -323,20 +314,6 @@ export const settingsCategoryIcons: Record<string, ReactNode> = {
       <circle cx="12" cy="12" r="10" />
       <path d="M12 16v-4" />
       <path d="M12 8h.01" />
-    </Icon>
-  ),
-
-  emulator: (
-    <Icon>
-      {/* Robot head */}
-      <rect x="5" y="6" width="14" height="10" rx="2" />
-      <circle cx="9" cy="10" r="1.4" fill="currentColor" />
-      <circle cx="15" cy="10" r="1.4" fill="currentColor" />
-      <path d="M8 14h8" />
-      <line x1="7" y1="6" x2="5" y2="3" />
-      <line x1="17" y1="6" x2="19" y2="3" />
-      <circle cx="5" cy="3" r="0.8" fill="currentColor" />
-      <circle cx="19" cy="3" r="0.8" fill="currentColor" />
     </Icon>
   ),
 

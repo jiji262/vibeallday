@@ -18,7 +18,7 @@
 console.log("[RemoteClient] Loading remote-main.tsx entry point");
 
 import "./lib/developmentPerformanceBootstrap";
-import { Fragment, lazy, StrictMode, Suspense } from "react";
+import { Fragment, lazy, StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 
 // Toggle to disable StrictMode for easier debugging (avoids double renders)
@@ -29,7 +29,6 @@ import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { PrebootComposerRetirement } from "./components/PrebootComposerRetirement";
 import { RouteModule, routeModule } from "./components/RouteModule";
 import { TooltipLayer } from "./components/ui/TooltipLayer";
-import { isExtensionPage } from "./extension/chrome";
 import { initializeContentMaxWidth } from "./hooks/useContentMaxWidth";
 import { initializeFontSize } from "./hooks/useFontSize";
 import { initializeSidebarSpacing } from "./hooks/useSidebarSpacing";
@@ -66,9 +65,6 @@ const loadBangCommandsPageModule = cachedModule(
 const loadMorePageModule = cachedModule(() => import("./pages/MorePage"));
 const loadDirectLoginPageModule = cachedModule(
   () => import("./pages/DirectLoginPage"),
-);
-const loadEmulatorPageModule = cachedModule(
-  () => import("./pages/EmulatorPage"),
 );
 const loadFilePageModule = cachedModule(() => import("./pages/FilePage"));
 const loadLocalSourcePageModule = cachedModule(
@@ -162,11 +158,6 @@ const MorePage = lazy(() =>
 const DirectLoginPage = lazy(() =>
   loadDirectLoginPageModule().then(({ DirectLoginPage }) => ({
     default: DirectLoginPage,
-  })),
-);
-const EmulatorPage = lazy(() =>
-  loadEmulatorPageModule().then(({ EmulatorPage }) => ({
-    default: EmulatorPage,
   })),
 );
 const FilePage = lazy(() =>
@@ -277,12 +268,6 @@ const ProviderSignInPage = lazy(() =>
   })),
 );
 
-// Only the Chrome extension's app tab mirrors saved hosts and takes
-// navigation from the side panel (docs/tactical/151).
-const ExtensionAppBridge = isExtensionPage()
-  ? lazy(() => import("./extension/AppBridge"))
-  : null;
-
 const initialRemoteModuleLoaders: Record<
   RemoteRouteModuleKey,
   () => Promise<unknown>
@@ -290,7 +275,6 @@ const initialRemoteModuleLoaders: Record<
   agentsPage: loadAgentsPageModule,
   bangCommandsPage: loadBangCommandsPageModule,
   directLoginPage: loadDirectLoginPageModule,
-  emulatorPage: loadEmulatorPageModule,
   filePage: loadFilePageModule,
   localSourcePage: loadLocalSourcePageModule,
   gitStatusPage: loadGitStatusPageModule,
@@ -407,8 +391,7 @@ const APP_ROUTES = (
       <Route path="issues" element={routeModule(<IssuesPage />)} />
       <Route path="git-status" element={routeModule(<GitStatusPage />)} />
       <Route path="bang-commands" element={routeModule(<BangCommandsPage />)} />
-      <Route path="devices" element={routeModule(<EmulatorPage />)} />
-      <Route path="devices/:deviceId" element={routeModule(<EmulatorPage />)} />
+
       <Route
         path="provider-sign-in/:provider"
         element={routeModule(<ProviderSignInPage />)}
@@ -457,11 +440,7 @@ const app = (
     <TooltipLayer />
     <BrowserRouter basename={basename}>
       <PrebootComposerRetirement />
-      {ExtensionAppBridge && (
-        <Suspense fallback={null}>
-          <ExtensionAppBridge />
-        </Suspense>
-      )}
+
       <I18nProvider>
         <Routes>
           <Route

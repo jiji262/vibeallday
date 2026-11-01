@@ -1,11 +1,7 @@
 import {
-  DEVICE_BRIDGE_AVAILABLE_CAPABILITY,
-  DEVICE_BRIDGE_CAPABILITY,
-  DEVICE_BRIDGE_DOWNLOAD_CAPABILITY,
   GIT_SOURCE_REVIEW_SUBMISSIONS_CAPABILITY,
   SERVER_CAPABILITIES,
 } from "@vibeallday/shared";
-import { isExtensionPage } from "./extension/chrome";
 import type { SidebarSpacing } from "./hooks/useSidebarSpacing";
 import type {
   OutputFixedFont,
@@ -140,15 +136,6 @@ export function getSettingsCategories(
         unsupportedMessage: t("issuesUnavailable"),
       },
     },
-    ...(isExtensionPage()
-      ? [
-          {
-            id: "browser-extension",
-            label: t("settingsBrowserExtensionTitle"),
-            description: t("settingsBrowserExtensionDescription"),
-          },
-        ]
-      : []),
     {
       id: "storage",
       label: t("settingsStorageTitle"),
@@ -246,19 +233,6 @@ export function getSettingsCategories(
       id: "development",
       label: t("settingsDevelopmentTitle"),
       description: t("settingsDevelopmentDescription"),
-    },
-    {
-      id: "emulator",
-      label: t("settingsEmulatorTitle"),
-      description: t("settingsEmulatorDescription"),
-      requires: {
-        anyCapability: [
-          DEVICE_BRIDGE_CAPABILITY,
-          DEVICE_BRIDGE_DOWNLOAD_CAPABILITY,
-          DEVICE_BRIDGE_AVAILABLE_CAPABILITY,
-        ],
-        unsupportedMessage: t("settingsEmulatorUnsupportedServer"),
-      },
     },
     {
       id: "about",

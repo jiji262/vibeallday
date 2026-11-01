@@ -76,64 +76,7 @@ Playwright specs, configurations and support modules through
 `packages/client/tsconfig.e2e.json`. Keep fixture and startup changes in that
 strict gate; Playwright strips types without checking them.
 
-The general CI unit-test job runs `pnpm test`. Android unit, lint, build, and
-instrumentation coverage belongs to the dedicated Android App workflow so its
-Gradle work does not contend with the JavaScript workspace test processes.
-Android JVM unit-test tasks have a five-minute task timeout and emit per-test
-lifecycle output so a stalled worker fails with attributable evidence.
-
-On a dedicated, authorized Android device, `pnpm --filter @vibeallday/android
-test:live` installs the minified Debug probe and exercises owned direct and local
-relay fixtures. Set `VIBEALLDAY_NATIVE_PUBLIC_RELAY_LIVE=1` for the separate public TLS
-relay check: it registers a uniquely named disposable server, starts native
-pairing from Android's Main dispatcher, then verifies the bundled WebView,
-streaming, upload and sequential typing. The runner removes its port forwards
-and server afterward. Set `ANDROID_SERIAL` when more than one device is attached.
-For an attached personal phone, set `VIBEALLDAY_NATIVE_ISOLATED=1` and
-`ANDROID_HOME` to build a side-by-side `VIBEALLDAY Transport Test` package. The runner
-verifies both APK application IDs before installation, refuses to replace an
-existing test package, removes only packages it installed and leaves the primary
-app's profiles untouched. The isolated package claims no launcher/deep-link
-intent filters; instrumentation launches its activities explicitly. Select route
-modes with `VIBEALLDAY_NATIVE_LIVE_MODES=direct,mux` and a focused class/method list with
-`VIBEALLDAY_NATIVE_LIVE_CLASSES` (comma separated, Android runner `Class#method` syntax).
-An app-data sandbox does not bypass secure keyguard: physical sleep/wake cases
-need manual unlock. Use emulator sleep/fault runs while the handheld is locked, then non-locking
-physical foreground/background cases after manual unlock; do not describe a
-keyguard-blocked run as a product regression or passing lifecycle acceptance.
-
-The WebView probe also checks native tabs, internal/external links, warm launcher
-resume, draft/scroll identity, rotation and cold route restoration. Add
-`VIBEALLDAY_NATIVE_NETWORK_LIFECYCLE=1` on an authorized phone to disable both Wi-Fi and
-mobile data during warm resume; the probe restores each radio's original state
-in teardown. Its tab records and selected profile are restored after the run.
-These instrumentation probes preserve extra shared test APIs; separately verify
-the actual Release login form before uploading a store bundle. A background
-instrumentation caller or plaintext fixture cannot prove UI-initiated TLS login.
-The typing probe taps the WebView editor through Android accessibility and
-requires window focus, an active input connection and stable viewport before
-injecting sequential hardware keys. Input-readiness failure must fail setup,
-including on emulators; it must never continue into a partial typing sample.
-Live fixture hosts have unique display names so a previous interrupted run
-cannot redirect a later host-picker tap to a stopped server. On UI failure,
-the probe captures the screen, accessibility hierarchy and window/power state
-before teardown. The live runner retains these under
-`packages/android/app/build/reports/native-live/` for the existing CI artifact
-upload. These captures use the owned fixtures; inspect any local device
-captures before sharing them. Hosted run `37219989321` established that a
-Pixel Launcher ANR dialog was hiding an otherwise connected VIBEALLDAY page from
-accessibility. CI compiles its minified probe APKs before starting the emulator,
-then uses the same minification property for ordinary and live
-instrumentation. This avoids rebuilding/shrinking a different variant
-beside the running emulator. Fixtures use loopback through adb reverse, which
-every build's network policy permits; no build opts into broader plain HTTP.
-The UI probes can close that exact
-system-owned Pixel Launcher dialog once per test, on emulators only, and retain
-its evidence. They never dismiss VIBEALLDAY ANRs or relax input-readiness/latency gates.
-Link probes resolve the accessible name from either WebView text or content
-description, then perform real taps/long presses. Hosted run `37223303403`
-exposed the external anchor only as a content description; the external VIEW
-intent, unchanged document identity and tab count remain required assertions.
+The general CI unit-test job runs `pnpm test` for the core Web workspaces.
 
 Captured provider regressions run offline in the normal server suite:
 `pnpm --dir packages/server exec vitest run test/captured-provider.test.ts`.
@@ -167,39 +110,6 @@ their explicit update responses; general tests never require public update
 service availability. Client unit setup clears local/session storage before
 invalidating preference caches, so earlier cases cannot choose later defaults.
 
-## Native App CI Cadence
-
-Main CI and Server Runtime And SQLite still run on every pull request and
-`main` push. Native application workflows use matching path filters for both
-events: platform code, tests, resources, manifests and build scripts trigger
-their platform immediately. Shared Rust mobile-core changes trigger both
-mobile apps. Native web-host adapter, crypto and binary-framing changes also
-retain immediate Android/iOS coverage.
-
-Ordinary web UI, server, shared-code and root lockfile changes do not trigger
-native application builds by themselves. Android runs the full build and
-WebView instrumentation workflow daily at 04:17 UTC; iOS runs its full Rust,
-simulator and unsigned-device workflow at 04:47 UTC. Both scheduled runs check
-the current default-branch source, including bundled web changes. Push and
-scheduled Android runs verify without publishing. An explicit manual main
-run with `publish_internal=true` can publish its verified bundled AAB after
-[delivery setup](../distribution/mobile/README.md#android-ci-internal-delivery).
-Superseded Android verification runs on the same ref are cancelled; explicit
-release runs use a separate group and finish even if new pushes arrive.
-iOS still does not publish store releases. GitHub may delay scheduled starts.
-
-Desktop retains its existing 02:37 UTC Nightly Desktop release, which selects
-verified main source and skips unchanged packaged inputs. Its per-change
-workflow covers the desktop package, packaging inputs and scripts, dependency
-manifests for bundled packages, patches and workflow changes. Desktop release
-tags and reusable release calls retain full packaging regardless of paths.
-
-All three native workflows support manual dispatch for targeted acceptance or
-release preparation. Native package Markdown-only changes do not start builds.
-The workflow path lists are authoritative; before a release, obtain passing
-platform acceptance for the source being released even when its changes only
-received scheduled coverage.
-
 ## Cross-Platform Behavior And Tests
 
 Treat Linux, macOS, and Windows as supported development targets. Code and
@@ -215,19 +125,3 @@ tests by platform or capability, and test the supported fallback on the other
 platforms. Passing on one contributor's OS is not sufficient evidence. When
 other-OS validation is unavailable, state that limitation in the handoff.
 Never weaken a security boundary merely to make another platform pass.
-
-## Device Control Testing
-
-Use the Android emulator only when testing the device-control/device-bridge feature. Check with `source ~/.profile && adb devices` and deploy/test on the emulator for changes that touch device streaming, `/api/devices`, `deviceBridge`, or `packages/device-bridge`. For general client, server, web UI, provider, relay, or rendering changes, do not require emulator testing.
-
-## ChromeOS Debugging
-
-For Chromebook testing and debugging (screenshots, input, diagnostics), use the chromeos-testbed CLI — NOT the browser control skill (which is for local headless Chromium).
-
-```bash
-~/code/chromeos-testbed/bin/chromeos screenshot              # saves screenshot, prints path
-~/code/chromeos-testbed/bin/chromeos screenshot output.png   # saves to output.png
-~/code/chromeos-testbed/bin/chromeos help                    # full command list
-```
-
-Requires SSH access to `chromeroot`. See `~/code/chromeos-testbed/CLAUDE.md` for details.

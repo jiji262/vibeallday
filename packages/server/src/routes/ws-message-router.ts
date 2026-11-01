@@ -313,7 +313,6 @@ interface MessageRouteHandlers {
   onSpeechControl?: (
     msg: RemoteClientMessage & { type: "speech_control" },
   ) => Promise<void> | void;
-  onDeviceMessage?: (msg: RemoteClientMessage) => Promise<void> | void;
 }
 
 function getMessageId(msg: RemoteClientMessage): string | undefined {
@@ -396,11 +395,6 @@ export async function routeClientMessageSafely(
       case "device_stream_stop":
       case "device_webrtc_answer":
       case "device_ice_candidate":
-        if (handlers.onDeviceMessage) {
-          await handlers.onDeviceMessage(msg);
-        } else {
-          console.warn("[WS Relay] Device message received but no handler");
-        }
         break;
       default:
         console.warn(

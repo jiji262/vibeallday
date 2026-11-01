@@ -16,11 +16,6 @@
     "test": "node ../../scripts/run-with-safe-home.js vitest run",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
-    "test:e2e:android": "playwright test --grep \"streams physical Android\"",
-    "test:e2e:android:soak": "VIBEALLDAY_E2E_ANDROID_LONG_STREAM=true VIBEALLDAY_E2E_ANDROID_LONG_STREAM_MS=${VIBEALLDAY_E2E_ANDROID_LONG_STREAM_MS:-120000} playwright test --grep \"long duration\"",
-    "test:e2e:emulator:apk": "DEVICE_BRIDGE_USE_APK_FOR_EMULATOR=true ANDROID_DEVICE_SERVER_APK=${ANDROID_DEVICE_SERVER_APK:-../android-device-server/app/build/outputs/apk/release/vibeallday-device-server.apk} playwright test --grep \"APK transport override\"",
-    "test:e2e:emulator:apk:adaptive": "DEVICE_BRIDGE_USE_APK_FOR_EMULATOR=true ANDROID_DEVICE_SERVER_APK=${ANDROID_DEVICE_SERVER_APK:-../android-device-server/app/build/outputs/apk/release/vibeallday-device-server.apk} VIBEALLDAY_BRIDGE_TEST_ADAPTIVE_PROFILE_CYCLE=true E2E_SERVER_LOG_LEVEL=info E2E_SERVER_FILE_LOG_LEVEL=info playwright test --grep \"adaptive profile downshift/upshift events via APK transport override\"",
-    "test:e2e:chromeos": "CHROMEOS_HOST=${CHROMEOS_HOST:-chromeroot} playwright test --grep \"streams ChromeOS\"",
     "request:census": "node scripts/request-census.mjs",
     "transcript:artifacts": "node scripts/transcript-artifact-smoke.mjs",
     "transcript:benchmark": "tsx scripts/transcript-projection-benchmark.ts",
@@ -58,7 +53,7 @@
     "fake-indexeddb": "^6.2.5",
     "jsdom": "^25.0.1",
     "typescript": "^5.7.2",
-    "vite": "^6.4.4",
+    "vite": "^6.4.5",
     "vitest": "^4.1.12"
   }
 }

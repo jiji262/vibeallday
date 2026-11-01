@@ -26,6 +26,11 @@ overrides:
   # @modelcontextprotocol/sdk > express, whose own range is already ^6.14.0,
   # so this pulls the patched release forward without breaking that range.
   "express>qs": "^6.16.1"
+  # GHSA-g3hv-75wg-m249 is patched only in minimatch 11. Both ESLint
+  # consumers use the compatible Minimatch constructor/match API. Drop these
+  # scoped pins when their declared ranges include a patched release.
+  "eslint>minimatch": "11.0.1"
+  "@eslint/config-array>minimatch": "11.0.1"
 
 onlyBuiltDependencies:
   - bcrypt
@@ -33,15 +38,12 @@ onlyBuiltDependencies:
 # Vetted no-op build scripts, blocked on purpose. Listing them records that
 # decision, so installs stop warning and `pnpm approve-builds` stays empty.
 ignoredBuiltDependencies:
-  - "@firebase/util"
   - esbuild
-  - protobufjs
 
 auditConfig:
   ignoreGhsas:
     - GHSA-qwww-vcr4-c8h2
     - GHSA-rmxm-3fg6-px4f
-    - GHSA-w5hq-g745-h8pq
 
 patchedDependencies:
   zod@4.6.7: patches/zod@4.6.7.patch

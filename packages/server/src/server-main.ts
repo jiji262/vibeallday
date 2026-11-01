@@ -29,8 +29,6 @@ import {
   registerDevWrapperBackend,
   reportDevWrapperListening,
 } from "./dev-wrapper-client.js";
-import { DeviceBridgeService } from "./device/DeviceBridgeService.js";
-import { detectAdb } from "./device/adb.js";
 import { DESKTOP_BOOTSTRAP_PROTOCOL_VERSION } from "./desktop/DesktopBootstrapService.js";
 import { readDesktopBootstrapServiceFromStdin } from "./desktop/startup.js";
 import {
@@ -120,7 +118,6 @@ import {
   WorkstreamService,
 } from "./services/index.js";
 import { providerInstallationCoordinator } from "./services/ProviderInstallationCoordinator.js";
-import { NativePushService } from "./push/NativePushService.js";
 import { configureInboundWebSocketMessageLimit } from "./websocketLimits.js";
 import {
   type SpeechRegistryInitOptions,
@@ -205,14 +202,12 @@ let disposeAppForShutdown:
   | Awaited<ReturnType<typeof createApp>>["disposeSessionReaders"]
   | null = null;
 let stopNotificationsForShutdown: (() => void) | null = null;
-let deviceBridgeForShutdown: DeviceBridgeService | null = null;
 let projectGlossarySubscriptionsForShutdown: ProjectGlossarySubscriptionManager | null =
   null;
 let projectWorktreeSubscriptionsForShutdown: ProjectWorktreeSubscriptionManager | null =
   null;
 let hostAwakeForShutdown: HostAwakeService | null = null;
 let securityClientForShutdown: SecurityClientService | null = null;
-let nativePushForShutdown: NativePushService | null = null;
 let providerSessionWatchersForShutdown: ProviderSessionWatcherRegistry | null =
   null;
 let attachmentStagingCleanupTimer: ReturnType<typeof setInterval> | null = null;
@@ -282,7 +277,6 @@ async function gracefulShutdown(signal: string): Promise<void> {
 
   if (securityClientForShutdown) {
     try {
-      nativePushForShutdown?.shutdown();
       await securityClientForShutdown.shutdown();
       console.log("[Shutdown] Security-client audit state flushed");
     } catch (error) {
@@ -383,16 +377,6 @@ async function gracefulShutdown(signal: string): Promise<void> {
   projectWorktreeSubscriptionsForShutdown = null;
   providerSessionWatchersForShutdown?.stop();
   providerSessionWatchersForShutdown = null;
-
-  // Shut down device bridge sidecar
-  if (deviceBridgeForShutdown) {
-    try {
-      await deviceBridgeForShutdown.shutdown();
-      console.log("[Shutdown] Device bridge shut down");
-    } catch (error) {
-      console.error("[Shutdown] Error shutting down emulator bridge:", error);
-    }
-  }
 
   // Let a credential save already in progress finish before exiting. An exit
   // during an in-place save once left auth.json empty, and the next start came
@@ -708,9 +692,6 @@ const securityClientService = new SecurityClientService({
   connectedBrowsers: connectedBrowsersService,
   pushService,
 });
-const nativePushService = new NativePushService(securityClientService);
-nativePushForShutdown = nativePushService;
-pushService.setNativePushService(nativePushService);
 const serverSettingsService = new ServerSettingsService({
   dataDir: config.dataDir,
 });
@@ -1022,29 +1003,6 @@ async function startServer() {
   console.log(`Server URL: ${effectiveLocalhostUrl}`);
 
   // Detect ADB and create emulator bridge service (lazy start)
-  const adbPath = await detectAdb();
-  let deviceBridgeService: DeviceBridgeService | undefined;
-  if (adbPath) {
-    deviceBridgeService = new DeviceBridgeService({
-      adbPath,
-      dataDir: config.dataDir,
-    });
-    console.log(`[DeviceBridge] ADB detected at ${adbPath}`);
-    if (deviceBridgeService.hasBinary()) {
-      console.log(
-        "[DeviceBridge] Sidecar binary found (will start on first use)",
-      );
-    } else {
-      console.log(
-        "[DeviceBridge] Sidecar binary not found (feature disabled until binary is available)",
-      );
-    }
-  } else {
-    console.log(
-      "[DeviceBridge] ADB not found, device bridge streaming disabled",
-    );
-  }
-
   const persistedSpeechBackends =
     parseSpeechVoiceBackends(
       serverSettingsService.getSetting("speechVoiceBackends"),
@@ -1183,7 +1141,6 @@ async function startServer() {
     remoteAccessService,
     remoteSessionService,
     securityClientService,
-    nativePushService,
     relayClientService,
     relayConfigCallbackHolder,
     // Note: frontendProxy not passed - will be added below
@@ -1221,7 +1178,6 @@ async function startServer() {
     hostAwakeService,
     workstreamService,
     publicShareService,
-    deviceBridgeService,
     modelInfoService,
     enabledProviders: config.enabledProviders,
     claudeSummaryParserWorkerMode: config.claudeSummaryParserWorkerMode,
@@ -1276,7 +1232,6 @@ async function startServer() {
 
   // Set service references for graceful shutdown
   supervisorForShutdown = supervisor;
-  deviceBridgeForShutdown = deviceBridgeService ?? null;
 
   const hostedProviderRuntimes = await listHostedProviderRuntimes().catch(
     (error) => {
@@ -1398,7 +1353,6 @@ async function startServer() {
     focusedSessionWatchManager,
     projectGlossarySubscriptionManager,
     projectWorktreeSubscriptionManager,
-    deviceBridgeService,
     speechBackendRegistry,
     dataDir: config.dataDir,
     serverSettingsService,
@@ -1428,7 +1382,6 @@ async function startServer() {
     focusedSessionWatchManager,
     projectGlossarySubscriptionManager,
     projectWorktreeSubscriptionManager,
-    deviceBridgeService,
     speechBackendRegistry,
     dataDir: config.dataDir,
     serverSettingsService,
@@ -1446,13 +1399,6 @@ async function startServer() {
       const compatibility = await getServerCompatibilityInfo({
         browserSettingsBackupAvailable: true,
         securityClientAuditAvailable: true,
-        nativePush: nativePushService.version(),
-        getDeviceBridgeState: () => {
-          if (!deviceBridgeService) return "unavailable";
-          return deviceBridgeService.hasBinary() ? "available" : "downloadable";
-        },
-        isDeviceBridgeEnabled: () =>
-          serverSettingsService.getSetting("deviceBridgeEnabled") ?? false,
         providerHostControlAvailable: isProviderRuntimeHostAvailable(),
         isLiveWorktreeMonitoringEnabled: () =>
           serverSettingsService.getSetting("liveWorktreeMonitoringEnabled"),

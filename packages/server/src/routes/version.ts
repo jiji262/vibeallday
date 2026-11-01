@@ -30,10 +30,6 @@ import {
   CODEX_PAGINATED_ROLLOUT_LINEAGE_CAPABILITY,
   CODEX_REASONING_SUMMARY_SETTING_CAPABILITY,
   CODEX_STREAM_DURABLE_ID_ALIGNMENT_CAPABILITY,
-  DEVICE_BRIDGE_AVAILABLE_CAPABILITY,
-  DEVICE_BRIDGE_CAPABILITY,
-  DEVICE_BRIDGE_DOWNLOAD_CAPABILITY,
-  DEVICE_BRIDGE_UPDATE_CAPABILITY,
   GIT_FILE_DIFF_PROJECTIONS_CAPABILITY,
   GIT_FILE_REVISION_CAPABILITY,
   GIT_INCLUSIVE_TO_HEAD_CAPABILITY,
@@ -644,31 +640,6 @@ export interface ServerCompatibilityInfo {
   desktopRuntime?: boolean;
 }
 
-function getCapabilitiesForDeviceBridgeState(
-  state: DeviceBridgeState,
-  enabled: boolean,
-): string[] {
-  if (state === "unavailable") {
-    return [];
-  }
-
-  const capabilities: string[] = [DEVICE_BRIDGE_AVAILABLE_CAPABILITY];
-  if (!enabled) {
-    return capabilities;
-  }
-
-  if (state === "available") {
-    capabilities.push(DEVICE_BRIDGE_CAPABILITY);
-    return capabilities;
-  }
-
-  capabilities.push(DEVICE_BRIDGE_DOWNLOAD_CAPABILITY);
-  if (state === "update-available") {
-    capabilities.push(DEVICE_BRIDGE_UPDATE_CAPABILITY);
-  }
-  return capabilities;
-}
-
 export function getServerCapabilities(options?: VersionRouteOptions): string[] {
   const capabilities: string[] = [
     ...BASE_CAPABILITIES,
@@ -714,8 +685,6 @@ export function getServerCapabilities(options?: VersionRouteOptions): string[] {
   if (options?.securityClientAuditAvailable) {
     capabilities.push(SECURITY_CLIENT_AUDIT_CAPABILITY);
   }
-  if (options?.nativePush)
-    capabilities.push(SERVER_CAPABILITIES.nativePushSubscriptions.name);
   if (options?.voiceInputEnabled !== false) {
     capabilities.push(VOICE_INPUT_CAPABILITY);
   }
@@ -728,11 +697,6 @@ export function getServerCapabilities(options?: VersionRouteOptions): string[] {
       GIT_WORKING_TREE_COMPLETE_SCAN_CAPABILITY,
     );
   }
-  const deviceBridgeState = options?.getDeviceBridgeState?.() ?? "unavailable";
-  const enabled = options?.isDeviceBridgeEnabled?.() ?? false;
-  capabilities.push(
-    ...getCapabilitiesForDeviceBridgeState(deviceBridgeState, enabled),
-  );
   const denied = new Set(options?.deniedCapabilities ?? []);
   return capabilities.filter((capability) => !denied.has(capability));
 }

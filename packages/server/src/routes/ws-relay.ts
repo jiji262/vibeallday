@@ -4,7 +4,6 @@ import type { Context, Hono } from "hono";
 import type { WSEvents } from "hono/ws";
 import type { WebSocket as RawWebSocket } from "ws";
 import { DIRECT_LOGIN_VARIABLE } from "../auth/principal.js";
-import type { DeviceBridgeService } from "../device/DeviceBridgeService.js";
 import { isAllowedOrigin } from "../middleware/allowed-hosts.js";
 import type { ProjectGlossarySubscriptionManager } from "../projects/projectGlossarySubscriptionManager.js";
 import type { ProjectWorktreeSubscriptionManager } from "../projects/projectWorktreeSubscriptionManager.js";
@@ -34,7 +33,6 @@ import {
   type RelayUploadState,
   type WSAdapter,
   cleanupConnectionState,
-  cleanupDeviceSessions,
   cleanupSubscriptions,
   cleanupUploads,
   createConnectionState,
@@ -82,8 +80,6 @@ export interface WsRelayDeps {
   projectGlossarySubscriptionManager?: ProjectGlossarySubscriptionManager;
   /** Project worktree snapshots and reference-counted watchers. */
   projectWorktreeSubscriptionManager?: ProjectWorktreeSubscriptionManager;
-  /** Emulator bridge service for Android emulator streaming (optional) */
-  deviceBridgeService?: DeviceBridgeService;
   /** Speech backend registry for relayed streaming STT (optional) */
   speechBackendRegistry?: SpeechBackendRegistry;
   /** Server data dir for relayed speech audio retention (optional) */
@@ -136,8 +132,6 @@ export interface AcceptRelayConnectionDeps {
   projectGlossarySubscriptionManager?: ProjectGlossarySubscriptionManager;
   /** Project worktree snapshots and reference-counted watchers. */
   projectWorktreeSubscriptionManager?: ProjectWorktreeSubscriptionManager;
-  /** Emulator bridge service for Android emulator streaming (optional) */
-  deviceBridgeService?: DeviceBridgeService;
   /** Speech backend registry for relayed streaming STT (optional) */
   speechBackendRegistry?: SpeechBackendRegistry;
   /** Server data dir for relayed speech audio retention (optional) */
@@ -261,7 +255,6 @@ export function createWsRelayRoutes(
     focusedSessionWatchManager,
     projectGlossarySubscriptionManager,
     projectWorktreeSubscriptionManager,
-    deviceBridgeService,
     speechBackendRegistry,
     dataDir,
     serverSettingsService,
@@ -289,7 +282,6 @@ export function createWsRelayRoutes(
     focusedSessionWatchManager,
     projectGlossarySubscriptionManager,
     projectWorktreeSubscriptionManager,
-    deviceBridgeService,
     speechBackendRegistry,
     dataDir,
     serverSettingsService,
@@ -318,8 +310,6 @@ export function createWsRelayRoutes(
     const subscriptions = new Map<string, () => void>();
     // Track active uploads for this connection
     const uploads = new Map<string, RelayUploadState>();
-    // Track active emulator streaming sessions for this connection
-    const deviceSessions = new Set<string>();
     const speechSessionRef: Parameters<
       typeof handleMessage
     >[7]["speechSessionRef"] = { current: null };
@@ -416,7 +406,6 @@ export function createWsRelayRoutes(
             evt.data,
             handlerDeps,
             { speechSessionRef },
-            deviceSessions,
           ).catch((err) => {
             console.error("[WS Relay] Unexpected error:", err);
           }),
@@ -434,9 +423,6 @@ export function createWsRelayRoutes(
             console.error("[WS Relay] Error cleaning up uploads:", err);
           },
         );
-
-        // Clean up emulator streaming sessions
-        cleanupDeviceSessions(deviceSessions, deviceBridgeService);
         speechSessionRef.current?.close();
         speechSessionRef.current = null;
 
@@ -488,7 +474,6 @@ export function createAcceptRelayConnection(
     focusedSessionWatchManager,
     projectGlossarySubscriptionManager,
     projectWorktreeSubscriptionManager,
-    deviceBridgeService,
     speechBackendRegistry,
     dataDir,
     serverSettingsService,
@@ -516,7 +501,6 @@ export function createAcceptRelayConnection(
     focusedSessionWatchManager,
     projectGlossarySubscriptionManager,
     projectWorktreeSubscriptionManager,
-    deviceBridgeService,
     speechBackendRegistry,
     dataDir,
     serverSettingsService,
@@ -539,8 +523,6 @@ export function createAcceptRelayConnection(
     const subscriptions = new Map<string, () => void>();
     // Track active uploads for this connection
     const uploads = new Map<string, RelayUploadState>();
-    // Track active emulator streaming sessions for this connection
-    const deviceSessions = new Set<string>();
     const speechSessionRef: Parameters<
       typeof handleMessage
     >[7]["speechSessionRef"] = { current: null };
@@ -570,7 +552,6 @@ export function createAcceptRelayConnection(
           data,
           handlerDeps,
           { isBinary, speechSessionRef },
-          deviceSessions,
         ).catch((err) => {
           console.error("[WS Relay] Unexpected error:", err);
         }),
@@ -597,9 +578,6 @@ export function createAcceptRelayConnection(
           console.error("[WS Relay] Error cleaning up uploads:", err);
         },
       );
-
-      // Clean up emulator streaming sessions
-      cleanupDeviceSessions(deviceSessions, deviceBridgeService);
       speechSessionRef.current?.close();
       speechSessionRef.current = null;
 
@@ -625,7 +603,6 @@ export function createAcceptRelayConnection(
         firstMessage,
         handlerDeps,
         { isBinary: firstMessageIsBinary, speechSessionRef },
-        deviceSessions,
       ).catch((err) => {
         console.error("[WS Relay] Error processing first message:", err);
       }),

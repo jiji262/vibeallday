@@ -36,11 +36,6 @@ export const CATEGORY_COMPONENTS: Record<string, React.ComponentType> = {
   issues: lazy(() =>
     import("./IssueSettings").then((m) => ({ default: m.IssueSettings })),
   ),
-  "browser-extension": lazy(() =>
-    import("./BrowserExtensionSettings").then((m) => ({
-      default: m.BrowserExtensionSettings,
-    })),
-  ),
   storage: lazy(() =>
     import("./StorageSettings").then((m) => ({ default: m.StorageSettings })),
   ),
@@ -105,9 +100,6 @@ export const CATEGORY_COMPONENTS: Record<string, React.ComponentType> = {
     import("./RemoteExecutorsSettings").then((m) => ({
       default: m.RemoteExecutorsSettings,
     })),
-  ),
-  emulator: lazy(() =>
-    import("./EmulatorSettings").then((m) => ({ default: m.EmulatorSettings })),
   ),
   environment: lazy(() =>
     import("./EnvironmentSettings").then((m) => ({

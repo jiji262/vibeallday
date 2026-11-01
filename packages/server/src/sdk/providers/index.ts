@@ -1,4 +1,3 @@
-import { assertAndroidWorkspaceAvailable } from "../../lib/android-workspace.js";
 import {
   isDesktopControlOrigin,
   nativeMachineControl,
@@ -221,7 +220,6 @@ function hostedProvider(rawProvider: AgentProvider): AgentProvider {
         return async (
           options: Parameters<AgentProvider["startSession"]>[0],
         ) => {
-          await assertAndroidWorkspaceAvailable(options.cwd);
           const native = nativeMachineControl();
           if (
             options.machineControl &&
@@ -271,7 +269,6 @@ function runtimeProvider(rawProvider: AgentProvider): AgentProvider {
           return async (
             options: Parameters<AgentProvider["startSession"]>[0],
           ) => {
-            await assertAndroidWorkspaceAvailable(options.cwd);
             return withInstructionRestoration(
               await target.startSession(options),
               options,

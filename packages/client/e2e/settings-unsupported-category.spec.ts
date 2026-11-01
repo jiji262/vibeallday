@@ -8,24 +8,24 @@ const VIEWPORTS = [
 ];
 
 test.describe("Settings category the server does not serve", () => {
-  test("answers a typed Emulator URL with its message and asks no device route", async ({
+  test("answers a typed Project templates URL without loading unsupported data", async ({
     page,
     baseURL,
   }) => {
     await page.route("**/api/version**", (route) =>
       route.fulfill({ json: { current: "0.8.1", capabilities: [] } }),
     );
-    const deviceRequests: string[] = [];
+    const templateRequests: string[] = [];
     page.on("request", (request) => {
-      if (new URL(request.url()).pathname.startsWith("/api/devices")) {
-        deviceRequests.push(request.url());
+      if (new URL(request.url()).pathname.startsWith("/api/project-template")) {
+        templateRequests.push(request.url());
       }
     });
 
     const runtimeNotice = page.getByTestId("remote-compatibility-notice");
     for (const [index, viewport] of VIEWPORTS.entries()) {
       await page.setViewportSize(viewport);
-      await page.goto(`${baseURL}/settings/emulator`);
+      await page.goto(`${baseURL}/settings/project-templates`);
       // The stub is an old server that reports no runtime; snooze that
       // unrelated notice once so it cannot cover the pane being checked.
       if (index === 0) {
@@ -35,10 +35,12 @@ test.describe("Settings category the server does not serve", () => {
       }
       await expect(runtimeNotice).toHaveCount(0);
       await expect(
-        page.getByText("This server does not support device streaming."),
+        page.getByText(
+          "This server does not support project templates. Update the server to use them.",
+        ),
       ).toBeVisible();
       await expect(
-        page.getByRole("button", { name: /^Test devices/ }),
+        page.getByRole("button", { name: /^Project templates/ }),
       ).toHaveCount(0);
       // Positive control: the list itself rendered.
       if (viewport.name === "desktop") {
@@ -48,10 +50,10 @@ test.describe("Settings category the server does not serve", () => {
       }
       await recordUiCapture(
         page,
-        `settings-emulator-unsupported-${viewport.name}`,
+        `settings-templates-unsupported-${viewport.name}`,
         viewport,
       );
     }
-    expect(deviceRequests).toEqual([]);
+    expect(templateRequests).toEqual([]);
   });
 });

@@ -56,7 +56,7 @@ export const featureCategories: FeatureCategory[] = [
     title: "Review and ship from the same surface",
     eyebrow: "Close the loop",
     description:
-      "Inspect files, diffs, Git state, shares, and running mobile builds remotely.",
+      "Inspect files, diffs, Git state, and shared sessions remotely.",
   },
   {
     id: "connect",
@@ -126,8 +126,7 @@ export const features = [
     category: "supervise",
     status: "stable",
     docsPath: "/docs/notifications-and-voice",
-    availability:
-      "Browser Web Push; native Android delivery is in development, with iOS planned later.",
+    availability: "Browser Web Push on supported desktop and mobile browsers.",
     sourceRefs: ["topics/notifications.md"],
   },
   {
@@ -366,16 +365,6 @@ export const features = [
       "site/src/pages/spring-2026.astro",
       "topics/relay-origin-and-share-gating.md",
     ],
-  },
-  {
-    id: "device-control",
-    title: "Remote device control",
-    summary:
-      "Stream and control Android devices, Android emulators, and iOS Simulators from the browser.",
-    category: "review",
-    status: "experimental",
-    docsPath: "/docs/files-and-source-control",
-    sourceRefs: ["site/src/pages/remote-device-control.astro"],
   },
   {
     id: "encrypted-relay",

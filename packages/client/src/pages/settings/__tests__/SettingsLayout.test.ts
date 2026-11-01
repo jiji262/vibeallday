@@ -14,7 +14,7 @@ describe("SettingsLayout", () => {
       (category) => category.id,
     );
 
-    expect(categoryIds.slice(-3)).toEqual(["development", "emulator", "about"]);
+    expect(categoryIds.slice(-2)).toEqual(["development", "about"]);
   });
 
   it("uses the actual settings-container width for the two-column layout", () => {

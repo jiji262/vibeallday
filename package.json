@@ -22,9 +22,6 @@
     "agent:monitor": "node scripts/monitor-agent-process.mjs",
     "artifact:capture": "tsx packages/client/scripts/capture-artifact.ts",
     "unicode-math:train": "tsx scripts/unicode-math/train.ts",
-    "android:interop:check": "tsx --conditions source scripts/android-secure-interop-fixture.ts",
-    "android:interop:write": "tsx scripts/android-secure-interop-fixture.ts --write",
-    "android:probe-server": "pnpm --filter @vibeallday/server exec tsx --conditions source scripts/android-native-secure-probe-server.ts",
     "css:check": "node scripts/check-css-architecture.mjs",
     "css:health": "tsx scripts/css-health.ts",
     "css:inventory": "tsx scripts/css-inventory.ts",
@@ -50,15 +47,10 @@
     "build": "pnpm -r build",
     "build:bundle": "tsx scripts/build-bundle.ts",
     "build:stable": "pnpm --filter client build:stable",
-    "typecheck": "pnpm --filter shared build && pnpm -r --filter=!@vibeallday/android --filter=!@vibeallday/browser-extension exec tsc --noEmit && pnpm tools:typecheck && pnpm e2e:typecheck",
-    "test": "node --test artifact-host/host.test.mjs packages/mobile-core/scripts/sodium.test.mjs packages/ios/scripts/input-headroom.test.mjs packages/client/e2e/support/record-host-launch.test.mjs packages/client/e2e/lifecycle-study/network-gate.checks.mjs packages/client/e2e/lifecycle-study/acceptance.checks.mjs packages/android-host/test/profile.test.mjs && pnpm -r --filter=!@vibeallday/android test",
+    "typecheck": "pnpm --filter shared build && pnpm -r exec tsc --noEmit && pnpm tools:typecheck && pnpm e2e:typecheck",
+    "test": "node --test artifact-host/host.test.mjs packages/client/e2e/support/record-host-launch.test.mjs packages/client/e2e/lifecycle-study/network-gate.checks.mjs packages/client/e2e/lifecycle-study/acceptance.checks.mjs && pnpm -r test",
     "test:e2e": "pnpm --filter client test:e2e",
     "test:e2e:ui": "pnpm --filter client test:e2e",
-    "test:e2e:android": "pnpm --filter client test:e2e:android",
-    "test:e2e:android:soak": "pnpm --filter client test:e2e:android:soak",
-    "test:e2e:emulator:apk": "pnpm --filter client test:e2e:emulator:apk",
-    "test:e2e:emulator:apk:adaptive": "pnpm --filter client test:e2e:emulator:apk:adaptive",
-    "test:e2e:chromeos": "pnpm --filter client test:e2e:chromeos",
     "test:e2e:sdk": "pnpm --filter server test:e2e",
     "test:e2e:sdk:real": "pnpm --filter server test:e2e:real",
     "test:e2e:sdk:local": "pnpm --filter server test:e2e:local",
@@ -106,10 +98,6 @@
     "grokCli": {
       "compatibleThroughVersion": "1.0.60"
     }
-  },
-  "dependencies": {
-    "tssrp6a": "^3.0.0",
-    "tweetnacl": "^1.0.3"
   },
   "version": "0.7.0"
 }

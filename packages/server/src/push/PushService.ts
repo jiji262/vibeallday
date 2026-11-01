@@ -24,7 +24,6 @@ import {
   type SubscriptionState,
 } from "./types.js";
 import type { VapidKeys } from "./vapid.js";
-import type { NativePushService } from "./NativePushService.js";
 
 const CURRENT_VERSION = 1;
 const DEFAULT_URGENT_DELIVERY: PushDeliveryUrgency = "high";
@@ -37,10 +36,6 @@ export interface PushServiceOptions {
 }
 
 export class PushService {
-  private nativePush?: NativePushService;
-  setNativePushService(service: NativePushService): void {
-    this.nativePush = service;
-  }
   private state: SubscriptionState;
   private dataDir: string;
   private filePath: string;
@@ -170,10 +165,7 @@ export class PushService {
    * Get subscription count.
    */
   getSubscriptionCount(): number {
-    return (
-      Object.keys(this.state.subscriptions).length +
-      (this.nativePush?.count() ?? 0)
-    );
+    return Object.keys(this.state.subscriptions).length;
   }
 
   /**
@@ -237,21 +229,18 @@ export class PushService {
     const browserProfileIds = Object.keys(this.state.subscriptions);
     if (!this.vapidKeys && browserProfileIds.length > 0)
       throw new Error("VAPID keys not configured");
-    const [results, nativeResults] = await Promise.all([
-      Promise.all(
-        browserProfileIds.map((browserProfileId) =>
-          this.sendToBrowserProfile(browserProfileId, payload, {
-            deliveryUrgency: options?.deliveryUrgency,
-          }),
-        ),
+    const results = await Promise.all(
+      browserProfileIds.map((browserProfileId) =>
+        this.sendToBrowserProfile(browserProfileId, payload, {
+          deliveryUrgency: options?.deliveryUrgency,
+        }),
       ),
-      this.nativePush?.sendToAll(payload) ?? Promise.resolve([]),
-    ]);
+    );
 
     // Clean up invalid subscriptions
     await this.cleanupInvalidSubscriptions(results);
 
-    return [...results, ...nativeResults];
+    return results;
   }
 
   /**

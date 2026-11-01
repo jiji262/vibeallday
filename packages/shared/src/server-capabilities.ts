@@ -463,16 +463,6 @@ export const SERVER_CAPABILITIES = {
       "Key-verified native clients can enroll, disable and test their own broker push subscription.",
     clientFallback:
       "Native push needs a server update; retain ordinary SRP and web use without enrollment requests.",
-    serverContract: {
-      routes: [
-        "PUT /api/security/clients/:clientId/native-push-subscription",
-        "DELETE /api/security/clients/:clientId/native-push-subscription",
-        "POST /api/security/clients/:clientId/native-push-subscription/test",
-        "GET /api/security/clients/:clientId/native-push-subscription/destination",
-      ],
-      routeModules: ["packages/server/src/routes/native-push.ts"],
-      responseFields: ["nativePush"],
-    },
     lifecycle: {
       kind: "permanent",
       reason:

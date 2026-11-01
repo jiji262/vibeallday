@@ -1,6 +1,4 @@
 import {
-  DEVICE_BRIDGE_CAPABILITY,
-  DEVICE_BRIDGE_DOWNLOAD_CAPABILITY,
   GIT_STATUS_ENHANCED_CAPABILITY,
   serverHasCapability,
 } from "@vibeallday/shared";
@@ -22,7 +20,6 @@ import {
   InboxIcon,
   ListIcon,
   SettingsIcon,
-  SmartphoneIcon,
   TerminalIcon,
 } from "../garden/icons";
 
@@ -33,7 +30,6 @@ export type ShellDestinationKey =
   | "source-control"
   | "bang-commands"
   | "issues"
-  | "devices"
   | "agents"
   | "hosts"
   | "settings";
@@ -64,7 +60,6 @@ interface DestinationGates {
   sourceControl: boolean;
   bangHistory: boolean;
   issues: boolean;
-  devices: boolean;
 }
 
 /**
@@ -128,14 +123,6 @@ const SHELL_DESTINATIONS: readonly ShellDestination[] = [
     Icon: TerminalIcon,
   },
   {
-    key: "devices",
-    group: "tools",
-    to: "/devices",
-    labelKey: "sidebarDevices",
-    hintKey: "moreDevicesHint",
-    Icon: SmartphoneIcon,
-  },
-  {
     key: "settings",
     group: "system",
     to: "/settings",
@@ -170,8 +157,6 @@ function isDestinationAvailable(
       return gates.bangHistory && !gates.limited;
     case "issues":
       return gates.issues && !gates.limited;
-    case "devices":
-      return gates.devices && !gates.limited;
     case "agents":
       return !gates.limited;
     default:
@@ -203,9 +188,6 @@ export function useShellDestinations({
         GIT_STATUS_ENHANCED_CAPABILITY,
       ),
       bangHistory: bangHistoryViewEnabled(version, clientDefaults),
-      devices:
-        serverHasCapability(version, DEVICE_BRIDGE_CAPABILITY) ||
-        serverHasCapability(version, DEVICE_BRIDGE_DOWNLOAD_CAPABILITY),
     };
     const available = SHELL_DESTINATIONS.filter((destination) =>
       isDestinationAvailable(destination.key, gates),

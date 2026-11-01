@@ -1,2 +1,0 @@
-# Guest administration only: all PRoot identities share Android app authority.
-user ALL=(ALL:ALL) NOPASSWD: ALL

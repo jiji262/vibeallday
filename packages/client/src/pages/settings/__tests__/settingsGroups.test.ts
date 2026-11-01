@@ -17,10 +17,7 @@ describe("settings home groups", () => {
   });
 
   it("names only categories that exist, plus the extension-only one", () => {
-    const known = new Set([
-      ...categories.map((category) => category.id),
-      "browser-extension",
-    ]);
+    const known = new Set([...categories.map((category) => category.id)]);
     expect(mappedIds.filter((id) => !known.has(id))).toEqual([]);
   });
 

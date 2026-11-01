@@ -121,11 +121,6 @@ export interface ConnectViaRelayOptions {
 }
 
 export interface RemoteConnectionState {
-  /** Installed native shell supplies its source without web credential storage. */
-  nativeSource?: {
-    sourceKey: ClientSummarySourceKey;
-    registration: import("../lib/sourceRuntime").SourceTransportRegistration;
-  };
   switchHost?: () => void;
   /** The active connection (null if not connected) */
   connection: Connection | null;

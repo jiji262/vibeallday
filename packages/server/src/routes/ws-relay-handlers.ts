@@ -59,7 +59,6 @@ import {
   encryptToBinaryEnvelopeWithCompression,
 } from "../crypto/index.js";
 import type { SrpServerSession } from "../crypto/index.js";
-import type { DeviceBridgeService } from "../device/DeviceBridgeService.js";
 import { getLogger } from "../logging/logger.js";
 import {
   AUTHENTICATED_DIRECT_LOGIN,
@@ -437,8 +436,6 @@ export interface RelayHandlerDeps {
   projectGlossarySubscriptionManager?: ProjectGlossarySubscriptionManager;
   /** Project worktree snapshots and their reference-counted watchers. */
   projectWorktreeSubscriptionManager?: ProjectWorktreeSubscriptionManager;
-  /** Emulator bridge service for Android emulator streaming (optional) */
-  deviceBridgeService?: DeviceBridgeService;
   /** Speech backend registry for relayed streaming STT (optional) */
   speechBackendRegistry?: SpeechBackendRegistry;
   /** Server data dir for relayed speech audio retention (optional) */
@@ -2740,7 +2737,6 @@ export async function handleMessage(
   data: unknown,
   deps: RelayHandlerDeps,
   options: HandleMessageOptions,
-  deviceSessions?: Set<string>,
 ): Promise<void> {
   const {
     app,
@@ -2924,29 +2920,6 @@ export async function handleMessage(
         if (!session) return;
         session.handleMessage(JSON.stringify(speechMsg.message));
       },
-      onDeviceMessage: deps.deviceBridgeService
-        ? (() => {
-            const bridge = deps.deviceBridgeService;
-            return async (emulatorMsg: RemoteClientMessage) => {
-              switch (emulatorMsg.type) {
-                case "device_stream_start":
-                  deviceSessions?.add(emulatorMsg.sessionId);
-                  await bridge.startStream(emulatorMsg, send);
-                  break;
-                case "device_stream_stop":
-                  deviceSessions?.delete(emulatorMsg.sessionId);
-                  bridge.stopStream(emulatorMsg);
-                  break;
-                case "device_webrtc_answer":
-                  bridge.handleAnswer(emulatorMsg);
-                  break;
-                case "device_ice_candidate":
-                  bridge.handleICE(emulatorMsg);
-                  break;
-              }
-            };
-          })()
-        : undefined,
     });
 
   const parsed = await decodeFrameToParsedMessage(
@@ -3026,30 +2999,6 @@ export async function handleMessage(
   }
 
   await routeClientMessage(msg);
-}
-
-/**
- * Clean up emulator streaming sessions on connection close.
- */
-export function cleanupDeviceSessions(
-  deviceSessions: Set<string>,
-  deviceBridgeService?: DeviceBridgeService,
-): void {
-  if (!deviceBridgeService || deviceSessions.size === 0) return;
-  for (const sessionId of deviceSessions) {
-    try {
-      deviceBridgeService.stopStream({
-        type: "device_stream_stop",
-        sessionId,
-      });
-    } catch (err) {
-      console.error(
-        `[WS Relay] Error cleaning up emulator session ${sessionId}:`,
-        err,
-      );
-    }
-  }
-  deviceSessions.clear();
 }
 
 /**

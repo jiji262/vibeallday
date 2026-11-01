@@ -1,11 +1,7 @@
 {
   "legacyGlobalStyles": {
-    "packages/client/src/styles/emulator.css": {
-      "maxLines": 17,
-      "reason": "Device stream video vocabulary produced by EmulatorStream."
-    },
     "packages/client/src/styles/index.css": {
-      "maxLines": 11438,
+      "maxLines": 11437,
       "reason": "Legacy application shell and page styles; tokens and themes live in theme.css."
     },
     "packages/client/src/styles/provider-colors.css": {

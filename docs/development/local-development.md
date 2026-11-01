@@ -27,32 +27,6 @@ and browser refresh. Plain `pnpm dev` keeps HMR. See
 [built-client lifecycle](../../topics/reload-safe-provider-runtimes.md#built-client-for-everyday-source-checkout-use)
 for build failure and asset retention behavior.
 
-For the unpacked Chrome extension, run `pnpm dev --extension` (also works
-with `--built-client`), then load `packages/browser-extension/dist-dev` once
-from Chrome's **Load unpacked**. The opt-in watcher rebuilds the panel, app,
-background worker and manifest together after source changes. It leaves the
-release `dist` alone. To watch without a dev server, run
-`pnpm --filter @vibeallday/browser-extension dev`.
-
-The **VibeAllDay (Dev)** side panel has a build indicator and update button
-at the bottom right. UI-only updates refresh the panel in place; worker or
-manifest changes highlight **Reload extension**. That button is also always
-available for a manual full reload, even when build detection fails or no
-update is detected. Full reload saves and restores the open extension tabs,
-their session URLs and window placement. Chrome may close the panel during a full extension reload
-and reject automatic reopening without a fresh user
-gesture; click the toolbar icon to reopen it. Updates are never applied
-automatically. Failed builds retain the last successful output. One watcher
-owns each output directory, so use one owner across dev profiles. See the
-[development build contract](../../topics/trusted-client-packaging.md#chrome-extension-development-build).
-
-If you only want the main app and do not want to install the relay workspace, use:
-
-```bash
-pnpm setup:core
-pnpm dev
-```
-
 ## Commands
 
 ```bash
@@ -62,8 +36,7 @@ pnpm lint             # Biome lint, CSS lint (ESLint), CSS containment checks
 pnpm format:check     # Biome formatter verification (does not write)
 pnpm format           # Intentionally format all tracked supported files
 pnpm typecheck        # TypeScript type checking
-pnpm test             # Unit tests for non-Android workspaces
-pnpm --filter @vibeallday/android test # Android unit tests
+pnpm test             # Unit tests for the core workspaces
 pnpm test:e2e         # E2E tests
 pnpm references:sync  # Clone/sync upstream source to pinned provider versions
 pnpm references:check # Verify local references match pinned provider versions

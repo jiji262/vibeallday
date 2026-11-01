@@ -23,8 +23,8 @@ server and React client exchange live events over WebSockets; provider-native
 transcripts preserve session history. Direct access uses Tailscale/LAN; relay
 access uses SRP authentication and end-to-end NaCl encryption.
 
-The server/web core needs no hosted account or Firebase dependency. The optional
-published native app uses its separate hosted push broker for notifications.
+The server/web core needs no hosted account or Firebase dependency. The browser client uses Web Push for notifications. Native application shells,
+browser extensions and native push delivery are outside this fork's scope.
 See [project context](docs/project/) for detail, [historical vision](docs/archive/)
 for background, and `~/code/dotfiles/projects/README.md` for cross-project context.
 
@@ -39,7 +39,7 @@ pnpm dev              # Open http://localhost:3400
 pnpm lint             # Lint diagnostics
 pnpm format:check     # Non-writing formatter verification
 pnpm typecheck        # TypeScript checking, no emit
-pnpm test             # Non-Android workspace unit tests
+pnpm test             # Core workspace unit tests
 pnpm test:e2e         # Full browser suite; CI runs it, local scope is risk-based
 ```
 
@@ -162,8 +162,6 @@ are not a requirement to read every neighboring document.
 | UI rendering boundaries or shared views | [UI architecture](topics/ui-architecture.md). |
 | Rendering or rich-renderer changes | [Rendering performance](packages/client/RENDERING_PERFORMANCE.md). |
 | Benchmark/regression evidence or measurement-host selection | [Performance regression suite](topics/performance-regression-suite.md#performance-measurement-hosts), before treating measurements as regression evidence. |
-| Device streaming, `/api/devices`, `deviceBridge`, or `packages/device-bridge` | [Device control testing](docs/development/testing.md#device-control-testing): emulator testing is scoped to this feature. |
-| Chromebook testing or debugging | [ChromeOS debugging](docs/development/testing.md#chromeos-debugging): use the chromeos-testbed CLI. |
 | Codex provider schemas, scanner, normalization, app-server protocol, or target-version/API/protocol refreshes | [Provider development](docs/development/providers.md): inspect pinned upstream source; read-only audits may proceed, but enacting Codex compatibility edits requires user approval. |
 | Any provider refresh, transcript schema, or tool-result schema change | [Provider development](docs/development/providers.md) and the applicable [provider refresh](topics/provider-refresh.md) sections; preserve audited-through version markers and run schema validation. |
 | SQLite adapter changes, SQL callers, statement lifetimes, or test ceilings | [Runtime-portable SQLite](topics/optional-sqlite.md#runtime-portable-sqlite): use the shared runtime intersection, reuse prepared statements, and obtain maintainer consensus before widening the boundary. |

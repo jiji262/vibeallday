@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
   APPROVAL_AUDIT_LOG_CAPABILITY,
+  DEVICE_BRIDGE_CAPABILITY,
+  DEVICE_BRIDGE_AVAILABLE_CAPABILITY,
   BANG_COMMANDS_CAPABILITY,
   BROWSER_SETTINGS_BACKUP_CAPABILITY,
   CACHE_MISS_BILLING_EXPECTED_EXPIRY_CAPABILITY,
@@ -43,6 +45,22 @@ import {
 import { getServerCapabilities } from "../../src/routes/version.js";
 
 describe("Version Routes", () => {
+  it("does not expose native app features even when stale platform configuration remains", () => {
+    const capabilities = getServerCapabilities({
+      nativePush: {
+        protocolVersion: 1,
+        brokerUrl: "https://push.example.test",
+        privacyModes: ["generic"],
+      },
+      getDeviceBridgeState: () => "available",
+      isDeviceBridgeEnabled: () => true,
+    });
+    expect(capabilities).not.toContain(
+      SERVER_CAPABILITIES.nativePushSubscriptions.name,
+    );
+    expect(capabilities).not.toContain(DEVICE_BRIDGE_CAPABILITY);
+    expect(capabilities).not.toContain(DEVICE_BRIDGE_AVAILABLE_CAPABILITY);
+  });
   it("advertises installed MC only with its mounted supported-host route", () => {
     const name = SERVER_CAPABILITIES.installedMachineControl.name;
     expect(getServerCapabilities()).not.toContain(name);
@@ -54,21 +72,6 @@ describe("Version Routes", () => {
         installedMachineControlAvailable: true,
         deniedCapabilities: [name],
       }),
-    ).not.toContain(name);
-  });
-  it("advertises native push only with a configured mounted adapter", () => {
-    const name = SERVER_CAPABILITIES.nativePushSubscriptions.name;
-    expect(
-      getServerCapabilities({ securityClientAuditAvailable: true }),
-    ).not.toContain(name);
-    const nativePush = {
-      protocolVersion: 1 as const,
-      brokerUrl: "https://push.example.test",
-      privacyModes: ["generic"] as ["generic"],
-    };
-    expect(getServerCapabilities({ nativePush })).toContain(name);
-    expect(
-      getServerCapabilities({ nativePush, deniedCapabilities: [name] }),
     ).not.toContain(name);
   });
   // A version-implied capability is inferred only from a release at least

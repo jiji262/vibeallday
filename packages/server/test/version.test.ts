@@ -531,7 +531,7 @@ describe("GET /version", () => {
     );
   });
 
-  it("reports update-available for stale bridge binaries", async () => {
+  it("keeps legacy bridge metadata without advertising retired capabilities", async () => {
     const { createVersionRoutes } = await importVersion();
     const routes = createVersionRoutes({
       isDeviceBridgeEnabled: () => true,
@@ -547,19 +547,19 @@ describe("GET /version", () => {
     expect(json.deviceBridgeState).toBe("update-available");
     expect(json.deviceBridgeVersion).toBe("0.1.0");
     expect(json.latestDeviceBridgeVersion).toBe("0.2.0");
-    expect(json.capabilities).toContain(DEVICE_BRIDGE_DOWNLOAD_CAPABILITY);
-    expect(json.capabilities).toContain(DEVICE_BRIDGE_UPDATE_CAPABILITY);
+    expect(json.capabilities).not.toContain(DEVICE_BRIDGE_DOWNLOAD_CAPABILITY);
+    expect(json.capabilities).not.toContain(DEVICE_BRIDGE_UPDATE_CAPABILITY);
     expect(json.capabilities).not.toContain(DEVICE_BRIDGE_CAPABILITY);
   });
 
-  it("preserves legacy sync bridge state for compatibility helpers", async () => {
+  it("does not advertise a retired bridge for legacy sync adapters", async () => {
     const { getServerCapabilities } = await importVersion();
     const capabilities = getServerCapabilities({
       getDeviceBridgeState: () => "downloadable",
       isDeviceBridgeEnabled: () => true,
     });
 
-    expect(capabilities).toContain(DEVICE_BRIDGE_DOWNLOAD_CAPABILITY);
+    expect(capabilities).not.toContain(DEVICE_BRIDGE_DOWNLOAD_CAPABILITY);
     expect(capabilities).not.toContain(DEVICE_BRIDGE_UPDATE_CAPABILITY);
   });
 });

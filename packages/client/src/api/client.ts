@@ -31,7 +31,6 @@ import type {
   CreateProjectQueueItemRequest,
   CreatePublicSessionShareRequest,
   CreatePublicSessionShareResponse,
-  DeviceInfo,
   DurableSyntheticDoneMessage,
   FreezePublicSharesResponse,
   FreezePublicSessionLiveSharesResponse,
@@ -1912,50 +1911,6 @@ export const api = {
       `/public-shares/sessions/${encodeURIComponent(projectId)}/${encodeURIComponent(sessionId)}/viewers/${encodeURIComponent(viewerId)}`,
       { method: "DELETE" },
     ),
-
-  // Device bridge API
-  getDevices: () => fetchJSON<DeviceInfo[]>("/devices"),
-
-  startDevice: (id: string) =>
-    fetchJSON<{ ok: boolean }>(`/devices/${encodeURIComponent(id)}/start`, {
-      method: "POST",
-    }),
-
-  stopDevice: (id: string) =>
-    fetchJSON<{ ok: boolean }>(`/devices/${encodeURIComponent(id)}/stop`, {
-      method: "POST",
-    }),
-
-  downloadDeviceBridge: () =>
-    fetchJSON<{
-      ok: boolean;
-      path?: string;
-      binaryPath?: string;
-      apkPath?: string;
-      error?: string;
-    }>("/devices/bridge/download", { method: "POST" }),
-
-  // Legacy aliases (kept while UI naming is still emulator-centric)
-  getEmulators: () => fetchJSON<DeviceInfo[]>("/devices"),
-
-  startEmulator: (id: string) =>
-    fetchJSON<{ ok: boolean }>(`/devices/${encodeURIComponent(id)}/start`, {
-      method: "POST",
-    }),
-
-  stopEmulator: (id: string) =>
-    fetchJSON<{ ok: boolean }>(`/devices/${encodeURIComponent(id)}/stop`, {
-      method: "POST",
-    }),
-
-  downloadEmulatorBridge: () =>
-    fetchJSON<{
-      ok: boolean;
-      path?: string;
-      binaryPath?: string;
-      apkPath?: string;
-      error?: string;
-    }>("/devices/bridge/download", { method: "POST" }),
 };
 
 /** Result of testing an SSH connection to a remote executor */

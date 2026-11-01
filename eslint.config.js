@@ -4,7 +4,7 @@
 import cssicorn from "eslint-cssicorn";
 import { defineConfig } from "eslint/config";
 
-// packages/desktop is outside Biome's scope as well; mockups are throwaway.
+// Mockups are throwaway.
 const authoredCss = ["packages/client/src/**/*.css", "site/src/**/*.css"];
 
 export default defineConfig([

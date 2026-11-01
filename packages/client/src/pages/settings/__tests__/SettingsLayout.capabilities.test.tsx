@@ -56,10 +56,6 @@ vi.mock("../../../i18n", () => ({
   useI18n: () => ({ t: (key: string) => key }),
 }));
 
-vi.mock("../EmulatorSettings", () => ({
-  EmulatorSettings: () => <p>emulator pane</p>,
-}));
-
 vi.mock("../ProjectTemplatesSettings", () => ({
   ProjectTemplatesSettings: () => <p>project templates pane</p>,
 }));
@@ -90,7 +86,6 @@ afterEach(() => {
 describe("SettingsLayout capability gating", () => {
   it("covers the categories whose panes an older server cannot serve", () => {
     expect(gatedCategories.map((category) => category.id).sort()).toEqual([
-      "emulator",
       "issues",
       "project-templates",
       "source-control",
@@ -115,32 +110,27 @@ describe("SettingsLayout capability gating", () => {
   );
 
   it("mounts no pane for a category the server cannot serve", async () => {
-    renderAt("/settings/emulator");
-    await act(async () => {});
-    expect(screen.queryByText("emulator pane")).toBeNull();
-    cleanup();
-
     renderAt("/settings/project-templates");
     await act(async () => {});
     expect(screen.queryByText("project templates pane")).toBeNull();
   });
 
   it("mounts the pane once the server has the capability", async () => {
-    versionState.version = { capabilities: ["deviceBridge"] };
-    renderAt("/settings/emulator");
+    versionState.version = { capabilities: ["project-template-sources"] };
+    renderAt("/settings/project-templates");
 
-    expect(await screen.findByText("emulator pane")).toBeTruthy();
-    expect(screen.queryByText("settingsEmulatorUnsupportedServer")).toBeNull();
+    expect(await screen.findByText("project templates pane")).toBeTruthy();
+    expect(screen.queryByText("projectTemplatesUnsupportedServer")).toBeNull();
   });
 
   it("waits for the server version before calling a server unsupported", async () => {
     versionState.version = null;
     versionState.loading = true;
-    renderAt("/settings/emulator");
+    renderAt("/settings/project-templates");
     await act(async () => {});
 
-    expect(screen.queryByText("settingsEmulatorUnsupportedServer")).toBeNull();
-    expect(screen.queryByText("emulator pane")).toBeNull();
+    expect(screen.queryByText("projectTemplatesUnsupportedServer")).toBeNull();
+    expect(screen.queryByText("project templates pane")).toBeNull();
     expect(screen.getByText("loading")).toBeTruthy();
   });
 });
