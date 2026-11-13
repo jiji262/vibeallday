@@ -1,0 +1,237 @@
+/*
+ * Session Defaults grid additions.
+ *
+ * The panel's own grid and the per-section rules still live in the legacy
+ * global sheet under `.settings-session-defaults-panel`; `pnpm css:touched`
+ * defers extracting that slice (165 owned lines, 117 coupled rules), so only
+ * these bounded rules are owned here.
+ *
+ * They reach global class names because the rows are rendered by SettingsItem,
+ * whose vocabulary is global. Specificity matches the selectors these replaced
+ * (`.settings-session-defaults-panel > .settings-item`, 0-2-0), so they still
+ * beat the 0-1-0 `.settings-item` base rule regardless of injection order.
+ */
+
+/* Searchable SettingsItem rows fill the panel grid as stacked cards. */
+.sessionDefaultsPanel > :global(.settings-item),
+.captionPair > :global(.settings-item) {
+  /* A wrapping column sizes children at an intrinsic width first, so wrapped
+     chip rows reserved phantom height; stacked rows never need to wrap. */
+  flex-flow: column nowrap;
+  align-items: stretch;
+  justify-content: flex-start;
+  gap: var(--space-2);
+  margin-bottom: 0;
+  height: 100%;
+}
+
+.sessionDefaultsPanel > :global(.settings-item) > :global(.settings-item-info),
+.captionPair > :global(.settings-item) > :global(.settings-item-info) {
+  flex: 0 0 auto;
+}
+
+/* Stacked label rows put their checkbox under the copy, start-aligned. */
+.sessionDefaultsPanel > :global(.settings-item) > input[type="checkbox"] {
+  align-self: flex-start;
+}
+
+/* The Claude auto-compact mirror carries a long caption; give it the same two
+   tracks as the compact row it sits beside instead of one narrow track. */
+@container (min-width: 36rem) {
+  .sessionDefaultsPanel
+    > [data-settings-item="session-default-claude-auto-compact"] {
+    grid-column: span 2;
+  }
+}
+
+.captionPair {
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem 1rem;
+}
+
+.captionPair > :global(.settings-search-match):only-child {
+  grid-column: 1 / -1;
+}
+
+@container (max-width: 24rem) {
+  .captionPair {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.recapDuration {
+  grid-column: 1 / -1;
+  min-width: 0;
+}
+
+.intro,
+.relatedDivider {
+  grid-column: 1 / -1;
+}
+
+/* Free text in the panel lines up with the rows' own padding. */
+.intro {
+  margin: 0;
+  padding: var(--space-4) var(--space-5) 0;
+  color: var(--text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.relatedDivider {
+  display: grid;
+  gap: var(--space-1);
+  margin-top: var(--space-2);
+  padding: var(--space-4) var(--space-5) 0;
+  border-top: 1px dashed var(--dash);
+}
+
+/* The model picker is a value select, not a filter: neutral field look with a
+   start-aligned label instead of the active-filter indigo tint. 0-2-1 beats
+   FilterDropdown's `.button.hasSelection`. */
+.sessionDefaultsPanel button.modelTrigger {
+  border-color: var(--line-strong);
+  background: var(--card);
+  color: var(--ink);
+  text-align: start;
+}
+
+.sessionDefaultsPanel button.modelTrigger:hover {
+  background: var(--bg-2);
+}
+
+.relatedDivider strong {
+  font-size: var(--font-size-base);
+}
+
+.relatedDivider span {
+  color: var(--text-muted);
+  font-size: var(--font-size-sm);
+}
+
+/* Provider picker (design: provider tabs above the per-provider defaults). */
+.providerSeg {
+  flex-wrap: wrap;
+}
+
+/* Thinking mode + effort: two labelled Segmented rows. */
+.thinkingStack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.thinkingRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+  min-width: 0;
+}
+
+.thinkingLabel {
+  min-width: 5rem;
+  color: var(--ink-2);
+  font-size: var(--fs-small);
+  font-weight: 600;
+}
+
+.effortSeg {
+  flex-wrap: wrap;
+}
+
+/* Permission mode as risk-coloured radio cards (design .smd-perm). */
+.permGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr));
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.perm {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  min-width: 0;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-input);
+  background: var(--surface);
+  cursor: pointer;
+}
+
+.perm:hover {
+  background: var(--surface-2);
+}
+
+.perm:has(input:checked) {
+  border-color: var(--accent-line);
+  background: var(--accent-soft);
+}
+
+.permDanger {
+  border-color: var(--err-line);
+}
+
+.perm input {
+  flex: none;
+  margin-top: 2px;
+}
+
+.permBody {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.permHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+}
+
+.permName {
+  color: var(--ink);
+  font-size: var(--fs-small);
+  font-weight: 600;
+}
+
+.permDanger .permName {
+  color: var(--err-ink);
+}
+
+.permDesc {
+  color: var(--ink-2);
+  font-size: var(--fs-small);
+}
+
+.risk {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  margin-left: auto;
+}
+
+.risk > span {
+  width: 12px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--surface-3);
+}
+
+.risk > span.riskOn {
+  background: var(--ok);
+}
+
+.riskAttn > span.riskOn {
+  background: var(--attn);
+}
+
+.riskErr > span.riskOn {
+  background: var(--err);
+}

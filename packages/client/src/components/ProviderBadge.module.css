@@ -1,0 +1,142 @@
+/* Provider identity: a neutral mono chip led by the provider letter tile. */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 24px;
+  padding: 0 8px 0 3px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-chip);
+  background: var(--surface);
+  color: var(--ink-2);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.mark {
+  flex-shrink: 0;
+}
+
+.thinking {
+  flex-shrink: 0;
+}
+
+.effort {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: 4px;
+  padding-left: 6px;
+  border-left: 1px solid color-mix(in srgb, currentColor 18%, transparent);
+}
+
+.effortDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  flex-shrink: 0;
+}
+
+.effortDot.off {
+  background: var(--ink-4);
+}
+
+.effortDot.auto {
+  background: var(--link);
+}
+
+.effortDot.low {
+  background: var(--ok);
+}
+
+.effortDot.medium {
+  background: var(--run);
+}
+
+.effortDot.high {
+  background: var(--attn);
+}
+
+.effortDot.xhigh {
+  background: var(--err);
+}
+
+.effortDot.max {
+  background: var(--err-ink);
+}
+
+.effortLabel {
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 1.2;
+  opacity: 0.82;
+}
+
+/* On mobile, hide the tile - the label already shows a compact model glyph */
+@media (width <= 600px) {
+  .mark {
+    display: none;
+  }
+
+  .badge {
+    padding-left: 8px;
+  }
+}
+
+.condensed {
+  min-width: 0;
+  max-width: 100%;
+  gap: 3px;
+  padding: 0 6px;
+  white-space: nowrap;
+}
+
+.model {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.condensed .effort {
+  flex-shrink: 0;
+  gap: 3px;
+  margin-left: 0;
+  padding-left: 4px;
+}
+
+.condensed .effortDot {
+  display: none;
+}
+
+/* Flat: the session header's meta line, where the model reads as mono text
+   with its provider tile instead of a bordered badge. */
+.flat {
+  gap: 6px;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--ink-3);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 20px;
+  letter-spacing: 0;
+}
+
+.flat .mark {
+  display: inline-grid;
+}
+
+.flat .effort {
+  margin-left: 0;
+  padding-left: 0;
+  border-left: 0;
+}
+
+.flat .effortLabel {
+  font-size: 11px;
+}

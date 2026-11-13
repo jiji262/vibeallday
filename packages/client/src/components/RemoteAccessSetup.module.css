@@ -1,0 +1,171 @@
+/* Settings → Remote access: relay connection card, config card, browsers. */
+.setup {
+  gap: var(--space-6);
+}
+
+/* Design .srm-hero: connection facts beside the pairing panel. */
+.hero {
+  flex-wrap: wrap;
+  gap: var(--space-6);
+  padding: var(--pad-card);
+  border: 1px solid var(--accent-line);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  box-shadow: var(--shadow-card);
+}
+
+.heroMain {
+  display: flex;
+  flex: 1 1 20rem;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.heroHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) 10px;
+}
+
+.heroHead h3 {
+  margin: 0;
+  color: var(--ink);
+  font-size: var(--fs-h2);
+  font-weight: var(--title-weight);
+}
+
+.heroToggle {
+  margin-left: auto;
+}
+
+.heroDescription {
+  margin: 0;
+  color: var(--ink-3);
+  font-size: var(--fs-small);
+}
+
+.heroError {
+  margin: 0;
+  color: var(--err-ink);
+  font-size: var(--fs-small);
+  overflow-wrap: anywhere;
+}
+
+.connect {
+  gap: 6px;
+}
+
+.metaLabel {
+  color: var(--ink-3);
+  font-size: var(--fs-meta);
+}
+
+.connectUrl {
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  background: var(--code-bg);
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-size: var(--fs-small);
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+.heroActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+/* Pairing inset: QR (on request) or the manual-entry hint. */
+.pairing {
+  flex: 0 1 15rem;
+  justify-content: center;
+  min-width: min(100%, 13.75rem);
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  background: var(--surface-2);
+  text-align: center;
+}
+
+.pairing h4 {
+  margin: 0;
+  color: var(--ink);
+  font-size: var(--fs-h3);
+  font-weight: var(--title-weight);
+}
+
+.qr {
+  padding: var(--space-2);
+}
+
+.pairingHint {
+  max-width: 13rem;
+  margin: 0;
+  color: var(--ink-3);
+  font-size: var(--fs-small);
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.sectionTitle {
+  margin: 0;
+  color: var(--ink);
+  font-size: var(--fs-h3);
+  font-weight: var(--title-weight);
+}
+
+.fields {
+  gap: var(--space-3);
+  padding: var(--pad-card);
+}
+
+.sessions {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: 0;
+}
+
+.sessionsHeader {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.sessionsList {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sessionItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-width: 0;
+  padding: 12px var(--pad-card);
+  border-bottom: 1px solid var(--line);
+  border-radius: 0;
+  background: transparent;
+}
+
+.sessionItem > :first-child {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.sessionItem:last-child {
+  border-bottom: 0;
+}

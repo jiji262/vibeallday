@@ -1,0 +1,51 @@
+/* Per-user usage table (design S-Users usage card). */
+
+/* Usage: one row per principal, one column per window. */
+.usage {
+  margin-top: var(--space-4, 1rem);
+}
+
+/* Usage tables: garden Table inside a flush card. The row header reads
+   like a data cell, the breakdown caption like a card title. */
+.usageCard {
+  margin-top: var(--space-3);
+}
+
+.usageCaption {
+  caption-side: top;
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px dashed var(--dash);
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 500;
+  text-align: start;
+}
+
+.usageWindow {
+  margin-top: var(--space-2);
+}
+
+.usageWindowLegend {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* Names wrap at their hyphens, never mid-word; the table scrolls instead. */
+.usageUser {
+  padding: 14px var(--space-4);
+  border-bottom: 1px dashed var(--dash);
+  color: var(--ink);
+  font-weight: 500;
+  text-align: start;
+  vertical-align: middle;
+  overflow-wrap: normal;
+}
+
+tr:last-child > .usageUser {
+  border-bottom: 0;
+}

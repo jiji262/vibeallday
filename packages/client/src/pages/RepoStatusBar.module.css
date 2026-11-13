@@ -1,0 +1,239 @@
+/* Repository identity (design Git boards `.gitd-repo`): an inset group with
+   the branch, upstream, ahead/behind and the changed/clean tag, separated by
+   hairlines. Long names ellipsize; the group wraps instead of widening. */
+.bar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  min-height: 38px;
+  padding: 3px 6px 3px 12px;
+  color: var(--ink-2);
+  font-size: var(--fs-small);
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+}
+
+.bar.inline {
+  min-width: 0;
+  flex: 0 1 auto;
+}
+
+/* Out of sync or uncommitted work reads as needs-you. */
+.bar.warn {
+  border-color: var(--attn-line);
+}
+
+/* `.copy-button` is a shared global primitive owned by `CopyButton`, and a
+   later `index.css` rule of the same name restyles it for settings surfaces.
+   Passing this class through `CopyButton`'s `className` prop keeps the compact
+   presentation at the two-class specificity the old descendant rule had. */
+.bar .copyButton {
+  position: relative;
+  padding: 2px;
+  color: var(--ink-3);
+  background: transparent;
+  border: 0;
+  border-radius: var(--r-xs);
+}
+
+/* The glyph stays small; the touch target grows around it. */
+.bar .copyButton::after {
+  content: "";
+  position: absolute;
+  inset: -12px;
+}
+
+.bar .copyButton:hover {
+  color: var(--ink);
+  background: var(--surface-3);
+}
+
+.branch {
+  display: inline-flex;
+  min-width: 0;
+  flex: 0 1 auto;
+  align-items: center;
+  gap: 6px;
+  color: var(--ink-3);
+}
+
+.branchName {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* The branch name is navigation to its tip commit; the adjacent icon copies. */
+.branchLink {
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.branchLink:hover,
+.branchLink:focus-visible {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.sep {
+  flex: none;
+  width: 1px;
+  height: 18px;
+  background: var(--line);
+}
+
+.upstream {
+  flex: 0 1 auto;
+  min-width: 0;
+  max-width: 14rem;
+  overflow: hidden;
+  color: var(--ink-3);
+  font-family: var(--font-mono);
+  font-size: var(--fs-meta);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sync,
+.syncWarn {
+  flex: none;
+  color: var(--ink-2);
+  font-weight: 600;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.syncWarn {
+  color: var(--attn-ink);
+}
+
+.stateTag {
+  flex: none;
+}
+
+/* The changed tag as a button: the design `.tag` recipe on a native control. */
+.stateAction {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  height: 20px;
+  padding: 0 7px;
+  color: var(--attn-ink);
+  background: var(--attn-soft);
+  border: 1px solid var(--attn-line);
+  border-radius: var(--r-xs);
+  font: 500 11px / 1 var(--font-mono);
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.stateAction::after {
+  content: "";
+  position: absolute;
+  inset: -12px -6px;
+}
+
+.stateAction:hover {
+  border-color: var(--attn);
+}
+
+.upstreamButton {
+  position: relative;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+}
+
+.upstreamButton::after {
+  content: "";
+  position: absolute;
+  inset: -12px -6px;
+}
+
+.upstreamButton:hover,
+.upstreamButton:focus-visible {
+  color: var(--ink);
+  text-decoration: underline;
+}
+
+.incomingDialog {
+  width: min(42rem, 80vw);
+}
+
+.incomingIntro,
+.incomingTruncated {
+  margin: 0;
+  color: var(--ink-3);
+  font-size: var(--fs-small);
+}
+
+.incomingList {
+  display: grid;
+  padding: 0;
+  margin: var(--space-3) 0 0;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--r-card);
+  background: var(--surface);
+  list-style: none;
+}
+
+.incomingCommit {
+  display: grid;
+  gap: 3px;
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--line);
+}
+
+.incomingCommit:last-child {
+  border-bottom: 0;
+}
+
+.incomingCommitHeader {
+  display: flex;
+  min-width: 0;
+  align-items: baseline;
+  gap: var(--space-2);
+}
+
+.incomingCommitHeader code {
+  flex-shrink: 0;
+  color: var(--ink-3);
+  font-family: var(--font-mono);
+  font-size: var(--fs-meta);
+}
+
+.incomingSubject {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.incomingMeta {
+  color: var(--ink-3);
+  font-family: var(--font-mono);
+  font-size: var(--fs-meta);
+}
+
+.incomingTruncated {
+  margin-top: var(--space-3);
+}
+
+@media (width <= 600px) {
+  .incomingDialog {
+    width: auto;
+  }
+
+  .incomingCommitHeader {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 2px;
+  }
+}

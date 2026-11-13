@@ -1,0 +1,40 @@
+export type DistributionStatus = "available" | "beta" | "development";
+
+export interface PublicDistribution {
+  id: string;
+  name: string;
+  platform: string;
+  status: DistributionStatus;
+  summary: string;
+  docsPath: `/docs/${string}`;
+  downloadUrl?: string;
+  actionLabel?: string;
+  sourceRefs: string[];
+}
+
+export const distributions = [
+  {
+    id: "npm",
+    name: "npm server install",
+    platform: "macOS, Windows, and Linux",
+    status: "development",
+    summary:
+      "Build the command-line server from source. The npm package is not published yet.",
+    docsPath: "/docs/install-npm",
+    actionLabel: "Build from source",
+    sourceRefs: ["README.md", "package.json"],
+  },
+  {
+    id: "mobile-web",
+    name: "Mobile browser",
+    platform: "Phones and tablets",
+    status: "available",
+    summary:
+      "Use the responsive web client from a browser; no native phone app is required.",
+    docsPath: "/docs/remote-access",
+    actionLabel: "Connect from a phone",
+    sourceRefs: ["README.md", "packages/client/src/remote-main.tsx"],
+  },
+] as const satisfies readonly PublicDistribution[];
+
+export type DistributionId = (typeof distributions)[number]["id"];

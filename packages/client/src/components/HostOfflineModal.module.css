@@ -1,0 +1,68 @@
+/* Host-offline dialog (design auth/Connection): reason, host facts, hint,
+   then Go to login · Switch host · Retry. */
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.message {
+  margin: 0;
+  color: var(--ink-2);
+  font-size: var(--fs-body);
+  line-height: 1.5;
+}
+
+.detail {
+  margin: 0;
+  padding: 10px 12px;
+  border: 1px solid var(--err-line);
+  border-radius: var(--r-md);
+  background: var(--err-soft);
+  color: var(--err-ink);
+  font-size: var(--fs-small);
+  overflow-wrap: anywhere;
+}
+
+.facts {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 6px 16px;
+  margin: 0;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  background: var(--surface-2);
+  font-size: var(--fs-small);
+}
+
+.facts dt {
+  color: var(--ink-3);
+}
+
+.facts dd {
+  margin: 0;
+  color: var(--ink);
+  font-family: var(--font-mono);
+  overflow-wrap: anywhere;
+}
+
+.hint {
+  margin: 0;
+  color: var(--ink-3);
+  font-size: var(--fs-small);
+  line-height: 1.45;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+}
+
+.switchHost {
+  margin-left: auto;
+}

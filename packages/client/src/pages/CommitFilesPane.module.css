@@ -1,0 +1,142 @@
+/* Commit detail head (design GitHistory detail card): subject as a heading,
+   author and time under it, hash and actions beside. Two classes beat the
+   global `.source-detail-*` recipe it sits on. */
+.banner.banner {
+  gap: 8px 10px;
+  padding: 12px var(--pad-card);
+  background: var(--surface);
+  border-color: var(--card-line);
+  border-radius: var(--r-card);
+  box-shadow: var(--shadow-card);
+}
+
+.subject.subject {
+  color: var(--ink);
+  font-family: var(--font-ui);
+  font-size: var(--fs-h3);
+  font-weight: var(--title-weight);
+}
+
+.byline {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  color: var(--ink-3);
+  font-family: var(--font-mono);
+  font-size: var(--fs-meta);
+}
+
+.author {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--ink-2);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.body {
+  display: block;
+  width: 100%;
+  margin: 0 0 var(--space-2);
+  padding: 8px;
+  color: var(--ink-2);
+  font-family: inherit;
+  font-size: var(--fs-small);
+  line-height: 1.65;
+  text-align: left;
+  white-space: pre-wrap;
+  user-select: text;
+  background: var(--surface);
+  border: 1px solid transparent;
+  border-radius: var(--r-md);
+  cursor: pointer;
+}
+
+.body:hover {
+  color: var(--ink);
+}
+
+.body:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: -2px;
+}
+
+.selected {
+  background: var(--accent-soft);
+  border-color: var(--line);
+}
+
+.mobile {
+  padding-block: 6px;
+  color: var(--ink-2);
+  white-space: normal;
+}
+
+.selectedPath {
+  position: sticky;
+  z-index: 3;
+  top: 0;
+  display: flex;
+  width: calc(100% - 8px);
+  justify-content: flex-end;
+  margin: 0 4px 6px;
+  pointer-events: none;
+}
+
+.selectedPathBox {
+  box-sizing: border-box;
+  width: max-content;
+  max-width: 100%;
+  padding: 5px 7px;
+  overflow-wrap: anywhere;
+  color: var(--tooltip-foreground);
+  background: var(--tooltip-background);
+  border: 1px solid var(--tooltip-border);
+  border-radius: 4px;
+  box-shadow: var(--shadow-md);
+  font-family: var(--font-mono);
+  font-size: calc(var(--font-size-xs) + 1px);
+  font-weight: 500;
+  line-height: 1.25;
+  white-space: normal;
+}
+
+@media (width >= 1100px) {
+  .selectedPath {
+    width: calc(
+      100% +
+      var(--source-revision-column-width, 300px) +
+      var(--space-3) -
+      8px
+    );
+    margin-left: calc(
+      4px -
+      var(--source-revision-column-width, 300px) -
+      var(--space-3)
+    );
+  }
+
+  .desktopColumn {
+    display: flex;
+    overflow: visible;
+    flex-direction: column;
+  }
+
+  .desktopColumn > :global(.source-detail-banner),
+  .desktopColumn > .selectedPath {
+    flex-shrink: 0;
+  }
+
+  .desktopColumn > .body {
+    min-height: 0;
+    max-height: 40%;
+    overflow-y: auto;
+  }
+
+  .desktopColumn > :global(.commit-file-list) {
+    min-height: 0;
+    flex: 1 1 auto;
+    overflow-y: auto;
+  }
+}

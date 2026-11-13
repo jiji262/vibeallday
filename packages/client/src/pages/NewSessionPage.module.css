@@ -1,0 +1,51 @@
+.appButton {
+  min-height: 36px;
+}
+
+.appButton[aria-pressed="true"] {
+  color: var(--app-accent);
+  border-color: var(--app-accent);
+}
+
+.workspace {
+  display: flex;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* Design: 56px above the prompt heading, 64px below the last row. The
+   pre-boot composer (preboot/new-session-composer.js) mirrors the side
+   insets. */
+.formColumn {
+  --new-session-page-top: 56px;
+  --new-session-page-bottom: 64px;
+  flex: 1;
+  min-width: 0;
+  overflow: auto;
+  padding: var(--new-session-page-top) var(--console-page-inset)
+    var(--new-session-page-bottom);
+}
+
+.appColumn {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+}
+
+.formColumn[hidden],
+.appColumn[hidden] {
+  display: none;
+}
+
+/* Phones compose full screen: no tab bar here, so the page keeps clear of
+   the home indicator itself. */
+@media (width < 768px) {
+  .formColumn {
+    --new-session-page-top: var(--space-4);
+    --new-session-page-bottom: var(--space-6);
+    padding-bottom: calc(
+      var(--new-session-page-bottom) +
+      env(safe-area-inset-bottom, 0px)
+    );
+  }
+}

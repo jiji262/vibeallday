@@ -1,0 +1,69 @@
+/* A badge after the title (clearloop remaining count) must stay visible when
+   the title ellipsizes: the text shrinks, the badge does not. */
+.titleWithBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.titleWithBadge > :global(.session-title-text) {
+  flex: 0 1 auto;
+}
+
+.titleWithBadge > :not(:global(.session-title-text)) {
+  flex-shrink: 0;
+}
+
+/* The pinned router account is secondary to the title: it yields space first
+   and leaves narrow headers entirely; Session Info carries the full pin. */
+.routerAccount {
+  flex: 0 8 auto;
+  min-width: 2.5rem;
+  max-width: 10rem;
+  margin-left: var(--space-1);
+  padding: 0 var(--space-2);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--label-font);
+  font-size: var(--eyebrow-size);
+  line-height: 20px;
+  letter-spacing: var(--badge-tracking);
+  color: var(--ink-3);
+  background: var(--bg-soft);
+  border: 1px dashed var(--dash);
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+}
+
+.routerAccount:hover,
+.routerAccount:focus-visible {
+  color: var(--ink);
+}
+
+/* The state pill follows the title and never shrinks below its word. */
+.stateBadge {
+  flex-shrink: 0;
+  margin-inline-start: var(--space-2);
+}
+
+.changesButton {
+  flex-shrink: 0;
+}
+
+/* The project App button is a square home icon, level with the session's
+   last-view icon beside it. */
+.projectAppButton {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+}
+
+@media (width <= 700px) {
+  .routerAccount {
+    display: none;
+  }
+}

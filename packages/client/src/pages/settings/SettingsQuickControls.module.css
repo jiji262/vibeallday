@@ -1,0 +1,86 @@
+/* Quick controls card (design .shd-qrow / phone .set-row). */
+.card {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid var(--card-line);
+  border-radius: var(--r-card);
+  background: var(--surface);
+  box-shadow: var(--shadow-card);
+}
+
+.head {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  padding: var(--space-4) var(--pad-card) var(--space-1);
+}
+
+/* The h2 reset beats the global heading margins in theme.css. */
+.heading {
+  margin: 0;
+  color: var(--ink);
+  font-size: var(--fs-h3);
+  font-weight: var(--title-weight);
+}
+
+.more {
+  margin-left: auto;
+  color: var(--link);
+  font-size: var(--fs-small);
+  text-decoration: none;
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px var(--space-6);
+  padding: 14px var(--pad-card);
+}
+
+.row + .row {
+  border-top: 1px solid var(--line);
+}
+
+.text {
+  display: flex;
+  flex: 1 1 200px;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.title {
+  display: flex;
+  flex: 1 1 120px;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--ink);
+  font-size: var(--fs-body);
+  font-weight: 600;
+}
+
+.description {
+  color: var(--ink-3);
+  font-size: var(--fs-small);
+  line-height: 1.55;
+}
+
+.detail {
+  min-width: 40px;
+  color: var(--ink-3);
+  font-family: var(--font-mono);
+  font-size: var(--fs-meta);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+/* Phone: the segmented control takes its own full-width line. */
+@media (width < 768px) {
+  .control {
+    flex: 1 1 100%;
+  }
+}

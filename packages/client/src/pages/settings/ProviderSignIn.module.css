@@ -1,0 +1,44 @@
+.panel {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.output {
+  max-width: 100%;
+  max-height: 10rem;
+  margin: 0;
+  padding: var(--space-2);
+  overflow: auto;
+  font-size: 0.85em;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  background: var(--code-bg);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+}
+
+/* On phones every action fills the width, like the sign-in screens. */
+@media (width <= 600px) {
+  .panel {
+    align-items: stretch;
+  }
+
+  .row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .panel :global(.settings-button) {
+    justify-content: center;
+  }
+}

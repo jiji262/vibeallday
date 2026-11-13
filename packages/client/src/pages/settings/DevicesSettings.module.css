@@ -1,0 +1,108 @@
+/* Browser profiles (design S-Devices): a highlighted card for this browser,
+   then hairline-separated rows for every other profile. */
+.sectionTitle {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin: var(--space-5) 0 var(--space-2);
+  color: var(--ink);
+  font-family: var(--font-ui);
+  font-size: var(--fs-h3);
+  font-weight: var(--title-weight);
+}
+
+.count {
+  color: var(--ink-3);
+  font-family: var(--font-mono);
+  font-size: var(--fs-meta);
+}
+
+.currentCard {
+  border-color: var(--accent-line);
+}
+
+.list:global(.device-list) {
+  gap: 0;
+}
+
+.profile:global(.device-list-item) {
+  flex-wrap: wrap;
+  align-items: flex-start;
+  padding: var(--space-3) var(--pad-card);
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.profile + .profile {
+  border-top: 1px solid var(--line);
+}
+
+.info {
+  display: flex;
+  flex: 1 1 16rem;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.name {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.currentTag:global(.device-current-badge) {
+  padding: 1px var(--space-2);
+  border-radius: var(--r-chip);
+  background: var(--accent-soft);
+  color: var(--accent-ink);
+  font-size: var(--fs-meta);
+  font-weight: 600;
+}
+
+.origins:global(.device-origins) {
+  margin: 0;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  background: var(--surface-2);
+}
+
+.origin:global(.device-origin) {
+  flex-flow: row wrap;
+  margin: 0;
+  align-items: center;
+  gap: var(--space-1) var(--space-3);
+  padding: var(--space-2) var(--space-3);
+}
+
+.origin + .origin {
+  border-top: 1px solid var(--line);
+}
+
+.originTime {
+  margin-left: auto;
+  color: var(--ink-3);
+  font-size: var(--fs-meta);
+}
+
+.meta {
+  margin: 0;
+  color: var(--ink-3);
+  font-size: var(--fs-meta);
+}
+
+.empty {
+  margin: 0;
+  padding: var(--space-4) var(--pad-card);
+  color: var(--ink-3);
+  font-size: var(--fs-small);
+}

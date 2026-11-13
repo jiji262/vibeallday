@@ -1,0 +1,13 @@
+/* Development: grouped debug switches and the maintenance (danger) card. */
+
+.ignoredTools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+  margin-top: var(--space-2);
+}
+
+/* Restart is destructive: its row shows the danger card's tint. */
+.dangerCard :global(.settings-item) {
+  background: transparent;
+}

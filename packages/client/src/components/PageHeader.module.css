@@ -1,0 +1,180 @@
+/*
+ * Page top bar (design `.topbar`): leading control, breadcrumb, actions and
+ * search on one row of `--topbar-height`, with the compact intro (eyebrow,
+ * title, description) on a second row for pages that keep their title here.
+ * Phones draw the design `.phead`: one sticky 56px row holding the back
+ * button, the title (header intro or last crumb), host chip and actions.
+ */
+.header:global(.session-header) {
+  z-index: var(--z-topbar);
+  border-bottom: 1px solid var(--line);
+  background: var(--canvas);
+}
+
+.header::after {
+  display: none;
+}
+
+.header .inner:global(.session-header-inner) {
+  display: grid;
+  grid-template-areas:
+    "lead tools"
+    "intro intro";
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-rows: minmax(var(--topbar-height), auto) auto;
+  align-items: center;
+  column-gap: 12px;
+  width: 100%;
+  min-height: var(--topbar-height);
+  padding: 0 28px;
+}
+
+.lead:global(.session-header-left) {
+  grid-area: lead;
+  gap: var(--space-2);
+}
+
+.tools:global(.session-header-actions) {
+  grid-area: tools;
+  gap: var(--space-2);
+}
+
+.control:global(.sidebar-toggle) {
+  width: 36px;
+  height: 36px;
+  margin-inline-start: calc(-1 * var(--space-2));
+}
+
+@media (pointer: coarse) {
+  .control:global(.sidebar-toggle) {
+    width: var(--tap-min);
+    height: var(--tap-min);
+  }
+}
+
+.crumbs {
+  flex: 1 1 auto;
+}
+
+.crumbs > ol {
+  font-size: var(--fs-small);
+}
+
+/* Only phones show the host chip; the sidebar names the host on desktop. */
+.hostChip {
+  display: none;
+}
+
+.intro {
+  display: grid;
+  grid-area: intro;
+  gap: var(--space-2);
+  min-width: 0;
+  padding: var(--space-2) 0 var(--space-5);
+}
+
+.title:global(.session-title) {
+  display: block;
+  margin: 0;
+  padding: 0;
+  color: var(--ink);
+  font-family: var(--font-ui);
+  font-size: var(--fs-h1);
+  font-weight: var(--title-weight);
+  font-stretch: var(--display-stretch);
+  line-height: 1.2;
+  letter-spacing: var(--display-tracking);
+  text-align: start;
+}
+
+.title:global(.session-title):hover {
+  color: var(--ink);
+}
+
+.description {
+  max-width: 65ch;
+  margin: 0;
+  color: var(--ink-3);
+  font-size: var(--fs-small);
+  line-height: 1.5;
+}
+
+@media (width < 768px) {
+  .header:global(.session-header) {
+    position: sticky;
+    top: 0;
+    border-bottom-color: var(--phead-line);
+    background: var(--phead-bg);
+    backdrop-filter: blur(14px);
+  }
+
+  .header .inner:global(.session-header-inner) {
+    grid-template-areas: "lead tools";
+    grid-template-rows: auto;
+    column-gap: var(--space-2);
+    min-height: 56px;
+    padding: 6px 12px 6px 16px;
+  }
+
+  .header[data-back] .inner:global(.session-header-inner) {
+    padding-inline-start: 4px;
+  }
+
+  .header[data-intro="header"] .inner:global(.session-header-inner) {
+    grid-template-areas: "lead intro tools";
+    grid-template-columns: auto minmax(0, 1fr) auto;
+  }
+
+  .control:global(.sidebar-toggle) {
+    width: var(--icon-btn);
+    height: var(--icon-btn);
+    margin-inline-start: 0;
+  }
+
+  /* The phone shows the title, never the breadcrumb trail. */
+  .header[data-intro="header"] .crumbs,
+  .crumbs li:not(:last-child),
+  .crumbs li:last-child > [aria-hidden="true"] {
+    display: none;
+  }
+
+  .crumbs [aria-current="page"] {
+    color: var(--ink);
+    font-size: 17px;
+    font-weight: var(--title-weight);
+    font-stretch: var(--display-stretch);
+  }
+
+  /* The host chip carries the marker on phones. */
+  .lead :global(.host-identity-marker) {
+    display: none;
+  }
+
+  .hostChip {
+    display: inline-flex;
+  }
+
+  .intro {
+    gap: 0;
+    padding: 0;
+  }
+
+  .eyebrow {
+    display: none;
+  }
+
+  .title:global(.session-title) {
+    overflow: hidden;
+    font-size: 17px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .description {
+    overflow: hidden;
+    font-family: var(--font-mono);
+    font-size: var(--fs-meta);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}

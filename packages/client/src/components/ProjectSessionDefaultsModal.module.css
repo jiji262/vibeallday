@@ -1,0 +1,202 @@
+/*
+ * Project settings dialog: app and sharing on the left, heartbeat defaults
+ * on the right, then a right-aligned footer. The dialog variant of Modal
+ * pads itself, so the body adds no padding of its own.
+ */
+
+:global(.modal):has(.body) {
+  width: min(44rem, calc(100dvw - 1.5rem));
+  max-width: min(44rem, calc(100dvw - 1.5rem));
+  height: auto;
+}
+
+.body {
+  box-sizing: border-box;
+  display: grid;
+  gap: var(--space-4);
+  min-width: 0;
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  min-width: 0;
+}
+
+.sectionTitle {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.section h3,
+.section p {
+  margin: 0;
+}
+
+.section h3 {
+  color: var(--ink);
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.intro,
+.section p,
+.textMeta {
+  margin: 0;
+  color: var(--ink-3);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.section {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-5);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--card);
+  box-shadow: var(--shadow-xs);
+}
+
+.headingRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.headingRow h3 {
+  margin: 0 0 var(--space-1);
+}
+
+.inheritToggle,
+.numberField,
+.recentField {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--ink-2);
+  font-size: 13px;
+}
+
+.inheritToggle {
+  flex: 0 0 auto;
+}
+
+.inheritToggle input {
+  accent-color: var(--indigo);
+}
+
+.minutesInput {
+  width: 6rem;
+}
+
+.recentField {
+  align-items: stretch;
+  flex-direction: column;
+}
+
+.textarea {
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-md);
+  background: var(--card);
+  color: var(--ink);
+  font: inherit;
+  line-height: 1.45;
+}
+
+.textMeta {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-3);
+  font-family: var(--label-font);
+  font-size: 12px;
+}
+
+.error {
+  margin: 0;
+  color: var(--rose-ink);
+  font-size: 13px;
+}
+
+.actions {
+  grid-column: 1 / -1;
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  padding-top: var(--space-4);
+  border-top: 1px dashed var(--dash);
+  background: var(--card);
+}
+
+@media (width <= 600px) {
+  :global(.modal):has(.body) {
+    width: 100dvw;
+    max-width: 100dvw;
+    height: 100dvh;
+  }
+
+  .headingRow {
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+
+  .actions {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+}
+
+@media (width >= 900px) {
+  :global(.modal):has(.body) {
+    width: min(64rem, calc(100dvw - 3rem));
+    max-width: min(64rem, calc(100dvw - 3rem));
+  }
+
+  .body {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: start;
+  }
+}
+
+/* Project sharing: one row per limited user, its level beside the name. */
+.sharingList {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sharingRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 12rem);
+  gap: var(--space-1) var(--space-2);
+  align-items: center;
+  padding: var(--space-2) 0;
+  border-bottom: 1px dashed var(--dash);
+  color: var(--ink);
+  font-size: 14px;
+}
+
+.sharingRow:last-child {
+  border-bottom: 0;
+}
+
+.sharingNote {
+  grid-column: 1 / -1;
+  color: var(--ink-3);
+  font-size: 13px;
+}
+
+.section .sharingEmpty {
+  color: var(--ink-3);
+}

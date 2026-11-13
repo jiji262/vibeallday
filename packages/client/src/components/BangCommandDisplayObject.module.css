@@ -1,0 +1,145 @@
+/* `!!` command block: mono command line with exit Status and duration, the
+   output preview (8 lines, then it scrolls), and small actions. Used in the
+   transcript and on the Shell history page. */
+.root {
+  margin: var(--space-2) 0;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--line);
+  border-radius: var(--r-card);
+  background: var(--surface-2);
+  color: var(--ink-2);
+  font-size: var(--font-size-xs);
+}
+
+.error,
+.killed {
+  border-color: var(--err-line);
+}
+
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.glyph {
+  color: var(--accent-ink);
+  font-family: var(--font-mono);
+  font-weight: 600;
+}
+
+.line {
+  flex: 1 1 12rem;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-size: var(--fs-code);
+  font-weight: 500;
+}
+
+.meta {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-left: auto;
+  color: var(--ink-3);
+  font-family: var(--font-mono);
+  font-size: var(--fs-meta);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.running {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.error[role="alert"] {
+  color: var(--err-ink);
+}
+
+/* Eight lines of output before the preview scrolls. */
+.preview {
+  --bang-preview-lines: 8;
+  --bang-preview-line-height: 1.5;
+
+  max-height: calc(
+    var(--bang-preview-lines) *
+    var(--bang-preview-line-height) *
+    1em +
+    2 *
+    var(--space-2)
+  );
+  margin: var(--space-2) 0 0;
+  padding: var(--space-2) var(--space-3);
+  overflow: auto;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--code-bg);
+  color: var(--ink);
+  font-family: var(--font-mono);
+  line-height: var(--bang-preview-line-height);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.output {
+  margin-top: var(--space-2);
+}
+
+.stderr summary {
+  margin-top: var(--space-2);
+  color: var(--ink-3);
+  cursor: pointer;
+}
+
+.truncated {
+  margin-top: var(--space-1);
+  color: var(--ink-3);
+  font-style: italic;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+  margin-top: var(--space-2);
+}
+
+.action {
+  height: 26px;
+  padding: 0 10px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-btn);
+  background: var(--surface);
+  color: var(--ink-2);
+  font-size: var(--font-size-xs);
+  cursor: pointer;
+  transition: color var(--duration-fast) var(--ease-standard);
+}
+
+.action:hover {
+  background: var(--surface-3);
+  color: var(--ink);
+}
+
+.action:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.actionDelete:hover {
+  border-color: var(--err-line);
+  background: var(--err-soft);
+  color: var(--err-ink);
+}
+
+@media (pointer: coarse) {
+  .action {
+    height: 32px;
+  }
+}

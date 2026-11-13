@@ -1,0 +1,209 @@
+/** Deliberately small JSON Schema emitter for the offline simple-client spike.
+ * Unsupported schema vocabulary fails generation rather than weakening a decoder.
+ */
+import { readFileSync, writeFileSync } from "node:fs";
+import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
+import { spawnSync } from "node:child_process";
+import { validateSimpleClientSchema } from "./lib/simple-client-schema.mjs";
+
+const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
+const check = process.argv.includes("--check");
+if (process.argv.slice(2).some((arg) => arg !== "--check"))
+  throw new Error("Use --check or no arguments");
+const schema = JSON.parse(
+  readFileSync(
+    resolve(root, "packages/shared/contracts/simple-client.schema.json"),
+    "utf8",
+  ),
+);
+validateSimpleClientSchema(schema);
+const defs = schema.$defs;
+const quote = JSON.stringify;
+const refName = (s) => s.$ref.slice("#/$defs/".length);
+const members = new Map();
+for (const [name, s] of Object.entries(defs)) {
+  if (!s["x-open-kind"]) continue;
+  for (const branch of s.oneOf.slice(0, -1)) {
+    const type = refName(branch);
+    if (members.has(type))
+      throw new Error(
+        "A record cannot belong to multiple unions in this spike",
+      );
+    members.set(type, name);
+  }
+}
+const order = [];
+const visiting = new Set();
+function visit(name) {
+  if (order.includes(name)) return;
+  if (visiting.has(name)) throw new Error(`Recursive definition: ${name}`);
+  if (!defs[name]) throw new Error(`Missing definition: ${name}`);
+  visiting.add(name);
+  function refs(s) {
+    if (s && typeof s === "object") {
+      if (s.$ref) {
+        if (!s.$ref.startsWith("#/$defs/"))
+          throw new Error("Only local references supported");
+        visit(refName(s));
+      } else Object.values(s).forEach(refs);
+    }
+  }
+  refs(defs[name]);
+  visiting.delete(name);
+  order.push(name);
+}
+Object.keys(defs).forEach(visit);
+
+function tsType(s) {
+  if (s.$ref) return refName(s);
+  if (s.const !== undefined) return quote(s.const);
+  if (s.enum) return s.enum.map(quote).join(" | ");
+  if (s.anyOf) return `${tsType(s.anyOf[0])} | null`;
+  if (s["x-open-kind"])
+    return [...s.oneOf.slice(0, -1).map(tsType), "UnknownVariant"].join(" | ");
+  if (s.type === "object")
+    return `{ ${Object.entries(s.properties)
+      .map(([k, v]) => `${k}: ${tsType(v)};`)
+      .join(" ")} }`;
+  if (s.type === "array") return `Array<${tsType(s.items)}>`;
+  return s.type === "integer" ? "number" : s.type;
+}
+function tsDecoder(s) {
+  if (s.$ref) return `${refName(s)}Schema`;
+  if (s.const !== undefined) return `z.literal(${quote(s.const)})`;
+  if (s.enum) return `z.enum(${quote(s.enum)})`;
+  if (s.anyOf) return `${tsDecoder(s.anyOf[0])}.nullable()`;
+  if (s.type === "object")
+    return `z.object({${Object.entries(s.properties)
+      .map(([k, v]) => `${k}: ${tsDecoder(v)}`)
+      .join(",")}})`;
+  if (s.type === "array")
+    return `z.array(${tsDecoder(s.items)}).min(${s.minItems}).max(${s.maxItems})`;
+  if (s.type === "integer")
+    return `z.number().int().min(${s.minimum}).max(${s.maximum})`;
+  if (s.type === "boolean") return "z.boolean()";
+  return `z.string().refine(v => Array.from(v).length >= ${s.minLength} && Array.from(v).length <= ${s.maxLength}, "String length out of bounds")${s.pattern ? `.regex(/${s.pattern}/)` : ""}`;
+}
+function schemaAt(...keys) {
+  let node = defs;
+  for (const key of keys) {
+    node = node?.[key];
+    if (node === undefined) throw new Error(`Schema has no ${keys.join(".")}`);
+  }
+  return node;
+}
+/** Wire revision and the producer-facing bounds, so no source spells them again. */
+const contractValues = {
+  CONVERSATION_API_REVISION: schemaAt(
+    "SnapshotEnvelope",
+    "properties",
+    "apiRevision",
+    "const",
+  ),
+  MAX_MESSAGE_CONTENT_ITEMS: schemaAt(
+    "ConversationMessage",
+    "properties",
+    "content",
+    "maxItems",
+  ),
+  MAX_TEXT_LENGTH: schemaAt("TextContent", "properties", "text", "maxLength"),
+  MAX_FAILURE_MESSAGE_LENGTH: schemaAt(
+    "FailureContent",
+    "properties",
+    "message",
+    "maxLength",
+  ),
+  MAX_TOOL_NAME_LENGTH: schemaAt(
+    "FailureContent",
+    "properties",
+    "toolName",
+    "maxLength",
+  ),
+  MAX_MEDIA_DESCRIPTION_LENGTH: schemaAt(
+    "MediaContent",
+    "properties",
+    "description",
+    "maxLength",
+  ),
+  MAX_ID_LENGTH: schemaAt("Id", "maxLength"),
+  MIN_FAILURE_EXIT_CODE: schemaAt(
+    "FailureContent",
+    "properties",
+    "exitCode",
+    "anyOf",
+    0,
+    "minimum",
+  ),
+  MAX_FAILURE_EXIT_CODE: schemaAt(
+    "FailureContent",
+    "properties",
+    "exitCode",
+    "anyOf",
+    0,
+    "maximum",
+  ),
+  // An open union's unknown branch is its last one, as the emitters below assume.
+  MAX_UNKNOWN_KIND_LENGTH: schemaAt(
+    "Content",
+    "oneOf",
+    schemaAt("Content", "oneOf").length - 1,
+    "properties",
+    "kind",
+    "maxLength",
+  ),
+};
+
+let ts = `// Generated by scripts/generate-simple-client.mjs. Edit the JSON Schema source.\nimport { z } from "zod";\n
+export type UnknownVariant = { kind: "unknown"; originalKind: string; raw: Record<string, unknown> };
+function openUnion<T>(variants: Record<string, z.ZodType<T>>): z.ZodType<T | UnknownVariant> {
+  return z.unknown().transform((raw, ctx): T | UnknownVariant => {
+    const tag = z.object({kind: z.string().refine(v => Array.from(v).length >= 1 && Array.from(v).length <= 128)}).passthrough().safeParse(raw);
+    if (!tag.success) { ctx.addIssue({code: "custom", message: "Expected an object with kind"}); return z.NEVER; }
+    const decoder = Object.hasOwn(variants, tag.data.kind) ? variants[tag.data.kind] : undefined;
+    if (!decoder) return {kind: "unknown", originalKind: tag.data.kind, raw: structuredClone(tag.data)};
+    const decoded = decoder.safeParse(raw);
+    if (!decoded.success) { ctx.addIssue({code: "custom", message: \`Malformed known variant: \${tag.data.kind}\`}); return z.NEVER; }
+    return decoded.data;
+  });
+}
+`;
+for (const name of order) {
+  const s = defs[name];
+  ts += `export type ${name} = ${tsType(s)};\n`;
+  const expression = s["x-open-kind"]
+    ? `openUnion<Exclude<${name}, UnknownVariant>>({${s.oneOf
+        .slice(0, -1)
+        .map(
+          (r) =>
+            `${quote(defs[refName(r)].properties.kind.const)}: ${refName(r)}Schema`,
+        )
+        .join(",")}})`
+    : tsDecoder(s);
+  ts += `export const ${name}Schema: z.ZodType<${name}> = ${expression};\n`;
+}
+for (const [name, value] of Object.entries(contractValues))
+  ts += `export const ${name} = ${quote(value)};\n`;
+ts += `export const MAX_SNAPSHOT_BYTES = 262144;\nexport function decodeSnapshot(encoded: string): SnapshotEnvelope {
+  if (new TextEncoder().encode(encoded).length > MAX_SNAPSHOT_BYTES) throw new Error("Snapshot byte limit exceeded");
+  return SnapshotEnvelopeSchema.parse(JSON.parse(encoded));
+}\n`;
+
+const tsPath = "packages/shared/src/experimental/simple-client.generated.ts";
+const formatted = spawnSync(
+  process.execPath,
+  [resolve(root, "scripts/biome.cjs"), "format", `--stdin-file-path=${tsPath}`],
+  { cwd: root, input: ts, encoding: "utf8" },
+);
+if (formatted.status !== 0) throw new Error(formatted.stderr);
+const outputs = [[tsPath, formatted.stdout]];
+for (const [path, content] of outputs) {
+  const absolute = resolve(root, path);
+  if (check) {
+    if (readFileSync(absolute, "utf8") !== content)
+      throw new Error(`Stale generated contract: ${path}`);
+  } else writeFileSync(absolute, content);
+}
+console.log(
+  `${check ? "Verified" : "Generated"} TypeScript contracts (${order.length} definitions)`,
+);

@@ -1,0 +1,152 @@
+.modal {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-width: min(560px, 90vw);
+}
+
+/* The dialog body already pads its content, so the comment list is a bare
+   hairline box with dashed row rules rather than a stack of padded cards. */
+.list {
+  max-height: 50vh;
+  padding: 0;
+  margin: 0;
+  overflow: auto;
+  list-style: none;
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+}
+
+.row {
+  padding: 0 var(--space-3) var(--space-3);
+  border-bottom: 1px dashed var(--line-strong);
+}
+
+.row:last-child {
+  border-bottom: 0;
+}
+
+.stale {
+  background: var(--attn-soft);
+}
+
+/* The whole header row is the checkbox's 44px target. */
+.rowHead {
+  display: grid;
+  grid-template-columns: 20px minmax(0, 1fr);
+  align-items: center;
+  gap: 0 var(--space-3);
+  min-height: var(--tap-min);
+  padding-top: var(--space-1);
+}
+
+.rowHead input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  accent-color: var(--accent);
+}
+
+.location {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font-family: var(--font-mono);
+  font-size: 13px;
+}
+
+.staleLabel,
+.movedLabel {
+  grid-column: 2;
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+
+.staleLabel {
+  color: var(--attn-ink);
+}
+
+.movedLabel {
+  color: var(--ink-3);
+}
+
+.rowText {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.destination {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+}
+
+.field {
+  display: grid;
+  grid-template-columns: 5rem minmax(0, 1fr);
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--ink-2);
+  font-size: 14px;
+}
+
+.field select,
+.field input {
+  min-width: 0;
+  width: 100%;
+}
+
+.newSession {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-2);
+}
+
+.targetError {
+  color: var(--err-ink);
+  font-size: 13px;
+}
+
+.actions {
+  display: flex;
+  align-items: end;
+  justify-content: flex-end;
+  gap: var(--space-2);
+}
+
+.name {
+  flex: 1;
+  max-width: 25rem;
+}
+
+@media (width <= 600px) {
+  .modal {
+    min-width: 0;
+  }
+
+  .field {
+    grid-template-columns: 1fr;
+    gap: var(--space-1);
+  }
+
+  .newSession {
+    grid-template-columns: 1fr;
+  }
+
+  .actions {
+    flex-wrap: wrap;
+  }
+
+  .name {
+    flex-basis: 100%;
+    max-width: none;
+  }
+
+  .button {
+    flex: 1;
+  }
+}

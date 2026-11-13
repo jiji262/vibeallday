@@ -1,0 +1,749 @@
+/* ==========================================================================
+   Timeline Items - Base styles for all items in assistant turn
+   ========================================================================== */
+
+/* Base timeline item - adds a dot on the timeline line */
+.timeline-item {
+  position: relative;
+  margin: 4px 0;
+}
+
+.timeline-item::before {
+  content: "";
+  position: absolute;
+  left: -11px;
+  top: 10px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--timeline-dot-default);
+}
+
+/* Line segment connecting to the next item's dot */
+.timeline-item::after {
+  content: "";
+  position: absolute;
+  left: -8px; /* Center of the dot */
+  top: 16px; /* Just below the dot */
+  bottom: -10px; /* Extend into next item's space to meet its dot */
+  width: 1px;
+  background: var(--line);
+}
+
+/* Last item in a turn - hide the line below */
+.assistant-turn > :last-child .timeline-item::after,
+.assistant-turn.has-turn-image-gallery
+  > :nth-last-child(2)
+  .timeline-item::after {
+  display: none;
+}
+
+/* Last item in task nested content - hide the line below */
+.task-nested-content > :last-child.timeline-item::after,
+.task-nested-content > :last-child .timeline-item::after {
+  display: none;
+}
+
+/* Thinking blocks - align dot with first line of text */
+.thinking-block.timeline-item::before {
+  top: 8px;
+}
+
+.thinking-block.timeline-item::after {
+  top: 14px;
+}
+
+.thinking-block.timeline-item {
+  padding-top: 2px;
+}
+
+/* Tool row - align dot with centered text in header (2px padding + centered in 20px = ~8px) */
+.tool-row.timeline-item::before {
+  top: 8px;
+}
+
+.tool-row.timeline-item::after {
+  top: 14px; /* Adjust line start for new dot position */
+}
+
+/* Tool row status-specific dot colors */
+.tool-row.timeline-item.status-pending::before {
+  background: var(--run);
+  animation: pulse 1.5s ease-in-out infinite var(--activity-play, paused);
+}
+
+.tool-row.timeline-item.status-complete::before {
+  background: var(--idle);
+}
+
+/* Errors read by shape as well as colour: the skin's error marker. */
+.tool-row.timeline-item.status-error::before {
+  border-radius: var(--err-marker-radius);
+  background: var(--err);
+  transform: var(--err-marker-transform);
+}
+
+.tool-row.timeline-item.status-aborted::before {
+  background: var(--idle);
+  opacity: 0.7;
+}
+
+.tool-row.timeline-item.status-incomplete::before {
+  background: var(--idle);
+  opacity: 0.7;
+}
+
+/* Clickable overlay on the timeline dot - expand/collapse Read/Edit rows */
+.timeline-dot-btn {
+  position: absolute;
+  left: -16px;
+  top: 3px;
+  width: 16px;
+  height: 16px;
+  border: none;
+  background: transparent;
+  border-radius: 50%;
+  cursor: pointer;
+  padding: 0;
+  z-index: 1;
+}
+
+.timeline-dot-btn:hover {
+  background: var(--surface-3);
+  box-shadow: 0 0 0 1px var(--line-strong);
+}
+
+.timeline-dot-btn:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.timeline-dot-btn:focus-visible {
+  box-shadow: 0 0 0 2px var(--focus);
+}
+
+/* ==========================================================================
+   Tool Call Rows - toolrow: icon / name / target / result on one mono line
+   ========================================================================== */
+
+.tool-row {
+  position: relative;
+}
+
+/* Fixed-height header - CRITICAL for no-jump during streaming */
+.tool-row-header {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  min-height: 32px;
+  padding: 4px 6px;
+  cursor: pointer;
+  border-radius: var(--r-sm);
+  transition: background-color 0.1s;
+  border: none;
+  background: transparent;
+  width: 100%;
+  text-align: left;
+}
+
+.tool-row-header:hover {
+  background: var(--surface-3);
+}
+
+.ran-tool-row .tool-row-header {
+  width: fit-content;
+  max-width: 100%;
+  box-sizing: border-box;
+  border: 1px solid var(--line);
+  background: var(--code-bg);
+}
+
+.ran-tool-row .tool-row-header:hover {
+  background: var(--surface-3);
+}
+
+.tool-row-header.has-command-preview,
+.tool-row-header.has-result-suffix {
+  flex-wrap: wrap;
+}
+
+.tool-row-header:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: -2px;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.6;
+    transform: scale(0.9);
+  }
+}
+
+/* Spinner (for pending state) */
+.tool-spinner {
+  flex-shrink: 0;
+  color: var(--ink-3);
+  display: flex;
+  align-items: center;
+}
+
+.tool-incomplete-icon {
+  flex-shrink: 0;
+  color: var(--ink-3);
+  font-weight: 700;
+  width: 14px;
+  text-align: center;
+}
+
+/* Tool name: the toolrow's name column, wide enough to align the targets of
+   consecutive Read/Edit/Grep rows. */
+.tool-name {
+  flex-shrink: 0;
+  min-width: 3.5rem;
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: var(--fixed-font-size-base);
+  color: var(--ink);
+}
+
+.ran-tool-row .tool-name {
+  min-width: 0;
+}
+
+/* Tool summary - takes remaining space, truncates */
+.tool-summary {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--output-prose-font-family);
+  font-optical-sizing: var(--output-prose-font-optical-sizing);
+  font-variation-settings: var(--output-prose-font-variation-settings);
+  font-size: var(--output-prose-font-size);
+  color: var(--ink-2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+button.tool-summary {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  text-align: left;
+}
+
+.tool-summary.interactive-summary.outline-summary {
+  overflow: visible;
+  text-overflow: clip;
+  white-space: normal;
+}
+
+/* Fixed-font output appearance */
+.ran-tool-row .tool-summary {
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-size: var(--fixed-font-size-base);
+}
+
+.tool-summary-command {
+  display: flex;
+  align-items: baseline;
+  gap: 0.45rem;
+  cursor: pointer;
+  line-height: 1.35;
+  white-space: normal;
+  text-overflow: clip;
+}
+
+.tool-summary-command:hover {
+  color: var(--ink);
+}
+
+.tool-summary-command:focus {
+  outline: 1px solid var(--focus);
+  outline-offset: -1px;
+}
+
+.tool-summary-command-text {
+  min-width: 0;
+  overflow: hidden;
+  line-height: inherit;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.hidden-content-badge {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  padding: 0.05rem 0.35rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface-2);
+  color: var(--ink-3);
+  font-family: var(--font-sans);
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  line-height: 1.15;
+  white-space: nowrap;
+}
+
+.tool-summary-command-more {
+  /* Wraps onto its own line under the Run/Ran label: the flex:1 command
+     fills row 1, so this fixed-size badge has no room and breaks below. */
+  align-self: flex-start;
+  margin-top: 3px;
+}
+
+.tool-result-suffix {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  color: var(--ink-3);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs);
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.tool-result-suffix-rc {
+  color: var(--err-ink);
+  font-weight: 600;
+}
+
+.tool-header-copy {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 1.35rem;
+  height: 1.35rem;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: var(--r-xs);
+  background: var(--surface);
+  color: var(--ink-3);
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    opacity 0.15s ease,
+    color 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.tool-row-header:hover .tool-header-copy,
+.tool-row-header:focus-within .tool-header-copy,
+.tool-row:focus-within .tool-header-copy,
+.tool-header-copy:focus,
+.tool-header-copy.copied {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.tool-header-copy:hover {
+  color: var(--ink);
+  border-color: var(--line-strong);
+}
+
+.tool-header-copy:focus {
+  outline: 1px solid var(--focus);
+  outline-offset: -1px;
+}
+
+.tool-header-copy.copied {
+  color: var(--ok-ink);
+}
+
+/* Expand chevron */
+.expand-chevron {
+  flex-shrink: 0;
+  width: 16px;
+  text-align: center;
+  font-size: var(--font-size-xs);
+  color: var(--ink-3);
+  transition: transform 0.15s;
+}
+
+/* Collapsed preview area - shown when tool has preview but not expanded */
+/* Nested left gutter: 10px (was 24px). Keep .tool-row-collapse-strip
+   geometry below aligned to this value. */
+.tool-row-collapsed-preview {
+  position: relative;
+  margin-left: 10px;
+  margin-top: 4px;
+  cursor: pointer;
+}
+
+.tool-row-deferred-preview {
+  cursor: default;
+  pointer-events: none;
+}
+
+.tool-row-deferred-preview-box {
+  box-sizing: border-box;
+  width: 100%;
+  height: var(--tool-row-deferred-preview-height, 7rem);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background:
+    linear-gradient(
+      to right,
+      color-mix(in srgb, var(--ink-3) 18%, transparent) 0 2.5rem,
+      transparent 2.5rem
+    ),
+    color-mix(in srgb, var(--code-bg) 72%, transparent);
+  opacity: 0.35;
+}
+
+/* Expanded content area */
+.tool-row-content {
+  position: relative;
+  margin-left: 10px;
+  padding: 8px;
+  border-left: 1px solid var(--line);
+  transition: border-left-color 0.1s;
+  animation: slideDown 0.15s ease-out;
+}
+
+/* Invisible wide strip over border-left — click anywhere along it to collapse.
+   Spans the 10px gutter + 8px into content, matching the old gutter+8 reach. */
+.tool-row-collapse-strip {
+  position: absolute;
+  left: -10px;
+  top: 0;
+  bottom: 0;
+  width: 18px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 0;
+  z-index: 1;
+  user-select: none;
+  touch-action: manipulation;
+}
+
+.tool-row-collapse-strip:hover {
+  background: var(--surface-3);
+}
+
+.tool-row-content:has(.tool-row-collapse-strip:hover) {
+  border-left-color: var(--ink-3);
+}
+
+.tool-row-collapsed-preview:has(.tool-row-collapse-strip:hover)
+  .bash-collapsed-preview {
+  border-color: var(--ink-3);
+}
+
+/* Work-log card: grouped read/search/list exploration rows. The header and
+   row heights match estimateExplorationGroupHeightPx (26px head, 24px rows),
+   so the card edge is an inset outline that adds no layout height. */
+.explored-group {
+  position: relative;
+  border-radius: var(--r-md);
+  background: var(--surface);
+  outline: 1px solid var(--line);
+  outline-offset: -1px;
+}
+
+.explored-group-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 26px;
+  padding: 2px 10px 2px 6px;
+  border: none;
+  border-radius: var(--r-md);
+  background: var(--surface-2);
+  color: var(--ink-2);
+  cursor: pointer;
+  font: inherit;
+  font-size: var(--fs-small);
+  text-align: left;
+}
+
+.explored-group-header[aria-expanded="true"] {
+  border-end-start-radius: 0;
+  border-end-end-radius: 0;
+}
+
+.explored-group-header:hover {
+  background: var(--surface-3);
+}
+
+.explored-group-header:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: -2px;
+}
+
+.explored-group-title {
+  flex-shrink: 0;
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.explored-group-count,
+.explored-group-duration {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--ink-3);
+  font-family: var(--font-mono);
+  font-size: var(--fs-meta);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.explored-group-duration {
+  flex-shrink: 0;
+  margin-inline-start: auto;
+}
+
+.explored-group-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-height: 8.5rem;
+  padding: 2px 0;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+/* icon / name / target, the toolrow grid of the work log. */
+.explored-entry {
+  display: grid;
+  grid-template-columns: 1rem 3.5rem minmax(0, 1fr);
+  align-items: baseline;
+  gap: 0.5rem;
+  min-height: 24px;
+  padding: 2px 10px;
+  font-family: var(--font-mono);
+  font-size: var(--fixed-font-size-base);
+}
+
+.explored-entry:target,
+.explored-entry:hover {
+  background: var(--surface-3);
+}
+
+.explored-entry-tool {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.explored-entry-summary {
+  min-width: 0;
+  color: var(--ink-2);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.explored-entry-summary .file-link-inline {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  vertical-align: bottom;
+}
+
+.explored-entry-semantic-summary {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.explored-entry-path,
+.explored-entry-query,
+.explored-entry-scope {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.explored-entry-path,
+.explored-entry-query {
+  flex: 1 1 auto;
+}
+
+.explored-entry-range {
+  flex-shrink: 0;
+  color: var(--ink-3);
+  font-size: var(--fs-meta);
+}
+
+.explored-entry-scope {
+  flex: 0 1 45%;
+  color: var(--ink-3);
+  font-size: var(--fs-meta);
+}
+
+.explored-entry-path,
+.explored-entry-scope {
+  display: inline-flex;
+  align-items: baseline;
+}
+
+.explored-entry-path .file-path-link,
+.explored-entry-scope .file-path-link {
+  min-width: 0;
+  overflow: hidden;
+}
+
+.explored-entry-path .file-path-link-name,
+.explored-entry-scope .file-path-link-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  word-break: normal;
+}
+
+.explored-entry-range .file-path-link {
+  color: inherit;
+  font-family: inherit;
+  text-decoration-color: transparent;
+}
+
+.explored-parent-details {
+  margin: 2px 10px 0 calc(4.5rem + 10px);
+}
+
+.explored-parent-details-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  min-height: 1.35rem;
+  padding: 1px 4px;
+  border: none;
+  border-radius: var(--r-xs);
+  background: transparent;
+  color: var(--ink-3);
+  cursor: pointer;
+  font: inherit;
+  font-size: var(--fs-meta);
+}
+
+.explored-parent-details-toggle:hover,
+.explored-parent-details-toggle:focus-visible {
+  background: var(--surface-3);
+  color: var(--ink-2);
+}
+
+.explored-parent-raw {
+  margin: 2px 0 4px 0.25rem;
+  padding-left: 0.5rem;
+  border-left: 1px solid var(--line);
+}
+
+.explored-parent-raw .tool-row.timeline-item::before,
+.explored-parent-raw .tool-row.timeline-item::after,
+.explored-parent-raw .tool-row > .timeline-dot-btn {
+  display: none;
+}
+
+.explored-entry-status {
+  color: var(--ink-3);
+  text-align: center;
+}
+
+.explored-entry.status-pending .explored-entry-status {
+  color: var(--run-ink);
+}
+
+.explored-entry.status-error .explored-entry-status {
+  color: var(--err-ink);
+}
+
+@media (width <= 600px) {
+  .explored-entry {
+    grid-template-columns: 1rem 2.85rem minmax(0, 1fr);
+    gap: 0.35rem;
+    padding-inline: 6px;
+  }
+
+  .explored-entry-semantic-summary {
+    gap: 0.35rem;
+  }
+
+  .explored-entry-scope {
+    max-width: 38%;
+  }
+
+  .explored-parent-details {
+    margin-left: calc(3.85rem + 6px);
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.tool-no-result {
+  color: var(--ink-3);
+  font-style: italic;
+  font-size: var(--font-size-base);
+}
+
+.tool-use-expanded,
+.tool-result-expanded {
+  font-size: var(--font-size-base);
+}
+
+/* ==========================================================================
+   Status-specific styles
+   ========================================================================== */
+
+.tool-row.status-pending .tool-summary {
+  color: var(--ink-3);
+}
+
+/* Aborted (interrupted) tool styles */
+.tool-row.status-aborted {
+  opacity: 0.7;
+}
+
+.tool-row.status-incomplete {
+  opacity: 0.85;
+}
+
+.tool-row.status-aborted .tool-summary {
+  color: var(--ink-3);
+}
+
+.tool-row.status-incomplete .tool-summary {
+  color: var(--ink-3);
+}
+
+.tool-aborted-icon {
+  flex-shrink: 0;
+  color: var(--ink-3);
+  font-weight: bold;
+  font-size: var(--font-size-lg);
+  display: flex;
+  align-items: center;
+}
+
+.tool-aborted-label {
+  color: var(--ink-3);
+  font-style: italic;
+}
+
+.tool-incomplete-label {
+  color: var(--ink-3);
+  font-style: italic;
+}

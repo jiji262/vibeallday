@@ -1,0 +1,173 @@
+/* The default row and its project table share one card. */
+.card {
+  padding-bottom: var(--space-2);
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--card);
+  box-shadow: var(--shadow-xs);
+}
+
+.card > :global(.settings-item) {
+  padding-bottom: var(--space-2);
+  background: none;
+}
+
+/* Garden table recipe: sunken mono uppercase header, dashed row rules. */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.table th {
+  padding: var(--space-3) var(--space-2);
+  border-block: 1px solid var(--line);
+  background: var(--bg-2);
+  color: var(--ink-3);
+  font-family: var(--label-font);
+  font-size: var(--eyebrow-size);
+  font-weight: 500;
+  letter-spacing: var(--eyebrow-tracking);
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.table th.nameHead {
+  padding-inline-start: var(--space-5);
+  text-align: left;
+}
+
+.table td {
+  height: 44px;
+  padding: 0;
+  border-bottom: 1px dashed var(--dash);
+}
+
+.table tr:hover > td {
+  background: var(--bg-2);
+}
+
+.table td.name {
+  padding-inline-start: var(--space-5);
+}
+
+.choice {
+  width: 3.6rem;
+  text-align: center;
+}
+
+.choice label {
+  display: flex;
+  height: 34px;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.choice input {
+  margin: 0;
+  accent-color: var(--indigo);
+  cursor: pointer;
+}
+
+.name {
+  max-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.name strong {
+  font-weight: 500;
+}
+
+.path {
+  margin-left: var(--space-2);
+  color: var(--ink-3);
+  font-family: var(--label-font);
+  font-size: 12px;
+}
+
+.watching,
+.waiting {
+  margin-left: var(--space-2);
+  font-size: var(--font-size-xs);
+}
+
+.watching {
+  color: var(--mint-ink);
+}
+
+.waiting {
+  color: var(--peach-ink);
+}
+
+.waitingShort {
+  display: none;
+}
+
+.footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: 0 var(--space-5);
+}
+
+.footerAlone {
+  border-top: 0;
+}
+
+.link {
+  min-height: 32px;
+  padding: 0;
+  color: var(--indigo);
+  background: none;
+  border: 0;
+  font: inherit;
+  font-size: var(--font-size-sm);
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.link:disabled {
+  color: var(--ink-4);
+  cursor: default;
+}
+
+.count {
+  color: var(--ink-4);
+  font-family: var(--label-font);
+  font-size: 11px;
+  letter-spacing: var(--meta-tracking);
+  text-transform: uppercase;
+}
+
+@container (max-width: 30rem) {
+  .path,
+  .waitingLong {
+    display: none;
+  }
+
+  .waitingShort {
+    display: inline;
+  }
+
+  .choice {
+    width: 3.2rem;
+  }
+
+  /* The links keep the first line; the count takes its own. */
+  .count {
+    order: 3;
+    flex-basis: 100%;
+    padding-bottom: var(--space-1);
+  }
+
+  .table td,
+  .choice label {
+    height: 40px;
+  }
+}

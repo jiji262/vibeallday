@@ -1,0 +1,111 @@
+.container {
+  position: fixed;
+  top: calc(env(safe-area-inset-top, 0px) + 56px);
+  bottom: auto;
+  left: 50%;
+  z-index: 9;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  pointer-events: none;
+  transform: translateX(-50%);
+}
+
+/* Desktop: stay below the header; if space is tight, cover scroll content. */
+@media (width >= 768px) {
+  .container {
+    top: calc(var(--space-4) + 48px);
+    right: var(--space-4);
+    bottom: auto;
+    left: auto;
+    transform: none;
+  }
+}
+
+/* Design toast: a dark pill (light in night) with an outlined action. The
+   radius is capped so a wrapped message keeps rounded, not lens, ends. The
+   icon shape, not its colour, carries the type. */
+.toast {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  max-width: 400px;
+  padding: 10px 16px;
+  border: 0;
+  border-radius: min(var(--r-toast), 22px);
+  background-color: var(--toast-bg);
+  box-shadow: var(--shadow-pop);
+  color: var(--toast-ink);
+  font-size: var(--fs-small);
+  font-weight: 500;
+  line-height: 1.5;
+  text-align: left;
+  cursor: pointer;
+  pointer-events: auto;
+  animation: fadeOut var(--toast-fade-duration, 4.5s) linear forwards;
+}
+
+.error,
+.success,
+.info {
+  color: var(--toast-ink);
+}
+
+.icon {
+  display: inline-flex;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.toast:has(.action) {
+  align-items: center;
+  padding: 8px 8px 8px 16px;
+}
+
+.message {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.action {
+  flex-shrink: 0;
+  min-height: 30px;
+  padding: 0 12px;
+  border: 1px solid color-mix(in srgb, var(--toast-ink) 30%, transparent);
+  border-radius: var(--r-btn);
+  background: transparent;
+  color: var(--toast-ink);
+  font: inherit;
+  font-size: var(--fs-small);
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.action:hover {
+  background: color-mix(in srgb, var(--toast-ink) 12%, transparent);
+}
+
+.action:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toast {
+    animation-timing-function: steps(1, end);
+  }
+}
+
+@keyframes fadeOut {
+  0%,
+  75% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+}

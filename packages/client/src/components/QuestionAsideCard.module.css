@@ -1,0 +1,150 @@
+.hint {
+  margin-bottom: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  background: var(--bg-card);
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+
+.card {
+  min-width: 0;
+  padding: var(--space-4);
+  margin-bottom: var(--space-3);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-xl);
+  background: var(--bg-card);
+  box-shadow: var(--shadow-sm);
+}
+
+.actions {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+}
+
+.content {
+  display: grid;
+  gap: var(--space-2);
+  max-height: 35dvh;
+  overflow: auto;
+  overflow-wrap: anywhere;
+}
+
+.question {
+  white-space: pre-wrap;
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.answer {
+  white-space: pre-wrap;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.status {
+  color: var(--text-muted);
+  font-size: var(--font-size-sm);
+  line-height: 1.4;
+}
+
+.actions button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: 36px;
+  padding: var(--space-1) var(--space-3);
+  border: 1px solid transparent;
+  border-radius: var(--radius-pill);
+  font: inherit;
+  font-size: var(--font-size-sm);
+  line-height: 1.2;
+  cursor: pointer;
+}
+
+.actions .save {
+  /* Optical centering for the label's ink, rather than its font line box. */
+  padding-top: calc(var(--space-1) + 1px);
+  padding-bottom: calc(var(--space-1) - 1px);
+  background: var(--indigo-soft);
+  border-color: transparent;
+  color: var(--indigo);
+  font-weight: 600;
+}
+
+.actions .discard,
+.actions .help {
+  background: transparent;
+  color: var(--text-secondary);
+}
+
+.actions .help {
+  margin-left: auto;
+  min-width: 30px;
+  border-color: var(--border-color);
+  border-radius: 50%;
+}
+
+.actions button:hover:not(:disabled) {
+  background: var(--bg-hover);
+  border-color: var(--text-muted);
+}
+
+.actions button:focus-visible {
+  outline: 2px solid var(--indigo);
+  outline-offset: 2px;
+}
+
+.actions kbd {
+  color: var(--text-muted);
+  font: inherit;
+  font-size: var(--font-size-xs);
+}
+
+.actions button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.helpContent {
+  position: absolute;
+  z-index: 4;
+  right: 0;
+  bottom: calc(100% + var(--space-2));
+  width: min(300px, calc(100dvw - 48px));
+  padding: var(--space-3);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  background: var(--bg-card);
+  box-shadow: var(--shadow-md);
+  font-size: var(--font-size-sm);
+  line-height: 1.45;
+}
+
+.helpContent p {
+  margin: var(--space-2) 0 0;
+}
+
+@media (pointer: coarse) {
+  .actions button {
+    min-height: 44px;
+    padding-inline: var(--space-3);
+  }
+
+  .actions .help {
+    min-width: 44px;
+  }
+
+  .actions kbd {
+    display: none;
+  }
+}

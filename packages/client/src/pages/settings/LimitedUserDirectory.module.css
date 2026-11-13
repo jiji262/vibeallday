@@ -1,0 +1,121 @@
+/* Limited-user directory (design S-Users list): user rows with avatar,
+   name and chips, plus the visible-projects card. */
+
+.userList {
+  overflow: hidden;
+}
+
+/* The account rows plus Add user at the foot. */
+.userBar {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Design .usr-user: initial, name and meta, state; the open one is marked. */
+.userRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-width: 0;
+  min-height: var(--tap-min);
+  padding: 12px 14px;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+
+.userRow:hover {
+  background: var(--surface-2);
+}
+
+.userRow[aria-pressed="true"] {
+  background: var(--accent-soft);
+  box-shadow: inset 3px 0 0 var(--accent);
+}
+
+.userRow:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: -2px;
+}
+
+.avatar {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--surface-3);
+  color: var(--ink-2);
+  font-size: var(--fs-small);
+  font-weight: 600;
+}
+
+.userText {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.userName,
+.userRowMeta {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.userName {
+  font-weight: 600;
+}
+
+.userRowMeta {
+  color: var(--ink-3);
+  font-size: var(--fs-meta);
+}
+
+/* A disabled account stays listed, visibly out of service. */
+.userChipDisabled .userName {
+  color: var(--ink-3);
+  text-decoration: line-through;
+}
+
+.userChip[aria-pressed="true"] {
+  border-color: var(--accent);
+  font-weight: 600;
+}
+
+.addUser {
+  margin: var(--space-2) 14px var(--space-3);
+  align-self: flex-start;
+}
+
+/* Design usr-scope card: allowed categories as tags. */
+.visibleCard {
+  gap: 10px;
+  padding: var(--space-4);
+}
+
+.visibleCard h3 {
+  margin: 0;
+  color: var(--ink);
+  font-size: var(--fs-h3);
+  font-weight: var(--title-weight);
+}
+
+.visibleCard p {
+  margin: 0;
+  color: var(--ink-3);
+  font-size: var(--fs-small);
+}
+
+.visibleTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}

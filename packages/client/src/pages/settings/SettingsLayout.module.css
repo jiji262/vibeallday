@@ -1,0 +1,106 @@
+/* Desktop settings: the settings rail (design .side, it stands in for the app
+   sidebar) beside the pane column, each scrolling on its own. */
+.twoColumn {
+  --settings-rail-width: 272px;
+  --page-content-max-width: 1040px;
+
+  display: grid;
+  flex: 1;
+  grid-template-columns: var(--settings-rail-width) minmax(0, 1fr);
+  min-height: 0;
+  height: 100%;
+}
+
+/* Fixed px width so the text-size setting cannot stretch it. */
+.rail {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  width: var(--settings-rail-width);
+  min-height: 0;
+  padding: 14px var(--space-3) 28px;
+  overflow-y: auto;
+  border-right: 1px solid var(--line);
+  background: var(--side-bg);
+  box-sizing: border-box;
+  scrollbar-width: thin;
+}
+
+/* Design .nav-item, muted: the way back to the app. */
+.back {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 36px;
+  padding: 0 10px;
+  border-radius: var(--r-btn);
+  color: var(--ink-3);
+  font-size: var(--fs-body);
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.back:hover {
+  background: var(--surface-3);
+  color: var(--ink);
+}
+
+.back:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: -2px;
+}
+
+.railHead {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: 0 var(--space-1);
+}
+
+.railTitle {
+  margin: 0;
+  color: var(--ink);
+  font-size: var(--fs-h1);
+  font-stretch: var(--display-stretch);
+  font-weight: var(--title-weight);
+  letter-spacing: var(--display-tracking);
+}
+
+.nav {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.overviewEntry {
+  margin-bottom: 6px;
+}
+
+.overviewIcon {
+  display: grid;
+  place-items: center;
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+}
+
+.panel {
+  min-width: 0;
+}
+
+.savedNote {
+  color: var(--ink-3);
+  font-family: var(--font-mono);
+  font-size: var(--fs-meta);
+  white-space: nowrap;
+}
+
+@media (pointer: coarse) {
+  .back {
+    min-height: var(--tap-min);
+  }
+}

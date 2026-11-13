@@ -1,0 +1,150 @@
+/* Cache billing metric strip and 7-day bars (design S-CacheBilling). */
+.strip {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(190px, 100%), 1fr));
+  gap: var(--space-3);
+}
+
+.tile {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+  padding: 14px 16px;
+  border: 1px solid var(--card-line);
+  border-radius: var(--r-card);
+  background: var(--surface);
+  box-shadow: var(--shadow-card);
+}
+
+.tile.attn {
+  border-color: var(--attn-line);
+}
+
+.eyebrow {
+  color: var(--ink-3);
+  font-family: var(--font-mono);
+  font-size: var(--fs-meta);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.attn .eyebrow {
+  color: var(--attn-ink);
+}
+
+.value {
+  color: var(--ink);
+  font-size: var(--fs-h1);
+  font-weight: var(--title-weight);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.05;
+}
+
+.value small {
+  margin-left: 2px;
+  color: var(--ink-3);
+  font-size: var(--fs-body);
+}
+
+.foot {
+  margin: 0;
+  color: var(--ink-3);
+  font-size: var(--fs-small);
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-width: 0;
+  padding: 18px 20px 16px;
+  border: 1px solid var(--card-line);
+  border-radius: var(--r-card);
+  background: var(--surface);
+}
+
+.cardHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.cardHead h3 {
+  margin: 0;
+  font-size: var(--fs-h3);
+}
+
+.legend {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+  color: var(--ink-2);
+  font-size: var(--fs-small);
+}
+
+.key {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  flex: none;
+  border-radius: 2px;
+}
+
+.plot {
+  display: flex;
+  gap: 6px;
+  min-width: 0;
+}
+
+.column {
+  display: flex;
+  flex: 1 1 0;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.barTrack {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  width: 100%;
+  height: 160px;
+  border-bottom: 1px solid var(--line-strong);
+}
+
+.bar {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  width: min(30px, 100%);
+  overflow: hidden;
+  border-radius: 4px 4px 0 0;
+}
+
+.hit {
+  flex: 1;
+  background: var(--accent);
+}
+
+.miss {
+  flex: none;
+  background: var(--attn);
+}
+
+.key.hit,
+.key.miss {
+  flex: none;
+}
+
+.xLabel {
+  overflow: hidden;
+  color: var(--ink-3);
+  font-size: var(--fs-meta);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

@@ -1,0 +1,129 @@
+/* Pending-review list (the Review tab's pending section). */
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  max-width: 900px;
+}
+
+/* One flush card; rows split by hairlines (design .list). */
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.row {
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--line);
+}
+
+.row:last-child {
+  border-bottom: 0;
+}
+
+.rowHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1) var(--space-2);
+  min-width: 0;
+}
+
+.location {
+  min-height: var(--tap-min);
+  padding: 0;
+  font-family: var(--font-mono);
+  font-size: var(--fs-small);
+  color: var(--link);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  overflow-wrap: anywhere;
+}
+
+.location:hover {
+  text-decoration: underline;
+}
+
+.revision {
+  font-family: var(--font-mono);
+  font-size: var(--fs-meta);
+  color: var(--ink-3);
+  white-space: nowrap;
+}
+
+.rowActions {
+  display: flex;
+  gap: var(--space-1);
+  margin-left: auto;
+}
+
+.edit,
+.delete {
+  min-height: var(--tap-min);
+  padding: 0 var(--space-3);
+  color: var(--ink-3);
+  font: inherit;
+  font-size: var(--fs-btn);
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--r-btn);
+}
+
+.edit:hover {
+  color: var(--ink);
+  background: var(--surface-3);
+}
+
+.delete:hover {
+  color: var(--err-ink);
+  background: var(--err-soft);
+}
+
+.text {
+  margin-top: var(--space-1);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  color: var(--ink);
+  font-size: var(--fs-body);
+  line-height: 1.5;
+}
+
+.editor {
+  display: grid;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+
+.editor textarea {
+  min-height: 6rem;
+  padding: var(--space-3);
+  color: var(--ink);
+  font: inherit;
+  font-size: 16px;
+  resize: vertical;
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-input);
+}
+
+.editor textarea:focus-visible {
+  border-color: var(--focus);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+  outline: none;
+}
+
+.editorActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-2);
+}
+
+.actions {
+  justify-content: flex-end;
+}

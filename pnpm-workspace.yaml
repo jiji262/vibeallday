@@ -1,0 +1,49 @@
+packages:
+  - "packages/*"
+
+# scripts/biome.cjs intentionally uses Biome's static musl binary on Linux so
+# lint and formatting also work on hosts with an older glibc. pnpm otherwise
+# installs only the current libc's optional package.
+supportedArchitectures:
+  libc:
+    - current
+    - musl
+
+# pnpm settings live here, not under a "pnpm" key in package.json: pnpm 11
+# stopped reading that key, and a pnpm 11 invocation of an install in this
+# repo reports all three of these as ignored. Silently losing
+# onlyBuiltDependencies would re-enable arbitrary dependency install scripts,
+# so keep them where every supported pnpm reads them. Rationale for the
+# individual entries is in docs/development/dependencies.md
+# ("Dependency Security Maintenance").
+overrides:
+  "bn.js": "5.2.5"
+  "fast-uri": "3.1.9"
+  "postcss": "^8.5.23"
+  "jsdom>ws": "^8.21.3"
+  "mermaid>katex": "^0.18.6"
+  # qs <= 6.16.0 carries GHSA-6pq8-jhm2-2vcw. Its only production path is
+  # @modelcontextprotocol/sdk > express, whose own range is already ^6.14.0,
+  # so this pulls the patched release forward without breaking that range.
+  "express>qs": "^6.16.1"
+  # GHSA-g3hv-75wg-m249 is patched only in minimatch 11. Both ESLint
+  # consumers use the compatible Minimatch constructor/match API. Drop these
+  # scoped pins when their declared ranges include a patched release.
+  "eslint>minimatch": "11.0.1"
+  "@eslint/config-array>minimatch": "11.0.1"
+
+onlyBuiltDependencies:
+  - bcrypt
+
+# Vetted no-op build scripts, blocked on purpose. Listing them records that
+# decision, so installs stop warning and `pnpm approve-builds` stays empty.
+ignoredBuiltDependencies:
+  - esbuild
+
+auditConfig:
+  ignoreGhsas:
+    - GHSA-qwww-vcr4-c8h2
+    - GHSA-rmxm-3fg6-px4f
+
+patchedDependencies:
+  zod@4.6.7: patches/zod@4.6.7.patch

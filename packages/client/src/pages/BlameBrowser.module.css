@@ -1,0 +1,125 @@
+.inventory {
+  min-width: 0;
+}
+
+.sectionControls {
+  min-width: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin: 0 0 8px;
+  padding: 0;
+  border: 0;
+}
+
+.sectionToggle {
+  display: inline-flex;
+  min-height: var(--chip-h);
+  align-items: center;
+  gap: 5px;
+  padding: 0 10px;
+  color: var(--ink-2);
+  font: inherit;
+  font-size: var(--fs-small);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-chip);
+  cursor: pointer;
+}
+
+.sectionToggle:hover,
+.sectionToggle:focus-visible {
+  color: var(--ink);
+  background: var(--surface-3);
+}
+
+.activeSectionToggle {
+  color: var(--accent-ink);
+  background: var(--accent-soft);
+  border-color: var(--accent-line);
+}
+
+.truncated {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin: 8px;
+  color: var(--ink-3);
+  font-size: var(--fs-meta);
+}
+
+.truncated button {
+  display: inline-flex;
+  min-height: 28px;
+  align-items: center;
+  padding: 3px 10px;
+  color: var(--ink);
+  font: inherit;
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-btn);
+  cursor: pointer;
+}
+
+.truncated button:hover,
+.truncated button:focus-visible {
+  background: var(--surface-3);
+}
+
+.detail {
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  height: 100%;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--surface);
+  border: 1px solid var(--card-line);
+  border-radius: var(--r-card);
+  box-shadow: var(--shadow-card);
+}
+
+.detail > :global(.file-viewer),
+.detail > :global(.blame-view) {
+  min-height: 0;
+  flex: 1;
+  border: 0;
+  border-radius: 0;
+}
+
+.detailModes {
+  min-width: 0;
+  display: flex;
+  justify-content: flex-end;
+  margin: 0;
+  gap: 2px;
+  padding: 4px 8px;
+  background: var(--surface-2);
+  border: 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.detailModes button {
+  min-height: 28px;
+  padding: 0 10px;
+  color: var(--ink-2);
+  font: inherit;
+  font-size: var(--fs-small);
+  font-weight: 600;
+  background: transparent;
+  border: 0;
+  border-radius: var(--r-seg-item);
+  cursor: pointer;
+}
+
+.detailModes button:hover,
+.detailModes button:focus-visible {
+  color: var(--ink);
+  background: var(--surface-3);
+}
+
+.detailModes .activeMode {
+  color: var(--ink);
+  background: var(--seg-on);
+  box-shadow: var(--seg-shadow);
+}

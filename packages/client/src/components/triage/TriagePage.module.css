@@ -1,0 +1,44 @@
+/* Triage page layout (design Triage-Desktop / Triage-Phone). */
+
+.topActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
+}
+
+.kbd {
+  display: inline-flex;
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.hints {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 16px;
+  margin: 0;
+  padding: 0 4px;
+  color: var(--ink-3);
+  font-size: var(--fs-small);
+}
+
+@media (width < 768px) {
+  .topActions {
+    width: 100%;
+  }
+
+  .kbd,
+  .hints {
+    display: none;
+  }
+
+  .body {
+    gap: 18px;
+  }
+}

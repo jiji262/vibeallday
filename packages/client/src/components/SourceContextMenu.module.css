@@ -1,0 +1,112 @@
+.rowSurface {
+  position: relative;
+}
+
+.trigger {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-end: 0;
+  width: 28px;
+  align-self: stretch;
+  min-height: 28px;
+  padding: 0;
+  color: var(--ink-3);
+  background: transparent;
+  border: 0;
+  border-radius: 6px;
+  cursor: pointer;
+  opacity: 0;
+}
+
+/* The row supplies the hover/focus surface by opting in with `rowSurface`; the
+   menu owns the reveal. Row owners used to reach in by class name instead, so
+   every new list of rows had to remember to restyle a control it does not own. */
+.rowSurface:hover > .trigger,
+.rowSurface:focus-within > .trigger,
+.trigger:focus-visible {
+  opacity: 1;
+}
+
+.trigger:hover,
+.trigger:focus-visible {
+  color: var(--ink);
+  background: var(--surface-3);
+  outline: 2px solid var(--focus-ring, var(--accent-color));
+  outline-offset: -2px;
+}
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9998;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  cursor: default;
+}
+
+.menu {
+  position: fixed;
+  z-index: 9999;
+  display: flex;
+  min-width: 216px;
+  max-width: min(280px, calc(100dvw - 16px));
+  flex-direction: column;
+  padding: var(--space-1, 4px);
+  background: var(--canvas);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md, 8px);
+  box-shadow: var(--shadow-pop);
+}
+
+.menu button {
+  min-height: 32px;
+  padding: 0.4rem 0.6rem;
+  color: var(--ink);
+  font-size: var(--font-size-sm);
+  text-align: left;
+  background: transparent;
+  border: 0;
+  border-radius: var(--radius-sm, 4px);
+  cursor: pointer;
+}
+
+.menu button.separatorBefore {
+  margin-top: 4px;
+  border-top: 1px solid var(--card-line);
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+
+.menu button:hover:not(:disabled),
+.menu button:focus-visible {
+  background: var(--surface-3);
+  outline: none;
+}
+
+.menu button:disabled {
+  color: var(--ink-3);
+  cursor: default;
+  opacity: 0.5;
+}
+
+.touchTargets button {
+  min-height: 44px;
+}
+
+.heading {
+  padding: 8px 10px;
+  color: var(--ink-3);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+}
+
+/* Touch rows have no hover, so the trigger stays visible and grows its target. */
+@media (width <= 600px) {
+  .trigger {
+    position: static;
+    width: auto;
+    flex: 0 0 36px;
+    opacity: 1;
+  }
+}

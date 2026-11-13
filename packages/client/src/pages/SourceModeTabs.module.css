@@ -1,0 +1,43 @@
+/* Source Control mode tabs: the garden underline strip (TabList) with a
+   design count capsule. In the page intro the strip spans its row under a
+   hairline; on phones the tabs split the row evenly so every mode stays
+   visible without scrolling. */
+.tabs {
+  min-width: 0;
+}
+
+.tab {
+  font-size: var(--fs-small);
+}
+
+.count {
+  font-size: var(--fs-meta);
+}
+
+.stacked {
+  width: 100%;
+}
+
+@media (width < 760px) {
+  .tabs.stacked {
+    display: grid;
+    grid-auto-columns: minmax(0, 1fr);
+    grid-auto-flow: column;
+    justify-content: space-between;
+    box-sizing: border-box;
+    width: 100%;
+  }
+
+  .tabs.stacked .tab {
+    min-width: 0;
+    min-height: var(--tap-min);
+    padding-inline: 4px;
+    line-height: 1.15;
+    text-align: center;
+    white-space: normal;
+  }
+
+  .tabs.stacked .count {
+    padding-inline: 5px;
+  }
+}

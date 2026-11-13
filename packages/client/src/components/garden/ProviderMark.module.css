@@ -1,0 +1,59 @@
+/* Design .prov letter tile; the letter comes from data-letter. */
+.mark {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: var(--r-xs);
+  background: var(--surface-3);
+  color: var(--ink-2);
+  font: 700 11px / 1 var(--font-mono);
+}
+
+.mark::before {
+  content: attr(data-letter);
+}
+
+.sm {
+  width: 16px;
+  height: 16px;
+  font-size: 10px;
+}
+
+.lg {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--r-sm);
+  font-size: 15px;
+}
+
+.claude {
+  background: color-mix(in srgb, var(--prov-claude) 14%, transparent);
+  color: var(--prov-claude);
+}
+
+.codex {
+  background: color-mix(in srgb, var(--prov-codex) 14%, transparent);
+  color: var(--prov-codex);
+}
+
+.gemini {
+  background: color-mix(in srgb, var(--prov-gemini) 14%, transparent);
+  color: var(--prov-gemini);
+}
+
+.opencode {
+  background: color-mix(in srgb, var(--prov-opencode) 14%, transparent);
+  color: var(--prov-opencode);
+}
+
+.grok {
+  background: color-mix(in srgb, var(--prov-grok) 14%, transparent);
+  color: var(--prov-grok);
+}
+
+.ollama {
+  background: color-mix(in srgb, var(--prov-ollama) 14%, transparent);
+  color: var(--prov-ollama);
+}

@@ -1,0 +1,98 @@
+.intro {
+  display: grid;
+  gap: var(--space-4);
+  margin-bottom: 28px;
+}
+
+.head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.text {
+  display: grid;
+  gap: var(--space-2);
+  min-width: 0;
+  max-width: 72ch;
+}
+
+.title:global(.session-title) {
+  margin: 0;
+  overflow: visible;
+  color: var(--ink);
+  font-family: var(--font-ui);
+  font-size: var(--fs-display);
+  font-weight: var(--title-weight);
+  font-stretch: var(--display-stretch);
+  line-height: 1.1;
+  letter-spacing: var(--display-tracking);
+  white-space: normal;
+  font-optical-sizing: auto;
+  cursor: auto;
+}
+
+.title:global(.session-title):hover {
+  color: var(--ink);
+}
+
+.lede {
+  margin: 0;
+  color: var(--ink-3);
+  font-size: var(--fs-body);
+  line-height: 1.55;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.meta {
+  color: var(--ink-3);
+  font-family: var(--font-mono);
+  font-size: var(--fs-meta);
+  letter-spacing: var(--meta-tracking);
+  text-transform: uppercase;
+}
+
+@media (width < 768px) {
+  .intro {
+    margin-bottom: var(--space-6);
+  }
+
+  /* A title-only intro collapses once the header carries the title. */
+  .intro:has(> .head:only-child > .text:only-child > .title:only-child) {
+    margin-bottom: 0;
+  }
+
+  /* The sticky page header shows the title on phones; the h1 stays for
+     assistive technology and in-page landmarks. */
+  .title:global(.session-title) {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    white-space: nowrap;
+    clip-path: inset(50%);
+  }
+
+  .lede {
+    font-size: var(--fs-small);
+  }
+
+  .actions {
+    width: 100%;
+  }
+}

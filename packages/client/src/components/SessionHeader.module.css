@@ -1,0 +1,250 @@
+/*
+ * SessionPage's own `.session-header`: the detail-page top bar. It matches
+ * PageHeader's bar (`--topbar-height`, surface fill, hairline bottom, page
+ * gutter) so moving between a list page and a session keeps the frame still.
+ *
+ * The leading back button or sidebar toggle brings its own padding, so the
+ * row's start inset is the gutter minus that padding; with no leading control
+ * (the desktop case, where the sidebar carries its own toggle) the title
+ * starts on the gutter itself.
+ */
+.row {
+  --header-control-size: 36px;
+  --header-row-size: var(--topbar-height);
+  --header-control-inset: var(--space-2);
+}
+
+.row:global(.session-header-inner) {
+  min-height: var(--header-row-size);
+  padding-block: calc(
+    (var(--header-row-size) - var(--header-control-size)) /
+    2
+  );
+  padding-inline: calc(var(--page-gutter) - var(--header-control-inset))
+    var(--page-gutter);
+}
+
+.row :global(.sidebar-toggle) {
+  min-width: var(--header-control-size);
+  min-height: var(--header-control-size);
+}
+
+.row:global(.session-header-inner).noLeadingControl {
+  padding-inline-start: var(--page-gutter);
+}
+
+.header .left {
+  overflow: visible;
+}
+
+.header .titleRow {
+  min-width: 3rem;
+}
+
+.header .actions {
+  flex-wrap: nowrap;
+}
+
+.header .modelButton {
+  align-items: center;
+  min-height: var(--header-control-size);
+  max-width: 14rem;
+  padding-inline: 10px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-chip);
+  background: var(--surface);
+  transform: none;
+}
+
+.header .modelButton:hover {
+  background: var(--surface-3);
+}
+
+/* Inspector toggle: the same square as the menu trigger beside it. A fixed
+   size, not a minimum: IconButton's own `--icon-btn` (38px in Celadon) would
+   otherwise outgrow the row and push the bar past `--topbar-height`. */
+.header .inspectorToggle {
+  flex-shrink: 0;
+  width: var(--header-control-size);
+  height: var(--header-control-size);
+}
+
+.header .menuTrigger {
+  min-width: var(--header-control-size);
+  min-height: var(--header-control-size);
+  opacity: 1;
+}
+
+.header .project {
+  max-width: 8.5rem;
+  flex-shrink: 0;
+  min-width: 0;
+}
+
+.header .project > :global(.project-breadcrumb) {
+  display: block;
+  min-width: 0;
+  flex-shrink: 1;
+  overflow: hidden;
+  color: var(--ink-3);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.header .project > :global(.project-breadcrumb):hover {
+  color: var(--ink);
+}
+
+/* Wide headers read as a breadcrumb: project / session title. */
+.header:not([data-header-layout="narrow"]) .project::after {
+  flex-shrink: 0;
+  margin-inline: 6px 2px;
+  color: var(--ink-4);
+  content: "/";
+}
+
+.header[data-header-layout="compact"] .project {
+  max-width: 5rem;
+  overflow: hidden;
+}
+
+/* Narrow headers give the project its natural width up to half the meta line
+   (the model and state follow it); the menu below must not be clipped. */
+.header[data-header-layout="narrow"] .project {
+  max-width: 55%;
+  flex: 0 1 auto;
+}
+
+.header[data-header-layout="narrow"] .modelButton {
+  max-width: 8rem;
+}
+
+/* Preserve the mounted inline field if a roomy header shrinks mid-edit. */
+.header[data-inline-rename="true"][data-header-layout="narrow"]
+:global(.session-header-inner),
+.header[data-inline-rename="true"][data-header-layout="narrow"] .left {
+  flex-wrap: wrap;
+}
+
+.header[data-inline-rename="true"][data-header-layout="narrow"] .left,
+.header[data-inline-rename="true"][data-header-layout="narrow"] .titleRow {
+  flex-basis: 100%;
+}
+
+@media (pointer: coarse) {
+  .row {
+    --header-control-size: 44px;
+  }
+}
+
+/* Garden header: a hairline instead of the legacy fade, a display-serif title
+   and a mono meta line. The wrappers vanish on wide headers so the children
+   keep flowing in one row; narrow headers lay them out as two lines. */
+.header:global(.session-header) {
+  z-index: var(--z-topbar);
+  background: var(--canvas);
+  /* A hairline that adds no height to the row. */
+  box-shadow: 0 1px 0 var(--line);
+}
+
+.header:global(.session-header)::after {
+  content: none;
+}
+
+/* One title size at every width: --fs-h2 has no phone override. */
+.header :global(.session-title) {
+  color: var(--ink);
+  font-family: var(--font-ui);
+  font-size: var(--fs-h2);
+  font-weight: var(--title-weight);
+  letter-spacing: -0.005em;
+  line-height: 24px;
+}
+
+.header :global(.sidebar-toggle) {
+  color: var(--ink-3);
+}
+
+.leadingTools,
+.metaRow {
+  display: contents;
+}
+
+@media (width < 600px) {
+  .header[data-header-layout="narrow"]:not([data-inline-rename="true"])
+    .row:global(.session-header-inner) {
+    padding-block: 0;
+  }
+
+  .header[data-header-layout="narrow"]:not([data-inline-rename="true"]) .left {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-areas:
+      "toggle title tools"
+      "toggle meta tools";
+    align-items: center;
+    gap: 0 2px;
+  }
+
+  .header[data-header-layout="narrow"]:not([data-inline-rename="true"])
+    .left
+    > :global(.sidebar-toggle) {
+    grid-area: toggle;
+  }
+
+  .header[data-header-layout="narrow"]:not([data-inline-rename="true"])
+    .titleRow {
+    grid-area: title;
+    min-height: 32px;
+    padding-inline-start: 6px;
+  }
+
+  /* The title fills its row, so the whole 36px line opens the recents menu. */
+  .header[data-header-layout="narrow"]:not([data-inline-rename="true"])
+    .titleRow
+    > :global(.session-title-recent-trigger) {
+    align-self: stretch;
+  }
+
+  /* The project link is a 20px line of mono type; a larger invisible target
+     keeps it tappable without making the meta row taller. */
+  .header[data-header-layout="narrow"]
+    .project
+    > :global(.project-breadcrumb)::after {
+    position: absolute;
+    inset: -10px -6px;
+    content: "";
+  }
+
+  .header[data-header-layout="narrow"]:not([data-inline-rename="true"])
+    .metaRow {
+    display: flex;
+    grid-area: meta;
+    min-width: 0;
+    align-items: center;
+    gap: 6px;
+    padding-inline-start: 6px;
+  }
+
+  .header[data-header-layout="narrow"]:not([data-inline-rename="true"])
+    .leadingTools {
+    display: flex;
+    grid-area: tools;
+    align-items: center;
+  }
+
+  /* The title itself opens the recent-sessions menu; the chevron repeats it. */
+  .header[data-header-layout="narrow"] :global(.session-title-chevron-trigger) {
+    display: none;
+  }
+}
+
+/* Phone page header: the shell's translucent page-header fill. */
+@media (width < 768px) {
+  .header:global(.session-header) {
+    background: var(--phead-bg);
+    box-shadow: 0 1px 0 var(--phead-line);
+  }
+}

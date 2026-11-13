@@ -1,0 +1,72 @@
+/* Settings search field plus the adjacent match-values toggle that appears
+   only while a query is active (contract: topics/settings-search.md). The
+   result-pane visibility vocabulary stays global in index.css: it styles rows
+   the search results mount from every other settings pane. */
+
+.bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  min-width: 0;
+}
+
+.inputWrap {
+  position: relative;
+  flex: 1 1 140px;
+  min-width: 0;
+}
+
+/* Room for the clear button; compounded so it beats the field's padding. */
+.inputWrap .input {
+  padding-right: var(--space-8);
+}
+
+.input::-webkit-search-cancel-button {
+  display: none;
+}
+
+.clear {
+  position: absolute;
+  top: 50%;
+  right: var(--space-1);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  transform: translateY(-50%);
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--ink-3);
+  cursor: pointer;
+}
+
+.clear:hover {
+  background: var(--bg-soft);
+  color: var(--ink);
+}
+
+.clear:focus-visible {
+  box-shadow: 0 0 0 3px var(--indigo-soft);
+}
+
+.valuesToggle {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  color: var(--ink-3);
+  font-family: var(--label-font);
+  font-size: 11px;
+  letter-spacing: var(--meta-tracking);
+  text-transform: uppercase;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.valuesToggle input {
+  accent-color: var(--indigo);
+}

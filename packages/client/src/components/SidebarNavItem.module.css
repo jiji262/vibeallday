@@ -1,0 +1,243 @@
+/* Sidebar navigation (design .nav-item / .nav-label / .count). The current
+ * destination takes the skin's --nav-on-* treatment: a raised pill in
+ * Celadon, an inset accent bar in Night. Density knobs set the spacing. */
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0 0 var(--sidebar-section-gap, 1rem);
+  padding: 0;
+}
+
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.groupLabel {
+  margin: var(--space-4) 0 4px;
+  padding: 0 10px;
+  color: var(--ink-3);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  line-height: 1.4;
+  text-transform: uppercase;
+}
+
+.groupLabelText {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--sidebar-navigation-inline-spacing, 10px);
+  min-width: 0;
+  min-height: 36px;
+  padding: var(--sidebar-navigation-padding-block, 0)
+    var(--sidebar-navigation-inline-spacing, 10px);
+  border: 0;
+  border-radius: var(--r-md);
+  background: transparent;
+  color: var(--ink-2);
+  font: inherit;
+  font-size: var(--fs-body);
+  font-weight: 500;
+  line-height: 1.35;
+  text-align: start;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    background-color var(--duration-fast) var(--ease-standard),
+    color var(--duration-fast) var(--ease-standard);
+}
+
+.item:hover {
+  background: var(--surface-3);
+  color: var(--ink);
+}
+
+.item:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: -2px;
+}
+
+.icon {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  color: inherit;
+}
+
+.icon > svg {
+  flex-shrink: 0;
+}
+
+.text {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.current,
+.current:hover {
+  background: var(--nav-on-bg);
+  box-shadow: var(--nav-on-shadow);
+  color: var(--nav-on-ink);
+  font-weight: 600;
+}
+
+.draftDot {
+  flex: none;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.badge {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  margin-inline-start: auto;
+  padding: 0 6px;
+  border-radius: var(--radius-pill);
+  font: 600 11px / 1 var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.badgeNeedsYou {
+  background: var(--attn);
+  color: var(--on-attn);
+}
+
+.badgeQueue {
+  background: var(--surface-3);
+  color: var(--ink-2);
+}
+
+.tag {
+  margin-inline-start: auto;
+}
+
+.tag + .badge {
+  margin-inline-start: 0;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-inline-size: 0;
+  border-radius: var(--r-md);
+  transition: background-color var(--duration-fast) var(--ease-standard);
+}
+
+.row > a {
+  flex: 1;
+  min-inline-size: 0;
+}
+
+.row:hover {
+  background: var(--surface-3);
+}
+
+.rowCurrent,
+.rowCurrent:hover {
+  background: var(--nav-on-bg);
+  box-shadow: var(--nav-on-shadow);
+}
+
+.row > .item:hover,
+.rowCurrent > .current {
+  background: transparent;
+  box-shadow: none;
+}
+
+/* Matches the inline-end inset of a session row's own trailing control, so a
+ * navigation accessory and the counts below it share one right edge. */
+.accessory {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  margin-inline-end: 4px;
+}
+
+@media (pointer: coarse) {
+  :global(.sidebar) .item {
+    min-height: var(--tap-min);
+  }
+}
+
+/* Collapsed rail: 40px icon squares, captions become rules. */
+:global(.sidebar-collapsed) .row {
+  flex-direction: column;
+}
+
+:global(.sidebar-collapsed) .item {
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  min-height: 0;
+  margin-inline: auto;
+  padding: 0;
+}
+
+/* The rail stacks the accessory under a square icon: only the icon washes. */
+:global(.sidebar-collapsed) .row,
+:global(.sidebar-collapsed) .rowCurrent {
+  background: transparent;
+  box-shadow: none;
+}
+
+/* In the column the link's flex: 1 would size it to its icon, not 40px. */
+:global(.sidebar-collapsed) .row > a {
+  flex: none;
+}
+
+/* Centre the chip under its icon and pull its padding in, so a two-digit
+ * count still fits inside the rail. */
+:global(.sidebar-collapsed) .accessory {
+  margin-inline: auto;
+}
+
+:global(.sidebar-collapsed) .accessory > * {
+  gap: var(--space-1);
+  padding-inline: var(--space-1);
+}
+
+:global(.sidebar-collapsed) .row > .item:hover {
+  background: var(--surface-3);
+}
+
+:global(.sidebar-collapsed) .rowCurrent > .current {
+  background: var(--nav-on-bg);
+  box-shadow: var(--nav-on-shadow);
+}
+
+:global(.sidebar-collapsed) .tag,
+:global(.sidebar-collapsed) .draftDot {
+  display: none;
+}
+
+:global(.sidebar-collapsed) .groupLabel {
+  height: 0;
+  margin: var(--space-2);
+  padding: 0;
+  border-top: 1px solid var(--line);
+}

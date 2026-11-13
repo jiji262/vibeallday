@@ -1,0 +1,45 @@
+.limitControls {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+/* Beside its explanation (wider than the point where `.settings-item--wide-control`
+   stacks), the control column takes the same share as the explanation. The
+   explanation's 11rem basis would otherwise claim most of the row and squeeze
+   the slider and number box past the row edge. */
+@container (width > 36rem) {
+  .limitControls {
+    flex: 1 1 11rem;
+    min-width: min(100%, 18rem);
+  }
+}
+
+/* One column on a phone, and up to three once the row is wide enough for a
+   provider name to sit beside its checkbox without wrapping: the list is a
+   dozen short labels, which read as a block rather than as a tall stack. */
+.providerToggles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+  gap: var(--space-1) var(--space-4);
+  margin-top: var(--space-2);
+  max-width: 42rem;
+}
+
+.providerToggle {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+/* The pane lede carries an inline link back to Providers. */
+.lede {
+  margin: 0 0 var(--space-5);
+  max-width: 40rem;
+  color: var(--ink-2);
+  font-size: var(--fs-body);
+}
+
+.lede a {
+  color: var(--link);
+}

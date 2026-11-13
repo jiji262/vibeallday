@@ -1,0 +1,19 @@
+/* "Moved to Apps" pointer: an info banner above the first card. */
+.movedNotice {
+  margin-bottom: var(--space-4);
+}
+
+.movedLink {
+  color: inherit;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.movedLink:hover {
+  text-decoration: underline;
+}
+
+.movedLink:focus-visible {
+  border-radius: var(--radius-xs);
+  box-shadow: 0 0 0 3px var(--indigo-soft);
+}

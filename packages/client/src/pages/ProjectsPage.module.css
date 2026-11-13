@@ -1,0 +1,146 @@
+/*
+ * Projects page: PageIntro, load and remove notices, the folded Project
+ * Queue, the search/source/sort toolbar, then the auto-fill card grid ending
+ * in the dashed Add project tile. The card itself lives in ProjectCard.
+ */
+
+.notice {
+  margin-bottom: var(--space-4);
+}
+
+.toolbar {
+  margin-bottom: var(--space-4);
+}
+
+/* Phones stretch every FilterDropdown to the row; these stay pill-sized. */
+.toolbar .pill {
+  width: auto;
+  flex: 0 1 auto;
+}
+
+/* The sort select wears the FilterDropdown trigger beside it: same text
+   size and colour, no edge shadow, and the same thin stroked chevron in
+   place of the garden select's filled caret. */
+.sortField {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.sortField .sort {
+  width: auto;
+  min-width: 140px;
+  padding-left: var(--space-3);
+  background-image: none;
+  box-shadow: none;
+  color: var(--ink-2);
+  font-size: var(--font-size-sm);
+  transition:
+    border-color var(--duration-fast) var(--ease-standard),
+    background-color var(--duration-fast) var(--ease-standard);
+}
+
+.sortField .sort:hover {
+  background-color: var(--bg-soft);
+}
+
+.sortField .sort:focus-visible {
+  border-color: var(--focus);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+  outline: none;
+}
+
+.sortChevron {
+  position: absolute;
+  right: var(--space-3);
+  color: var(--ink-2);
+  pointer-events: none;
+}
+
+/* iOS zooms into selects under 16px; keep the garden phone size there. */
+@media (width < 768px) {
+  .sortField .sort {
+    font-size: 16px;
+  }
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr));
+  gap: var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.addItem {
+  display: flex;
+  min-width: 0;
+}
+
+/* Design .prj-add: a dashed tile as tall as a short card. */
+.addTile {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 220px;
+  padding: 20px;
+  border: 1.5px dashed var(--line-strong);
+  border-radius: var(--r-card);
+  background: transparent;
+  color: var(--ink-3);
+  font: inherit;
+  text-align: center;
+  cursor: pointer;
+}
+
+.addTile:hover {
+  border-color: var(--accent-line);
+  background: var(--accent-soft);
+  color: var(--accent-ink);
+}
+
+.addTile:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.addTitle {
+  font-weight: 600;
+}
+
+.addHint {
+  font-size: var(--fs-small);
+}
+
+.showMore {
+  display: flex;
+  justify-content: center;
+  margin-top: var(--space-4);
+}
+
+/* Phones stack the cards in one column and shrink Add project to a
+   full-width secondary button (design Projects-Phone). */
+@media (width < 768px) {
+  .grid {
+    gap: var(--space-3);
+  }
+
+  .addTile {
+    flex-direction: row;
+    gap: var(--space-2);
+    min-height: var(--tap-min);
+    padding: 0 var(--btn-px);
+    border: 1px solid var(--line-strong);
+    border-radius: var(--r-btn);
+    background: var(--surface);
+    color: var(--ink);
+  }
+
+  .addHint {
+    display: none;
+  }
+}

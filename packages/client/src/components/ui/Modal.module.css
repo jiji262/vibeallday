@@ -1,0 +1,218 @@
+/* Design dialogs, sheets and menus over the global .modal vocabulary.
+   `surface`/`overlay` reach every modal; `sheet`, `compact` and `dialog`
+   give prompts and menus the license-hub dialog anatomy. Doubled class
+   selectors win over the legacy shell rules. */
+
+:global(.modal-overlay).overlay {
+  background: var(--scrim);
+}
+
+:global(.modal-overlay).sheetOverlay {
+  align-items: center;
+  padding: var(--space-4);
+}
+
+/* A desktop menu anchored to its trigger is a popover: no scrim, no blur. */
+:global(.modal-overlay).anchoredOverlay {
+  background: transparent;
+  backdrop-filter: none;
+}
+
+/* Design dialogs separate the header with a hairline, not a dashed seam. */
+.surface :global(.modal-header) {
+  border-bottom: 1px solid var(--line);
+}
+
+.surface :global(.modal-close) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--r-icon-btn);
+  color: var(--ink-2);
+  transition:
+    color var(--duration-fast) var(--ease-standard),
+    background-color var(--duration-fast) var(--ease-standard);
+}
+
+.surface :global(.modal-close):hover {
+  background: var(--surface-3);
+  color: var(--ink);
+}
+
+.surface :global(.modal-close):focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+:global(.modal).sheet {
+  width: min(512px, 100%);
+  height: auto;
+  max-height: min(80dvh, 720px);
+  border: 1px solid var(--line);
+  background: var(--surface);
+}
+
+:global(.modal).compact {
+  width: min(300px, 100%);
+}
+
+.sheet :global(.modal-header),
+.dialog :global(.modal-header) {
+  min-height: 0;
+  padding: var(--space-4) var(--space-3) var(--space-1) var(--space-5);
+  border-bottom: 0;
+  background: transparent;
+}
+
+.sheet :global(.modal-title),
+.dialog :global(.modal-title) {
+  color: var(--ink);
+  font-family: inherit;
+  font-size: var(--fs-h2);
+  font-weight: var(--title-weight);
+  font-stretch: var(--display-stretch);
+}
+
+.sheet :global(.modal-close),
+.dialog :global(.modal-close) {
+  width: 32px;
+  min-width: 32px;
+  height: 32px;
+  min-height: 32px;
+  padding: 0;
+}
+
+.sheet :global(.modal-content),
+.dialog :global(.modal-content) {
+  padding: var(--space-3) var(--space-5) var(--space-5);
+}
+
+.compact :global(.modal-header) {
+  display: none;
+}
+
+.compact :global(.modal-content) {
+  padding: var(--space-1);
+}
+
+@media (width > 600px) {
+  :global(.modal).surface {
+    border-color: var(--line);
+    border-radius: var(--r-dialog);
+    background: var(--surface);
+    box-shadow: var(--shadow-pop);
+  }
+
+  :global(.modal).compact {
+    border-radius: var(--r-lg);
+  }
+}
+
+@media (width >= 640px) {
+  .sheet :global(.modal-header),
+  .dialog :global(.modal-header) {
+    padding: var(--space-5) var(--space-4) var(--space-1) 28px;
+  }
+
+  .sheet :global(.modal-content),
+  .dialog :global(.modal-content) {
+    padding: var(--space-3) 28px var(--space-6);
+  }
+
+  .compact :global(.modal-content) {
+    padding: var(--space-1);
+  }
+}
+
+@media (width <= 600px) {
+  :global(.modal-overlay).sheetOverlay {
+    align-items: flex-end;
+    padding: max(24px, env(safe-area-inset-top, 0px)) 0 0;
+  }
+
+  :global(.modal).sheet,
+  :global(.modal).compact {
+    width: 100%;
+    max-width: 100%;
+    max-height: 100%;
+    border-width: 1px 0 0;
+    border-radius: var(--r-sheet) var(--r-sheet) 0 0;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    box-shadow: var(--shadow-pop);
+    animation: sheet-rise var(--duration-sheet) cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+
+  :global(.modal).sheet::before {
+    content: "";
+    align-self: center;
+    flex-shrink: 0;
+    width: 36px;
+    height: 5px;
+    margin-top: var(--space-2);
+    border-radius: var(--radius-pill);
+    background: var(--line-strong);
+  }
+
+  .compact :global(.modal-header) {
+    display: flex;
+  }
+
+  .compact :global(.modal-content) {
+    padding: var(--space-2) var(--space-3) var(--space-4);
+  }
+
+  .sheet :global(.modal-close),
+  .dialog :global(.modal-close) {
+    width: var(--tap-min);
+    min-width: var(--tap-min);
+    height: var(--tap-min);
+    min-height: var(--tap-min);
+  }
+}
+
+/* `dialog`: ordinary prompts and forms. On phones the dialog sizes to its
+   content instead of the full-height, edge-to-edge shape that file and diff
+   viewers use. */
+@media (width <= 600px) {
+  :global(.modal).dialog {
+    height: auto;
+    max-height: 100%;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    animation: sheet-rise var(--duration-sheet) cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+
+  :global(.modal).dialog::before {
+    content: "";
+    align-self: center;
+    flex-shrink: 0;
+    width: 36px;
+    height: 5px;
+    margin-top: var(--space-2);
+    border-radius: var(--radius-pill);
+    background: var(--line-strong);
+  }
+
+  /* Keeps the 44px close button and its focus ring off the screen edge. */
+  .dialog :global(.modal-header) {
+    padding: var(--space-1) var(--space-2) var(--space-1) var(--space-4);
+  }
+}
+
+@keyframes sheet-rise {
+  from {
+    transform: translateY(24px);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :global(.modal).sheet,
+  :global(.modal).compact,
+  :global(.modal).dialog {
+    animation: none;
+  }
+
+  .surface :global(.modal-close) {
+    transition: none;
+  }
+}

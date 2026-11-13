@@ -1,0 +1,47 @@
+/*
+ * Bulk band at the top of the Sessions result card (design batch bar). It
+ * sticks under the page's sticky search toolbar, whose height the page
+ * publishes as --sessions-toolbar-height.
+ */
+
+.bar {
+  position: sticky;
+  top: var(--sessions-toolbar-height, 0);
+  z-index: 3;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px 8px var(--pad-card);
+  border-bottom: 1px solid var(--accent-line);
+  /* Night's accent-soft is translucent; layer it on the card so rows
+     scrolling under the sticky band stay hidden. */
+  background:
+    linear-gradient(var(--accent-soft), var(--accent-soft)), var(--surface);
+}
+
+.count {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--accent-ink);
+  font-size: var(--fs-small);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+}
+
+@media (width < 768px) {
+  .actions {
+    width: 100%;
+    margin-left: 0;
+  }
+}

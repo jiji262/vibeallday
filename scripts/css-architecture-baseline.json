@@ -1,0 +1,26 @@
+{
+  "legacyGlobalStyles": {
+    "packages/client/src/styles/index.css": {
+      "maxLines": 11437,
+      "reason": "Legacy application shell and page styles; tokens and themes live in theme.css."
+    },
+    "packages/client/src/styles/provider-colors.css": {
+      "maxLines": 35,
+      "reason": "Theme-dependent provider badge color tokens shared by every badge surface."
+    },
+    "packages/client/src/styles/renderers.css": {
+      "maxLines": 5794,
+      "reason": "Legacy generated-content and renderer class vocabulary."
+    },
+    "packages/client/src/styles/theme.css": {
+      "maxLines": 1284,
+      "reason": "Garden design tokens, themes, self-hosted font faces and base element rules; the single global source of design values. Raised 938 -> 1300 for the redesign skins: per-skin design tokens (Celadon, Night, OLED, auto-dark copy), phone sizes and the skin font faces."
+    },
+    "packages/client/src/styles/tool-rows.css": {
+      "maxLines": 749,
+      "reason": "Shared tool-row state and generated renderer composition."
+    }
+  },
+  "updated": "2026-10-30",
+  "note": "Chapter 11 containment baseline for authored non-module CSS under packages/client/src. Limits may only ratchet downward. New client stylesheets must be CSS Modules unless a reviewed generated-content or truly global exception is added here with a reason."
+}

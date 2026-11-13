@@ -1,0 +1,17 @@
+/* Design .split: the two buttons share one outline with a hairline seam. */
+.split {
+  display: inline-flex;
+  flex: none;
+}
+
+.main {
+  border-start-end-radius: 0;
+  border-end-end-radius: 0;
+}
+
+.toggle {
+  padding-inline: 10px;
+  border-start-start-radius: 0;
+  border-end-start-radius: 0;
+  box-shadow: inset 1px 0 0 color-mix(in srgb, currentcolor 22%, transparent);
+}

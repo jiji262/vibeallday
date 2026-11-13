@@ -1,0 +1,85 @@
+/* The add-project form inside its sheet: path, optional chosen name and code,
+ * and the cancel/add row. The sheet is the container, so the form is flat. */
+
+.sheetBody {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.input {
+  width: 100%;
+  min-height: var(--tap-min);
+  padding: 0 var(--space-3);
+  box-sizing: border-box;
+  background: var(--bg-input);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 16px;
+}
+
+.input:focus {
+  border-color: var(--indigo);
+  outline: 2px solid var(--indigo-soft-2);
+  outline-offset: 0;
+}
+
+.input[aria-invalid="true"] {
+  border-color: var(--rose-ink);
+}
+
+.text {
+  font-family: var(--font-ui);
+}
+
+.fields {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.field {
+  display: flex;
+  flex: 1 1 14rem;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.codeField {
+  flex: 0 1 13rem;
+}
+
+.label {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.hint {
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.actions {
+  display: flex;
+  gap: var(--space-2);
+  justify-content: flex-end;
+}
+
+.error {
+  padding: var(--space-2) var(--space-3);
+  background: var(--rose-soft);
+  border-radius: var(--radius-md);
+  color: var(--rose-ink);
+  font-size: 13px;
+}

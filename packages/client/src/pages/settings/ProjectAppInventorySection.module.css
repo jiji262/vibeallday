@@ -1,0 +1,85 @@
+/* Project apps card (design .card) under the hosted apps. */
+.inventory {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+  margin: 0 0 var(--space-4);
+  padding: var(--pad-card);
+  border: 1px solid var(--card-line);
+  border-radius: var(--r-card);
+  background: var(--surface);
+  box-shadow: var(--shadow-card);
+}
+.inventory p {
+  margin: 0;
+  color: var(--ink-3);
+  overflow-wrap: anywhere;
+  font-size: var(--fs-small);
+}
+.heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px 12px;
+}
+.heading h3 {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  color: var(--ink);
+  font-family: var(--font-ui);
+  font-size: var(--fs-h3);
+  font-weight: var(--title-weight);
+}
+.heading > :first-child {
+  flex: 1;
+  overflow-wrap: anywhere;
+}
+.inventory button {
+  min-height: var(--btn-h-sm);
+  padding: 0 var(--btn-px);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-btn);
+  color: var(--ink);
+  background: var(--surface);
+  font: inherit;
+  font-size: var(--fs-btn);
+  cursor: pointer;
+}
+/* Deleting an app or project is destructive (design danger-soft); the
+   browser confirmation stays the final step. */
+.inventory .dangerButton {
+  border-color: var(--err-line);
+  color: var(--err-ink);
+  background: var(--err-soft);
+}
+.row {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+.deleteActions {
+  display: flex;
+  flex: 0 0 auto;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.table {
+  --settings-first-column-width: 22%;
+}
+.table th:nth-child(2) {
+  width: 33%;
+}
+.table th:nth-child(3) {
+  width: 23%;
+}
+.row > button {
+  justify-self: start;
+}
+@media (width <= 640px) {
+  .inventory button {
+    min-height: 44px;
+  }
+}

@@ -1,0 +1,146 @@
+/*
+ * Filters sheet (design SessionsFilter): eyebrow-labelled groups (status,
+ * project, provider, time, source, search in) over 44px controls, and a
+ * sticky footer that clears the bottom safe area.
+ */
+
+.body {
+  display: grid;
+  gap: 22px;
+}
+
+.section {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.sectionTitle {
+  margin: 0 0 10px;
+  padding: 0 2px;
+  color: var(--ink-3);
+  font-family: var(--font-mono);
+  font-size: var(--fs-meta);
+  font-weight: 600;
+  letter-spacing: var(--meta-tracking);
+  text-transform: uppercase;
+}
+
+.chipRow {
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: 8px;
+}
+
+.ageRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--ink-3);
+}
+
+.rowLabel {
+  min-width: 4.5em;
+  font-size: var(--fs-small);
+  color: var(--ink-2);
+}
+
+.ageInput {
+  width: 5.5em;
+  height: var(--input-h);
+  padding: 0 var(--space-3);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-input);
+  background: var(--surface);
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-size: var(--fs-input);
+  text-align: center;
+}
+
+.ageInput::placeholder {
+  color: var(--ink-4);
+}
+
+.ageInput:focus {
+  border-color: var(--focus);
+  outline: 2px solid var(--accent-soft);
+  outline-offset: 0;
+}
+
+.statusList {
+  display: grid;
+  gap: var(--space-2);
+}
+
+/* Scope dropdowns: two columns, the project name gets a full row. */
+.fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3) var(--space-2);
+}
+
+.field {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+  align-content: start;
+}
+
+.wide {
+  grid-column: 1 / -1;
+}
+
+.fieldLabel {
+  color: var(--ink-2);
+  font-size: var(--fs-small);
+}
+
+/* Doubled with the section so it outranks FilterDropdown's own trigger. */
+.section .trigger {
+  min-height: var(--input-h);
+  border-radius: var(--r-input);
+  font-size: var(--fs-input);
+  text-align: left;
+}
+
+/*
+ * The sheet content (ui/Modal) pads its sides and bottom; the footer cancels
+ * that padding so it spans the sheet and pins to its own bottom edge. The
+ * phone sheet already lifts its content above the bottom safe area.
+ */
+.footer {
+  --sheet-pad-x: var(--space-5);
+  --sheet-pad-bottom: var(--space-5);
+
+  position: sticky;
+  bottom: calc(-1 * var(--sheet-pad-bottom));
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin: var(--space-5) calc(-1 * var(--sheet-pad-x))
+    calc(-1 * var(--sheet-pad-bottom));
+  padding: 12px var(--sheet-pad-x) 14px;
+  border-top: 1px solid var(--line);
+  background: var(--surface);
+}
+
+@media (width >= 640px) {
+  .footer {
+    --sheet-pad-x: 28px;
+    --sheet-pad-bottom: var(--space-6);
+  }
+}
+
+.footer > :first-child {
+  flex: 1 1 0;
+}
+
+/* The primary "Show N sessions" takes two shares, as on the board. */
+.footer > :last-child {
+  flex: 2 1 0;
+}

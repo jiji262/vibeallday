@@ -1,0 +1,42 @@
+.page {
+  display: flex;
+  min-height: 100%;
+  flex-direction: column;
+  background: var(--canvas);
+}
+
+.parentLink {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--tap-min);
+  color: var(--link);
+  font-size: var(--fs-small);
+  font-weight: 500;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.parentLink:hover,
+.parentLink:focus-visible {
+  text-decoration: underline;
+}
+
+.main {
+  min-height: 0;
+  flex: 1 1 auto;
+  overflow: auto;
+}
+
+.status {
+  margin: var(--space-4);
+  color: var(--ink-3);
+  font-size: var(--fs-body);
+}
+
+/* The dock's back action is a link drawn as the primary button. */
+.dockLink {
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+  text-decoration: none;
+}

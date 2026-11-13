@@ -1,0 +1,86 @@
+/* Labelled bar pinned to the top edge, below the safe area, while the
+   transport is down (design auth/Connection). Sits under sheets, dialogs and
+   menus. Its height is published as --connection-bar-height, which the app
+   shell reserves above its frame, so the bar never covers the top bar. */
+.root {
+  position: fixed;
+  top: env(safe-area-inset-top, 0px);
+  right: 0;
+  left: 0;
+  z-index: calc(var(--z-sheet) - 1);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 12px;
+  padding: 6px max(16px, env(safe-area-inset-right)) 6px
+    max(16px, env(safe-area-inset-left));
+  border-bottom: 1px solid var(--line);
+  font-family: var(--font-ui);
+  font-size: var(--fs-small);
+}
+
+.connecting {
+  border-bottom-color: var(--attn-line);
+  background: var(--attn-soft);
+  color: var(--attn-ink);
+}
+
+.disconnected {
+  border-bottom-color: var(--err-line);
+  background: var(--err-soft);
+  color: var(--err-ink);
+}
+
+.pulse {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentcolor;
+}
+
+.connecting .pulse {
+  background: var(--attn);
+  box-shadow: 0 0 0 4px var(--attn-soft);
+  animation: reconnectingPulse 1.4s ease-in-out infinite;
+}
+
+.disconnected .pulse {
+  border-radius: var(--err-marker-radius);
+  background: var(--err);
+  transform: var(--err-marker-transform);
+}
+
+.title {
+  min-width: 0;
+  font-weight: 600;
+}
+
+.meta {
+  min-width: 0;
+  font-family: var(--font-mono);
+  font-size: var(--fs-meta);
+}
+
+.retry {
+  margin-left: auto;
+}
+
+@keyframes reconnectingPulse {
+  50% {
+    box-shadow: 0 0 0 7px var(--attn-soft);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .connecting .pulse {
+    animation: none;
+  }
+}
+
+/* Phone: one compact line; the clock time is secondary. */
+@media (width < 768px) {
+  .meta {
+    display: none;
+  }
+}

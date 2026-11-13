@@ -1,0 +1,57 @@
+/*
+ * Inbox page layout (design Inbox-Desktop): status blocks in now/NowSummary,
+ * then the section column beside an aside of review outcomes and quick
+ * start. Sections live in now/InboxSection, queue rows in now/InboxQueueItem
+ * and review rows in now/ReviewOutcomes.
+ */
+
+.loading {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-5);
+}
+
+.note {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0 0 var(--space-5);
+  color: var(--ink-3);
+  font-size: var(--fs-small);
+}
+
+/* Main column grows; the aside wraps under it on narrow windows. */
+.columns {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--space-6);
+}
+
+.main {
+  display: flex;
+  flex: 1 1 560px;
+  flex-direction: column;
+  gap: var(--space-6);
+  min-width: 0;
+}
+
+.aside {
+  display: flex;
+  flex: 0 1 300px;
+  flex-direction: column;
+  gap: var(--space-4);
+  min-width: 260px;
+}
+
+@media (width < 768px) {
+  .columns,
+  .main {
+    gap: 18px;
+  }
+
+  .aside {
+    flex-basis: 100%;
+    min-width: 0;
+  }
+}

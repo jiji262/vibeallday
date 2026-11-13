@@ -1,0 +1,212 @@
+/* Brand column beside the auth card (design auth/Login): wordmark, tagline,
+   and on wide screens a static approval card plus three promises. */
+.column {
+  display: flex;
+  flex: 1 1 400px;
+  flex-direction: column;
+  gap: 28px;
+  min-width: 0;
+  max-width: 520px;
+}
+
+.wordmark {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--ink);
+  font-family: var(--font-ui);
+  font-size: 17px;
+  font-weight: 700;
+  font-stretch: var(--display-stretch);
+  letter-spacing: -0.01em;
+}
+
+.mark {
+  flex: none;
+  border-radius: var(--r-sm);
+}
+
+.intro {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.tagline {
+  margin: 0;
+  color: var(--ink);
+  font-family: var(--font-ui);
+  font-size: var(--fs-display);
+  font-weight: var(--title-weight);
+  font-stretch: var(--display-stretch);
+  line-height: 1.1;
+  letter-spacing: var(--display-tracking);
+}
+
+.lead {
+  max-width: 440px;
+  margin: 0;
+  color: var(--ink-2);
+  font-size: var(--fs-body);
+  line-height: 1.55;
+}
+
+.wideOnly {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.preview {
+  max-width: 460px;
+  margin: 0;
+  overflow: hidden;
+  border: 1px solid var(--ask-line);
+  border-radius: var(--r-card);
+  background: var(--surface);
+  box-shadow: var(--shadow-pop);
+}
+
+.previewHead {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: var(--ask-head);
+  color: var(--attn-ink);
+  font-size: var(--fs-small);
+  font-weight: 600;
+}
+
+.previewMeta {
+  flex: none;
+  margin-left: auto;
+  color: var(--ink-3);
+  font-family: var(--font-mono);
+  font-size: var(--fs-meta);
+  font-weight: 400;
+}
+
+.previewBody {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px 16px 16px;
+}
+
+.previewTitleRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.previewTitle {
+  overflow: hidden;
+  color: var(--ink);
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.previewCode {
+  display: block;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  background: var(--code-bg);
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-size: var(--fs-code);
+  line-height: 1.6;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.previewActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  height: var(--btn-h-sm);
+  padding: 0 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-btn);
+  background: var(--surface);
+  color: var(--ink);
+  font-size: var(--fs-btn);
+  font-weight: 600;
+}
+
+.chipAccent {
+  border-color: var(--accent-line);
+  color: var(--accent-ink);
+}
+
+.chipGhost {
+  border-color: transparent;
+  background: transparent;
+  color: var(--ink-2);
+}
+
+.features {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.feature {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.featureIcon {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  background: var(--surface);
+  color: var(--accent-ink);
+}
+
+.featureText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.featureTitle {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.featureBody {
+  color: var(--ink-3);
+  font-size: var(--fs-small);
+  line-height: 1.5;
+}
+
+/* Phone and narrow windows: the card comes first in reading weight, so the
+   column keeps only the wordmark, tagline and lead. */
+@media (width < 768px) {
+  .column {
+    flex-basis: 100%;
+    gap: 16px;
+  }
+
+  .wideOnly {
+    display: none;
+  }
+}

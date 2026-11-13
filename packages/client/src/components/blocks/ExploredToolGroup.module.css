@@ -1,0 +1,32 @@
+/* Design toolrow: the kind icon sits centred beside the tool name. */
+.status {
+  display: flex;
+  align-self: center;
+  justify-content: center;
+}
+
+/* The path gives way so the trailing result (lines, matches) stays whole. */
+.summary :global(.file-link-inline) {
+  display: flex;
+  min-width: 0;
+}
+
+/* The link cluster caps itself at 100%, which would also be its minimum. */
+.summary :global(.file-link-inline) > :first-child {
+  min-width: 0;
+}
+
+.summary :global(.file-link-inline .file-path-link) {
+  min-width: 0;
+  overflow: hidden;
+}
+
+.summary :global(.file-link-inline .file-path-link-name) {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.summary :global(.file-line-count-inline) {
+  flex-shrink: 0;
+  margin-inline-start: auto;
+}

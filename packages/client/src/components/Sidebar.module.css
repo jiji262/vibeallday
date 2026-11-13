@@ -1,0 +1,288 @@
+/*
+ * App sidebar (design .side): brand row, host card, New Session and search
+ * above a scrolling column of navigation and session sections, with Settings
+ * and the appearance menu pinned at the bottom. The same aside renders as the
+ * desktop column, the collapsed rail and the overlay drawer.
+ */
+.console {
+  padding: max(14px, env(safe-area-inset-top, 0px)) 12px
+    max(var(--space-4), env(safe-area-inset-bottom, 0px));
+  background: var(--side-bg);
+}
+
+:global(.sidebar-collapsed) .console {
+  padding-inline: var(--space-2);
+}
+
+.actions {
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  gap: 8px;
+  margin-bottom: var(--space-3);
+  padding-top: var(--sidebar-actions-padding-top, 0);
+}
+
+/* Primary block button (design .btn-primary .btn-block). */
+.newSession:global(.sidebar-nav-item),
+.newSession:global(.sidebar-nav-item):hover {
+  justify-content: center;
+  gap: 8px;
+  min-height: var(--btn-h);
+  padding: 0 var(--btn-px);
+  border-radius: var(--r-btn);
+  background: var(--accent);
+  box-shadow: none;
+  color: var(--on-accent);
+  font-size: var(--fs-btn);
+  font-weight: 600;
+}
+
+.newSession:global(.sidebar-nav-item):hover {
+  background: var(--accent-hover);
+}
+
+.newSession :global(.sidebar-nav-text) {
+  flex: 0 1 auto;
+}
+
+:global(.sidebar-collapsed) .newSession:global(.sidebar-nav-item) {
+  padding: 0;
+  border-radius: var(--r-icon-btn);
+}
+
+/* The scroller reaches the sidebar edges so its bar sits on the border. */
+.sessions {
+  flex: 1;
+  min-height: 0;
+  margin-inline: -12px;
+  padding: var(--sidebar-sessions-padding-top, 0) 12px var(--space-4);
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+:global(.sidebar-collapsed) .sessions {
+  margin-inline: calc(-1 * var(--space-2));
+  padding-inline: var(--space-2);
+  overflow: hidden;
+}
+
+.section {
+  margin-bottom: var(--sidebar-section-gap, 1rem);
+}
+
+.sessionList {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sessionList > li {
+  margin: 0;
+}
+
+/*
+ * Compact session rows as design .side-session: a status dot, the title, and
+ * the project on a meta line below. Only CSS changes here; the row keeps its
+ * DOM. The dot is the row's own ::before, so no element is added per row.
+ */
+.console :global(.session-list-item--compact) {
+  --side-dot-inset: 10px;
+  --side-dot-size: 8px;
+
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 0;
+  padding-inline-start: calc(var(--side-dot-inset) * 2 + var(--side-dot-size));
+  border-radius: var(--r-md);
+}
+
+.console :global(.session-list-item--compact)::before {
+  position: absolute;
+  top: 15px;
+  left: var(--side-dot-inset);
+  box-sizing: border-box;
+  width: var(--side-dot-size);
+  height: var(--side-dot-size);
+  border: 1.5px solid var(--idle);
+  border-radius: 50%;
+  background: transparent;
+  transform: none;
+  content: "";
+}
+
+.console :global(.session-list-item--compact.unread)::before {
+  border: 0;
+  border-radius: 2px;
+  background: var(--ink);
+}
+
+/* Row state comes from SessionListItem's data-session-state. */
+.console
+:global(.session-list-item--compact[data-session-state="attn"])::before {
+  border: 0;
+  border-radius: 50%;
+  background: var(--attn);
+}
+
+.console
+  :global(.session-list-item--compact[data-session-state="run"])::before {
+  border: 0;
+  border-radius: 50%;
+  background: var(--run);
+  box-shadow: 0 0 0 3px var(--run-halo);
+}
+
+.console
+  :global(.session-list-item--compact[data-session-state="queued"])::before {
+  border: 1.5px dashed var(--ink-3);
+  border-radius: 50%;
+  background: transparent;
+}
+
+/* The left dot replaces the trailing thinking indicator of a running row:
+   the trailing span that is neither the project name nor a badge. */
+.console
+  :global(.session-list-item--compact)
+  > a
+  > span:not(
+    :global(.session-list-item__project-compact),
+    :global(.session-badge)
+  ) {
+  display: none;
+}
+
+.console :global(.session-list-item--compact):hover {
+  background: var(--surface-3);
+}
+
+.console :global(.session-list-item--compact.current),
+.console :global(.session-list-item--compact.current):hover {
+  border-radius: var(--r-md);
+  background: var(--nav-on-bg);
+  box-shadow: var(--nav-on-shadow);
+}
+
+/* The title line. A zero hypothetical width would let the full-width meta
+   link share this line and collapse the title to nothing; 1px keeps the
+   meta link wrapping onto its own line while the title still ellipsizes. */
+.console :global(.session-list-item--compact) > div {
+  flex: 1 1 0;
+  min-width: 1px;
+}
+
+.console :global(.session-list-item--compact .session-list-item__link) {
+  min-height: 0;
+  padding: 8px 4px 1px 0;
+  color: var(--ink);
+}
+
+.console :global(.session-list-item--compact .session-list-item__title-text) {
+  font-size: var(--fs-small);
+}
+
+.console
+  :global(.session-list-item--compact.unread .session-list-item__title-text),
+.console
+  :global(.session-list-item--compact.current .session-list-item__title-text) {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.console :global(.session-list-item--compact) > span[data-session-accessory] {
+  align-self: center;
+}
+
+/* Meta line: project and needs-you badge under the title. */
+.console :global(.session-list-item--compact) > a {
+  flex: 1 0 100%;
+  order: 2;
+  min-height: 0;
+  padding: 0 10px 8px 0;
+  color: var(--ink-3);
+  font-size: var(--fs-meta);
+}
+
+.console
+  :global(.session-list-item--compact .session-list-item__project-compact) {
+  max-width: none;
+  color: var(--ink-3);
+  font-size: var(--fs-meta);
+}
+
+.console :global(.session-list-item--compact) > ul {
+  flex: 1 0 100%;
+  order: 3;
+}
+
+.pendingQueueRow {
+  display: flex;
+  align-items: stretch;
+  min-width: 0;
+}
+
+.pendingQueueLink {
+  flex: 1;
+  min-width: 0;
+}
+
+.recentMore {
+  display: flex;
+  align-items: center;
+  min-height: 36px;
+  padding: 0 10px;
+  border-radius: var(--r-md);
+  color: var(--link);
+  font-size: var(--fs-small);
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.recentMore:hover {
+  background: var(--surface-3);
+}
+
+.recentMore:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: -2px;
+}
+
+.empty {
+  padding: var(--space-4);
+  color: var(--ink-3);
+  font-size: var(--fs-meta);
+  text-align: center;
+}
+
+.hiddenDupsToggle {
+  min-height: 28px;
+  padding: var(--space-1) 10px;
+  border: 0;
+  border-radius: var(--r-md);
+  background: transparent;
+  color: var(--ink-3);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.hiddenDupsToggle:hover {
+  background: var(--surface-3);
+  color: var(--ink);
+}
+
+/* The rail shows only icons; session sections leave it entirely. */
+:global(.sidebar-collapsed) .section,
+:global(.sidebar-collapsed) .recentMore,
+:global(.sidebar-collapsed) .empty {
+  display: none;
+}
+
+@media (pointer: coarse) {
+  .recentMore {
+    min-height: var(--tap-min);
+  }
+}

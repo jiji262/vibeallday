@@ -1,0 +1,42 @@
+/* One Advanced group: an eyebrow title over an inset card of options. */
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+/* Every option in the group can render nothing (a capability, provider or
+   sandbox state rules it out); the heading would then label nothing. */
+.group:not(:has(.body > *)) {
+  display: none;
+}
+
+/* Beats the sheet's own heading rule, which styles the option titles. */
+.title.title.title {
+  margin: 0;
+  padding: 0 2px;
+  color: var(--ink-3);
+  font-family: var(--font-mono);
+  font-size: var(--fs-meta);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  line-height: 1.3;
+  text-transform: uppercase;
+}
+
+.body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-4);
+  min-width: 0;
+  padding: 14px 16px;
+  border: 1px solid var(--card-line);
+  border-radius: var(--r-card);
+  background: var(--surface);
+}
+
+.body > * {
+  min-width: 0;
+  margin-bottom: 0;
+}

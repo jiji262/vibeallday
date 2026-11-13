@@ -1,0 +1,276 @@
+/* Settings → Users: topics/limited-users.md § Delivery v1. Ordinary settings
+   list-and-editor shape; nothing here is sidebar-sized. */
+
+/* List and side cards beside the open editor where the pane is wide;
+   one column (list, then editor) on narrow panes and phones. */
+.directoryHost {
+  margin-bottom: var(--space-4);
+  container-type: inline-size;
+}
+
+.directory {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-5);
+  align-items: start;
+}
+
+@container (width >= 46rem) {
+  .directory {
+    grid-template-columns: minmax(16rem, 18.75rem) minmax(0, 1fr);
+  }
+}
+
+.directoryList,
+.directoryDetail {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  min-width: 0;
+}
+
+.directoryDetail:empty {
+  display: none;
+}
+
+.listCount {
+  margin: 0 var(--space-1);
+  color: var(--ink-3);
+  font-size: var(--fs-meta);
+}
+
+.trustCard {
+  margin-bottom: var(--space-4);
+  overflow: hidden;
+}
+
+.trustNotice {
+  padding: 0 var(--pad-card) var(--space-4);
+}
+
+.userMeta {
+  color: var(--ink-3);
+  font-size: var(--fs-meta);
+}
+
+/* Title and status on one line; account actions wrap beneath on a phone. */
+.editorHeader {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.editorHeading {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.userActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.enabledToggle {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: var(--font-size-sm);
+}
+
+.editor {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--pad-card);
+}
+
+.editorTitle {
+  margin: 0;
+  color: var(--ink);
+  font-size: var(--fs-h2);
+  font-weight: var(--title-weight);
+}
+
+.account {
+  margin-bottom: var(--space-2);
+}
+.account summary {
+  cursor: pointer;
+  min-height: 40px;
+  align-content: center;
+  color: var(--ink-2);
+  font-size: var(--fs-small);
+}
+
+.trustCard .account {
+  margin-bottom: 0;
+}
+
+.trustCard .account summary {
+  padding-inline: var(--pad-card);
+}
+
+/* Cards whose content is not settings rows carry the card padding. */
+.cardBody {
+  padding: var(--pad-card);
+}
+.accountFields {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding-block: var(--space-2);
+}
+
+.editorActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  font-size: var(--font-size-sm);
+}
+
+.input,
+.select {
+  min-width: 0;
+  /* Mobile-first: every control stays a real touch target. */
+  min-height: var(--input-h);
+  padding: 4px 10px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-input);
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  font-size: var(--fs-input);
+}
+
+/* The open list is drawn by the browser, which paints it from the element's
+   color scheme and its own defaults, not from the closed control's colors.
+   Under the default "auto" theme on a light desktop that is a white popup
+   with grey text hanging off a dark control. Naming the option colors and
+   the accent pins all three themes to VIBEALLDAY's own palette. */
+.select {
+  accent-color: var(--accent-color, var(--app-accent));
+}
+
+.select option {
+  background-color: var(--bg-surface);
+  color: var(--text-primary);
+}
+
+.select option:disabled {
+  color: var(--text-muted);
+}
+
+.inputRow {
+  display: flex;
+  align-items: stretch;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.inputRow > input {
+  flex: 1;
+  min-width: 0;
+}
+
+.inputRow > button {
+  flex: none;
+  white-space: nowrap;
+}
+
+.subhead {
+  margin: var(--space-2) 0 0;
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+}
+
+.projectList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  max-height: 40vh;
+  padding: 0;
+  margin: 0;
+  overflow-y: auto;
+  list-style: none;
+}
+
+/* One column for the name, one for its control, so every access select shares
+   a left edge instead of stepping with the project name's width. */
+.projectRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 12rem;
+  gap: var(--space-2);
+  align-items: center;
+}
+
+.projectName {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Path, level and remove on one line; the path takes the slack. */
+.directoryRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 12rem auto;
+  gap: var(--space-2);
+  align-items: center;
+}
+
+@media (width <= 600px) {
+  .directoryRow {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+  .directoryRow > input {
+    grid-column: 1 / -1;
+  }
+}
+
+.projectExpand {
+  align-self: flex-start;
+}
+
+/* Three lock selects side by side where there is room, stacked on a phone. */
+.lockRow {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+  gap: var(--space-2);
+}
+
+.grants {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  gap: var(--space-1) var(--space-3);
+  margin: 0 0 var(--space-3);
+}
+
+.grants dt {
+  color: var(--text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.grants dd {
+  margin: 0;
+  font-weight: 600;
+}
+
+@media (width <= 600px) {
+  .projectRow {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

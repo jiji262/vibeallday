@@ -1,0 +1,71 @@
+---
+import Footer from "../components/Footer.astro";
+import Header from "../components/Header.astro";
+import BaseLayout from "../layouts/BaseLayout.astro";
+---
+
+<BaseLayout
+  title="Install VibeAllDay from source"
+  description="Run the local server and responsive web client on your own computer."
+>
+  <Header />
+  <main id="main-content">
+    <section class="download-hero">
+      <div class="site-container">
+        <h1>Build VibeAllDay.</h1>
+        <p class="lede">Run the local service on macOS, Windows, or Linux. Connect from your computer, phone, or tablet browser.</p>
+        <div class="download-help">
+          <a href="/docs/install-npm">Build from source</a>
+          <a href="https://github.com/jiji262/vibeallday">Open GitHub</a>
+          <a href="/remote">Open the browser client</a>
+        </div>
+      </div>
+    </section>
+  </main>
+  <Footer />
+</BaseLayout>
+
+<style>
+  .download-hero {
+    border-bottom: 1px solid var(--border);
+    padding: 24px 0 20px;
+  }
+
+  .download-hero h1 {
+    font-size: clamp(38px, 6vw, 50px);
+    letter-spacing: -0.05em;
+    line-height: 1.02;
+    margin-top: 12px;
+  }
+
+  .lede {
+    color: var(--text-secondary);
+    font-size: 16px;
+    margin-top: 10px;
+    max-width: 730px;
+  }
+
+  .download-help {
+    border-top: 1px solid var(--border);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 24px;
+    margin-top: 34px;
+    padding-top: 20px;
+  }
+
+  .download-help a {
+    align-items: center;
+    color: var(--accent-hover);
+    display: inline-flex;
+    font-size: 14px;
+    font-weight: 650;
+    min-height: 44px;
+  }
+
+  @media (max-width: 650px) {
+    .download-hero {
+      padding: 24px 0;
+    }
+  }
+</style>

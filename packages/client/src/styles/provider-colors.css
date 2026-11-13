@@ -1,0 +1,35 @@
+/* Provider hues per skin. Each keeps >= 4.5:1 against its theme's page
+   (--canvas); a single mid-gray for every provider is not the contract. */
+
+:root {
+  --provider-claude: #b4532a;
+  --provider-codex: #1f6f8b;
+  --provider-gemini: #3d5bc9;
+  --provider-grok: #3a4a43;
+  --provider-ollama: #6b4fa8;
+  --provider-opencode: #8a6210;
+  --provider-pi: #1f6f6a;
+}
+
+[data-theme="dark"],
+[data-theme="verydark"] {
+  --provider-claude: #ffa46e;
+  --provider-codex: #7fdcb4;
+  --provider-gemini: #8eb6ff;
+  --provider-grok: #d0d6df;
+  --provider-ollama: #c9b6ff;
+  --provider-opencode: #e3c46b;
+  --provider-pi: #7fd3cb;
+}
+
+@media (prefers-color-scheme: dark) {
+  [data-theme="auto"] {
+    --provider-claude: #ffa46e;
+    --provider-codex: #7fdcb4;
+    --provider-gemini: #8eb6ff;
+    --provider-grok: #d0d6df;
+    --provider-ollama: #c9b6ff;
+    --provider-opencode: #e3c46b;
+    --provider-pi: #7fd3cb;
+  }
+}

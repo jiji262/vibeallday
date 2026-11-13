@@ -1,0 +1,94 @@
+/* Repository operations in the Source Control identity bar. They are garden
+   secondary sm buttons; the leading indicator keeps a fixed slot so a glyph,
+   the running spinner, and the outcome mark swap without moving the label. */
+.actionGroup {
+  display: inline-flex;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.action {
+  white-space: nowrap;
+}
+
+.iconOnly {
+  padding-inline: 0;
+  width: var(--btn-h-sm);
+}
+
+/* Design .split: Sync and its overflow share one outline with a seam. */
+.split {
+  display: inline-flex;
+  flex: none;
+}
+
+.splitMain {
+  border-start-end-radius: 0;
+  border-end-end-radius: 0;
+}
+
+.splitToggle {
+  padding-inline: 8px;
+  border-start-start-radius: 0;
+  border-end-start-radius: 0;
+  box-shadow: inset 1px 0 0 var(--line);
+}
+
+.syncCounts {
+  color: var(--ink-3);
+  font-family: var(--font-mono);
+  font-size: var(--fs-meta);
+  font-variant-numeric: tabular-nums;
+}
+
+.indicator {
+  display: inline-flex;
+  width: 0.75rem;
+  height: 0.75rem;
+  flex: 0 0 0.75rem;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink-3);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.indicator .glyph {
+  display: block;
+  width: 0.75rem;
+  height: 0.75rem;
+}
+
+.success .indicator {
+  color: var(--ok-ink);
+}
+
+.warning .indicator {
+  color: var(--attn-ink);
+}
+
+@media (width < 768px) {
+  .actionGroup {
+    width: 100%;
+  }
+
+  /* Repository operations are thumb targets on phones. */
+  .action {
+    min-height: var(--tap-min);
+  }
+
+  .iconOnly {
+    width: var(--tap-min);
+  }
+
+  .checkRemote,
+  .checkRemote .actionLabel {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}

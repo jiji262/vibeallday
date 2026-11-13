@@ -1,0 +1,28 @@
+/* The relay setup draws its own cards; keep the pane's section rhythm. */
+.setupBlock {
+  margin-bottom: var(--space-6);
+}
+
+/* Server scope tag on rows that render custom info. */
+.scopeTag {
+  margin-left: var(--space-2);
+  vertical-align: 1px;
+}
+
+/* Hosted-client facts read as row description text, not body copy. */
+.clientInfo {
+  display: grid;
+  gap: var(--space-1);
+  color: var(--ink-3);
+  font-size: var(--fs-small);
+  line-height: 1.5;
+}
+
+.clientInfo p {
+  margin: 0;
+}
+
+.clientInfo strong {
+  color: var(--ink-2);
+  font-weight: 500;
+}

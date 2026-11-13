@@ -1,0 +1,132 @@
+.root {
+  container-type: inline-size;
+  container-name: settings-collection;
+  min-width: 0;
+}
+.collection {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+.open {
+  grid-template-columns: minmax(0, 1fr) minmax(17rem, 1fr);
+}
+/* The list is a flush garden card holding a garden-recipe table: sunken
+   mono uppercase header, dashed row rules, bg-2 row hover. */
+.list {
+  min-width: 0;
+  max-height: 65vh;
+  overflow: auto;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--card);
+  box-shadow: var(--shadow-xs);
+}
+.list table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  font-size: 14px;
+}
+.list th,
+.list td {
+  padding: 14px var(--space-4);
+  text-align: left;
+  border-bottom: 1px dashed var(--dash);
+  overflow-wrap: anywhere;
+  vertical-align: middle;
+}
+.list tbody tr:last-child > td {
+  border-bottom: 0;
+}
+.list th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  padding-block: var(--space-3);
+  border-bottom: 1px solid var(--line);
+  background: var(--bg-2);
+  color: var(--ink-3);
+  font-family: var(--label-font);
+  font-size: var(--eyebrow-size);
+  font-weight: 500;
+  letter-spacing: var(--eyebrow-tracking);
+  text-transform: uppercase;
+}
+.list th:first-child {
+  width: var(--settings-first-column-width, 50%);
+}
+.list button[aria-expanded] {
+  display: block;
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-weight: 500;
+  text-align: left;
+  overflow-wrap: anywhere;
+  cursor: pointer;
+}
+.list button[aria-expanded="true"] {
+  color: var(--indigo);
+  background: var(--card);
+  border-color: var(--line);
+  box-shadow: var(--shadow-xs);
+}
+.list button[aria-expanded]:focus-visible {
+  border-color: var(--indigo);
+  box-shadow: 0 0 0 3px var(--indigo-soft);
+}
+/* The whole row expands, so the whole row shows it is one target. */
+.list tr[data-expandable] {
+  cursor: pointer;
+}
+.list tr[data-expandable]:hover > td {
+  background: var(--bg-2);
+}
+.detail {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+  max-height: 65vh;
+  overflow: auto;
+  padding: var(--space-5);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--card);
+  box-shadow: var(--shadow-xs);
+}
+.heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+.heading h4 {
+  flex: 1 1 10rem;
+  min-width: 0;
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}
+@container settings-collection (max-width: 560px) {
+  .open {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .open .list {
+    display: none;
+  }
+  .detail {
+    max-height: none;
+  }
+  .list button[aria-expanded],
+  .heading button {
+    min-height: 44px;
+  }
+}

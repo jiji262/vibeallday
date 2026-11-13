@@ -1,0 +1,54 @@
+.header {
+  display: flex;
+  align-items: center;
+  flex: 0 0 auto;
+  gap: 4px;
+  /* The slim mouse toolbar keeps the app its height (at most 33px). */
+  padding: 0 4px;
+  min-width: 0;
+  border-bottom: 1px solid var(--line);
+  background: var(--surface-2);
+  touch-action: pan-y;
+}
+/* A mouse keeps the slim toolbar; touch gets room around its 44px targets. */
+@media (pointer: coarse) {
+  .header {
+    padding: var(--space-1) var(--space-2);
+  }
+}
+.content:not([hidden]) {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.floating {
+  position: absolute;
+  top: env(safe-area-inset-top, 0px);
+  right: env(safe-area-inset-right, 0px);
+  z-index: 3;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: var(--r-card);
+  box-shadow: var(--shadow-pop);
+}
+.floating[data-corner="left"] {
+  right: auto;
+  left: env(safe-area-inset-left, 0px);
+}
+.error {
+  position: absolute;
+  top: 32px;
+  right: 0;
+  z-index: 4;
+  max-width: 100%;
+  padding: 8px 12px;
+  border: 1px solid var(--err-line);
+  border-radius: var(--r-card);
+  background: var(--err-soft);
+  color: var(--err-ink);
+  font-size: var(--fs-small);
+}

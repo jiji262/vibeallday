@@ -1,0 +1,90 @@
+/* Host card under the brand row (design .host). */
+.slot {
+  flex-shrink: 0;
+  margin-bottom: var(--space-3);
+}
+
+.pill {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-width: 0;
+  padding: 9px 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  background: var(--surface);
+  box-shadow: var(--shadow-card);
+  color: var(--ink);
+  font: inherit;
+  text-align: start;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color var(--duration-fast) var(--ease-standard);
+}
+
+.pill:hover {
+  background: var(--surface-3);
+}
+
+.pill:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.dot {
+  flex: none;
+}
+
+.text {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  line-height: 1.3;
+}
+
+.name {
+  overflow: hidden;
+  font-size: var(--fs-small);
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.caption {
+  overflow: hidden;
+  color: var(--ink-3);
+  font-size: var(--fs-meta);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chevron {
+  flex: none;
+  color: var(--ink-3);
+}
+
+@media (pointer: coarse) {
+  .pill {
+    min-height: var(--tap-min);
+  }
+}
+
+/* The rail keeps only the status dot, centred in a 40px square. */
+:global(.sidebar-collapsed) .slot {
+  margin-bottom: var(--space-2);
+}
+
+:global(.sidebar-collapsed) .pill {
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  margin-inline: auto;
+  padding: 0;
+}
+
+:global(.sidebar-collapsed) .chevron {
+  display: none;
+}

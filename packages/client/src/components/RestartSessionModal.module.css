@@ -1,0 +1,5 @@
+/* The dialog body already pads its content; the shared model-switch wrapper
+   would pad it a second time. */
+.content:global(.model-switch-content) {
+  padding: 0;
+}

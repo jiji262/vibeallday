@@ -1,0 +1,22 @@
+/* Provider sign-in: one form-width Card holding the sign-in flow. */
+.body {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.settingsLink {
+  color: var(--indigo);
+  font-size: 13px;
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+
+.settingsLink:hover {
+  text-decoration: underline;
+}
+
+.settingsLink:focus-visible {
+  border-radius: var(--radius-xs);
+  outline: 2px solid var(--indigo);
+  outline-offset: 2px;
+}

@@ -1,0 +1,72 @@
+.trigger {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: var(--space-2);
+  width: 280px;
+  height: 36px;
+  padding: 0 var(--space-2) 0 var(--space-3);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-md);
+  background: var(--surface);
+  color: var(--ink-3);
+  font-family: var(--font-ui);
+  font-size: var(--fs-small);
+  font-weight: 500;
+  cursor: pointer;
+  transition:
+    background-color var(--duration-fast) var(--ease-standard),
+    color var(--duration-fast) var(--ease-standard);
+}
+
+.trigger:hover {
+  background: var(--surface-3);
+  color: var(--ink-2);
+}
+
+.trigger:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.icon {
+  flex-shrink: 0;
+}
+
+.label {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-align: start;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.kbd {
+  flex-shrink: 0;
+}
+
+@media (width < 1024px) {
+  .trigger {
+    width: 220px;
+  }
+}
+
+@media (width < 768px) {
+  /* Phone page header: a bare icon button (design `.icon-btn`). */
+  .trigger {
+    justify-content: center;
+    width: var(--icon-btn);
+    height: var(--icon-btn);
+    padding: 0;
+    border-color: transparent;
+    border-radius: var(--r-icon-btn);
+    background: transparent;
+    color: var(--ink-2);
+  }
+
+  .label,
+  .kbd {
+    display: none;
+  }
+}

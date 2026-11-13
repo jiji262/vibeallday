@@ -1,0 +1,105 @@
+.path {
+  min-width: 0;
+  flex: 1 1 auto;
+  overflow: hidden;
+  color: var(--ink);
+  font-family: var(--font-mono, monospace);
+  font-size: 0.8rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pathWithMatch {
+  display: flex;
+  text-overflow: clip;
+}
+
+@media (width <= 600px) {
+  .path {
+    display: -webkit-box;
+    overflow-wrap: anywhere;
+    white-space: normal;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+
+  .pathWithMatch {
+    display: flex;
+  }
+}
+
+/* Git status letter: a compact mono tile in the garden status tones. */
+.statusBadge {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: var(--badge-tracking);
+  text-transform: uppercase;
+}
+
+.toneModified {
+  color: var(--attn-ink);
+  background: var(--attn-soft);
+}
+
+.toneAdded {
+  color: var(--ok-ink);
+  background: var(--ok-soft);
+}
+
+.toneDeleted {
+  color: var(--err-ink);
+  background: var(--err-soft);
+}
+
+.toneMoved {
+  color: var(--accent-ink);
+  background: var(--accent-soft);
+}
+
+.toneUntracked {
+  color: var(--ink-3);
+  background: var(--grey-soft);
+}
+
+.reviewStates {
+  display: inline-flex;
+  flex: 0 0 auto;
+  gap: 3px;
+  align-items: center;
+}
+
+.reviewState {
+  padding: 1px 6px;
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  letter-spacing: var(--badge-tracking);
+  line-height: 1.25;
+  white-space: nowrap;
+  border: 1px solid currentColor;
+  border-radius: var(--radius-pill);
+}
+
+.open {
+  color: var(--attn-ink);
+}
+
+.addressed {
+  color: var(--accent-ink);
+}
+
+.changed {
+  color: var(--ok-ink);
+}
+
+.unchanged,
+.unavailable {
+  color: var(--ink-3);
+}

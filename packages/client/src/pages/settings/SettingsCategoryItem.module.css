@@ -1,0 +1,139 @@
+/* Category row (design .row / .shd-cat): icon tile, name, hint, chevron.
+   Shared by the phone home, the overview cards and search hits. */
+.row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  min-height: 52px;
+  padding: 9px var(--space-4);
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+  transition: background-color var(--duration-fast) var(--ease-standard);
+}
+
+.row + .row {
+  border-top: 1px solid var(--line);
+}
+
+.row:hover {
+  background: var(--surface-3);
+}
+
+.row:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: -2px;
+}
+
+/* .cat-ico: 30px tile, surface fill, hairline, ink-2 glyph. */
+.row .icon {
+  width: 30px;
+  height: 30px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-btn);
+  background: var(--surface);
+  color: var(--ink-2);
+}
+
+.row .icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+.text {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.label {
+  overflow: hidden;
+  color: var(--ink);
+  font-size: var(--fs-small);
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.hint {
+  overflow: hidden;
+  color: var(--ink-3);
+  font-size: var(--fs-meta);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.attn {
+  color: var(--attn-ink);
+}
+
+.chevron {
+  display: flex;
+  flex-shrink: 0;
+  color: var(--ink-4);
+}
+
+/* Settings rail (.desk .set-cat): 34px rows, 26px tiles, raised active row. */
+.rail {
+  gap: 10px;
+  min-height: 34px;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--r-btn);
+  color: var(--ink-2);
+}
+
+.rail + .rail {
+  margin-top: 1px;
+  border-top: 0;
+}
+
+.rail .icon {
+  width: 26px;
+  height: 26px;
+}
+
+.rail .icon svg {
+  width: 15px;
+  height: 15px;
+}
+
+.rail .label {
+  color: inherit;
+}
+
+.rail:hover {
+  color: var(--ink);
+}
+
+.active {
+  background: var(--nav-on-bg);
+  box-shadow: var(--nav-on-shadow);
+  color: var(--ink);
+}
+
+.active.rail:hover {
+  background: var(--nav-on-bg);
+}
+
+.active .icon {
+  border-color: var(--accent-line);
+  background: var(--accent-soft);
+  color: var(--accent-ink);
+}
+
+.dot {
+  margin-left: auto;
+}
+
+@media (pointer: coarse) {
+  .rail {
+    min-height: var(--tap-min);
+  }
+}

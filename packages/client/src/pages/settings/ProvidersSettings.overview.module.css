@@ -1,0 +1,20 @@
+/* ---- Overview (design S-Providers) ---- */
+.overview {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.toolbar {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.cardActions {
+  display: flex;
+  flex: none;
+  align-items: center;
+  align-self: center;
+  gap: var(--space-2);
+  margin-left: auto;
+}

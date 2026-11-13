@@ -1,0 +1,95 @@
+/* Design .menu: surface panel, pop shadow, 36px rows (48px on phones). */
+.menu {
+  display: flex;
+  flex-direction: column;
+  min-width: 220px;
+  padding: 6px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  background: var(--surface);
+  box-shadow: var(--shadow-pop);
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 36px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: var(--r-sm);
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-size: var(--fs-body);
+  text-align: start;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.item:hover,
+.item:focus-visible {
+  background: var(--surface-3);
+  outline: none;
+}
+
+.item:disabled {
+  background: transparent;
+  color: var(--ink-4);
+  cursor: not-allowed;
+}
+
+.danger {
+  color: var(--err-ink);
+}
+
+.icon {
+  display: inline-flex;
+  flex: none;
+  color: var(--ink-3);
+}
+
+.danger .icon {
+  color: inherit;
+}
+
+.icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+.label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.trailing {
+  display: inline-flex;
+  flex: none;
+  margin-left: auto;
+  color: var(--ink-3);
+}
+
+.separator {
+  height: 1px;
+  margin: 6px 4px;
+  background: var(--line);
+}
+
+.groupLabel {
+  padding: 8px 10px 4px;
+  color: var(--ink-3);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+@media (width < 768px), (pointer: coarse) {
+  .item {
+    min-height: 48px;
+  }
+}

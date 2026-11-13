@@ -1,0 +1,423 @@
+/* Question Answer Panel - for AskUserQuestion tool with tabbed UI. The
+   needs-you card pinned above the composer: amber head (NeedsYouHead), the
+   question, bordered option rows, then Skip and the primary answer action. */
+
+/* Wrapper for the question panel with floating toggle */
+.wrapper {
+  position: relative;
+  margin-bottom: var(--space-2);
+}
+
+/* Floating toggle button above the panel */
+.toggle {
+  position: absolute;
+  top: -11px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1;
+  width: 40px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-chip);
+  box-shadow: var(--shadow-card);
+  color: var(--ink-3);
+  cursor: pointer;
+  transition:
+    background 120ms ease,
+    color 120ms ease,
+    border-color 120ms ease;
+}
+
+.toggle::after {
+  position: absolute;
+  inset: -12px -6px;
+  content: "";
+}
+
+.toggle:hover {
+  background: var(--surface-3);
+  color: var(--ink);
+  border-color: var(--line-strong);
+}
+
+.toggle svg {
+  width: 14px;
+  height: 14px;
+  transition: transform 0.2s ease;
+}
+
+/* `chevron-up`/`chevron-down` is shared collapse-affordance vocabulary that
+   MessageInput and ToolApprovalPanel also set on their own toggles, so it
+   stays global and this module only reacts to it. */
+.toggle svg:global(.chevron-up) {
+  transform: rotate(180deg);
+}
+
+/* The card: the amber line says "answer me"; the head stays put while the
+   body scrolls. */
+.panel {
+  display: flex;
+  flex-direction: column;
+  max-width: 44rem;
+  margin-inline: auto;
+  overflow: hidden;
+  background: var(--surface);
+  border: 1px solid var(--ask-line);
+  border-radius: var(--r-card);
+  box-shadow: var(--shadow-pop);
+  /* Mobile: limit height and enable scrolling when keyboard is open */
+  max-height: min(60dvh, 30rem);
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 0;
+  padding: 14px 16px 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.empty {
+  padding: 14px 16px;
+  color: var(--ink-3);
+  font-style: italic;
+}
+
+/* Tab bar */
+.tabs {
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.tab {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-height: var(--chip-h);
+  padding: 0 var(--space-3);
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-chip);
+  font-size: var(--fs-small);
+  color: var(--ink-2);
+  cursor: pointer;
+  transition:
+    background 120ms ease,
+    color 120ms ease;
+}
+
+.tab:hover {
+  background: var(--surface-3);
+}
+
+.tab.active {
+  background: var(--accent-soft);
+  border-color: var(--accent-line);
+  color: var(--accent-ink);
+  font-weight: 600;
+}
+
+.tab.answered:not(.active) {
+  color: var(--ok-ink);
+}
+
+.tabCheck {
+  color: var(--ok-ink);
+}
+
+.tab.active .tabCheck {
+  color: var(--accent-ink);
+}
+
+/* Question content */
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.content .text {
+  font-size: var(--fs-h3);
+  font-weight: var(--title-weight);
+  color: var(--ink);
+  line-height: 1.4;
+  /* Cap the reading measure (~45-75 chars is the readability sweet spot) so
+     prose never runs to 1000px+ lines on a very wide card. Only shrinks —
+     the card still fills the window, and no horizontal scroll is introduced. */
+  max-width: 72ch;
+}
+
+/* Options list */
+.optionsList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  /* Query container so an option's preview can switch between stacked (below)
+     and side-by-side (beside) based on the card's own width, not the viewport. */
+  container-type: inline-size;
+  container-name: qopts;
+}
+
+.option {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  column-gap: var(--space-3);
+  row-gap: var(--space-2);
+  min-height: var(--tap-min);
+  padding: 12px 14px;
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-input);
+  color: var(--ink);
+  text-align: left;
+  cursor: pointer;
+  transition:
+    background 120ms ease,
+    border-color 120ms ease;
+  width: 100%;
+}
+
+.option:hover {
+  background: var(--surface-3);
+}
+
+.option.selected {
+  /* Single-cue selection: a tinted fill and an accent border. */
+  border-color: var(--accent-line);
+  background: var(--accent-soft);
+}
+
+.option.selected:hover {
+  border-color: var(--accent-line);
+  background: var(--accent-soft);
+}
+
+/* Drawn radio: a ring that fills with an accent dot when chosen. */
+.optionRadio {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  margin-top: 2px;
+  background: var(--surface);
+  border: 1.5px solid var(--line-strong);
+  border-radius: 50%;
+}
+
+/* Multi-select draws a rounded square instead. */
+.optionCheck {
+  border-radius: 5px;
+}
+
+.optionMarkOn {
+  background: var(--accent);
+  border-color: var(--accent);
+  box-shadow: inset 0 0 0 3px var(--surface);
+}
+
+.option .optionLabel {
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.option .optionDesc {
+  font-size: var(--fs-small);
+  color: var(--ink-2);
+}
+
+.optionText {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  /* Same readable-measure cap as the question prose; min-width:0 lets the
+     text shrink inside its grid cell instead of forcing the row wider. */
+  min-width: 0;
+  max-width: 72ch;
+}
+
+/* Option preview: a neutral, monospaced surface for the option's `preview`
+   content. Stacked full-width below the option by default (spans both grid
+   columns); promoted to a side panel when the card is wide (see @container). */
+.optionPreview {
+  grid-column: 1 / -1;
+  margin: 0;
+  padding: var(--space-2);
+  background: var(--code-bg);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  color: var(--ink-2);
+  font-family: var(--font-mono);
+  font-size: var(--fs-code);
+  line-height: 1.45;
+  white-space: pre;
+  overflow: auto;
+  max-height: 14rem;
+  /* Selectable/copyable even though it lives inside the option button. */
+  cursor: text;
+  user-select: text;
+}
+
+@container qopts (min-width: 460px) {
+  .option.hasPreview {
+    /* Bounded text column keeps the side preview adjacent to the option
+       instead of flung to the far edge on an extremely wide card. */
+    grid-template-columns: auto minmax(0, 40rem) minmax(10rem, 18rem);
+  }
+
+  .option.hasPreview .optionPreview {
+    grid-column: 3;
+    grid-row: 1 / 2;
+    align-self: stretch;
+    max-height: 16rem;
+  }
+}
+
+/* Other option input */
+.otherInput {
+  margin-left: calc(18px + var(--space-3) + 14px);
+}
+
+.otherInput input {
+  width: 100%;
+  min-height: var(--input-h);
+  padding: 0 var(--space-3);
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-input);
+  color: var(--ink);
+  font-size: var(--fs-input);
+}
+
+.otherInput input:focus {
+  outline: none;
+  border-color: var(--focus);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.otherInput input::placeholder {
+  color: var(--ink-4);
+}
+
+/* Actions */
+.actions {
+  /* Pin to the bottom of the scrolling panel so Cancel/Submit stay reachable
+     on short/narrow screens without scrolling past the options. */
+  position: sticky;
+  bottom: 0;
+  z-index: 1;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 10px 0 16px;
+  border-top: 1px solid var(--line);
+  background: var(--surface);
+}
+
+.btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: var(--btn-h);
+  padding: 0 var(--btn-px);
+  /* Transparent border on every variant keeps heights aligned whether or not
+     a variant draws a visible border. */
+  border: 1px solid transparent;
+  border-radius: var(--r-btn);
+  font-size: var(--fs-btn);
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    opacity 0.15s,
+    background 0.15s,
+    border-color 0.15s,
+    color 0.15s;
+  min-width: 90px;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Skip is a quiet ghost so the single solid answer action reads as the
+   primary CTA. */
+.btn.deny {
+  background: transparent;
+  color: var(--ink-2);
+}
+
+.btn.deny:hover:not(:disabled) {
+  background: var(--surface-3);
+  color: var(--ink);
+}
+
+.btn.next {
+  background: var(--surface);
+  border-color: var(--line-strong);
+  color: var(--ink);
+}
+
+.btn.next:hover:not(:disabled) {
+  background: var(--surface-3);
+}
+
+.btn.submit {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+.btn.submit:hover:not(:disabled) {
+  background: var(--accent-hover);
+}
+
+.btn kbd {
+  font-family: var(--font-mono);
+  font-size: var(--fs-meta);
+  font-weight: 400;
+  padding: 0.1rem 0.3rem;
+  /* Theme-agnostic translucent chip (reads on both the ghost Cancel and the
+     solid Submit), de-emphasized so the shortcut hint stays subordinate. */
+  background: rgba(127, 127, 127, 0.22);
+  border-radius: var(--radius-sm);
+  opacity: 0.75;
+}
+
+/* Keycap hints are for hardware keyboards only. */
+@media (pointer: coarse) {
+  .btn kbd {
+    display: none;
+  }
+}
+
+/* Mobile adjustments: Skip keeps its width, the answer action fills. */
+@media (width <= 600px) {
+  .body {
+    padding: 14px 14px 0;
+  }
+
+  .tabs {
+    gap: var(--space-1);
+  }
+
+  .actions {
+    flex-direction: row;
+  }
+
+  .btn {
+    min-width: 70px;
+    min-height: var(--tap-min);
+  }
+
+  .btn.submit,
+  .btn.next {
+    flex: 1;
+  }
+}

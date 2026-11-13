@@ -1,0 +1,53 @@
+.expandedCommand:global(.tool-summary-command) {
+  display: block;
+  text-overflow: clip;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.disclosureAnchor {
+  display: inline-block;
+  position: relative;
+  width: 0;
+  height: 1cap;
+  vertical-align: baseline;
+}
+
+.waitingRow {
+  --timeline-dot-default: var(--attn);
+}
+
+.waitingSummary {
+  min-width: 0;
+  overflow-x: auto;
+  white-space: pre;
+  color: var(--attn-ink);
+  font: var(--font-size-base) / 1.5 var(--font-mono);
+}
+
+.waitingHeader:global(.tool-row-header) {
+  cursor: default;
+}
+
+.waitingHeader:global(.tool-row-header):hover {
+  background: transparent;
+}
+
+:global(.ran-tool-row) .disclosureAnchor {
+  margin-inline: -1px 1px;
+}
+
+:global(.tool-row):has(.disclosureAnchor button)::before {
+  display: none;
+}
+
+:global(.tool-row):has(.disclosureAnchor button)::after {
+  top: 24px;
+  opacity: 0.45;
+}
+
+/* Pending rows pause their spinner while off screen: the row sets
+   `--activity-play` from viewport visibility. */
+:global(.tool-spinner) > .pendingSpinner {
+  animation-play-state: var(--activity-play, paused);
+}

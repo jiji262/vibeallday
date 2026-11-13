@@ -1,0 +1,37 @@
+/* Reference type as a garden Tag (radius 6, mono 11px uppercase). The hues
+   carry no state: open, merged and closed come from the tracker Badge. */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+  padding: 2px var(--space-2);
+  border-radius: var(--r-xs);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: var(--badge-tracking);
+  line-height: 1.4;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.jira {
+  background: var(--accent-soft);
+  color: var(--accent-ink);
+}
+
+.pr {
+  background: color-mix(in srgb, var(--provider-opencode) 14%, transparent);
+  color: var(--provider-opencode);
+}
+
+.issue {
+  background: color-mix(in srgb, var(--provider-pi) 14%, transparent);
+  color: var(--provider-pi);
+}
+
+.unknown {
+  background: var(--surface-3);
+  color: var(--ink-3);
+}

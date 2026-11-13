@@ -1,0 +1,214 @@
+/*
+ * Public share inventory: one flush card of share rows with dashed
+ * dividers, mono meta, a mode tile and ghost icon actions.
+ */
+
+.list {
+  display: grid;
+  max-height: min(72vh, 720px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--card);
+  box-shadow: var(--shadow-xs);
+  touch-action: pan-y;
+}
+
+.listCompact {
+  max-height: min(240px, 35vh);
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  transition: background-color var(--duration-fast) var(--ease-standard);
+}
+
+.row + .row {
+  border-top: 1px dashed var(--dash);
+}
+
+.row:hover {
+  background: var(--bg-2);
+}
+
+.rowHighlighted,
+.rowHighlighted:hover {
+  background: var(--indigo-soft);
+  box-shadow: inset 3px 0 var(--indigo);
+}
+
+.rowMain {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.rowMain strong,
+.rowMeta {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rowMain strong {
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.rowMeta {
+  color: var(--ink-3);
+  font-family: var(--label-font);
+  font-size: 12px;
+}
+
+.warning {
+  color: var(--peach-ink);
+  font-size: 12px;
+}
+
+.notice {
+  color: var(--ink-3);
+  font-size: 13px;
+}
+
+.rowActions {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.rowTypeIcon {
+  display: inline-flex;
+  flex: 0 0 28px;
+  align-items: center;
+  justify-content: center;
+  height: 28px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--bg-soft);
+  color: var(--ink-3);
+}
+
+.rowTypeIcon svg {
+  width: 16px;
+  height: 16px;
+}
+
+.rowTypeIconLive {
+  border-color: transparent;
+  background: var(--mint-soft);
+  color: var(--mint-ink);
+}
+
+.iconButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  min-height: 32px;
+  padding: 4px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--ink-3);
+  cursor: pointer;
+  transition:
+    background-color var(--duration-fast) var(--ease-standard),
+    color var(--duration-fast) var(--ease-standard);
+}
+
+.iconButton:hover:not(:disabled) {
+  background: var(--bg-soft);
+  color: var(--ink);
+}
+
+.iconButton:focus-visible {
+  border-color: var(--indigo);
+  box-shadow: 0 0 0 3px var(--indigo-soft);
+}
+
+.iconButtonFreeze {
+  color: var(--peach-ink);
+}
+
+.iconButtonFreeze svg {
+  width: 14px;
+  height: 14px;
+}
+
+.iconButtonFreeze:hover:not(:disabled) {
+  background: var(--peach-soft);
+  color: var(--peach-ink);
+}
+
+.iconButtonDanger {
+  color: var(--rose-ink);
+}
+
+.iconButtonDanger svg {
+  width: 13px;
+  height: 13px;
+}
+
+.iconButtonDanger:hover:not(:disabled) {
+  background: var(--rose-soft);
+  color: var(--rose-ink);
+}
+
+.iconButton:disabled {
+  color: var(--ink-4);
+  cursor: not-allowed;
+}
+
+.error {
+  color: var(--rose-ink);
+  font-size: 13px;
+}
+
+.empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: 40px var(--space-4);
+  color: var(--ink-3);
+  font-size: 14px;
+  text-align: center;
+}
+
+.count {
+  color: var(--ink-3);
+  font-family: var(--label-font);
+  font-size: var(--eyebrow-size);
+  letter-spacing: var(--meta-tracking);
+  text-align: right;
+  text-transform: uppercase;
+}
+
+@media (pointer: coarse) {
+  .iconButton {
+    min-width: var(--tap-min);
+    min-height: var(--tap-min);
+  }
+}
+
+@media (width <= 600px) {
+  .row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .row,
+  .iconButton {
+    transition: none;
+  }
+}

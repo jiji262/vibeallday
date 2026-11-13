@@ -1,0 +1,196 @@
+/* Command palette (design Palette-Desktop): a 640px dialog over the scrim,
+   grouped rows with an accent-soft active row and match marks, and a
+   footer of key hints. */
+.scrim {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-sheet);
+  padding: 88px var(--space-4) var(--space-4);
+  background: var(--scrim);
+}
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 640px;
+  max-height: 100%;
+  margin-inline: auto;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--r-dialog);
+  background: var(--surface);
+  box-shadow: var(--shadow-pop);
+}
+
+.field {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--line);
+}
+
+.fieldIcon {
+  flex-shrink: 0;
+  color: var(--ink-3);
+}
+
+.input {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-size: max(var(--fs-input), var(--fs-h3));
+  outline: none;
+}
+
+.input::placeholder {
+  color: var(--ink-4);
+}
+
+.list {
+  max-height: min(620px, 60dvh);
+  padding: 6px 8px 10px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.group {
+  padding-top: 6px;
+}
+
+.group + .group {
+  margin-top: 6px;
+  border-top: 1px solid var(--line);
+}
+
+.groupLabel {
+  margin: 0;
+  padding: 8px 10px 4px;
+  color: var(--ink-3);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 44px;
+  padding: 7px 10px;
+  border-radius: var(--r-md);
+  color: var(--ink);
+  font-size: var(--fs-body);
+  cursor: pointer;
+}
+
+.row:hover {
+  background: var(--surface-3);
+}
+
+.active,
+.active:hover {
+  background: var(--accent-soft);
+  box-shadow: inset 0 0 0 1px var(--accent-line);
+}
+
+.rowIcon {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  background: var(--surface-2);
+  color: var(--ink-2);
+}
+
+.rowText {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.rowLabel,
+.rowHint {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rowLabel {
+  font-weight: 600;
+}
+
+.rowHint {
+  color: var(--ink-3);
+  font-size: var(--fs-small);
+}
+
+.hit {
+  padding: 0 2px;
+  border-radius: 3px;
+  background: var(--accent-soft);
+  color: var(--accent-ink);
+}
+
+.empty {
+  margin: 0;
+  padding: var(--space-3);
+  color: var(--ink-3);
+  font-size: var(--fs-small);
+  text-align: center;
+}
+
+.footer {
+  display: flex;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 18px;
+  border-top: 1px solid var(--line);
+  background: var(--surface-2);
+}
+
+.footerHint {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--ink-3);
+  font-family: var(--font-mono);
+  font-size: var(--fs-meta);
+}
+
+@media (pointer: coarse) {
+  .row {
+    min-height: var(--tap-min);
+  }
+
+  .footer {
+    display: none;
+  }
+}
+
+@media (width < 768px) {
+  .scrim {
+    padding-top: 56px;
+  }
+
+  .list {
+    max-height: none;
+    flex: 1 1 auto;
+  }
+}

@@ -1,0 +1,78 @@
+/*
+ * Sessions list page: intro, a sticky toolbar, then the result card. The
+ * toolbar pieces live in components/session-search; the card in
+ * session-search/SessionResults.
+ */
+
+.page {
+  box-sizing: border-box;
+  width: 100%;
+}
+
+/* The scroll container is the page's own; the toolbar pins to its top. */
+.sticky {
+  position: sticky;
+  top: 0;
+  z-index: 11;
+  margin: 0 calc(var(--page-gutter) * -1);
+  padding: var(--space-2) var(--page-gutter) 0;
+  background: var(--canvas);
+}
+
+.stack {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.stack:not(:empty) {
+  margin-bottom: var(--space-4);
+}
+
+.progress {
+  margin: 0;
+  color: var(--ink-3);
+  font-size: var(--fs-small);
+}
+
+.note {
+  margin: var(--space-3) 0 0;
+  color: var(--ink-3);
+  font-size: var(--fs-small);
+  line-height: 1.4;
+}
+
+.footer {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-3);
+  align-items: start;
+  margin-top: var(--space-3);
+}
+
+/* A turn match opens beside the list on wide screens. */
+.withDetail {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 40%);
+  grid-template-rows: auto minmax(0, 1fr);
+  max-width: none;
+}
+
+.detailHost {
+  grid-area: 1 / 2 / 3 / 3;
+  min-height: 0;
+  min-width: 0;
+  border-left: 1px solid var(--line);
+}
+
+@media (width < 1100px) {
+  .withDetail {
+    display: flex;
+  }
+
+  .detailHost {
+    position: fixed;
+    inset: 0 0 0 20px;
+    z-index: 100;
+    box-shadow: var(--shadow-lg);
+  }
+}

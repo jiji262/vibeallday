@@ -1,0 +1,59 @@
+/* Soft track; the chosen segment is a raised card with indigo text. */
+.track {
+  display: flex;
+  gap: 2px;
+  padding: 2px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-md);
+  background: var(--bg-soft);
+}
+
+.segment {
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 34px;
+  padding: 0 var(--space-3);
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--ink-3);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.2;
+  cursor: pointer;
+  transition:
+    background-color var(--duration-fast) var(--ease-standard),
+    color var(--duration-fast) var(--ease-standard);
+}
+
+.segment:hover {
+  color: var(--ink);
+}
+
+.segment[aria-pressed="true"] {
+  background: var(--card);
+  color: var(--indigo);
+  box-shadow: var(--shadow-xs);
+}
+
+.segment:focus-visible {
+  box-shadow: 0 0 0 3px var(--indigo-soft-2);
+}
+
+.segment:disabled {
+  color: var(--ink-4);
+  cursor: not-allowed;
+}
+
+@media (pointer: coarse) {
+  .segment {
+    min-height: var(--tap-min);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .segment {
+    transition: none;
+  }
+}

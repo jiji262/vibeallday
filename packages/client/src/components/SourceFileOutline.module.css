@@ -1,0 +1,127 @@
+.outline {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.group {
+  min-width: 0;
+  list-style: none;
+}
+
+.groupButton {
+  width: 100%;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 30px;
+  padding: 4px 10px;
+  color: var(--ink-2);
+  font: inherit;
+  font-size: var(--fs-small);
+  text-align: left;
+  background: transparent;
+  border: 0;
+  border-radius: var(--r-sm);
+  cursor: pointer;
+}
+
+.groupButton:hover {
+  color: var(--ink);
+  background: var(--surface-3);
+}
+
+.groupButton:focus-visible {
+  color: var(--ink);
+  background: var(--surface-3);
+  outline: 2px solid var(--focus);
+  outline-offset: -2px;
+}
+
+.disclosure {
+  width: 12px;
+  flex: 0 0 12px;
+  color: var(--ink-3);
+  text-align: center;
+}
+
+.groupLabel {
+  min-width: 0;
+  overflow: hidden;
+  flex: 1;
+  font-family: var(--font-mono);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.groupStatuses {
+  display: inline-flex;
+  flex: 0 0 auto;
+  gap: 3px;
+  align-items: center;
+}
+
+.groupCount {
+  min-width: 22px;
+  padding: 1px 5px;
+  color: var(--ink-3);
+  font-size: var(--fs-meta);
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  background: var(--surface-3);
+  border-radius: 999px;
+}
+
+.children {
+  margin: 0 0 0 0.95rem;
+  padding: 0 0 0 0.45rem;
+  list-style: none;
+  border-left: 1px solid var(--line);
+}
+
+.sectionDivider {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 10px 8px 6px;
+  color: var(--ink-3);
+  font-size: var(--fs-meta);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.sectionDivider::before,
+.sectionDivider::after {
+  height: 1px;
+  flex: 1;
+  content: "";
+  background: var(--line);
+}
+
+.sectionDivider::before {
+  flex: 0 0 12px;
+}
+
+.sectionDividerButton {
+  width: calc(100% - 16px);
+  padding: 0;
+  font: inherit;
+  cursor: pointer;
+  background: transparent;
+  border: 0;
+}
+
+.sectionDividerButton:hover,
+.sectionDividerButton:focus-visible {
+  color: var(--ink);
+}
+
+.sectionDisclosure {
+  width: 10px;
+  flex: 0 0 10px;
+  font-size: 0.78rem;
+  text-align: center;
+}

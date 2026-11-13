@@ -1,0 +1,202 @@
+/*
+ * One card in the projects grid (design .prj-card): identity head with the
+ * overflow menu, caption, status counts, and New session / Open at the foot.
+ * The grid itself lives in ProjectsPage.module.css.
+ */
+
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-width: 0;
+  padding: 18px 18px 14px;
+  border: 1px solid var(--card-line);
+  border-radius: var(--r-card);
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: var(--shadow-card);
+}
+
+.head {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.identity {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.nameLine {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+/* Truncates the name itself so the code-name chip beside it stays visible. */
+.name {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--ink);
+  font-size: var(--fs-h2);
+  font-weight: var(--title-weight);
+  font-stretch: var(--display-stretch);
+  line-height: 1.25;
+  text-decoration: none;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.name:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.name:focus-visible {
+  border-radius: var(--r-chip);
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/* Its own row under the title line, which would clip it. */
+.codeNameError {
+  display: block;
+  color: var(--err-ink);
+  font-size: var(--fs-meta);
+  line-height: 1.25;
+}
+
+.path {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--ink-3);
+  font-family: var(--font-mono);
+  font-size: var(--fs-meta);
+  line-height: 1.4;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  /* Truncate the head, keeping the project's own directory visible. The
+     `bdi` around the path keeps it reading left to right inside this box. */
+  direction: rtl;
+  text-align: left;
+}
+
+.more {
+  flex: none;
+  margin: -4px -6px 0 0;
+}
+
+.stats {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1) 14px;
+  color: var(--ink-2);
+  font-size: var(--fs-small);
+}
+
+.stat {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.attn {
+  color: var(--attn-ink);
+  font-weight: 600;
+}
+
+.meta {
+  color: var(--ink-3);
+  white-space: nowrap;
+}
+
+.queueWarning {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--attn-soft);
+  color: var(--attn-ink);
+  font-family: var(--font-mono);
+  font-size: var(--fs-meta);
+  font-weight: 700;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: auto;
+}
+
+/* The design's ghost `btn-sm`, drawn on a router link. */
+.open {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--btn-h-sm);
+  padding: 0 12px;
+  border-radius: var(--r-btn);
+  color: var(--ink-2);
+  font-size: var(--fs-small);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.open:hover {
+  background: var(--surface-3);
+  color: var(--ink);
+}
+
+.open:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/* Inline editors keep their edit affordance out of the way until the card is
+   hovered or focused; touch screens always show it. */
+@media (hover: hover) and (pointer: fine) {
+  .card [data-row-affordance] {
+    opacity: 0;
+    transition: opacity var(--duration-fast) var(--ease-standard);
+  }
+
+  .card:hover [data-row-affordance],
+  .card:focus-within [data-row-affordance] {
+    opacity: 1;
+  }
+}
+
+@media (pointer: coarse) {
+  .open {
+    min-height: var(--tap-min);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card [data-row-affordance] {
+    transition: none;
+  }
+}
+
+@media (width < 768px) {
+  .card {
+    gap: 10px;
+    padding: 14px;
+  }
+
+  .name {
+    font-size: var(--fs-h3);
+  }
+}

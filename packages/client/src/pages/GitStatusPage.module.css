@@ -1,0 +1,20 @@
+/* Released-server compatibility view: repository operations in their own row
+   above the compatibility notice. The page head is `SourceControlIntro`. */
+.compatibilityActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+/* The compatibility note keeps a real heading above its warning banner. */
+.compatibilityNote {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.compatibilityNote h2 {
+  margin: 0;
+  font-size: var(--font-size-md);
+  font-weight: 600;
+}
