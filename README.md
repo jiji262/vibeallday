@@ -188,4 +188,6 @@ pnpm start
 `packages/server` 本地服务 · `packages/client` Web 界面 ·
 `packages/shared` 共享协议 · `packages/relay` 可选远程 relay。
 
+友情链接：[Linux DO](https://linux.do/)
+
 [MIT License](LICENSE)
