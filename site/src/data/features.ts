@@ -318,7 +318,7 @@ export const features = [
     providers: ["opencode", "grok", "gemini", "pi"],
     sourceRefs: [
       "site/src/content/docs/providers.md",
-      "packages/server/src/sdk/providers/gemini.ts",
+      "packages/server/src/sdk/providers/gemini-acp.ts",
     ],
   },
   {

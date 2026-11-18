@@ -1,6 +1,3 @@
-import { FilterChip } from "../components/controls/FilterChip";
-import { Count } from "../components/garden/Count";
-import { StatusDot, type StatusState } from "../components/garden/StatusDot";
 import { type MessageKey, useI18n } from "../i18n";
 import styles from "./AgentsStateFilter.module.css";
 
@@ -10,13 +7,25 @@ export type ProcessStateFilter = "all" | ProcessSectionKey;
 const CHIPS: Array<{
   value: ProcessSectionKey;
   label: MessageKey;
-  state: StatusState;
 }> = [
-  { value: "active", label: "agentsSectionActive", state: "run" },
-  { value: "idle", label: "agentsSectionIdle", state: "idle" },
-  { value: "stopped", label: "agentsSectionStopped", state: "queued" },
-  { value: "external", label: "agentsSectionExternal", state: "attn" },
+  { value: "active", label: "agentsSectionActive" },
+  { value: "idle", label: "agentsSectionIdle" },
+  { value: "stopped", label: "agentsSectionStopped" },
+  { value: "external", label: "agentsSectionExternal" },
 ];
+
+function dotClassFor(section: ProcessSectionKey, count: number) {
+  switch (section) {
+    case "active":
+      return count > 0 ? styles.dotRunLive : styles.dotRun;
+    case "idle":
+      return styles.dotIdle;
+    case "stopped":
+      return styles.dotStopped;
+    case "external":
+      return styles.dotAttn;
+  }
+}
 
 /** Whether a section shows under the chosen chip. */
 export function showsSection(
@@ -58,8 +67,8 @@ export function countShown(
 }
 
 /**
- * Design 进程 state chips: all, then one per section with its count. A
- * second press on a chip returns to all.
+ * Studio segmented state pills: all, then one per section with its count.
+ * A second press on an active section pill returns to all.
  */
 export function AgentsStateFilter({
   value,
@@ -76,27 +85,50 @@ export function AgentsStateFilter({
   const { t } = useI18n();
   const chips = CHIPS.filter((chip) => external || chip.value !== "external");
   const total = chips.reduce((sum, chip) => sum + counts[chip.value], 0);
+  const allPressed = value === "all";
   return (
     <div
       role="group"
       aria-label={t("agentsStateFilterLabel")}
-      className={styles.chips}
+      className={styles.segmented}
     >
-      <FilterChip pressed={value === "all"} onClick={() => onChange("all")}>
-        {t("agentsStateAll")}
-        <Count>{total}</Count>
-      </FilterChip>
-      {chips.map((chip) => (
-        <FilterChip
-          key={chip.value}
-          pressed={value === chip.value}
-          onClick={() => onChange(value === chip.value ? "all" : chip.value)}
+      <button
+        type="button"
+        aria-pressed={allPressed}
+        className={`${styles.pill} ${allPressed ? styles.pillActive : ""}`}
+        onClick={() => onChange("all")}
+      >
+        <span className={styles.pillLabel}>{t("agentsStateAll")}</span>{" "}
+        <span
+          className={`${styles.pillCount} ${allPressed ? styles.pillCountActive : ""}`}
         >
-          <StatusDot state={chip.state} />
-          {t(chip.label)}
-          <Count>{counts[chip.value]}</Count>
-        </FilterChip>
-      ))}
+          {total}
+        </span>
+      </button>
+      {chips.map((chip) => {
+        const pressed = value === chip.value;
+        const count = counts[chip.value];
+        return (
+          <button
+            key={chip.value}
+            type="button"
+            aria-pressed={pressed}
+            className={`${styles.pill} ${pressed ? styles.pillActive : ""}`}
+            onClick={() => onChange(pressed ? "all" : chip.value)}
+          >
+            <span
+              className={`${styles.dot} ${dotClassFor(chip.value, count)}`}
+              aria-hidden="true"
+            />
+            <span className={styles.pillLabel}>{t(chip.label)}</span>{" "}
+            <span
+              className={`${styles.pillCount} ${pressed ? styles.pillCountActive : ""}`}
+            >
+              {count}
+            </span>
+          </button>
+        );
+      })}
     </div>
   );
 }

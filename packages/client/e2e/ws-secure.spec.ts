@@ -286,7 +286,7 @@ test.describe("Remote Access Configuration", () => {
         "X-VibeAllDay": "true",
       },
       body: JSON.stringify({
-        url: "wss://relay.example.com/ws",
+        url: "ws://127.0.0.1:9/ws",
         username: "ab",
       }),
     });
@@ -304,7 +304,7 @@ test.describe("Remote Access Configuration", () => {
         "X-VibeAllDay": "true",
       },
       body: JSON.stringify({
-        url: "wss://relay.example.com/ws",
+        url: "ws://127.0.0.1:9/ws",
         username: "testuser",
       }),
     });

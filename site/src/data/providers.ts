@@ -88,13 +88,14 @@ export const providers = [
     name: "Gemini CLI",
     status: "experimental",
     summary:
-      "Launch or read Gemini CLI sessions with a narrower control surface.",
+      "Launch or resume Gemini CLI sessions through the Agent Client Protocol, and read historical Gemini CLI transcripts.",
     notes:
-      "Streaming and tool rendering are available; approvals, steering, and history behavior vary by mode.",
+      "Streaming, tool rendering, approvals, and durable history run through Gemini CLI's ACP mode.",
     runtimeIds: ["gemini", "gemini-acp"],
     sourceRefs: [
-      "packages/server/src/sdk/providers/gemini.ts",
       "packages/server/src/sdk/providers/gemini-acp.ts",
+      "packages/server/src/sessions/gemini-reader.ts",
+      "site/src/content/docs/providers.md",
     ],
   },
   {

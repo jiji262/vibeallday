@@ -10,7 +10,6 @@ import {
 } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
-  BANG_COMMANDS_CAPABILITY,
   DEFAULT_PROJECT_QUEUE_QUIET_SECONDS,
   DEFAULT_STEER_NOW_ENABLED,
   PROJECT_QUEUE_CAPABILITY,
@@ -203,26 +202,6 @@ describe("MessageDeliverySettings", () => {
 
     expect(mockUpdateSettings).toHaveBeenCalledWith({
       clientDefaults: { projectQueueCtrlEnterEnabled: false },
-    });
-  });
-
-  it("keeps local bang commands default-off behind a server capability", () => {
-    render(<MessageDeliverySettings />);
-    expect(screen.queryByLabelText("messageDeliveryBangCommandsTitle")).toBe(
-      null,
-    );
-
-    cleanup();
-    versionState.version = {
-      capabilities: [PROJECT_QUEUE_CAPABILITY, BANG_COMMANDS_CAPABILITY],
-    };
-    render(<MessageDeliverySettings />);
-
-    const toggle = screen.getByLabelText("messageDeliveryBangCommandsTitle");
-    expect((toggle as HTMLInputElement).checked).toBe(false);
-    fireEvent.click(toggle);
-    expect(mockUpdateSettings).toHaveBeenCalledWith({
-      clientDefaults: { bangCommandsEnabled: true },
     });
   });
 

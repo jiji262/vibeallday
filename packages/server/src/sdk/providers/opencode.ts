@@ -30,6 +30,7 @@ import type {
   OpenCodeSSEEvent,
   OpenCodeSessionStatus,
   OpenCodeSessionStatusEvent,
+  ProviderSubscriptionUsage,
 } from "@vibeallday/shared";
 import { parseOpenCodeSSEEvent } from "@vibeallday/shared";
 import { getLogger } from "../../logging/logger.js";
@@ -54,6 +55,7 @@ import {
   parseOpenCodeModelSelection,
   parseOpenCodeVerboseModels,
 } from "./opencode-models.js";
+import { fetchOpenCodeGoSubscriptionUsage } from "./provider-subscription-usage.js";
 import type {
   CanUseTool,
   ContentBlock,
@@ -98,6 +100,10 @@ export interface OpenCodeProviderConfig {
   opencodePath?: string;
   /** Base port to start from (auto-selects if not specified) */
   basePort?: number;
+  /** Optional OpenCode data directory override (used for tests / custom XDG setups) */
+  dataDir?: string;
+  /** Optional fetch override for deterministic subscription usage tests */
+  fetchImpl?: typeof fetch;
 }
 
 /** Port counter for unique port assignment */
@@ -264,10 +270,14 @@ export class OpenCodeProvider implements AgentProvider {
   readonly supportsSteering = false;
 
   private readonly opencodePath?: string;
+  private readonly dataDir?: string;
+  private readonly fetchImpl?: typeof fetch;
   private modelCatalogStatus: ModelCatalogStatus | undefined;
 
   constructor(config: OpenCodeProviderConfig = {}) {
     this.opencodePath = config.opencodePath;
+    this.dataDir = config.dataDir;
+    this.fetchImpl = config.fetchImpl;
   }
 
   /**
@@ -310,6 +320,16 @@ export class OpenCodeProvider implements AgentProvider {
 
   getModelCatalogStatus(): ModelCatalogStatus | undefined {
     return this.modelCatalogStatus;
+  }
+
+  async getSubscriptionUsage(
+    models: readonly ModelInfo[],
+  ): Promise<ProviderSubscriptionUsage | null> {
+    if (!(await this.isInstalled())) return null;
+    return fetchOpenCodeGoSubscriptionUsage(models, {
+      dataDir: this.dataDir,
+      fetchImpl: this.fetchImpl,
+    });
   }
 
   /**

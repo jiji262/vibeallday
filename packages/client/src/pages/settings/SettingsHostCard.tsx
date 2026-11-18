@@ -94,14 +94,16 @@ export function SettingsHostCard({ compact = false }: { compact?: boolean }) {
         <p className={styles.meta}>{meta}</p>
       </div>
       {remote ? (
-        <Button
-          size="sm"
-          icon={<SwitchHostIcon size={SWITCH_ICON_SIZE} />}
-          onClick={() => switchHost(remote)}
-          title={t("moreSwitchHostHint")}
-        >
-          {t("settingsHostSwitch")}
-        </Button>
+        <div className={styles.actions}>
+          <Button
+            size="sm"
+            icon={<SwitchHostIcon size={SWITCH_ICON_SIZE} />}
+            onClick={() => switchHost(remote)}
+            title={t("moreSwitchHostHint")}
+          >
+            {t("settingsHostSwitch")}
+          </Button>
+        </div>
       ) : null}
     </section>
   );

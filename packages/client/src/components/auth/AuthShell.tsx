@@ -53,7 +53,7 @@ export function AuthShell({
             <h1 className={styles.title}>{title}</h1>
             {subtitle ? <p className={styles.subtitle}>{subtitle}</p> : null}
           </div>
-          {controls}
+          {controls ? <div className={styles.controls}>{controls}</div> : null}
           {children}
           {footer ? <div className={styles.footer}>{footer}</div> : null}
         </main>
@@ -113,6 +113,11 @@ export function AuthField({
       {hint ? <p className={styles.hint}>{hint}</p> : null}
     </div>
   );
+}
+
+/** Recessed Studio disclosure container for optional/advanced auth fields. */
+export function AuthAdvanced({ children }: { children: ReactNode }) {
+  return <div className={styles.advanced}>{children}</div>;
 }
 
 /** Checkbox row with a 44px target. */

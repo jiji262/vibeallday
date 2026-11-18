@@ -1,23 +1,41 @@
 /*
- * Inbox page layout (design Inbox-Desktop): status blocks in now/NowSummary,
- * then the section column beside an aside of review outcomes and quick
- * start. Sections live in now/InboxSection, queue rows in now/InboxQueueItem
- * and review rows in now/ReviewOutcomes.
+ * Studio Workbench Inbox layout: compact command header (PageIntro +
+ * OverviewToolbar + NowSummary KPI tiles), then the main section stack
+ * beside an aside of review outcomes and quick dispatch.
  */
+
+.commandHeader {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin-bottom: var(--space-5);
+}
+
+/* Collapse PageIntro's standalone bottom spacing inside the unified header. */
+.commandHeader > :first-child {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: 0;
+}
 
 .loading {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  gap: var(--space-5);
+  gap: var(--space-4);
 }
 
 .note {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: var(--space-2);
-  margin: 0 0 var(--space-5);
-  color: var(--ink-3);
-  font-size: var(--fs-small);
+  margin: 0 0 var(--space-4);
+  padding: 5px 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-btn);
+  background: var(--surface);
+  color: var(--ink-2);
+  font-family: var(--font-mono);
+  font-size: var(--fs-meta);
 }
 
 /* Main column grows; the aside wraps under it on narrow windows. */
@@ -25,14 +43,14 @@
   display: flex;
   flex-wrap: wrap;
   align-items: flex-start;
-  gap: var(--space-6);
+  gap: var(--space-5);
 }
 
 .main {
   display: flex;
   flex: 1 1 560px;
   flex-direction: column;
-  gap: var(--space-6);
+  gap: var(--space-5);
   min-width: 0;
 }
 
@@ -45,9 +63,14 @@
 }
 
 @media (width < 768px) {
+  .commandHeader {
+    gap: var(--space-2);
+    margin-bottom: var(--space-4);
+  }
+
   .columns,
   .main {
-    gap: 18px;
+    gap: var(--space-4);
   }
 
   .aside {

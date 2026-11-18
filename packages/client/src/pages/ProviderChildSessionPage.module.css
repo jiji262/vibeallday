@@ -8,17 +8,35 @@
 .parentLink {
   display: inline-flex;
   align-items: center;
-  min-height: var(--tap-min);
-  color: var(--link);
+  gap: 6px;
+  min-height: var(--btn-h);
+  padding-inline: var(--space-3);
+  border: 1px solid var(--line);
+  border-radius: var(--r-btn);
+  background: var(--surface);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.03);
+  color: var(--ink);
   font-size: var(--fs-small);
   font-weight: 500;
   text-decoration: none;
   white-space: nowrap;
+  transition:
+    background-color 140ms ease,
+    border-color 140ms ease,
+    color 140ms ease;
 }
 
 .parentLink:hover,
 .parentLink:focus-visible {
-  text-decoration: underline;
+  border-color: var(--line-strong);
+  background: var(--surface-3);
+  text-decoration: none;
+}
+
+@media (pointer: coarse) {
+  .parentLink {
+    min-height: var(--tap-min);
+  }
 }
 
 .main {
@@ -27,13 +45,19 @@
   overflow: auto;
 }
 
-.status {
-  margin: var(--space-4);
-  color: var(--ink-3);
+.statusCard {
+  max-width: 36rem;
+  margin: var(--space-6) auto;
+  padding: var(--space-4) var(--space-5);
+  border: 1px solid var(--card-line);
+  border-radius: var(--r-card);
+  background: var(--surface);
+  box-shadow: var(--shadow-card);
+  color: var(--ink-2);
   font-size: var(--fs-body);
 }
 
-/* The dock's back action is a link drawn as the primary button. */
+/* The dock's back action is a link drawn as the primary Studio button. */
 .dockLink {
   display: inline-flex;
   align-items: center;

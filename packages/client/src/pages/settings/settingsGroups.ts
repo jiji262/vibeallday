@@ -4,7 +4,6 @@ import type { SettingsCategory } from "./types";
 export type SettingsGroupId =
   | "agents"
   | "look"
-  | "notifications"
   | "access"
   | "projects"
   | "data"
@@ -17,60 +16,36 @@ interface SettingsGroupDefinition {
 }
 
 /**
- * The settings home lists categories under these groups, in this order.
+ * The settings home lists categories under these 5 groups, in this order.
  * Every id from `getSettingsCategories` belongs to exactly one group (pinned
- * by a test); a category a future change forgets to map lands in `advanced`
- * so it stays reachable.
+ * by a test); a category a future change forgets to map lands in the last
+ * group so it stays reachable.
  */
 export const SETTINGS_GROUPS: readonly SettingsGroupDefinition[] = [
   {
     id: "agents",
     titleKey: "settingsGroupAgents",
-    categoryIds: [
-      "providers",
-      "model",
-      "agent-context",
-      "agent-behavior",
-      "message-delivery",
-      "cache-miss-billing",
-      "remote-executors",
-    ],
+    categoryIds: ["providers", "model"],
   },
   {
     id: "look",
     titleKey: "settingsGroupLook",
-    categoryIds: ["appearance", "toolbar", "speech"],
-  },
-  {
-    id: "notifications",
-    titleKey: "settingsGroupNotifications",
-    categoryIds: ["notifications", "devices"],
+    categoryIds: ["appearance", "speech"],
   },
   {
     id: "access",
     titleKey: "settingsGroupAccess",
-    categoryIds: ["local-access", "remote", "users"],
+    categoryIds: ["local-access", "remote", "notifications", "users"],
   },
   {
     id: "projects",
     titleKey: "settingsGroupProjects",
-    categoryIds: [
-      "source-control",
-      "issues",
-      "project-templates",
-      "apps",
-      "webhooks",
-    ],
+    categoryIds: ["source-control", "apps", "storage"],
   },
   {
     id: "data",
     titleKey: "settingsGroupData",
-    categoryIds: ["storage", "import-export", "about"],
-  },
-  {
-    id: "advanced",
-    titleKey: "settingsGroupAdvanced",
-    categoryIds: ["performance", "environment", "development"],
+    categoryIds: ["about"],
   },
 ];
 

@@ -65,8 +65,11 @@ export function HostRow({
     t(MODE_LABEL_KEY[host.mode]),
     lastConnected ? t("hostPickerLastSeen", { time: lastConnected }) : "",
   ].filter(Boolean);
+  const rowClassName = current
+    ? `host-picker-item ${styles.host} ${styles.hostCurrent}`
+    : `host-picker-item ${styles.host}`;
   return (
-    <li className={`host-picker-item ${styles.host}`}>
+    <li className={rowClassName}>
       <span
         className={
           current ? `${styles.avatar} ${styles.avatarOn}` : styles.avatar

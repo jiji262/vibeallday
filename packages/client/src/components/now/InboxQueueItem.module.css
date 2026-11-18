@@ -1,6 +1,6 @@
 /*
- * A pending new-session Project Queue item, drawn as one more row of the
- * Running card: same padding and divider as the session rows.
+ * A pending new-session Project Queue item, drawn as a Studio row inside the
+ * Running panel: crisp surface hover, mono metadata, and status pills.
  */
 
 .item {
@@ -14,8 +14,9 @@
 
 .link {
   display: grid;
-  gap: var(--space-1);
-  padding: 14px var(--space-5);
+  gap: 4px;
+  padding: 12px var(--space-4);
+  background: var(--surface);
   color: inherit;
   text-decoration: none;
   transition: background-color var(--duration-fast) var(--ease-standard);
@@ -28,6 +29,15 @@
 .link:focus-visible {
   outline: none;
   box-shadow: inset 0 0 0 2px var(--focus);
+}
+
+.failed .link {
+  box-shadow: inset 3px 0 0 var(--err);
+  background: color-mix(in srgb, var(--err) 4%, var(--surface));
+}
+
+.failed .link:hover {
+  background: color-mix(in srgb, var(--err) 7%, var(--surface-2));
 }
 
 .titleRow {
@@ -55,17 +65,17 @@
   display: inline-flex;
   flex-shrink: 0;
   align-items: center;
-  height: 22px;
-  padding: 0 var(--space-2);
-  border-radius: var(--radius-pill);
-  font-family: var(--label-font);
-  font-size: 12px;
-  font-weight: 500;
-  letter-spacing: var(--badge-tracking);
+  height: 20px;
+  padding: 0 7px;
+  border-radius: var(--r-sm);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
   white-space: nowrap;
 }
 
 .targetBadge {
+  border: 1px solid var(--accent-line);
   background: var(--accent-soft);
   color: var(--accent-ink);
 }
@@ -87,34 +97,36 @@
   align-items: center;
   gap: var(--space-1) var(--space-3);
   color: var(--ink-3);
-  font-family: var(--label-font);
-  font-size: 12px;
+  font-family: var(--font-mono);
+  font-size: var(--fs-meta);
+  font-variant-numeric: tabular-nums;
 }
 
 .project {
   overflow: hidden;
   max-width: 160px;
+  color: var(--ink-2);
+  font-weight: 500;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .status {
-  background: var(--queue-soft);
+  border: 1px solid var(--line);
+  background: var(--surface-2);
   color: var(--ink-2);
 }
 
 .statusDispatching {
+  border-color: color-mix(in srgb, var(--run) 35%, var(--line));
   background: var(--run-soft);
   color: var(--run-ink);
 }
 
 .statusFailed {
+  border-color: color-mix(in srgb, var(--err) 35%, var(--line));
   background: var(--err-soft);
   color: var(--err-ink);
-}
-
-.failed .link {
-  background: color-mix(in srgb, var(--err) 4%, transparent);
 }
 
 @media (width < 768px) {

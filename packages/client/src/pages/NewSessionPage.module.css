@@ -1,46 +1,81 @@
+/*
+ * Studio Workbench AI Session Launchpad:
+ * - Centered launchpad stage (`max-width: 760px`) with optical vertical breathing
+ *   room when `appOpen` is false.
+ * - Crisp two-column split workspace (`composerPane` + bordered `appPane`)
+ *   when `appOpen` is true.
+ */
+
 .appButton {
-  min-height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--btn-h-sm);
+  padding: 0 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-btn);
+  background: var(--surface);
+  color: var(--ink-2);
+  font-size: var(--fs-small);
+  font-weight: 600;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .appButton {
+    transition:
+      border-color var(--duration-fast) var(--ease-standard),
+      background-color var(--duration-fast) var(--ease-standard),
+      color var(--duration-fast) var(--ease-standard);
+  }
+}
+
+.appButton:hover {
+  border-color: var(--line-strong);
+  background: var(--surface-2);
+  color: var(--ink);
 }
 
 .appButton[aria-pressed="true"] {
-  color: var(--app-accent);
-  border-color: var(--app-accent);
+  border-color: var(--accent-line);
+  background: var(--accent-soft);
+  color: var(--accent-ink);
+}
+
+.errorStage {
+  width: 100%;
+  max-width: 760px;
+  margin-inline: auto;
+  padding: var(--space-6) var(--space-5);
 }
 
 .workspace {
   display: flex;
+  flex: 1;
+  flex-direction: column;
   min-height: 0;
+  overflow: hidden auto;
+}
+
+.workspaceSplit {
+  flex-direction: row;
   overflow: hidden;
 }
 
-/* Design: 56px above the prompt heading, 64px below the last row. The
-   pre-boot composer (preboot/new-session-composer.js) mirrors the side
-   insets. */
-.formColumn {
-  --new-session-page-top: 56px;
+/* Centered launchpad stage by default (760px max-width + optical top spacing).
+   Pre-boot composer mirrors `--new-session-page-top` and side insets. */
+.composerPane {
+  --new-session-page-top: clamp(40px, 7.5dvh, 84px);
   --new-session-page-bottom: 64px;
-  flex: 1;
+  width: 100%;
+  max-width: 760px;
   min-width: 0;
-  overflow: auto;
+  margin-inline: auto;
   padding: var(--new-session-page-top) var(--console-page-inset)
     var(--new-session-page-bottom);
 }
 
-.appColumn {
-  flex: 1;
-  min-width: 0;
-  min-height: 0;
-}
-
-.formColumn[hidden],
-.appColumn[hidden] {
-  display: none;
-}
-
-/* Phones compose full screen: no tab bar here, so the page keeps clear of
-   the home indicator itself. */
 @media (width < 768px) {
-  .formColumn {
+  .composerPane {
     --new-session-page-top: var(--space-4);
     --new-session-page-bottom: var(--space-6);
     padding-bottom: calc(
@@ -48,4 +83,41 @@
       env(safe-area-inset-bottom, 0px)
     );
   }
+}
+
+.composerPane[hidden] {
+  display: none;
+}
+
+.workspaceSplit .composerPane {
+  --new-session-page-top: 28px;
+  --new-session-page-bottom: 48px;
+  flex: 0 0 min(520px, 46%);
+  max-width: none;
+  margin-inline: 0;
+  overflow-y: auto;
+  padding: var(--new-session-page-top) var(--space-5)
+    var(--new-session-page-bottom);
+}
+
+@media (width < 960px) {
+  .workspaceSplit .composerPane {
+    flex: 1 1 100%;
+    padding-inline: var(--console-page-inset);
+  }
+}
+
+.appPane {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  border-left: 1px solid var(--line);
+  background: var(--surface);
+}
+
+.appPane[hidden] {
+  display: none;
 }

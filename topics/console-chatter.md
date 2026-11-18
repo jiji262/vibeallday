@@ -32,6 +32,14 @@ Every asynchronous write and flush handles storage rejection internally; an
 unhandled-rejection listener never reports its own failed persistence as a new
 unhandled rejection.
 
+Remote diagnostic uploads are bound to the source endpoint and authenticated
+identity at capture time. Only console emissions with an explicit matching
+connection scope may join a remote source's queue; unscoped global console
+messages and global errors remain in the browser console. Same-origin local
+collection keeps global console capture. Pending UI traces retain their
+original source and collection lifecycle, and legacy unscoped queue entries
+are discarded during migration.
+
 Transcript projection pairs tool results with calls anywhere in the loaded
 window, including calls that follow their results after reconciliation. It
 preserves conversation row order and streaming-to-final result order. A paired

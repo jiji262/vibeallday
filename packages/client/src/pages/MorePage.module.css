@@ -1,9 +1,18 @@
-/* Phone "More" tab (design More-Phone): host card, then grouped rows. */
+/* Studio Workbench "More" tab: connection banner card + grouped navigation cards. */
+
 .host {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  padding: 14px;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-card);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--accent-soft) 32%, var(--surface)) 0%,
+    var(--surface) 100%
+  );
+  box-shadow: var(--shadow-card);
 }
 
 .hostHead {
@@ -17,19 +26,22 @@
   display: inline-grid;
   flex: none;
   place-items: center;
-  width: 44px;
-  height: 44px;
+  width: 42px;
+  height: 42px;
   border: 1px solid var(--accent-line);
   border-radius: var(--r-md);
   background: var(--accent-soft);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--surface) 50%, transparent);
   color: var(--accent-ink);
-  font-size: var(--fs-h3);
-  font-weight: 600;
+  font-family: var(--font-mono);
+  font-size: 16px;
+  font-weight: 700;
 }
 
 .hostTitle {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 8px;
   min-width: 0;
 }
@@ -38,16 +50,27 @@
   margin: 0;
   overflow: hidden;
   color: var(--ink);
-  font-size: var(--fs-h3);
+  font-size: 15px;
   font-weight: 600;
+  letter-spacing: -0.01em;
   line-height: 1.35;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
+.hostStatus {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  padding: 2px 8px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface);
+}
+
 .caption {
   overflow: hidden;
-  color: var(--ink-3);
+  color: var(--ink-2);
   font-family: var(--font-mono);
   font-size: var(--fs-meta);
   text-overflow: ellipsis;
@@ -56,14 +79,17 @@
 
 .hostHint {
   margin: 0;
+  padding-top: 10px;
+  border-top: 1px solid var(--line);
   color: var(--ink-3);
-  font-size: var(--fs-small);
+  font-size: 12px;
+  line-height: 1.4;
 }
 
 .group {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
   margin-top: 20px;
 }
 
@@ -73,9 +99,17 @@
   color: var(--ink-3);
   font-family: var(--font-mono);
   font-size: 11px;
-  font-weight: 500;
-  letter-spacing: 0.08em;
+  font-weight: 600;
+  letter-spacing: 0.07em;
   text-transform: uppercase;
+}
+
+.list {
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--r-card);
+  background: var(--surface);
+  box-shadow: var(--shadow-card);
 }
 
 .list > * + * {
@@ -96,10 +130,11 @@
   text-align: start;
   text-decoration: none;
   cursor: pointer;
+  transition: background-color var(--duration-fast) var(--ease-standard);
 }
 
 .row:hover {
-  background: var(--surface-3);
+  background: var(--surface-2);
 }
 
 .row:focus-visible {
@@ -111,19 +146,29 @@
   display: grid;
   flex: none;
   place-items: center;
-  width: 30px;
-  height: 30px;
+  width: 32px;
+  height: 32px;
   border: 1px solid var(--line);
-  border-radius: var(--r-sm);
-  background: var(--surface);
+  border-radius: 8px;
+  background: var(--surface-2);
   color: var(--ink-2);
+  transition:
+    background-color var(--duration-fast) var(--ease-standard),
+    border-color var(--duration-fast) var(--ease-standard),
+    color var(--duration-fast) var(--ease-standard);
+}
+
+.row:hover .icon {
+  border-color: var(--line-strong);
+  background: var(--surface-3);
+  color: var(--ink);
 }
 
 .text {
   display: flex;
   flex: 1;
   flex-direction: column;
-  gap: 1px;
+  gap: 2px;
   min-width: 0;
 }
 
@@ -147,6 +192,14 @@
 .chevron {
   flex-shrink: 0;
   color: var(--ink-3);
+  transition:
+    color var(--duration-fast) var(--ease-standard),
+    transform var(--duration-fast) var(--ease-standard);
+}
+
+.row:hover .chevron {
+  color: var(--ink-2);
+  transform: translateX(2px);
 }
 
 .setRow {
@@ -155,6 +208,7 @@
   align-items: center;
   gap: 10px 24px;
   padding: 14px var(--pad-card);
+  background: color-mix(in srgb, var(--surface-2) 45%, var(--surface));
 }
 
 .setRow > :last-child {
@@ -169,4 +223,16 @@
   color: var(--ink);
   font-size: var(--fs-body);
   font-weight: 600;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .row,
+  .icon,
+  .chevron {
+    transition: none;
+  }
+
+  .row:hover .chevron {
+    transform: none;
+  }
 }

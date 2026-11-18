@@ -1,40 +1,44 @@
-/* Project call to action on Sessions: arriving from a project card. */
+/* Studio Workbench project call-to-action banner on Sessions. */
+
 .cta {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: var(--space-3);
-  padding: var(--space-3) var(--space-4);
-  border: 1px solid color-mix(in srgb, var(--indigo) 20%, transparent);
-  border-radius: var(--radius-md);
-  background: var(--indigo-soft);
+  padding: 10px 14px;
+  border: 1px solid var(--accent-line);
+  border-left: 3px solid var(--accent);
+  border-radius: var(--r-card);
+  background: color-mix(in srgb, var(--accent-soft) 45%, var(--surface));
+  box-shadow: var(--shadow-card);
 }
 
 .copy {
   display: grid;
   gap: 2px;
   min-width: 0;
-  font-size: 14px;
+  font-size: var(--fs-small);
 }
 
 .copy strong {
   color: var(--ink);
-  font-size: 14px;
-  font-weight: 500;
+  font-size: var(--fs-small);
+  font-weight: 600;
 }
 
 .copy span {
-  color: var(--ink-3);
-  font-size: 13px;
+  color: var(--ink-2);
+  font-size: 12px;
   overflow-wrap: anywhere;
 }
 
 .cta code {
   padding: 1px 6px;
-  border-radius: var(--radius-xs);
-  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  background: var(--surface);
   color: var(--ink);
-  font-family: var(--label-font);
+  font-family: var(--font-mono);
   font-size: 0.9em;
   white-space: pre-wrap;
   overflow-wrap: anywhere;

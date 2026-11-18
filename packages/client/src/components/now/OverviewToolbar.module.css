@@ -1,4 +1,4 @@
-/* Overview scope row: project select, questions chip, refresh. */
+/* Studio Workbench scope toolbar: compact project scope, async questions, refresh. */
 
 .toolbar {
   display: flex;
@@ -10,13 +10,33 @@
 }
 
 .toolbar .project {
-  flex: 0 1 240px;
+  flex: 0 1 220px;
   width: auto;
   min-width: 0;
+  height: var(--btn-h-sm);
+  padding-block: 0;
+  border-color: var(--line-strong);
+  border-radius: var(--r-btn);
+  background-color: var(--surface);
+  font-size: var(--fs-small);
   text-overflow: ellipsis;
+}
+
+.toolbar .project:hover {
+  background-color: var(--surface-2);
 }
 
 .toolbar .refresh {
   flex-shrink: 0;
   margin-left: auto;
+  border: 1px solid var(--line);
+  border-radius: var(--r-btn);
+  background: var(--surface);
+  color: var(--ink-2);
+}
+
+.toolbar .refresh:hover:not(:disabled) {
+  border-color: var(--line-strong);
+  background: var(--surface-2);
+  color: var(--ink);
 }

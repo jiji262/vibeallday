@@ -580,7 +580,12 @@ function PublicSharePageGeneration({ locationHash }: { locationHash: string }) {
               />
             )}
             {badgeLabel && (
-              <span className="public-share-badge">{badgeLabel}</span>
+              <span
+                className="public-share-badge"
+                data-mode={mode ?? undefined}
+              >
+                {badgeLabel}
+              </span>
             )}
           </div>
         </div>

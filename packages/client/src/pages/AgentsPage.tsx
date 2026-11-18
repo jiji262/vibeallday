@@ -256,6 +256,7 @@ function ProcessGroupsView({
       {showsSection(stateFilter, "active") && (
         <ProcessSection
           title={t("agentsSectionActive")}
+          tone="active"
           count={groups.active.length}
           empty={empty("agentsEmptyActive")}
         >
@@ -265,6 +266,7 @@ function ProcessGroupsView({
       {host.enabled && showsSection(stateFilter, "external") && (
         <ProcessSection
           title={t("agentsSectionExternal")}
+          tone="external"
           count={groups.external.length}
           empty={<ExternalEmpty host={host} filtered={filtered} />}
         >
@@ -280,6 +282,7 @@ function ProcessGroupsView({
       {showsSection(stateFilter, "idle") && (
         <ProcessSection
           title={t("agentsSectionIdle")}
+          tone="idle"
           count={groups.idle.length}
           empty={empty("agentsEmptyIdle")}
         >
@@ -289,6 +292,7 @@ function ProcessGroupsView({
       {showsSection(stateFilter, "stopped") && (
         <ProcessSection
           title={t("agentsSectionStopped")}
+          tone="stopped"
           count={groups.stopped.length}
           empty={empty("agentsEmptyStopped")}
         >
@@ -335,29 +339,31 @@ export function AgentsPage() {
             lede={t("consoleAgentsDescription")}
           />
           {!loading && !error && <ProcessStatsStrip stats={stats} />}
-          <ListToolbar
-            label={t("agentsSearchLabel")}
-            search={
-              <SearchField
-                label={t("agentsSearchLabel")}
-                placeholder={t("agentsSearchPlaceholder")}
-                value={query}
-                onChange={(event) => setQuery(event.target.value)}
-              />
-            }
-            filters={
-              <AgentsStateFilter
-                value={stateFilter}
-                onChange={setStateFilter}
-                counts={counts}
-                external={host.enabled}
-              />
-            }
-            count={t("agentsCount", {
-              shown: countShown(stateFilter, counts),
-              total,
-            })}
-          />
+          <div className={styles.commandBar}>
+            <ListToolbar
+              label={t("agentsSearchLabel")}
+              search={
+                <SearchField
+                  label={t("agentsSearchLabel")}
+                  placeholder={t("agentsSearchPlaceholder")}
+                  value={query}
+                  onChange={(event) => setQuery(event.target.value)}
+                />
+              }
+              filters={
+                <AgentsStateFilter
+                  value={stateFilter}
+                  onChange={setStateFilter}
+                  counts={counts}
+                  external={host.enabled}
+                />
+              }
+              count={t("agentsCount", {
+                shown: countShown(stateFilter, counts),
+                total,
+              })}
+            />
+          </div>
           {feedback && (
             <Notice
               tone={feedback.tone}

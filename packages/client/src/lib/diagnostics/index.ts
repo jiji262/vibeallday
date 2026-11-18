@@ -89,7 +89,7 @@ export function initClientLogCollection(): () => void {
     currentStatus = buildStatus();
     applyCollectionStatus();
     resumeUnsubscribe = subscribeResumeObservations((event) =>
-      clientLogCollector.record("info", "SrpResume", JSON.stringify(event)),
+      clientLogCollector.recordResumeObservation(event),
     );
     developerModeUnsubscribe = subscribeDeveloperMode(applyCollectionStatus);
   }

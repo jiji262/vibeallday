@@ -7,7 +7,6 @@ import {
 } from "@vibeallday/shared";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { SpeechSettings } from "../SpeechSettings";
-import { SettingsSearchScopeProvider } from "../SettingsSearchContext";
 
 const modelSettings = vi.hoisted(() => {
   const state = {
@@ -170,45 +169,17 @@ describe("SpeechSettings", () => {
       );
     },
   );
-  it("finds vocabulary by keyterms and explains disabled storage without mounting controls", () => {
-    const scope = {
-      query: "keyterms",
-      matchValues: false,
-      sectionMatched: false,
-      categoryLabel: "Speech backends",
-      jumpToItem: vi.fn(),
-    };
-    const view = render(
-      <SettingsSearchScopeProvider value={scope}>
-        <SpeechSettings />
-      </SettingsSearchScopeProvider>,
-    );
-    expect(screen.getByText("speechVocabularyTitle")).toBeTruthy();
-    expect(screen.getByText("speechVocabularyStorageDisabled")).toBeTruthy();
-    expect(screen.queryByText("speechVocabularyScan")).toBeNull();
-    view.rerender(
-      <SettingsSearchScopeProvider
-        value={{ ...scope, query: "unrelated-query" }}
-      >
-        <SpeechSettings />
-      </SettingsSearchScopeProvider>,
-    );
-    expect(screen.queryByText("speechVocabularyTitle")).toBeNull();
-  });
-
   it("gives a limited user the backend choice without host administration", () => {
     versionState.capabilities = [
       VOICE_INPUT_CAPABILITY,
       SPEECH_BACKEND_SETUP_CAPABILITY,
     ];
     const owner = render(<SpeechSettings />);
-    expect(screen.getByText("speechVocabularyTitle")).toBeTruthy();
     expect(screen.getByText("speech-backend-setup-stub")).toBeTruthy();
     owner.unmount();
     principalState.canAdministerHost = false;
     try {
       render(<SpeechSettings />);
-      expect(screen.queryByText("speechVocabularyTitle")).toBeNull();
       expect(screen.queryByText("speech-backend-setup-stub")).toBeNull();
       expect(
         screen.getByRole("button", {

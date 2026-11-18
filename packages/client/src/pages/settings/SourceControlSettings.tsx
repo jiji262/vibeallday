@@ -1,11 +1,12 @@
 import {
   GIT_LIVE_WORKTREE_SETTING_CAPABILITY,
+  SERVER_CAPABILITIES,
   serverHasCapability,
 } from "@vibeallday/shared";
-import { ErrorState } from "../../components/garden/ErrorState";
-import { LoadingState } from "../../components/garden/LoadingState";
 import { useCallback, useMemo } from "react";
 import type { ServerSettings } from "../../api/client";
+import { ErrorState } from "../../components/garden/ErrorState";
+import { LoadingState } from "../../components/garden/LoadingState";
 import { useServerSettings } from "../../hooks/useServerSettings";
 import {
   type SourceControlCleanLanding,
@@ -13,6 +14,9 @@ import {
 } from "../../hooks/useSourceControlCleanLanding";
 import { useVersion } from "../../hooks/useVersion";
 import { useI18n } from "../../i18n";
+import { EmbeddedSettingsPane } from "./EmbeddedSettingsPane";
+import { IssueSettings } from "./IssueSettings";
+import { LifecycleWebhooksSettings } from "./LifecycleWebhooksSettings";
 import { SettingsItem } from "./SettingsItem";
 import { useSettingsPaneTitle } from "./SettingsPaneTitleContext";
 import { SettingsSection } from "./SettingsSection";
@@ -25,6 +29,10 @@ export function SourceControlSettings() {
   const liveWorktreeSettingSupported = serverHasCapability(
     version,
     GIT_LIVE_WORKTREE_SETTING_CAPABILITY,
+  );
+  const issuesSupported = serverHasCapability(
+    version,
+    SERVER_CAPABILITIES.issueSessionAssociations.name,
   );
   const { settings, isLoading, error, updateSettings } = useServerSettings();
   const reviewsEnabled = settings?.sourceReviewSubmissionsEnabled ?? false;
@@ -82,92 +90,59 @@ export function SourceControlSettings() {
   }
 
   return (
-    <SettingsSection description={t("sourceControlSettingsDescription")}>
-      <SettingsSection title={t("sourceControlSectionChanges")} scope="local">
-        <div className="settings-group">
-          <SettingsItem
-            className="settings-item--wide-control"
-            label={t("sourceControlCleanLandingTitle")}
-            description={t("sourceControlCleanLandingDescription")}
-            valueText={
-              sourceControlCleanLanding === "latest-commit"
-                ? t("sourceControlCleanLandingLatestCommit")
-                : t("sourceControlCleanLandingWorkingTree")
-            }
-          >
-            <select
-              className="settings-select"
-              aria-label={t("sourceControlCleanLandingTitle")}
-              value={sourceControlCleanLanding}
-              onChange={(event) =>
-                setSourceControlCleanLanding(
-                  event.target.value as SourceControlCleanLanding,
-                )
+    <>
+      <SettingsSection description={t("sourceControlSettingsDescription")}>
+        <SettingsSection title={t("sourceControlSectionChanges")} scope="local">
+          <div className="settings-group">
+            <SettingsItem
+              className="settings-item--wide-control"
+              label={t("sourceControlCleanLandingTitle")}
+              description={t("sourceControlCleanLandingDescription")}
+              valueText={
+                sourceControlCleanLanding === "latest-commit"
+                  ? t("sourceControlCleanLandingLatestCommit")
+                  : t("sourceControlCleanLandingWorkingTree")
               }
             >
-              <option value="working-tree">
-                {t("sourceControlCleanLandingWorkingTree")}
-              </option>
-              <option value="latest-commit">
-                {t("sourceControlCleanLandingLatestCommit")}
-              </option>
-            </select>
-          </SettingsItem>
-        </div>
-      </SettingsSection>
-      <SettingsSection title={t("sourceControlSectionReview")} scope="server">
-        <div className="settings-group">
-          <SettingsItem
-            as="label"
-            label={t("sourceReviewSubmissionsSettingTitle")}
-            description={t("sourceReviewSubmissionsSettingDescription")}
-            valueText={reviewsEnabled ? t("commonOn") : t("commonOff")}
-          >
-            <span className="toggle-switch">
-              <input
-                type="checkbox"
-                aria-label={t("sourceReviewSubmissionsSettingTitle")}
-                checked={reviewsEnabled}
-                onChange={(event) => {
-                  void updateSettings({
-                    sourceReviewSubmissionsEnabled: event.target.checked,
-                  }).catch(() => {
-                    // The hook keeps the actionable error visible in this pane.
-                  });
-                }}
-              />
-              <span className="toggle-slider" />
-            </span>
-          </SettingsItem>
-        </div>
-      </SettingsSection>
-      {liveWorktreeSettingSupported && (
-        <SettingsSection
-          title={t("sourceControlSectionAdvanced")}
-          scope="server"
-        >
+              <select
+                className="settings-select"
+                aria-label={t("sourceControlCleanLandingTitle")}
+                value={sourceControlCleanLanding}
+                onChange={(event) =>
+                  setSourceControlCleanLanding(
+                    event.target.value as SourceControlCleanLanding,
+                  )
+                }
+              >
+                <option value="working-tree">
+                  {t("sourceControlCleanLandingWorkingTree")}
+                </option>
+                <option value="latest-commit">
+                  {t("sourceControlCleanLandingLatestCommit")}
+                </option>
+              </select>
+            </SettingsItem>
+          </div>
+        </SettingsSection>
+        <SettingsSection title={t("sourceControlSectionReview")} scope="server">
           <div className="settings-group">
             <SettingsItem
               as="label"
-              label={t("liveWorktreeMonitoringSettingTitle")}
-              description={t("liveWorktreeMonitoringSettingDescription")}
-              valueText={
-                liveWorktreeMonitoringEnabled ? t("commonOn") : t("commonOff")
-              }
+              label={t("sourceReviewSubmissionsSettingTitle")}
+              description={t("sourceReviewSubmissionsSettingDescription")}
+              valueText={reviewsEnabled ? t("commonOn") : t("commonOff")}
             >
               <span className="toggle-switch">
                 <input
                   type="checkbox"
-                  aria-label={t("liveWorktreeMonitoringSettingTitle")}
-                  checked={liveWorktreeMonitoringEnabled}
+                  aria-label={t("sourceReviewSubmissionsSettingTitle")}
+                  checked={reviewsEnabled}
                   onChange={(event) => {
                     void updateSettings({
-                      liveWorktreeMonitoringEnabled: event.target.checked,
-                    })
-                      .then(() => refetchVersion())
-                      .catch(() => {
-                        // The hook keeps the actionable error visible in this pane.
-                      });
+                      sourceReviewSubmissionsEnabled: event.target.checked,
+                    }).catch(() => {
+                      // The hook keeps the actionable error visible in this pane.
+                    });
                   }}
                 />
                 <span className="toggle-slider" />
@@ -175,8 +150,51 @@ export function SourceControlSettings() {
             </SettingsItem>
           </div>
         </SettingsSection>
+        {liveWorktreeSettingSupported && (
+          <SettingsSection
+            title={t("sourceControlSectionAdvanced")}
+            scope="server"
+          >
+            <div className="settings-group">
+              <SettingsItem
+                as="label"
+                label={t("liveWorktreeMonitoringSettingTitle")}
+                description={t("liveWorktreeMonitoringSettingDescription")}
+                valueText={
+                  liveWorktreeMonitoringEnabled ? t("commonOn") : t("commonOff")
+                }
+              >
+                <span className="toggle-switch">
+                  <input
+                    type="checkbox"
+                    aria-label={t("liveWorktreeMonitoringSettingTitle")}
+                    checked={liveWorktreeMonitoringEnabled}
+                    onChange={(event) => {
+                      void updateSettings({
+                        liveWorktreeMonitoringEnabled: event.target.checked,
+                      })
+                        .then(() => refetchVersion())
+                        .catch(() => {
+                          // The hook keeps the actionable error visible in this pane.
+                        });
+                    }}
+                  />
+                  <span className="toggle-slider" />
+                </span>
+              </SettingsItem>
+            </div>
+          </SettingsSection>
+        )}
+        {error && <ErrorState inline message={error} />}
+      </SettingsSection>
+      {issuesSupported && (
+        <EmbeddedSettingsPane title={t("issuesTitle")}>
+          <IssueSettings />
+        </EmbeddedSettingsPane>
       )}
-      {error && <ErrorState inline message={error} />}
-    </SettingsSection>
+      <EmbeddedSettingsPane title={t("settingsWebhooksTitle")}>
+        <LifecycleWebhooksSettings />
+      </EmbeddedSettingsPane>
+    </>
   );
 }

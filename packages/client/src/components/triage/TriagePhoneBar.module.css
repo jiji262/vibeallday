@@ -1,4 +1,4 @@
-/* Phone triage decision bar (design Triage-Phone bottom bar). */
+/* Phone triage decision bar: safe-area frosted Studio dock. */
 
 .bar {
   display: none;
@@ -11,12 +11,14 @@
     z-index: 5;
     display: flex;
     flex-direction: column;
-    gap: 6px;
-    margin: 0 calc(-1 * var(--space-4));
-    padding: 10px 12px calc(12px + env(safe-area-inset-bottom, 0px));
-    border-top: 1px solid var(--phead-line);
-    background: var(--phead-bg);
-    backdrop-filter: blur(12px);
+    gap: 8px;
+    margin: var(--space-3) calc(-1 * var(--page-gutter)) 0;
+    padding: 10px var(--page-gutter)
+      calc(12px + env(safe-area-inset-bottom, 0px));
+    border-top: 1px solid var(--line);
+    background: color-mix(in srgb, var(--surface) 86%, transparent);
+    box-shadow: 0 -4px 16px color-mix(in srgb, var(--ink) 6%, transparent);
+    backdrop-filter: blur(16px);
   }
 
   .row {

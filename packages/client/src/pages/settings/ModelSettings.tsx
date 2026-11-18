@@ -1,4 +1,5 @@
 import {
+  DEFAULT_CACHE_MISS_BILLING_SETTINGS,
   DEFAULT_RECAP_AFTER_SECONDS,
   DEFAULT_PROMPT_CACHE_KEEPALIVE_INACTIVITY_MINUTES,
   HELPER_SIDE_MODEL_CHEAPEST,
@@ -57,6 +58,10 @@ import {
   ClaudeAutoCompactPercentOverrideControl,
   VibeAllDayCompactContextEarlyControl,
 } from "./compactSettingsControls";
+import { AgentBehaviorSettings } from "./AgentBehaviorSettings";
+import { AgentContextSettings } from "./AgentContextSettings";
+import { EmbeddedSettingsPane } from "./EmbeddedSettingsPane";
+import { MessageDeliverySettings } from "./MessageDeliverySettings";
 import { SettingsItem } from "./SettingsItem";
 import { useSettingsPaneTitle } from "./SettingsPaneTitleContext";
 import { SettingsSection } from "./SettingsSection";
@@ -568,571 +573,642 @@ export function ModelSettings() {
     await updateProviderSessionDefaults({ model: modelId });
   };
 
+  const cacheMissSettings = {
+    ...DEFAULT_CACHE_MISS_BILLING_SETTINGS,
+    ...settings?.cacheMissBilling,
+  };
+
   return (
-    // The page intro already shows the pane title; keep it search-only here.
-    <SettingsSection
-      scope="server"
-      keywords={[
-        t("modelSettingsSessionDefaultsTitle"),
-        "session defaults",
-        "default model",
-        "provider",
-        "permission mode",
-        "thinking",
-        "recap",
-        "prompt suggestions",
-        "compact",
-        "early compact",
-        "context early",
-        "autocompact",
-        "prompt cache keepalive",
-        "sandbox bubblewrap project writes",
-        "helper model",
-        "fork summary",
-      ]}
-    >
-      <div className="settings-group">
-        <div
-          className={`settings-session-defaults-panel ${styles.sessionDefaultsPanel}`}
-        >
-          <p className={styles.intro}>
-            {t("modelSettingsNewSessionDefaultsIntro")}
-          </p>
-
-          <SettingsItem
-            id="session-default-provider"
-            label={
-              sessionDefaultCopy.provider.settings?.title ??
-              sessionDefaultCopy.provider.title
-            }
-            description={sessionDefaultCopy.provider.description}
-            keywords={[
-              ...(sessionDefaultCopy.provider.settings?.keywords ?? []),
-              sessionDefaultCopy.provider.title,
-              ...availableProviders.map((p) => p.displayName),
-            ]}
-            valueText={selectedProvider?.displayName}
-            className="new-session-provider-section session-default-provider-section settings-item--session-default-block settings-item--wide-control"
+    <>
+      {/* The page intro already shows the pane title; keep it search-only here. */}
+      <SettingsSection
+        scope="server"
+        keywords={[
+          t("modelSettingsSessionDefaultsTitle"),
+          "session defaults",
+          "default model",
+          "provider",
+          "permission mode",
+          "thinking",
+          "recap",
+          "prompt suggestions",
+          "compact",
+          "early compact",
+          "context early",
+          "autocompact",
+          "prompt cache keepalive",
+          "sandbox bubblewrap project writes",
+          "helper model",
+          "fork summary",
+        ]}
+      >
+        <div className="settings-group">
+          <div
+            className={`settings-session-defaults-panel ${styles.sessionDefaultsPanel}`}
           >
-            <ProviderSegmented
-              providers={availableProviders}
-              value={selectedProvider?.name}
-              disabled={providersLoading || settingsLoading}
-              onChange={(name) => void handleProviderChange(name)}
-            />
-          </SettingsItem>
+            <p className={styles.intro}>
+              {t("modelSettingsNewSessionDefaultsIntro")}
+            </p>
 
-          <SettingsItem
-            id="session-default-model"
-            label={
-              sessionDefaultCopy.model.settings?.title ??
-              sessionDefaultCopy.model.title
-            }
-            description={sessionDefaultCopy.model.description}
-            keywords={[
-              ...(sessionDefaultCopy.model.settings?.keywords ?? []),
-              sessionDefaultCopy.model.title,
-            ]}
-            valueText={selectedModel ?? undefined}
-            className="new-session-model-section session-default-model-section settings-item--session-default-block settings-item--wide-control"
-          >
-            <div className="new-session-model-field">
-              {selectedModels.length > 0 ? (
-                <FilterDropdown
-                  triggerClassName={styles.modelTrigger}
-                  label={t("newSessionModelTitle")}
-                  options={modelOptions}
-                  selected={selectedModel ? [selectedModel] : []}
-                  onChange={(selected) => {
-                    const nextModel = selected[0];
-                    if (nextModel) void handleDefaultModelChange(nextModel);
-                  }}
-                  multiSelect={false}
-                  placeholder={t("newSessionModelPlaceholder")}
-                  fullWidth
-                />
-              ) : (
-                <span className="model-settings-empty">
-                  {t("modelSwitchEmpty")}
-                </span>
-              )}
-            </div>
-          </SettingsItem>
-
-          {showThinkingControls && (
             <SettingsItem
-              id="session-default-thinking"
-              // The mode picker labels itself "default thinking mode"; the row
-              // spans mode + effort, so it takes the broader "Thinking" title.
-              label={t("newSessionThinkingEffortTitle")}
-              description={sessionDefaultCopy.thinking.description}
-              keywords={[
-                sessionDefaultCopy.thinking.title,
-                ...(sessionDefaultCopy.thinking.settings?.keywords ?? []),
-              ]}
-              valueText={`${effectiveThinkingMode} ${effectiveEffortLevel ?? ""}`.trim()}
-              className="new-session-helper-section session-default-thinking-section settings-item--session-default-block settings-item--wide-control"
-            >
-              <ThinkingDefaults
-                mode={effectiveThinkingMode}
-                modeOptions={thinkingModeOptions}
-                level={effectiveEffortLevel}
-                effortOptions={effortOptions}
-                onSetMode={(mode: ThinkingMode) =>
-                  void updateProviderSessionDefaults({ thinkingMode: mode })
-                }
-                onSetEffort={(level: EffortLevel) =>
-                  void updateProviderSessionDefaults({
-                    thinkingMode: "on",
-                    effortLevel: level,
-                  })
-                }
-              />
-            </SettingsItem>
-          )}
-
-          {supportsPermissionMode && (
-            <SettingsItem
-              id="session-default-permission-mode"
-              label={sessionDefaultCopy.permission.title}
-              keywords={sessionDefaultCopy.permission.settings?.keywords}
-              valueText={modeLabels[effectiveDefaultPermissionMode]}
-              className="new-session-mode-section session-default-mode-section settings-item--session-default-block settings-item--wide-control"
-            >
-              <PermissionModeCards
-                label={sessionDefaultCopy.permission.title}
-                modes={permissionModeOptions}
-                value={effectiveDefaultPermissionMode}
-                labels={modeLabels}
-                descriptions={modeDescriptions}
-                disabled={settingsLoading}
-                onChange={(modeValue) =>
-                  void updateNewSessionDefaults({ permissionMode: modeValue })
-                }
-              />
-            </SettingsItem>
-          )}
-
-          {canConfigureSessionSandbox && (
-            <SettingsItem
-              id="session-default-sandbox"
-              as="label"
+              id="session-default-provider"
               label={
-                sessionDefaultCopy.sandbox.settings?.title ??
-                sessionDefaultCopy.sandbox.title
+                sessionDefaultCopy.provider.settings?.title ??
+                sessionDefaultCopy.provider.title
               }
-              description={sessionDefaultCopy.sandbox.description}
+              description={sessionDefaultCopy.provider.description}
               keywords={[
-                ...(sessionDefaultCopy.sandbox.settings?.keywords ?? []),
-                t("newSessionSandboxLabel"),
+                ...(sessionDefaultCopy.provider.settings?.keywords ?? []),
+                sessionDefaultCopy.provider.title,
+                ...availableProviders.map((p) => p.displayName),
               ]}
-              valueText={
-                savedDefaults?.sandboxLevel === "project-write"
-                  ? t("newSessionSandboxLabel")
-                  : undefined
-              }
-              className="new-session-helper-section session-default-sandbox-section settings-item--session-default-block"
+              valueText={selectedProvider?.displayName}
+              className="new-session-provider-section session-default-provider-section settings-item--session-default-block settings-item--wide-control"
             >
-              <input
-                type="checkbox"
-                checked={savedDefaults?.sandboxLevel === "project-write"}
-                disabled={settingsLoading}
-                onChange={(event) => {
-                  const enabled = event.currentTarget.checked;
-                  void updateNewSessionDefaults({
-                    sandboxLevel: enabled ? "project-write" : "none",
-                    sandboxNetworkFirewall: enabled ? true : undefined,
-                    ...(enabled && savedRecapMode === "side-session"
-                      ? { recapMode: "off" }
-                      : {}),
-                  });
-                }}
-                aria-label={
+              <ProviderSegmented
+                providers={availableProviders}
+                value={selectedProvider?.name}
+                disabled={providersLoading || settingsLoading}
+                onChange={(name) => void handleProviderChange(name)}
+              />
+            </SettingsItem>
+
+            <SettingsItem
+              id="session-default-model"
+              label={
+                sessionDefaultCopy.model.settings?.title ??
+                sessionDefaultCopy.model.title
+              }
+              description={sessionDefaultCopy.model.description}
+              keywords={[
+                ...(sessionDefaultCopy.model.settings?.keywords ?? []),
+                sessionDefaultCopy.model.title,
+              ]}
+              valueText={selectedModel ?? undefined}
+              className="new-session-model-section session-default-model-section settings-item--session-default-block settings-item--wide-control"
+            >
+              <div className="new-session-model-field">
+                {selectedModels.length > 0 ? (
+                  <FilterDropdown
+                    triggerClassName={styles.modelTrigger}
+                    label={t("newSessionModelTitle")}
+                    options={modelOptions}
+                    selected={selectedModel ? [selectedModel] : []}
+                    onChange={(selected) => {
+                      const nextModel = selected[0];
+                      if (nextModel) void handleDefaultModelChange(nextModel);
+                    }}
+                    multiSelect={false}
+                    placeholder={t("newSessionModelPlaceholder")}
+                    fullWidth
+                  />
+                ) : (
+                  <span className="model-settings-empty">
+                    {t("modelSwitchEmpty")}
+                  </span>
+                )}
+              </div>
+            </SettingsItem>
+
+            {showThinkingControls && (
+              <SettingsItem
+                id="session-default-thinking"
+                // The mode picker labels itself "default thinking mode"; the row
+                // spans mode + effort, so it takes the broader "Thinking" title.
+                label={t("newSessionThinkingEffortTitle")}
+                description={sessionDefaultCopy.thinking.description}
+                keywords={[
+                  sessionDefaultCopy.thinking.title,
+                  ...(sessionDefaultCopy.thinking.settings?.keywords ?? []),
+                ]}
+                valueText={`${effectiveThinkingMode} ${effectiveEffortLevel ?? ""}`.trim()}
+                className="new-session-helper-section session-default-thinking-section settings-item--session-default-block settings-item--wide-control"
+              >
+                <ThinkingDefaults
+                  mode={effectiveThinkingMode}
+                  modeOptions={thinkingModeOptions}
+                  level={effectiveEffortLevel}
+                  effortOptions={effortOptions}
+                  onSetMode={(mode: ThinkingMode) =>
+                    void updateProviderSessionDefaults({ thinkingMode: mode })
+                  }
+                  onSetEffort={(level: EffortLevel) =>
+                    void updateProviderSessionDefaults({
+                      thinkingMode: "on",
+                      effortLevel: level,
+                    })
+                  }
+                />
+              </SettingsItem>
+            )}
+
+            {supportsPermissionMode && (
+              <SettingsItem
+                id="session-default-permission-mode"
+                label={sessionDefaultCopy.permission.title}
+                keywords={sessionDefaultCopy.permission.settings?.keywords}
+                valueText={modeLabels[effectiveDefaultPermissionMode]}
+                className="new-session-mode-section session-default-mode-section settings-item--session-default-block settings-item--wide-control"
+              >
+                <PermissionModeCards
+                  label={sessionDefaultCopy.permission.title}
+                  modes={permissionModeOptions}
+                  value={effectiveDefaultPermissionMode}
+                  labels={modeLabels}
+                  descriptions={modeDescriptions}
+                  disabled={settingsLoading}
+                  onChange={(modeValue) =>
+                    void updateNewSessionDefaults({ permissionMode: modeValue })
+                  }
+                />
+              </SettingsItem>
+            )}
+
+            {canConfigureSessionSandbox && (
+              <SettingsItem
+                id="session-default-sandbox"
+                as="label"
+                label={
                   sessionDefaultCopy.sandbox.settings?.title ??
                   sessionDefaultCopy.sandbox.title
                 }
-              />
-            </SettingsItem>
-          )}
+                description={sessionDefaultCopy.sandbox.description}
+                keywords={[
+                  ...(sessionDefaultCopy.sandbox.settings?.keywords ?? []),
+                  t("newSessionSandboxLabel"),
+                ]}
+                valueText={
+                  savedDefaults?.sandboxLevel === "project-write"
+                    ? t("newSessionSandboxLabel")
+                    : undefined
+                }
+                className="new-session-helper-section session-default-sandbox-section settings-item--session-default-block"
+              >
+                <input
+                  type="checkbox"
+                  checked={savedDefaults?.sandboxLevel === "project-write"}
+                  disabled={settingsLoading}
+                  onChange={(event) => {
+                    const enabled = event.currentTarget.checked;
+                    void updateNewSessionDefaults({
+                      sandboxLevel: enabled ? "project-write" : "none",
+                      sandboxNetworkFirewall: enabled ? true : undefined,
+                      ...(enabled && savedRecapMode === "side-session"
+                        ? { recapMode: "off" }
+                        : {}),
+                    });
+                  }}
+                  aria-label={
+                    sessionDefaultCopy.sandbox.settings?.title ??
+                    sessionDefaultCopy.sandbox.title
+                  }
+                />
+              </SettingsItem>
+            )}
 
-          {canConfigureSessionSandbox && (
-            <SettingsItem
-              id="session-default-sandbox-network-firewall"
-              as="label"
-              label={sessionDefaultCopy.sandboxFirewall.title}
-              description={sessionDefaultCopy.sandboxFirewall.description}
-              keywords={sessionDefaultCopy.sandboxFirewall.settings?.keywords}
-              valueText={
-                savedDefaults?.sandboxLevel === "project-write" &&
-                savedDefaults.sandboxNetworkFirewall !== false
-                  ? t("newSessionSandboxNetworkFirewallLabel")
-                  : undefined
-              }
-              className="new-session-helper-section session-default-sandbox-section settings-item--session-default-block"
-            >
-              <input
-                type="checkbox"
-                checked={
+            {canConfigureSessionSandbox && (
+              <SettingsItem
+                id="session-default-sandbox-network-firewall"
+                as="label"
+                label={sessionDefaultCopy.sandboxFirewall.title}
+                description={sessionDefaultCopy.sandboxFirewall.description}
+                keywords={sessionDefaultCopy.sandboxFirewall.settings?.keywords}
+                valueText={
                   savedDefaults?.sandboxLevel === "project-write" &&
                   savedDefaults.sandboxNetworkFirewall !== false
+                    ? t("newSessionSandboxNetworkFirewallLabel")
+                    : undefined
                 }
-                disabled={
-                  settingsLoading ||
-                  savedDefaults?.sandboxLevel !== "project-write"
+                className="new-session-helper-section session-default-sandbox-section settings-item--session-default-block"
+              >
+                <input
+                  type="checkbox"
+                  checked={
+                    savedDefaults?.sandboxLevel === "project-write" &&
+                    savedDefaults.sandboxNetworkFirewall !== false
+                  }
+                  disabled={
+                    settingsLoading ||
+                    savedDefaults?.sandboxLevel !== "project-write"
+                  }
+                  onChange={(event) => {
+                    void updateNewSessionDefaults({
+                      sandboxNetworkFirewall: event.currentTarget.checked,
+                    });
+                  }}
+                  aria-label={t("newSessionSandboxNetworkFirewallLabel")}
+                />
+              </SettingsItem>
+            )}
+
+            <div className={styles.captionPair}>
+              <SettingsItem
+                id="session-default-show-thinking"
+                label={sessionDefaultCopy.showThinking.title}
+                description={sessionDefaultCopy.showThinking.description}
+                keywords={sessionDefaultCopy.showThinking.settings?.keywords}
+                valueText={String(showThinking)}
+                scope="local"
+                className="new-session-helper-section session-default-show-thinking-section settings-item--session-default-block settings-item--wide-control"
+              >
+                <ShowThinkingControls
+                  value={showThinking}
+                  onChange={setShowThinking}
+                  t={t}
+                  showLabel={false}
+                />
+              </SettingsItem>
+
+              <SettingsItem
+                id="session-default-suggestions"
+                label={sessionDefaultCopy.suggestions.title}
+                description={
+                  promptSuggestionModeDescriptions[selectedPromptSuggestionMode]
                 }
-                onChange={(event) => {
-                  void updateNewSessionDefaults({
-                    sandboxNetworkFirewall: event.currentTarget.checked,
-                  });
-                }}
-                aria-label={t("newSessionSandboxNetworkFirewallLabel")}
-              />
-            </SettingsItem>
-          )}
+                keywords={sessionDefaultCopy.suggestions.settings?.keywords}
+                valueText={
+                  promptSuggestionModeLabels[selectedPromptSuggestionMode]
+                }
+                className="new-session-helper-section session-default-suggestions-section settings-item--session-default-block settings-item--wide-control"
+              >
+                <div className="new-session-helper-options">
+                  {availablePromptSuggestionModes.map((modeValue) => (
+                    <button
+                      key={modeValue}
+                      type="button"
+                      className={`new-session-helper-option ${
+                        selectedPromptSuggestionMode === modeValue
+                          ? "selected"
+                          : ""
+                      }`}
+                      onClick={() =>
+                        void updateNewSessionDefaults({
+                          promptSuggestionMode: modeValue,
+                        })
+                      }
+                      disabled={settingsLoading}
+                      title={promptSuggestionModeDescriptions[modeValue]}
+                    >
+                      <span
+                        className={`mode-option-dot suggestion-${modeValue}`}
+                      />
+                      <span>{promptSuggestionModeLabels[modeValue]}</span>
+                    </button>
+                  ))}
+                </div>
+              </SettingsItem>
+            </div>
 
-          <div className={styles.captionPair}>
             <SettingsItem
-              id="session-default-show-thinking"
-              label={sessionDefaultCopy.showThinking.title}
-              description={sessionDefaultCopy.showThinking.description}
-              keywords={sessionDefaultCopy.showThinking.settings?.keywords}
-              valueText={String(showThinking)}
-              scope="local"
-              className="new-session-helper-section session-default-show-thinking-section settings-item--session-default-block settings-item--wide-control"
-            >
-              <ShowThinkingControls
-                value={showThinking}
-                onChange={setShowThinking}
-                t={t}
-                showLabel={false}
-              />
-            </SettingsItem>
-
-            <SettingsItem
-              id="session-default-suggestions"
-              label={sessionDefaultCopy.suggestions.title}
-              description={
-                promptSuggestionModeDescriptions[selectedPromptSuggestionMode]
+              id="session-default-recap"
+              label={sessionDefaultCopy.recap.title}
+              description={getRecapModeDescription(
+                selectedRecapMode,
+                t,
+                selectedRecapAfterSeconds,
+              )}
+              keywords={sessionDefaultCopy.recap.settings?.keywords}
+              valueText={recapModeLabels[selectedRecapMode]}
+              className="new-session-helper-section session-default-recap-section settings-item--session-default-block settings-item--wide-control"
+              after={
+                selectedRecapMode !== "off" ? (
+                  <RecapAfterSecondsControl
+                    value={selectedRecapAfterSeconds}
+                    disabled={settingsLoading}
+                    label={recapAfterSecondsInlineLabels[selectedRecapMode]}
+                    mode={selectedRecapMode}
+                    className={`${styles.recapDuration} recap-after-seconds-control--inline`}
+                    onCommit={(seconds) =>
+                      updateNewSessionDefaults({ recapAfterSeconds: seconds })
+                    }
+                  />
+                ) : undefined
               }
-              keywords={sessionDefaultCopy.suggestions.settings?.keywords}
-              valueText={
-                promptSuggestionModeLabels[selectedPromptSuggestionMode]
-              }
-              className="new-session-helper-section session-default-suggestions-section settings-item--session-default-block settings-item--wide-control"
             >
               <div className="new-session-helper-options">
-                {availablePromptSuggestionModes.map((modeValue) => (
+                {availableRecapModes.map((modeValue) => (
                   <button
                     key={modeValue}
                     type="button"
                     className={`new-session-helper-option ${
-                      selectedPromptSuggestionMode === modeValue
-                        ? "selected"
-                        : ""
+                      selectedRecapMode === modeValue ? "selected" : ""
                     }`}
                     onClick={() =>
-                      void updateNewSessionDefaults({
-                        promptSuggestionMode: modeValue,
-                      })
+                      void updateNewSessionDefaults({ recapMode: modeValue })
                     }
-                    disabled={settingsLoading}
-                    title={promptSuggestionModeDescriptions[modeValue]}
+                    disabled={
+                      settingsLoading ||
+                      (canConfigureSessionSandbox &&
+                        savedDefaults?.sandboxLevel === "project-write" &&
+                        modeValue === "side-session")
+                    }
+                    title={getRecapModeDescription(
+                      modeValue,
+                      t,
+                      selectedRecapAfterSeconds,
+                    )}
                   >
-                    <span
-                      className={`mode-option-dot suggestion-${modeValue}`}
+                    <span className={`mode-option-dot recap-${modeValue}`} />
+                    <span>{recapModeLabels[modeValue]}</span>
+                  </button>
+                ))}
+              </div>
+            </SettingsItem>
+
+            {showHelperSideModel && (
+              <SettingsItem
+                id="session-default-helper-model"
+                label={sessionDefaultCopy.helperModel.title}
+                description={sessionDefaultCopy.helperModel.description}
+                keywords={sessionDefaultCopy.helperModel.settings?.keywords}
+                valueText={selectedHelperSideModel}
+                className="new-session-helper-section session-default-helper-model-section settings-item--session-default-block settings-item--wide-control"
+              >
+                <FilterDropdown
+                  label={sessionDefaultCopy.helperModel.title}
+                  options={helperSideModelOptions}
+                  selected={[selectedHelperSideModel]}
+                  onChange={(selected) => {
+                    const helperSideModel =
+                      selected[0] ?? HELPER_SIDE_MODEL_CHEAPEST;
+                    void updateProviderSessionDefaults({ helperSideModel });
+                  }}
+                  multiSelect={false}
+                  placeholder={t("helperSideModelCheapest")}
+                  fullWidth
+                />
+              </SettingsItem>
+            )}
+
+            <div className={styles.relatedDivider}>
+              <strong>{t("modelSettingsRelatedBehaviorTitle")}</strong>
+              <span>{t("modelSettingsRelatedBehaviorDescription")}</span>
+            </div>
+
+            <SettingsItem
+              id="session-default-fork-summary"
+              as="label"
+              label={t("modelSettingsForkSummaryAutoOpenTitle")}
+              description={t("modelSettingsForkSummaryAutoOpenDescription")}
+              keywords={[
+                "fork",
+                "fork summary",
+                "forked session",
+                t("modelSettingsForkSummaryAutoOpenLabel"),
+              ]}
+              valueText={
+                forkSummaryAutoOpen
+                  ? t("modelSettingsForkSummaryAutoOpenLabel")
+                  : undefined
+              }
+              className="new-session-helper-section session-default-fork-summary-section settings-item--session-default-block"
+              scope="local"
+            >
+              <input
+                type="checkbox"
+                checked={forkSummaryAutoOpen}
+                onChange={(e) => setForkSummaryAutoOpen(e.target.checked)}
+                aria-label={t("modelSettingsForkSummaryAutoOpenLabel")}
+              />
+            </SettingsItem>
+
+            {showCompactThreshold && selectedModel && (
+              <VibeAllDayCompactContextEarlyControl
+                id="session-default-compact-early"
+                modelId={selectedModel}
+                contextWindow={selectedModelInfo?.contextWindow}
+                storedPercent={storedCompactPercent}
+                map={settings?.clientDefaults?.compactAtContextPercent}
+                updateSetting={updateSetting}
+                disabled={settingsLoading}
+                className="new-session-helper-section session-default-compact-section settings-item--session-default-block settings-item--wide-control"
+              />
+            )}
+
+            {showClaudeAutoCompactMirror && (
+              <ClaudeAutoCompactPercentOverrideControl
+                id="session-default-claude-auto-compact"
+                value={settings?.claudeAutoCompactPercentOverride}
+                updateSetting={updateSetting}
+                description={t("providersClaudeAutoCompactMirrorDescription")}
+                searchable={false}
+              />
+            )}
+
+            {showCompactThreshold &&
+              selectedProvider?.supportsNativeCompactThreshold === true && (
+                <SettingsItem
+                  id="session-default-force-vibeallday-compaction"
+                  as="label"
+                  label={t("modelSettingsForceVibeAllDayCompactionLabel")}
+                  description={t(
+                    "modelSettingsForceVibeAllDayCompactionDescription",
+                  )}
+                  keywords={[
+                    "force vibeallday",
+                    "orchestrated compaction",
+                    "vibeallday compact",
+                    "/compact",
+                  ]}
+                  valueText={
+                    forceVibeAllDayOrchestratedCompaction
+                      ? t("modelSettingsForceVibeAllDayCompactionLabel")
+                      : undefined
+                  }
+                  className="new-session-helper-section session-default-force-vibeallday-section settings-item--session-default-block"
+                >
+                  <input
+                    type="checkbox"
+                    checked={forceVibeAllDayOrchestratedCompaction}
+                    disabled={settingsLoading}
+                    onChange={(event) => {
+                      void updateSetting("clientDefaults", {
+                        forceVibeAllDayOrchestratedCompaction:
+                          event.currentTarget.checked,
+                      });
+                    }}
+                    aria-label={t(
+                      "modelSettingsForceVibeAllDayCompactionLabel",
+                    )}
+                  />
+                </SettingsItem>
+              )}
+
+            {showPromptCacheKeepalive && selectedProvider && (
+              <SettingsItem
+                id="session-default-prompt-cache"
+                label={t("promptCacheKeepaliveTitle")}
+                description={[
+                  t("promptCacheKeepaliveDescription", {
+                    provider: selectedProvider.displayName,
+                  }),
+                  t("promptCacheKeepaliveCadenceHint"),
+                ].join(" ")}
+                keywords={[
+                  "prompt cache",
+                  "keepalive",
+                  "cache refresh",
+                  "inactivity",
+                ]}
+                valueText={`${selectedPromptCacheKeepalive.mode} ${selectedPromptCacheKeepalive.inactivityMinutes}m`}
+                className="new-session-helper-section session-default-cache-keepalive-section settings-item--session-default-block settings-item--wide-control"
+              >
+                <div className="session-default-cache-keepalive-controls">
+                  <div className="new-session-helper-options">
+                    {PROMPT_CACHE_KEEPALIVE_MODE_ORDER.map((modeValue) => (
+                      <button
+                        key={modeValue}
+                        type="button"
+                        className={`new-session-helper-option ${
+                          selectedPromptCacheKeepalive.mode === modeValue
+                            ? "selected"
+                            : ""
+                        }`}
+                        onClick={() =>
+                          void updatePromptCacheKeepalive({ mode: modeValue })
+                        }
+                        disabled={settingsLoading}
+                        title={promptCacheKeepaliveModeDescriptions[modeValue]}
+                      >
+                        <span
+                          className={`mode-option-dot keepalive-${modeValue}`}
+                        />
+                        <span>{promptCacheKeepaliveModeLabels[modeValue]}</span>
+                      </button>
+                    ))}
+                  </div>
+                  <label className="prompt-cache-keepalive-cadence">
+                    <span>{t("promptCacheKeepaliveCadenceLabel")}</span>
+                    <input
+                      key={`${selectedProvider.name}-${selectedPromptCacheKeepalive.inactivityMinutes}`}
+                      type="number"
+                      min={1}
+                      max={1440}
+                      step={1}
+                      defaultValue={
+                        selectedPromptCacheKeepalive.inactivityMinutes
+                      }
+                      disabled={
+                        settingsLoading ||
+                        selectedPromptCacheKeepalive.mode === "off"
+                      }
+                      aria-label={t("promptCacheKeepaliveCadenceAria")}
+                      onBlur={(event) => {
+                        const minutes = normalizeKeepaliveMinutes(
+                          Number(event.currentTarget.value),
+                        );
+                        if (minutes === null) {
+                          event.currentTarget.value = String(
+                            selectedPromptCacheKeepalive.inactivityMinutes,
+                          );
+                          return;
+                        }
+                        event.currentTarget.value = String(minutes);
+                        if (
+                          minutes !==
+                          selectedPromptCacheKeepalive.inactivityMinutes
+                        ) {
+                          void updatePromptCacheKeepalive({
+                            inactivityMinutes: minutes,
+                          });
+                        }
+                      }}
                     />
-                    <span>{promptSuggestionModeLabels[modeValue]}</span>
+                    <span>{t("promptCacheKeepaliveCadenceUnit")}</span>
+                  </label>
+                </div>
+              </SettingsItem>
+            )}
+          </div>
+        </div>
+
+        {selectedProvider?.name === "claude" && (
+          <div className="settings-group">
+            <SettingsItem
+              label={t("modelSettingsModelTitle")}
+              description={t("modelSettingsModelDescription")}
+              className="model-settings-item"
+              scope="local"
+              valueText={model}
+            >
+              <div className="font-size-selector model-settings-chip-group">
+                {MODEL_OPTIONS.map((opt) => (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    className={`font-size-option ${model === opt.value ? "active" : ""}`}
+                    onClick={() => setModel(opt.value)}
+                  >
+                    {opt.label}
                   </button>
                 ))}
               </div>
             </SettingsItem>
           </div>
-
+        )}
+      </SettingsSection>
+      <EmbeddedSettingsPane title={t("settingsAgentContextTitle")}>
+        <AgentContextSettings />
+      </EmbeddedSettingsPane>
+      <EmbeddedSettingsPane title={t("settingsAgentBehaviorTitle")}>
+        <AgentBehaviorSettings />
+      </EmbeddedSettingsPane>
+      <EmbeddedSettingsPane title={t("settingsMessageDeliveryTitle")}>
+        <MessageDeliverySettings />
+      </EmbeddedSettingsPane>
+      <SettingsSection
+        title={t("settingsCacheMissBillingTitle")}
+        description={t("cacheMissBillingDescription")}
+        scope="server"
+      >
+        <div className="settings-group">
           <SettingsItem
-            id="session-default-recap"
-            label={sessionDefaultCopy.recap.title}
-            description={getRecapModeDescription(
-              selectedRecapMode,
-              t,
-              selectedRecapAfterSeconds,
-            )}
-            keywords={sessionDefaultCopy.recap.settings?.keywords}
-            valueText={recapModeLabels[selectedRecapMode]}
-            className="new-session-helper-section session-default-recap-section settings-item--session-default-block settings-item--wide-control"
-            after={
-              selectedRecapMode !== "off" ? (
-                <RecapAfterSecondsControl
-                  value={selectedRecapAfterSeconds}
-                  disabled={settingsLoading}
-                  label={recapAfterSecondsInlineLabels[selectedRecapMode]}
-                  mode={selectedRecapMode}
-                  className={`${styles.recapDuration} recap-after-seconds-control--inline`}
-                  onCommit={(seconds) =>
-                    updateNewSessionDefaults({ recapAfterSeconds: seconds })
-                  }
-                />
-              ) : undefined
-            }
-          >
-            <div className="new-session-helper-options">
-              {availableRecapModes.map((modeValue) => (
-                <button
-                  key={modeValue}
-                  type="button"
-                  className={`new-session-helper-option ${
-                    selectedRecapMode === modeValue ? "selected" : ""
-                  }`}
-                  onClick={() =>
-                    void updateNewSessionDefaults({ recapMode: modeValue })
-                  }
-                  disabled={
-                    settingsLoading ||
-                    (canConfigureSessionSandbox &&
-                      savedDefaults?.sandboxLevel === "project-write" &&
-                      modeValue === "side-session")
-                  }
-                  title={getRecapModeDescription(
-                    modeValue,
-                    t,
-                    selectedRecapAfterSeconds,
-                  )}
-                >
-                  <span className={`mode-option-dot recap-${modeValue}`} />
-                  <span>{recapModeLabels[modeValue]}</span>
-                </button>
-              ))}
-            </div>
-          </SettingsItem>
-
-          {showHelperSideModel && (
-            <SettingsItem
-              id="session-default-helper-model"
-              label={sessionDefaultCopy.helperModel.title}
-              description={sessionDefaultCopy.helperModel.description}
-              keywords={sessionDefaultCopy.helperModel.settings?.keywords}
-              valueText={selectedHelperSideModel}
-              className="new-session-helper-section session-default-helper-model-section settings-item--session-default-block settings-item--wide-control"
-            >
-              <FilterDropdown
-                label={sessionDefaultCopy.helperModel.title}
-                options={helperSideModelOptions}
-                selected={[selectedHelperSideModel]}
-                onChange={(selected) => {
-                  const helperSideModel =
-                    selected[0] ?? HELPER_SIDE_MODEL_CHEAPEST;
-                  void updateProviderSessionDefaults({ helperSideModel });
-                }}
-                multiSelect={false}
-                placeholder={t("helperSideModelCheapest")}
-                fullWidth
-              />
-            </SettingsItem>
-          )}
-
-          <div className={styles.relatedDivider}>
-            <strong>{t("modelSettingsRelatedBehaviorTitle")}</strong>
-            <span>{t("modelSettingsRelatedBehaviorDescription")}</span>
-          </div>
-
-          <SettingsItem
-            id="session-default-fork-summary"
             as="label"
-            label={t("modelSettingsForkSummaryAutoOpenTitle")}
-            description={t("modelSettingsForkSummaryAutoOpenDescription")}
-            keywords={[
-              "fork",
-              "fork summary",
-              "forked session",
-              t("modelSettingsForkSummaryAutoOpenLabel"),
-            ]}
+            label={t("cacheMissBillingEnableTitle")}
+            description={t("cacheMissBillingEnableDescription")}
             valueText={
-              forkSummaryAutoOpen
-                ? t("modelSettingsForkSummaryAutoOpenLabel")
-                : undefined
+              cacheMissSettings.enabled
+                ? t("settingsAgentsValueOn")
+                : t("settingsAgentsValueOff")
             }
-            className="new-session-helper-section session-default-fork-summary-section settings-item--session-default-block"
-            scope="local"
           >
             <input
               type="checkbox"
-              checked={forkSummaryAutoOpen}
-              onChange={(e) => setForkSummaryAutoOpen(e.target.checked)}
-              aria-label={t("modelSettingsForkSummaryAutoOpenLabel")}
+              checked={cacheMissSettings.enabled}
+              onChange={(event) =>
+                void updateSetting("cacheMissBilling", {
+                  ...settings?.cacheMissBilling,
+                  enabled: event.currentTarget.checked,
+                })
+              }
+              aria-label={t("cacheMissBillingEnableTitle")}
             />
           </SettingsItem>
-
-          {showCompactThreshold && selectedModel && (
-            <VibeAllDayCompactContextEarlyControl
-              id="session-default-compact-early"
-              modelId={selectedModel}
-              contextWindow={selectedModelInfo?.contextWindow}
-              storedPercent={storedCompactPercent}
-              map={settings?.clientDefaults?.compactAtContextPercent}
-              updateSetting={updateSetting}
-              disabled={settingsLoading}
-              className="new-session-helper-section session-default-compact-section settings-item--session-default-block settings-item--wide-control"
-            />
-          )}
-
-          {showClaudeAutoCompactMirror && (
-            <ClaudeAutoCompactPercentOverrideControl
-              id="session-default-claude-auto-compact"
-              value={settings?.claudeAutoCompactPercentOverride}
-              updateSetting={updateSetting}
-              description={t("providersClaudeAutoCompactMirrorDescription")}
-              searchable={false}
-            />
-          )}
-
-          {showCompactThreshold &&
-            selectedProvider?.supportsNativeCompactThreshold === true && (
-              <SettingsItem
-                id="session-default-force-vibeallday-compaction"
-                as="label"
-                label={t("modelSettingsForceVibeAllDayCompactionLabel")}
-                description={t(
-                  "modelSettingsForceVibeAllDayCompactionDescription",
-                )}
-                keywords={[
-                  "force vibeallday",
-                  "orchestrated compaction",
-                  "vibeallday compact",
-                  "/compact",
-                ]}
-                valueText={
-                  forceVibeAllDayOrchestratedCompaction
-                    ? t("modelSettingsForceVibeAllDayCompactionLabel")
-                    : undefined
-                }
-                className="new-session-helper-section session-default-force-vibeallday-section settings-item--session-default-block"
-              >
-                <input
-                  type="checkbox"
-                  checked={forceVibeAllDayOrchestratedCompaction}
-                  disabled={settingsLoading}
-                  onChange={(event) => {
-                    void updateSetting("clientDefaults", {
-                      forceVibeAllDayOrchestratedCompaction:
-                        event.currentTarget.checked,
-                    });
-                  }}
-                  aria-label={t("modelSettingsForceVibeAllDayCompactionLabel")}
-                />
-              </SettingsItem>
-            )}
-
-          {showPromptCacheKeepalive && selectedProvider && (
-            <SettingsItem
-              id="session-default-prompt-cache"
-              label={t("promptCacheKeepaliveTitle")}
-              description={[
-                t("promptCacheKeepaliveDescription", {
-                  provider: selectedProvider.displayName,
-                }),
-                t("promptCacheKeepaliveCadenceHint"),
-              ].join(" ")}
-              keywords={[
-                "prompt cache",
-                "keepalive",
-                "cache refresh",
-                "inactivity",
-              ]}
-              valueText={`${selectedPromptCacheKeepalive.mode} ${selectedPromptCacheKeepalive.inactivityMinutes}m`}
-              className="new-session-helper-section session-default-cache-keepalive-section settings-item--session-default-block settings-item--wide-control"
-            >
-              <div className="session-default-cache-keepalive-controls">
-                <div className="new-session-helper-options">
-                  {PROMPT_CACHE_KEEPALIVE_MODE_ORDER.map((modeValue) => (
-                    <button
-                      key={modeValue}
-                      type="button"
-                      className={`new-session-helper-option ${
-                        selectedPromptCacheKeepalive.mode === modeValue
-                          ? "selected"
-                          : ""
-                      }`}
-                      onClick={() =>
-                        void updatePromptCacheKeepalive({ mode: modeValue })
-                      }
-                      disabled={settingsLoading}
-                      title={promptCacheKeepaliveModeDescriptions[modeValue]}
-                    >
-                      <span
-                        className={`mode-option-dot keepalive-${modeValue}`}
-                      />
-                      <span>{promptCacheKeepaliveModeLabels[modeValue]}</span>
-                    </button>
-                  ))}
-                </div>
-                <label className="prompt-cache-keepalive-cadence">
-                  <span>{t("promptCacheKeepaliveCadenceLabel")}</span>
-                  <input
-                    key={`${selectedProvider.name}-${selectedPromptCacheKeepalive.inactivityMinutes}`}
-                    type="number"
-                    min={1}
-                    max={1440}
-                    step={1}
-                    defaultValue={
-                      selectedPromptCacheKeepalive.inactivityMinutes
-                    }
-                    disabled={
-                      settingsLoading ||
-                      selectedPromptCacheKeepalive.mode === "off"
-                    }
-                    aria-label={t("promptCacheKeepaliveCadenceAria")}
-                    onBlur={(event) => {
-                      const minutes = normalizeKeepaliveMinutes(
-                        Number(event.currentTarget.value),
-                      );
-                      if (minutes === null) {
-                        event.currentTarget.value = String(
-                          selectedPromptCacheKeepalive.inactivityMinutes,
-                        );
-                        return;
-                      }
-                      event.currentTarget.value = String(minutes);
-                      if (
-                        minutes !==
-                        selectedPromptCacheKeepalive.inactivityMinutes
-                      ) {
-                        void updatePromptCacheKeepalive({
-                          inactivityMinutes: minutes,
-                        });
-                      }
-                    }}
-                  />
-                  <span>{t("promptCacheKeepaliveCadenceUnit")}</span>
-                </label>
-              </div>
-            </SettingsItem>
-          )}
-        </div>
-      </div>
-
-      {selectedProvider?.name === "claude" && (
-        <div className="settings-group">
           <SettingsItem
-            label={t("modelSettingsModelTitle")}
-            description={t("modelSettingsModelDescription")}
-            className="model-settings-item"
-            scope="local"
-            valueText={model}
+            as="label"
+            label={t("cacheMissBillingToastTitle")}
+            description={t("cacheMissBillingToastDescription")}
+            valueText={
+              cacheMissSettings.showToasts
+                ? t("settingsAgentsValueOn")
+                : t("settingsAgentsValueOff")
+            }
           >
-            <div className="font-size-selector model-settings-chip-group">
-              {MODEL_OPTIONS.map((opt) => (
-                <button
-                  key={opt.value}
-                  type="button"
-                  className={`font-size-option ${model === opt.value ? "active" : ""}`}
-                  onClick={() => setModel(opt.value)}
-                >
-                  {opt.label}
-                </button>
-              ))}
-            </div>
+            <input
+              type="checkbox"
+              checked={cacheMissSettings.showToasts}
+              disabled={!cacheMissSettings.enabled}
+              onChange={(event) =>
+                void updateSetting("cacheMissBilling", {
+                  ...settings?.cacheMissBilling,
+                  showToasts: event.currentTarget.checked,
+                })
+              }
+              aria-label={t("cacheMissBillingToastTitle")}
+            />
           </SettingsItem>
         </div>
-      )}
-    </SettingsSection>
+      </SettingsSection>
+    </>
   );
 }

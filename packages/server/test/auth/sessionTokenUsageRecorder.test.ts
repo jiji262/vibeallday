@@ -449,6 +449,37 @@ describe("SessionTokenUsageRecorder", () => {
     ]);
   });
 
+  it("reads Grok's usage from its turn result", () => {
+    const { recorder, records } = recorderWithLog();
+    const process = fakeProcess({
+      provider: "grok",
+      requestedModel: "grok-4.6",
+      resolvedModel: "grok-4.6",
+    } as Partial<Process>);
+
+    recorder.observeMessage(process, {
+      type: "result",
+      usage: {
+        input_tokens: 450,
+        output_tokens: 95,
+        cache_read_input_tokens: 1_200,
+        cache_creation_input_tokens: 0,
+      },
+    } as unknown as SDKMessage);
+    recorder.flush(process);
+
+    expect(records).toEqual([
+      expect.objectContaining({
+        provider: "grok",
+        modelId: "grok-4.6",
+        freshInputTokens: 450,
+        cachedInputTokens: 1_200,
+        cacheWriteTokens: 0,
+        outputTokens: 95,
+      }),
+    ]);
+  });
+
   it("leaves the username absent for the superuser", () => {
     const { recorder, records } = recorderWithLog();
     const process = fakeProcess({ sessionId: "unowned" });

@@ -13,7 +13,7 @@ import { useCurrentSourceRuntime } from "../contexts/SourceRuntimeContext";
 import { useRemoteBasePath } from "../hooks/useRemoteBasePath";
 import { useI18n } from "../i18n";
 import { formatBriefAge } from "../lib/sessionAge";
-import styles from "./IssuesPage.module.css";
+import styles from "./IssueSessionRow.module.css";
 
 /** The server's largest evidence page. */
 const MAX_EVIDENCE_PAGE = 100;
@@ -50,10 +50,16 @@ function evidenceAfterFirstPage(session: IssueSession) {
     : null;
 }
 
+function sessionStateClass(state: IssueSession["state"]) {
+  if (state === "confirmed") return styles.cardConfirmed ?? "";
+  if (state === "dismissed") return styles.cardDismissed ?? "";
+  return "";
+}
+
 /**
- * One associated session in the Issues pane. `session` and `includeDismissed`
- * describe the same answer: the filter is the one that answer was fetched
- * under, not the checkbox's current state.
+ * One associated session card in the Issues inspector pane. `session` and
+ * `includeDismissed` describe the same answer: the filter is the one that
+ * answer was fetched under, not the checkbox's current state.
  */
 export function IssueSessionRow({
   issueId,
@@ -78,10 +84,6 @@ export function IssueSessionRow({
     dismiss: t("issuesCancel"),
   });
   const [expanded, setExpanded] = useState(false);
-  // Only the pages this row fetched are held here: the first mention stays a
-  // prop. Offsets index the list the current `session` came from, so each new
-  // answer re-fetches as many mentions as were loaded rather than keeping
-  // pages fetched under another filter or ordering.
   const [loaded, setLoaded] = useState<{
     entries: IssueEvidence[];
     nextOffset: number | null;
@@ -94,8 +96,6 @@ export function IssueSessionRow({
     : evidenceAfterFirstPage(session);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  // Bumped by every reload and by unmount; a response from an older
-  // generation belongs to a list this row no longer shows.
   const generation = useRef(0);
   useEffect(
     () => () => {
@@ -110,8 +110,6 @@ export function IssueSessionRow({
     shownSession.current = session;
     const current = ++generation.current;
     const isCurrent = () => current === generation.current;
-    // An expanded row whose first page was still in flight shows one mention
-    // and no "more" control, so it asks again rather than stalling.
     const wanted = loadedCount || (expanded ? DEFAULT_EVIDENCE_PAGE : 0);
     if (wanted === 0) {
       setLoading(false);
@@ -169,27 +167,19 @@ export function IssueSessionRow({
     }
   };
   const age = formatBriefAge(session.updatedAt);
-  const excerpt = (entry: IssueEvidence, compact: boolean) => (
-    <div key={entry.id} className={styles.mention}>
-      <p className={compact ? styles.excerpt : styles.expandedExcerpt}>
-        {entry.excerpt || entry.value}
-      </p>
-      {entry.sourceTime && (
-        <time className={styles.muted} dateTime={entry.sourceTime}>
-          {new Date(entry.sourceTime).toLocaleString()}
-        </time>
-      )}
-    </div>
-  );
+  const shownEvidence = expanded ? evidence : evidence.slice(0, 1);
+  const hasControls =
+    session.evidenceCount > 1 ||
+    (expanded && evidence.length > 1 && nextOffset !== null);
   return (
     <article
-      className={styles.session}
+      className={`${styles.card} ${sessionStateClass(session.state)}`}
       aria-label={session.title ?? session.sessionId}
     >
-      <div className={styles.sessionRow}>
-        <div className={styles.sessionIdentity}>
+      <div className={styles.headerRow}>
+        <div className={styles.identity}>
           {session.sourceAvailable === false ? (
-            <span>
+            <span className={styles.unavailableLine}>
               {session.title ?? session.sessionId} ·{" "}
               {t("issuesSourceUnavailable")}
             </span>
@@ -259,7 +249,7 @@ export function IssueSessionRow({
           <MoreHorizontalIcon />
         </IconButton>
       </div>
-      <div className={styles.sessionMeta}>
+      <div className={styles.metaBar}>
         <span
           title={
             session.updatedAt
@@ -269,7 +259,7 @@ export function IssueSessionRow({
         >
           {age ? t("issuesLastActivity", { age }) : t("issuesActivityUnknown")}
         </span>
-        <span>
+        <span className={styles.mentionCapsule}>
           {t(
             session.evidenceCount === 1
               ? "issuesSingleMention"
@@ -278,35 +268,55 @@ export function IssueSessionRow({
           )}
         </span>
       </div>
-      {(expanded ? evidence : evidence.slice(0, 1)).map((entry) =>
-        excerpt(entry, !expanded),
+      {shownEvidence.length > 0 && (
+        <div className={styles.mentionsList}>
+          {shownEvidence.map((entry) => (
+            <div key={entry.id} className={styles.mention}>
+              <p className={expanded ? styles.expandedExcerpt : styles.excerpt}>
+                {entry.excerpt || entry.value}
+              </p>
+              {entry.sourceTime && (
+                <time
+                  className={styles.mentionTime}
+                  dateTime={entry.sourceTime}
+                >
+                  {new Date(entry.sourceTime).toLocaleString()}
+                </time>
+              )}
+            </div>
+          ))}
+        </div>
       )}
-      {session.evidenceCount > 1 && (
-        <Button
-          variant="link"
-          size="sm"
-          className={styles.textButton}
-          aria-expanded={expanded}
-          onClick={() => {
-            setExpanded(!expanded);
-            if (!expanded && evidence.length === 1) void more();
-          }}
-        >
-          {t(expanded ? "issuesFewerMentions" : "issuesMoreMentions", {
-            count: session.evidenceCount - 1,
-          })}
-        </Button>
-      )}
-      {expanded && evidence.length > 1 && nextOffset !== null && (
-        <Button
-          variant="link"
-          size="sm"
-          className={styles.textButton}
-          disabled={loading}
-          onClick={() => void more()}
-        >
-          {t("issuesMoreEvidence")}
-        </Button>
+      {hasControls && (
+        <div className={styles.controlsRow}>
+          {session.evidenceCount > 1 && (
+            <Button
+              variant="link"
+              size="sm"
+              className={styles.textButton}
+              aria-expanded={expanded}
+              onClick={() => {
+                setExpanded(!expanded);
+                if (!expanded && evidence.length === 1) void more();
+              }}
+            >
+              {t(expanded ? "issuesFewerMentions" : "issuesMoreMentions", {
+                count: session.evidenceCount - 1,
+              })}
+            </Button>
+          )}
+          {expanded && evidence.length > 1 && nextOffset !== null && (
+            <Button
+              variant="link"
+              size="sm"
+              className={styles.textButton}
+              disabled={loading}
+              onClick={() => void more()}
+            >
+              {t("issuesMoreEvidence")}
+            </Button>
+          )}
+        </div>
       )}
       {loading && (
         <LoadingState variant="compact" label={t("issuesLoadingMentions")} />

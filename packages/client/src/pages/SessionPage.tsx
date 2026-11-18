@@ -9,8 +9,6 @@ import type {
   EffortLevel,
   PermissionMode,
   PromptSuggestionMode,
-  ProviderName,
-  ProjectQueueItemSummary,
   ProjectQueueStagedAttachments,
   SlashCommand,
   ThinkingMode,
@@ -205,7 +203,6 @@ import {
 } from "../hooks/useLongContextEffortGuard";
 import { LongContextEffortWarningModal } from "../components/LongContextEffortWarningModal";
 import { useSessionLoadingProgress } from "../hooks/useSessionLoadingProgress";
-import type { SessionLoadProgress } from "../hooks/useSessionMessages";
 import { useSessionPerformanceSettings } from "../hooks/useSessionPerformanceSettings";
 import { useSessionToolbarPresence } from "../hooks/useSessionToolbarPresence";
 import { useLongPress } from "../hooks/useLongPress";
@@ -263,7 +260,7 @@ import {
 } from "../lib/composerDraftSignal";
 import { createTranscriptPositionStore } from "../lib/transcriptPositionStore";
 import { buildCorrectionText } from "../lib/correctionText";
-import { logSessionUiTrace } from "../lib/diagnostics/uiTrace";
+import { useSessionUiTrace } from "../lib/diagnostics/useSessionUiTrace";
 import { isEffortLevel } from "../lib/effortLevels";
 import {
   executeSemanticUiComposerAction,
@@ -364,7 +361,7 @@ import {
   loadMessageInputModule,
   loadMessageListModule,
 } from "../lib/sessionRouteModules";
-import type { Message, Project } from "../types";
+import type { Project } from "../types";
 import { LoadingState } from "../components/garden/LoadingState";
 
 const LazyMessageList = lazy(() =>
@@ -407,78 +404,25 @@ function MessageInput(props: ComponentProps<typeof LazyMessageInput>) {
   );
 }
 
-const CLAUDE_HANDOFF_REQUIRED_MESSAGE =
-  "Claude session cannot be safely resumed because the Claude SDK recorded an API-error response as the latest assistant message. Start a handoff session instead.";
-const EMPTY_PROJECT_QUEUE_PROJECT_IDS: readonly string[] = [];
-const EMPTY_PROJECT_QUEUE_ITEMS: readonly ProjectQueueItemSummary[] = [];
+import {
+  CLAUDE_HANDOFF_REQUIRED_MESSAGE,
+  EMPTY_PROJECT_QUEUE_ITEMS,
+  EMPTY_PROJECT_QUEUE_PROJECT_IDS,
+  type GeneratedRetitleState,
+  getSessionLoadingProgressText,
+  isMissingDeferredQueueEntryError,
+  messageKey,
+  parsePositiveIntegerParam,
+  requiresHandoffAfterClaudeResumeError,
+  SESSION_LOADING_PROGRESS_DETAILS_DELAY_MS,
+  SESSION_TITLE_SKELETON_HEIGHT,
+  SESSION_TITLE_SKELETON_WIDTH,
+  type SessionPageProps,
+  type SessionPageRouteLocation,
+  type TitleEditMode,
+} from "./session/sessionPageHelpers";
 
-function messageKey(message: Message | undefined): string | undefined {
-  return message?.uuid ?? message?.id;
-}
-
-function isMissingDeferredQueueEntryError(error: unknown): boolean {
-  if ((error as { status?: number } | null)?.status === 404) {
-    return true;
-  }
-  const message = error instanceof Error ? error.message : String(error);
-  return (
-    message.includes("No active process") ||
-    message.includes("Deferred message not found")
-  );
-}
-
-function requiresHandoffAfterClaudeResumeError(
-  error: unknown,
-  provider: ProviderName | undefined,
-): boolean {
-  if ((error as { status?: number } | null)?.status !== 409) {
-    return false;
-  }
-  if (!isClaudeProviderName(provider)) {
-    return false;
-  }
-  const message = error instanceof Error ? error.message : String(error);
-  return (
-    message.includes("Start a handoff session") ||
-    message.includes("API error: 409")
-  );
-}
-
-function parsePositiveIntegerParam(value: string | null): number | undefined {
-  if (!value) return undefined;
-  const parsed = Number.parseInt(value, 10);
-  return Number.isFinite(parsed) && parsed > 0 ? parsed : undefined;
-}
-
-type TitleEditMode = "manual" | "retitle";
-
-interface GeneratedRetitleState {
-  requestId: number;
-  status: "generating" | "ready" | "error";
-  submittedTurnText: string;
-  title?: string;
-  error?: string;
-  deferredInsertion?: GeneratedRetitleInsertion;
-}
-
-export interface SessionPageRouteLocation {
-  pathname: string;
-  search: string;
-  state: unknown;
-  /** Router history entry id; distinguishes repeat navigations to one path. */
-  key?: string;
-}
-
-export interface SessionPageProps {
-  projectId?: string;
-  sessionId?: string;
-  routeLocation?: SessionPageRouteLocation;
-  isDomLingerParked?: boolean;
-  progressiveRenderPauseSignal?: {
-    readonly current: boolean;
-    supportsCompaction?: boolean;
-  };
-}
+export type { SessionPageProps, SessionPageRouteLocation };
 
 export function SessionPage({
   projectId: projectIdProp,
@@ -526,28 +470,6 @@ function SessionPageInvalidRoute() {
   return <div className="error">{t("sessionInvalidUrl")}</div>;
 }
 
-function getSessionLoadingProgressText(
-  progress: SessionLoadProgress,
-  t: ReturnType<typeof useI18n>["t"],
-): string | null {
-  switch (progress.stage) {
-    case "fetching":
-      return null;
-    case "rendering":
-      return t("sessionLoadingRenderingTranscript", {
-        count: progress.messageCount ?? 0,
-      });
-    case "idle":
-    case "complete":
-    case "error":
-      return null;
-  }
-}
-
-const SESSION_LOADING_PROGRESS_DETAILS_DELAY_MS = 1500;
-const SESSION_TITLE_SKELETON_WIDTH = 160;
-const SESSION_TITLE_SKELETON_HEIGHT = 16;
-
 function SessionPageContent({
   projectId,
   sessionId,
@@ -581,6 +503,7 @@ function SessionPageContent({
   const clientSummarySourceKey = useClientSummarySourceKey();
   const historyScope = useComposerHistoryScope();
   const sourceRuntime = useCurrentSourceRuntime();
+  const logSessionUiTrace = useSessionUiTrace();
   const sourceApi = sourceRuntime.api;
   const sourceSummary = sourceRuntime.summary;
   const sourceTransport = sourceRuntime.transport;

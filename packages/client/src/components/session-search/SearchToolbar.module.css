@@ -1,25 +1,36 @@
 /*
- * Sessions toolbar (design .ses search block): the needle field beside the
- * 标题 | 内容 scope, then quick chips, Filters, the scope count and Select.
- * The page module makes the whole block sticky.
+ * Studio Workbench unified sticky command bar: search input + Title | Content
+ * scope on the top deck, quick-filter pills + Filters + mono count badge +
+ * Select on the bottom deck.
  */
 
 .toolbar {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  padding-bottom: 12px;
+  gap: 8px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-card);
+  background: var(--surface);
+  box-shadow: var(--shadow-card);
+  transition:
+    border-color var(--duration-fast) var(--ease-standard),
+    box-shadow var(--duration-fast) var(--ease-standard);
+}
+
+.toolbar:focus-within {
+  border-color: var(--line-strong);
 }
 
 .searchRow {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
 }
 
 .field {
-  flex: 1 1 360px;
+  flex: 1 1 340px;
   min-width: 0;
 }
 
@@ -34,6 +45,8 @@
   align-items: center;
   gap: 8px;
   min-width: 0;
+  padding-top: 8px;
+  border-top: 1px solid var(--line);
 }
 
 .filtersButton {
@@ -46,7 +59,7 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  column-gap: 8px;
+  gap: 6px;
   min-width: 0;
 }
 
@@ -54,11 +67,37 @@
   flex: none;
 }
 
-/* Design .dot.unread: the accent read-state marker, not a status shape. */
+.chips button {
+  border-color: var(--line);
+  border-radius: var(--r-btn);
+  background: var(--surface-2);
+  color: var(--ink-2);
+  font-size: 12px;
+  font-weight: 500;
+  transition:
+    background-color var(--duration-fast) var(--ease-standard),
+    border-color var(--duration-fast) var(--ease-standard),
+    color var(--duration-fast) var(--ease-standard);
+}
+
+.chips button:hover {
+  border-color: var(--line-strong);
+  background: var(--surface-3);
+  color: var(--ink);
+}
+
+.chips button[aria-pressed="true"] {
+  border-color: var(--accent-line);
+  background: var(--accent-soft);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent-line) 30%, transparent);
+  color: var(--accent-ink);
+}
+
+/* Accent read-state dot inside Unread quick-filter pill. */
 .unreadDot {
   flex: none;
-  width: 8px;
-  height: 8px;
+  width: 7px;
+  height: 7px;
   border-radius: 50%;
   background: var(--accent);
 }
@@ -66,14 +105,14 @@
 .divider {
   flex: none;
   width: 1px;
-  height: 20px;
+  height: 18px;
   background: var(--line);
 }
 
 .end {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   min-width: 0;
   margin-left: auto;
   color: var(--ink-3);
@@ -83,15 +122,14 @@
 
 @media (width < 768px) {
   .toolbar {
-    gap: 10px;
+    padding: 8px 10px;
   }
 
   /* Phones scroll the chips sideways instead of wrapping them. */
   .chips {
     flex-wrap: nowrap;
     flex-basis: 100%;
-    margin: 0 calc(var(--page-gutter) * -1);
-    padding: 0 var(--page-gutter);
+    padding-bottom: 2px;
     overflow-x: auto;
     scrollbar-width: none;
   }
@@ -101,7 +139,7 @@
   }
 }
 
-/* Scope line: "in 34 sessions", the toolbar's mono count. */
+/* Scope count pill: "in 34 sessions" mono badge with scan indicator. */
 .statusArea {
   position: relative;
   display: inline-block;
@@ -112,17 +150,28 @@
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  min-height: 28px;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  color: inherit;
+  height: 26px;
+  padding: 0 8px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-btn);
+  background: var(--surface-2);
+  color: var(--ink-2);
   font: inherit;
   font-variant-numeric: tabular-nums;
   letter-spacing: inherit;
   text-transform: inherit;
   white-space: nowrap;
   cursor: pointer;
+  transition:
+    background-color var(--duration-fast) var(--ease-standard),
+    border-color var(--duration-fast) var(--ease-standard),
+    color var(--duration-fast) var(--ease-standard);
+}
+
+.statusButton:hover:not(:disabled) {
+  border-color: var(--line-strong);
+  background: var(--surface-3);
+  color: var(--ink);
 }
 
 .statusButton:disabled {
@@ -130,7 +179,7 @@
 }
 
 .statusButton:focus-visible {
-  border-radius: var(--r-chip);
+  border-radius: var(--r-btn);
   outline: 2px solid var(--focus);
   outline-offset: 2px;
 }
@@ -144,14 +193,14 @@
 .statusDetails {
   display: block;
   position: absolute;
-  left: 0;
-  top: 100%;
+  right: 0;
+  top: calc(100% + 6px);
   z-index: 20;
   width: max-content;
   max-width: min(320px, calc(100dvw - 32px));
   padding: var(--space-2) var(--space-3);
-  border: 1px solid var(--card-line);
-  border-radius: var(--r-card);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-md);
   background: var(--surface);
   box-shadow: var(--shadow-pop);
   color: var(--ink);
@@ -163,14 +212,16 @@
   white-space: normal;
 }
 
-/* Selection bar (design bulk card): accent-soft, shown only once selecting. */
+/* Selection mode strip: elevated Studio card with left accent bar. */
 .selection {
   display: grid;
-  gap: var(--space-1);
-  padding: 8px 10px 10px 16px;
+  gap: var(--space-2);
+  padding: 10px 14px;
   border: 1px solid var(--accent-line);
+  border-left: 3px solid var(--accent);
   border-radius: var(--r-card);
-  background: var(--accent-soft);
+  background: color-mix(in srgb, var(--accent-soft) 45%, var(--surface));
+  box-shadow: var(--shadow-card);
 }
 
 .selectionTop {
@@ -183,18 +234,21 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  min-height: var(--tap-min);
-  padding: 0 var(--space-1);
-  border: 0;
-  background: transparent;
+  min-height: 32px;
+  padding: 0 8px;
+  border: 1px solid var(--accent-line);
+  border-radius: var(--r-btn);
+  background: var(--surface);
   color: var(--accent-ink);
-  font-family: var(--font-ui);
+  font-family: var(--font-mono);
   font-size: var(--fs-small);
   font-weight: 600;
   font-variant-numeric: tabular-nums;
-  text-decoration: underline;
-  text-underline-offset: 3px;
   cursor: pointer;
+}
+
+.selectionCount:hover {
+  background: var(--surface-2);
 }
 
 .selectionActions {
@@ -208,9 +262,9 @@
 }
 
 .selectionHelp {
-  margin: var(--space-1) 0 0;
+  margin: 0;
   color: var(--ink-2);
-  font-size: var(--fs-small);
+  font-size: 12px;
   line-height: 1.4;
 }
 
@@ -219,7 +273,7 @@
 }
 
 .clearIcon {
-  color: var(--err-ink);
+  color: var(--err);
 }
 
 /* Selection manager sheet: one checkbox row per session. */
@@ -244,8 +298,8 @@
 
 .managerRow input {
   flex-shrink: 0;
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
   margin: 2px 0 0;
   accent-color: var(--accent);
 }
@@ -254,4 +308,12 @@
   color: var(--ink-3);
   font-family: var(--font-mono);
   font-size: var(--fs-meta);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toolbar,
+  .chips button,
+  .statusButton {
+    transition: none;
+  }
 }

@@ -1,40 +1,69 @@
-/* Design detail eyebrow: the mono key, then the type and tracker tags. */
+/* Studio Workbench inspector key eyebrow & 2-up metadata grid. */
+
 .keyRow {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   margin: 0;
 }
 
 .key {
-  color: var(--ink-2);
+  display: inline-flex;
+  align-items: center;
+  height: 20px;
+  padding: 0 7px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-sm);
+  background: var(--surface-2);
+  color: var(--ink);
   font-family: var(--font-mono);
-  font-size: var(--fs-meta);
+  font-size: 11.5px;
   font-weight: 600;
 }
 
-/* Design .iss-dl: labels share one column at least as wide as the board's. */
 .facts {
   display: grid;
-  grid-template-columns: minmax(72px, max-content) minmax(0, 1fr);
-  gap: 8px 12px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1px;
   margin: 0;
-  padding: 14px var(--space-5) var(--space-4);
   border-bottom: 1px solid var(--line);
-  font-size: var(--fs-small);
+  background: var(--line);
 }
 
-.facts dt {
+.factCell {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+  padding: 10px var(--space-4);
+  background: var(--surface-2);
+}
+
+.factLabel {
   color: var(--ink-3);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: var(--eyebrow-tracking, 0.06em);
+  text-transform: uppercase;
 }
 
-.facts dd {
+.factValue {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 6px;
   min-width: 0;
   margin: 0;
-  color: var(--ink-2);
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+@media (width < 480px) {
+  .facts {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }

@@ -1,7 +1,6 @@
 /*
- * Bulk band at the top of the Sessions result card (design batch bar). It
- * sticks under the page's sticky search toolbar, whose height the page
- * publishes as --sessions-toolbar-height.
+ * Elevated Studio bulk action dock at the top of the Sessions result card.
+ * Sticks directly beneath the sticky command bar (--sessions-toolbar-height).
  */
 
 .bar {
@@ -11,21 +10,31 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 8px;
-  padding: 8px 10px 8px var(--pad-card);
+  gap: 10px;
+  padding: 9px var(--pad-card);
   border-bottom: 1px solid var(--accent-line);
-  /* Night's accent-soft is translucent; layer it on the card so rows
-     scrolling under the sticky band stay hidden. */
   background:
-    linear-gradient(var(--accent-soft), var(--accent-soft)), var(--surface);
+    linear-gradient(
+      90deg,
+      var(--accent-soft),
+      color-mix(in srgb, var(--accent-soft) 50%, var(--surface))
+    ),
+    var(--surface);
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--ink) 8%, transparent);
 }
 
 .count {
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  height: 26px;
+  padding: 0 9px;
+  border: 1px solid var(--accent-line);
+  border-radius: var(--r-btn);
+  background: var(--surface);
   color: var(--accent-ink);
-  font-size: var(--fs-small);
+  font-family: var(--font-mono);
+  font-size: 12px;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;

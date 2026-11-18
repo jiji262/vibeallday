@@ -122,8 +122,16 @@ function consoleMethodOf(node) {
   if (!ts.isCallExpression(node)) return null;
   const callee = node.expression;
   if (!ts.isPropertyAccessExpression(callee)) return null;
-  if (!ts.isIdentifier(callee.expression)) return null;
-  if (callee.expression.text !== "console") return null;
+  const receiver = callee.expression;
+  const direct = ts.isIdentifier(receiver) && receiver.text === "console";
+  const scoped =
+    ts.isPropertyAccessExpression(receiver) &&
+    receiver.name.text === "scopedConsole";
+  const factory =
+    ts.isCallExpression(receiver) &&
+    ts.isIdentifier(receiver.expression) &&
+    receiver.expression.text === "createScopedConsole";
+  if (!direct && !scoped && !factory) return null;
   const method = callee.name.text;
   if (!chattyMethods.has(method) && !signalMethods.has(method)) return null;
   return method;

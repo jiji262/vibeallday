@@ -1,29 +1,38 @@
 /*
- * Companion to SessionDock.module.css, loaded after it: send and stop, the
- * enlarged hit targets, the dock's status captions, overflow tray,
- * software-keyboard row and collapsed composer (an approval or question is
- * open above). Same `.dock` anchor on the session footer.
+ * Companion to SessionDock.module.css: Studio Workbench send/stop buttons,
+ * overflow popover tray, mobile keyboard row, and collapsed approval composer.
  */
 
-/* The primary action: accent to send; stop is a quiet secondary square. */
 .dock :global(.message-input-actions) :global(.send-button),
 .dock :global(.message-input-actions) :global(.stop-button) {
   border-radius: var(--r-send);
+  transition:
+    background-color 120ms ease,
+    border-color 120ms ease,
+    color 120ms ease;
 }
 
 .dock :global(.message-input-actions) :global(.send-button) {
   background: var(--accent);
   color: var(--on-accent);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.08);
+}
+
+.dock
+  :global(.message-input-actions)
+  :global(.send-button):hover:not(:disabled) {
+  background: var(--accent-hover);
 }
 
 .dock :global(.message-input-actions) :global(.send-button):disabled {
   background: var(--surface-3);
+  box-shadow: none;
   color: var(--ink-4);
   opacity: 1;
 }
 
 .dock :global(.message-input-actions) :global(.stop-button) {
-  background: var(--surface);
+  background: var(--surface-2);
   border: 1px solid var(--line-strong);
   color: var(--ink);
 }
@@ -40,7 +49,6 @@
   background: currentColor;
 }
 
-/* Larger invisible targets for the short chip and the 16px context label. */
 .dock :global(.message-input-toolbar) :global(.mode-button)::after {
   position: absolute;
   inset: -4px 0;
@@ -54,16 +62,11 @@
   margin: -14px -6px;
 }
 
-/* Overflow menu: one tray above the card rather than a strip that grows
-   sideways off the screen. The card (or the dock's inner box while an approval
-   is open) becomes the containing block, and both legacy groups flow into it. */
 .dock :global(.message-input-toolbar),
 .dock :global(.composer-bottom-overflow) {
   position: static;
 }
 
-/* On phones the status chips float; here they become quiet mono captions just
-   above the card's left edge (the card is their containing block). */
 .dock
   :global(.message-input-toolbar):global(.status-floats)
   :global(.composer-status-ages) {
@@ -81,24 +84,22 @@
   border: 0;
   box-shadow: none;
   color: var(--ink-3);
+  font-family: var(--font-mono);
   font-size: 11px;
   opacity: 1;
 }
 
-/* Chips are separated by a mid dot, so two ages read as one caption. */
 .dock
   :global(.status-floats)
   :global(.composer-status-chip)
   + :global(.composer-status-chip)::before {
   margin-inline-end: 6px;
-  color: var(--ink-3);
+  color: var(--ink-4);
   content: "\00b7";
 }
 
-/* While an approval or question is open the toolbar stands alone under the
-   card, outside the composer card: no status caption to anchor there. */
 .dock :global(.session-input-inner) > :global(.message-input-toolbar) {
-  min-height: 52px;
+  min-height: 50px;
 }
 
 .dock
@@ -121,8 +122,9 @@
   align-items: center;
   gap: 4px;
   padding: 8px;
-  background: var(--surface);
-  border: 1px solid var(--line);
+  background: var(--phead-bg);
+  backdrop-filter: saturate(180%) blur(16px);
+  border: 1px solid var(--line-strong);
   border-radius: var(--r-card);
   box-shadow: var(--shadow-pop);
   pointer-events: auto;
@@ -132,7 +134,7 @@
   display: contents;
 }
 
-/* Software-keyboard row (phones, while typing): more, mic and a wide Send. */
+/* Software-keyboard row (phones, while typing). */
 .dock :global(.message-input-keyboard-compact) {
   padding: 0 6px 6px;
 }
@@ -162,8 +164,6 @@
   border-radius: var(--r-send);
 }
 
-/* Send is the default primary; steer, queue and project-queue keep their own
-   legacy colors. */
 .dock :global(.message-input-keyboard-primary)[data-action-kind="send"] {
   background: var(--accent);
   color: var(--on-accent);
@@ -176,7 +176,7 @@
   opacity: 1;
 }
 
-/* Collapsed (an approval or question is open above): a slim card of its own. */
+/* Collapsed composer (approval or question active above). */
 .dock :global(.message-input-collapsed) {
   margin-top: 0;
   background: var(--surface);
@@ -184,10 +184,16 @@
   border-radius: var(--r-composer);
   box-shadow: var(--shadow-composer);
   opacity: 1;
+  transition:
+    border-color 140ms ease,
+    box-shadow 140ms ease;
 }
 
 .dock :global(.message-input-collapsed):focus-within {
   border-color: var(--focus);
+  box-shadow:
+    var(--shadow-composer),
+    0 0 0 3px var(--focus-ring);
 }
 
 .dock :global(.message-input-collapsed) :global(.speech-draft-field) {
@@ -206,8 +212,8 @@
 }
 
 .dock :global(.message-input-collapsed-send) {
-  --composer-control-size: 36px;
-  --composer-primary-control-size: 36px;
+  --composer-control-size: 34px;
+  --composer-primary-control-size: 34px;
   background: var(--accent);
   border-radius: var(--r-send);
   box-shadow: none;

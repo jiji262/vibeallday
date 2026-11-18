@@ -1,5 +1,4 @@
-/* Desktop settings: the settings rail (design .side, it stands in for the app
-   sidebar) beside the pane column, each scrolling on its own. */
+/* Desktop settings: Studio preference rail beside the scrollable pane column. */
 .twoColumn {
   --settings-rail-width: 272px;
   --page-content-max-width: 1040px;
@@ -9,16 +8,17 @@
   grid-template-columns: var(--settings-rail-width) minmax(0, 1fr);
   min-height: 0;
   height: 100%;
+  background: var(--canvas);
 }
 
-/* Fixed px width so the text-size setting cannot stretch it. */
+/* Fixed px width so the text-size setting cannot stretch the sidebar rail. */
 .rail {
   display: flex;
   flex-direction: column;
-  gap: var(--space-4);
+  gap: var(--space-3);
   width: var(--settings-rail-width);
   min-height: 0;
-  padding: 14px var(--space-3) 28px;
+  padding: 12px 12px 28px;
   overflow-y: auto;
   border-right: 1px solid var(--line);
   background: var(--side-bg);
@@ -26,59 +26,93 @@
   scrollbar-width: thin;
 }
 
-/* Design .nav-item, muted: the way back to the app. */
+/* Crisp Studio pill button back to the active workspace. */
 .back {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 10px;
-  min-height: 36px;
-  padding: 0 10px;
-  border-radius: var(--r-btn);
-  color: var(--ink-3);
-  font-size: var(--fs-body);
+  align-self: flex-start;
+  gap: 6px;
+  min-height: 30px;
+  padding: 0 12px 0 9px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface);
+  box-shadow: var(--shadow-card);
+  color: var(--ink-2);
+  font-size: var(--fs-small);
   font-weight: 500;
   text-decoration: none;
+  transition:
+    background-color 140ms ease,
+    border-color 140ms ease,
+    color 140ms ease;
 }
 
 .back:hover {
-  background: var(--surface-3);
+  border-color: var(--line-strong);
+  background: var(--surface-2);
   color: var(--ink);
 }
 
 .back:focus-visible {
   outline: 2px solid var(--focus);
-  outline-offset: -2px;
+  outline-offset: 2px;
 }
 
 .railHead {
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
-  padding: 0 var(--space-1);
+  gap: 10px;
+  padding: 2px 2px 4px;
 }
 
 .railTitle {
   margin: 0;
+  padding: 0 4px;
   color: var(--ink);
-  font-size: var(--fs-h1);
+  font-size: var(--fs-h2);
   font-stretch: var(--display-stretch);
   font-weight: var(--title-weight);
   letter-spacing: var(--display-tracking);
+  line-height: 1.2;
 }
 
 .nav {
   display: flex;
   flex-direction: column;
-  gap: var(--space-1);
+  gap: 2px;
+}
+
+.nav h2,
+.nav h3 {
+  margin: 12px 0 4px;
+  padding: 0 8px;
+  color: var(--ink-3);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.nav [aria-current="page"],
+.nav [aria-current="true"] {
+  background: var(--nav-on-bg);
+  box-shadow: var(--nav-on-shadow);
+  color: var(--ink);
+  font-weight: 600;
 }
 
 .overviewEntry {
-  margin-bottom: 6px;
+  margin-bottom: 4px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--line);
 }
 
 .overviewIcon {
   display: grid;
   place-items: center;
+  color: var(--ink-2);
 }
 
 .column {
@@ -86,16 +120,25 @@
   flex-direction: column;
   min-width: 0;
   min-height: 0;
+  background: var(--canvas);
 }
 
 .panel {
   min-width: 0;
+  padding-bottom: 40px;
 }
 
 .savedNote {
+  display: inline-flex;
+  align-items: center;
+  height: 24px;
+  padding: 0 10px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface-2);
   color: var(--ink-3);
   font-family: var(--font-mono);
-  font-size: var(--fs-meta);
+  font-size: 11px;
   white-space: nowrap;
 }
 

@@ -1,3 +1,4 @@
+import { createScopedConsole } from "../diagnostics/scopedConsole";
 import type { ConversationQuery } from "@vibeallday/shared/experimental/simple-client.generated";
 /**
  * Secure connection for remote access using SRP authentication and NaCl encryption.
@@ -189,6 +190,9 @@ function toUint8ArrayView(
  */
 export class SecureConnection implements Connection {
   readonly mode = "secure" as const;
+  private readonly scopedConsole = createScopedConsole(() =>
+    this.getDiagnosticScope(),
+  );
 
   private ws: SecureConnectionSocket | null = null;
   private srpSession: SrpClientSession | null = null;
@@ -295,6 +299,20 @@ export class SecureConnection implements Connection {
         logPrefix: "[SecureConnection]",
       },
     );
+  }
+
+  /** 仅提供目的地元数据，诊断代码不得读取认证凭据。 */
+  getDiagnosticScope(): ResumeScope {
+    return {
+      mode: this.isRelayConnection ? "relay" : "direct",
+      endpoint: this.isRelayConnection
+        ? (this.relayUrl ?? this.wsUrl)
+        : this.wsUrl,
+      identity: this.username,
+      relayUsername: this.isRelayConnection
+        ? (this.relayUsername ?? undefined)
+        : undefined,
+    };
   }
 
   setConnectionManager(manager: ConnectionManager | null): void {
@@ -421,7 +439,9 @@ export class SecureConnection implements Connection {
         return;
       }
 
-      console.log("[SecureConnection] Resuming session on existing socket");
+      this.scopedConsole.log(
+        "[SecureConnection] Resuming session on existing socket",
+      );
       this.connectionState = "connecting";
 
       let authResolveHandler: () => void = () => {};
@@ -435,7 +455,7 @@ export class SecureConnection implements Connection {
       const ws = this.ws;
 
       ws.onerror = (event) => {
-        console.error("[SecureConnection] Error:", event);
+        this.scopedConsole.error("[SecureConnection] Error:", event);
       };
 
       ws.onclose = (event) => {
@@ -483,7 +503,7 @@ export class SecureConnection implements Connection {
       };
       ws.send(JSON.stringify(resumeInit));
       this.connectionState = "srp_resume_init_sent";
-      console.log("[SecureConnection] SRP resume init sent");
+      this.scopedConsole.log("[SecureConnection] SRP resume init sent");
       armResumeTimeout();
 
       authPromise
@@ -759,7 +779,7 @@ export class SecureConnection implements Connection {
 
     this.pendingResumeClientNonce = null;
     this.pendingResumeServerNonce = null;
-    console.log("[SecureConnection] Starting full SRP handshake");
+    this.scopedConsole.log("[SecureConnection] Starting full SRP handshake");
     this.srpSession = new SrpClientSession();
     await this.srpSession.generateHello(this.username, this.password);
 
@@ -782,7 +802,7 @@ export class SecureConnection implements Connection {
     };
     this.ws?.send(JSON.stringify(hello));
     this.connectionState = "srp_hello_sent";
-    console.log("[SecureConnection] SRP hello sent");
+    this.scopedConsole.log("[SecureConnection] SRP hello sent");
   }
 
   /**
@@ -834,7 +854,7 @@ export class SecureConnection implements Connection {
         this.ws?.send(JSON.stringify(resume));
         this.connectionState = "srp_resume_proof_sent";
         this.observeResume("proof");
-        console.log("[SecureConnection] SRP resume proof sent");
+        this.scopedConsole.log("[SecureConnection] SRP resume proof sent");
         return;
       }
 
@@ -862,7 +882,9 @@ export class SecureConnection implements Connection {
           !msg.transportNonce ||
           msg.transportNonce !== this.pendingResumeServerNonce
         ) {
-          console.error("[SecureConnection] Resume server proof failed");
+          this.scopedConsole.error(
+            "[SecureConnection] Resume server proof failed",
+          );
           this.connectionState = "failed";
           reject(
             this.makeResumeError(
@@ -887,7 +909,9 @@ export class SecureConnection implements Connection {
             proofProtocolVersion === null ||
             !this.acceptAuthenticatedResumeProtocolVersion(proofProtocolVersion)
           ) {
-            console.error("[SecureConnection] Resume server proof failed");
+            this.scopedConsole.error(
+              "[SecureConnection] Resume server proof failed",
+            );
             this.connectionState = "failed";
             reject(
               this.makeResumeError(
@@ -902,7 +926,7 @@ export class SecureConnection implements Connection {
         } else if (
           !this.acceptGraceProtocolVersion(GRACE_FULL_SRP_PROTOCOL_VERSION)
         ) {
-          console.error(
+          this.scopedConsole.error(
             "[SecureConnection] Resume would downgrade authenticated protocol",
           );
           this.connectionState = "failed";
@@ -915,7 +939,9 @@ export class SecureConnection implements Connection {
           this.ws?.close();
           return;
         }
-        console.log("[SecureConnection] Session resumed successfully");
+        this.scopedConsole.log(
+          "[SecureConnection] Session resumed successfully",
+        );
         this.sessionKey = deriveTransportKey(baseSessionKey, transportNonce);
         this.sessionId = msg.sessionId;
         this.connectionState = "authenticated";
@@ -948,7 +974,7 @@ export class SecureConnection implements Connection {
             : "unknown";
         await this.quarantineResume("rejected", reason);
         if (!this.password) {
-          console.log(
+          this.scopedConsole.log(
             `[SecureConnection] Session resume failed: ${reason} (no password for fallback)`,
           );
           this.connectionState = "failed";
@@ -962,7 +988,7 @@ export class SecureConnection implements Connection {
           return;
         }
 
-        console.log(
+        this.scopedConsole.log(
           `[SecureConnection] Session resume failed: ${reason}, falling back to SRP`,
         );
         this.storedSession = null;
@@ -973,7 +999,7 @@ export class SecureConnection implements Connection {
       if (isSrpError(msg)) {
         if (msg.code !== "server_error")
           await this.quarantineResume("rejected");
-        console.error("[SecureConnection] SRP error during resume");
+        this.scopedConsole.error("[SecureConnection] SRP error during resume");
         this.connectionState = "failed";
         reject(
           this.makeResumeError(
@@ -985,14 +1011,16 @@ export class SecureConnection implements Connection {
         return;
       }
 
-      console.warn("[SecureConnection] Unexpected message during resume");
+      this.scopedConsole.warn(
+        "[SecureConnection] Unexpected message during resume",
+      );
       this.connectionState = "failed";
       reject(
         this.makeResumeError("protocol", "Unexpected message during resume"),
       );
       this.ws?.close();
     } catch {
-      console.error("[SecureConnection] Resume response error");
+      this.scopedConsole.error("[SecureConnection] Resume response error");
       this.connectionState = "failed";
       reject(
         this.makeResumeError("protocol", "Malformed session resume response"),
@@ -1032,7 +1060,11 @@ export class SecureConnection implements Connection {
     event: CloseEvent,
     authRejectHandler?: (err: Error) => void,
   ): void {
-    console.log("[SecureConnection] Closed:", event.code, event.reason);
+    this.scopedConsole.log(
+      "[SecureConnection] Closed:",
+      event.code,
+      event.reason,
+    );
     const wasAuthenticated = this.connectionState === "authenticated";
     this.ws = null;
     this.sessionKey = null;
@@ -1064,13 +1096,13 @@ export class SecureConnection implements Connection {
       // Relay connections need to go through the relay again
       if (this.isRelayConnection) {
         if (this.relayUrl && this.relayUsername && this.storedSession) {
-          console.log(
+          this.scopedConsole.log(
             "[SecureConnection] Relay connection dropped, attempting auto-reconnect",
           );
           this.reconnectThroughRelay()
             .then(resolve)
             .catch((err) => {
-              console.error(
+              this.scopedConsole.error(
                 "[SecureConnection] Relay auto-reconnect failed:",
                 err,
               );
@@ -1082,7 +1114,7 @@ export class SecureConnection implements Connection {
             });
           return;
         }
-        console.log(
+        this.scopedConsole.log(
           "[SecureConnection] Cannot reconnect relay connection (missing config or session)",
         );
         reject(
@@ -1093,7 +1125,7 @@ export class SecureConnection implements Connection {
         return;
       }
 
-      console.log("[SecureConnection] Connecting to", this.wsUrl);
+      this.scopedConsole.log("[SecureConnection] Connecting to", this.wsUrl);
       this.connectionState = "connecting";
 
       const ws = new WebSocket(this.wsUrl);
@@ -1128,7 +1160,7 @@ export class SecureConnection implements Connection {
 
           if (this.password) {
             this.observeResume("timeout");
-            console.log(
+            this.scopedConsole.log(
               "[SecureConnection] Session resume timed out, falling back to full SRP",
             );
             this.storedSession = null;
@@ -1154,13 +1186,15 @@ export class SecureConnection implements Connection {
       };
 
       ws.onopen = async () => {
-        console.log("[SecureConnection] WebSocket connected");
+        this.scopedConsole.log("[SecureConnection] WebSocket connected");
         this.ws = ws;
 
         try {
           if (this.storedSession) {
             if (this.storedSessionSupportsCurrentResume()) {
-              console.log("[SecureConnection] Attempting session resumption");
+              this.scopedConsole.log(
+                "[SecureConnection] Attempting session resumption",
+              );
               const resumeInit: SrpSessionResumeInit = {
                 type: "srp_resume_init",
                 identity: this.username,
@@ -1169,7 +1203,7 @@ export class SecureConnection implements Connection {
               };
               ws.send(JSON.stringify(resumeInit));
               this.connectionState = "srp_resume_init_sent";
-              console.log("[SecureConnection] SRP resume init sent");
+              this.scopedConsole.log("[SecureConnection] SRP resume init sent");
               armResumeTimeout();
               return;
             }
@@ -1184,7 +1218,7 @@ export class SecureConnection implements Connection {
               return;
             }
 
-            console.log(
+            this.scopedConsole.log(
               "[SecureConnection] Stored session uses an old resume protocol; starting full SRP",
             );
             this.storedSession = null;
@@ -1192,7 +1226,7 @@ export class SecureConnection implements Connection {
 
           await this.startFullSrpHandshake(authRejectHandler);
         } catch (err) {
-          console.error("[SecureConnection] Connection error:", err);
+          this.scopedConsole.error("[SecureConnection] Connection error:", err);
           this.connectionState = "failed";
           authRejectHandler(
             err instanceof Error ? err : new Error(String(err)),
@@ -1202,7 +1236,7 @@ export class SecureConnection implements Connection {
       };
 
       ws.onerror = (event) => {
-        console.error("[SecureConnection] Error:", event);
+        this.scopedConsole.error("[SecureConnection] Error:", event);
       };
 
       ws.onclose = (event) => {
@@ -1273,12 +1307,14 @@ export class SecureConnection implements Connection {
       relayUsername,
       channel,
       onOpen: () => {
-        console.log(
+        createScopedConsole(() => null).log(
           `[SecureConnection] Relay connected, sending client_connect (${channel})`,
         );
       },
     });
-    console.log("[SecureConnection] Relay paired with server");
+    createScopedConsole(() => null).log(
+      "[SecureConnection] Relay paired with server",
+    );
     return ws;
   }
 
@@ -1287,7 +1323,10 @@ export class SecureConnection implements Connection {
       throw new Error("Missing relay config or stored session for reconnect");
     }
 
-    console.log("[SecureConnection] Connecting to relay:", this.relayUrl);
+    this.scopedConsole.log(
+      "[SecureConnection] Connecting to relay:",
+      this.relayUrl,
+    );
     this.connectionState = "connecting";
 
     const ws = await SecureConnection.connectRelaySocket(
@@ -1297,7 +1336,9 @@ export class SecureConnection implements Connection {
       this.relaySocketFactory ?? openRelayClientSocket,
     );
 
-    console.log("[SecureConnection] Resuming SRP session on new relay socket");
+    this.scopedConsole.log(
+      "[SecureConnection] Resuming SRP session on new relay socket",
+    );
     ws.onmessage = null;
     ws.onclose = null;
     ws.onerror = null;
@@ -1317,7 +1358,7 @@ export class SecureConnection implements Connection {
       const msg = JSON.parse(data);
 
       if (isSrpError(msg)) {
-        console.error("[SecureConnection] SRP error:", msg.message);
+        this.scopedConsole.error("[SecureConnection] SRP error:", msg.message);
         this.connectionState = "failed";
         reject(new Error(`Authentication failed: ${msg.message}`));
         this.ws?.close();
@@ -1325,7 +1366,7 @@ export class SecureConnection implements Connection {
       }
 
       if (!isSrpServerChallenge(msg)) {
-        console.warn(
+        this.scopedConsole.warn(
           "[SecureConnection] Unexpected message during SRP challenge:",
           msg,
         );
@@ -1344,7 +1385,7 @@ export class SecureConnection implements Connection {
         return;
       }
 
-      console.log("[SecureConnection] Received SRP challenge");
+      this.scopedConsole.log("[SecureConnection] Received SRP challenge");
 
       const { A, M1 } = await this.srpSession.processChallenge(msg.salt, msg.B);
 
@@ -1355,9 +1396,9 @@ export class SecureConnection implements Connection {
       };
       this.ws?.send(JSON.stringify(proof));
       this.connectionState = "srp_proof_sent";
-      console.log("[SecureConnection] SRP proof sent");
+      this.scopedConsole.log("[SecureConnection] SRP proof sent");
     } catch (err) {
-      console.error("[SecureConnection] SRP challenge error:", err);
+      this.scopedConsole.error("[SecureConnection] SRP challenge error:", err);
       this.connectionState = "failed";
       reject(err instanceof Error ? err : new Error(String(err)));
       this.ws?.close();
@@ -1376,7 +1417,7 @@ export class SecureConnection implements Connection {
       const msg = JSON.parse(data);
 
       if (isSrpError(msg)) {
-        console.error("[SecureConnection] SRP error:", msg.message);
+        this.scopedConsole.error("[SecureConnection] SRP error:", msg.message);
         this.connectionState = "failed";
         reject(new Error(`Authentication failed: ${msg.message}`));
         this.ws?.close();
@@ -1384,7 +1425,7 @@ export class SecureConnection implements Connection {
       }
 
       if (!isSrpServerVerify(msg)) {
-        console.warn(
+        this.scopedConsole.warn(
           "[SecureConnection] Unexpected message during SRP verify:",
           msg,
         );
@@ -1403,11 +1444,13 @@ export class SecureConnection implements Connection {
         return;
       }
 
-      console.log("[SecureConnection] Received SRP verify");
+      this.scopedConsole.log("[SecureConnection] Received SRP verify");
 
       const valid = await this.srpSession.verifyServer(msg.M2);
       if (!valid) {
-        console.error("[SecureConnection] Server verification failed");
+        this.scopedConsole.error(
+          "[SecureConnection] Server verification failed",
+        );
         this.connectionState = "failed";
         reject(new Error("Server verification failed"));
         this.ws?.close();
@@ -1421,7 +1464,7 @@ export class SecureConnection implements Connection {
       }
       const baseSessionKey = deriveSecretboxKey(rawKey);
       if (!msg.sessionId || !msg.transportNonce) {
-        console.error(
+        this.scopedConsole.error(
           "[SecureConnection] SRP verify missing required protocol metadata",
         );
         this.connectionState = "failed";
@@ -1441,7 +1484,9 @@ export class SecureConnection implements Connection {
           typeof proofProtocolVersion !== "number" ||
           !this.acceptAuthenticatedResumeProtocolVersion(proofProtocolVersion)
         ) {
-          console.error("[SecureConnection] SRP server info proof failed");
+          this.scopedConsole.error(
+            "[SecureConnection] SRP server info proof failed",
+          );
           this.connectionState = "failed";
           reject(new Error("Server protocol verification failed"));
           this.ws?.close();
@@ -1451,7 +1496,7 @@ export class SecureConnection implements Connection {
       } else if (
         !this.acceptGraceProtocolVersion(GRACE_FULL_SRP_PROTOCOL_VERSION)
       ) {
-        console.error(
+        this.scopedConsole.error(
           "[SecureConnection] SRP verify would downgrade authenticated protocol",
         );
         this.connectionState = "failed";
@@ -1482,10 +1527,10 @@ export class SecureConnection implements Connection {
       this.connectionManager?.markConnected();
       this.onAuthenticated?.();
 
-      console.log("[SecureConnection] Authentication complete");
+      this.scopedConsole.log("[SecureConnection] Authentication complete");
       resolve();
     } catch (err) {
-      console.error("[SecureConnection] SRP verify error:", err);
+      this.scopedConsole.error("[SecureConnection] SRP verify error:", err);
       this.connectionState = "failed";
       reject(err instanceof Error ? err : new Error(String(err)));
       this.ws?.close();
@@ -1503,7 +1548,9 @@ export class SecureConnection implements Connection {
    */
   private async handleMessage(data: unknown): Promise<void> {
     if (!this.sessionKey) {
-      console.warn("[SecureConnection] No session key for decryption");
+      this.scopedConsole.warn(
+        "[SecureConnection] No session key for decryption",
+      );
       return;
     }
 
@@ -1518,7 +1565,9 @@ export class SecureConnection implements Connection {
           this.sessionKey,
         );
         if (!envelope) {
-          console.warn("[SecureConnection] Failed to decrypt binary envelope");
+          this.scopedConsole.warn(
+            "[SecureConnection] Failed to decrypt binary envelope",
+          );
           return;
         }
         if (envelope.format === BinaryFormat.RESPONSE_CHUNK) {
@@ -1532,20 +1581,25 @@ export class SecureConnection implements Connection {
           envelope.payload,
         );
       } catch (err) {
-        console.warn("[SecureConnection] Binary envelope error:", err);
+        this.scopedConsole.warn(
+          "[SecureConnection] Binary envelope error:",
+          err,
+        );
         if (err instanceof TransportChunkError) {
           this.ws?.close(4005, "Invalid transport chunk sequence");
         }
         return;
       }
     } else if (typeof data === "string") {
-      console.warn(
+      this.scopedConsole.warn(
         "[SecureConnection] Received text message after auth; binary encrypted envelope required",
       );
       this.ws?.close(4005, "Binary encrypted message required");
       return;
     } else {
-      console.warn("[SecureConnection] Ignoring unknown message type");
+      this.scopedConsole.warn(
+        "[SecureConnection] Ignoring unknown message type",
+      );
       return;
     }
 
@@ -1556,12 +1610,14 @@ export class SecureConnection implements Connection {
         if (!this.acceptInboundSequence(payload.seq)) return;
         msg = payload.msg as VibeAllDayMessage;
       } else {
-        console.warn("[SecureConnection] Missing/invalid encrypted sequence");
+        this.scopedConsole.warn(
+          "[SecureConnection] Missing/invalid encrypted sequence",
+        );
         this.ws?.close(4004, "Invalid sequence");
         return;
       }
     } catch {
-      console.warn(
+      this.scopedConsole.warn(
         "[SecureConnection] Failed to parse decrypted message:",
         decrypted,
       );
@@ -1578,7 +1634,7 @@ export class SecureConnection implements Connection {
    */
   private acceptInboundSequence(seq: number): boolean {
     if (this.lastInboundSeq !== null && seq <= this.lastInboundSeq) {
-      console.warn(
+      this.scopedConsole.warn(
         `[SecureConnection] Replay/old sequence rejected: seq=${seq}, last=${this.lastInboundSeq}`,
       );
       this.ws?.close(4004, "Replay detected");
@@ -1694,14 +1750,17 @@ export class SecureConnection implements Connection {
       formats: formats as ClientCapabilities["formats"],
     };
 
-    console.log(
+    this.scopedConsole.log(
       `[SecureConnection] Sending capabilities: formats=${formats.map((f) => `0x${f.toString(16).padStart(2, "0")}`).join(", ")}`,
     );
 
     try {
       this.send(msg);
     } catch (err) {
-      console.warn("[SecureConnection] Failed to send capabilities:", err);
+      this.scopedConsole.warn(
+        "[SecureConnection] Failed to send capabilities:",
+        err,
+      );
     }
   }
 
@@ -1876,7 +1935,7 @@ export class SecureConnection implements Connection {
   }
 
   private async performForceReconnect(): Promise<void> {
-    console.log(
+    this.scopedConsole.log(
       `[SecureConnection] Force reconnecting... wsState=${this.ws?.readyState}, connState=${this.connectionState}, isRelay=${this.isRelayConnection}`,
     );
 
@@ -1912,7 +1971,7 @@ export class SecureConnection implements Connection {
     this.connectionPromise = null;
 
     await this.ensureConnected();
-    console.log(
+    this.scopedConsole.log(
       `[SecureConnection] Force reconnect complete, connState=${this.connectionState}`,
     );
   }
@@ -1965,7 +2024,9 @@ export class SecureConnection implements Connection {
         return;
       }
 
-      console.log("[SecureConnection] Authenticating on existing socket");
+      this.scopedConsole.log(
+        "[SecureConnection] Authenticating on existing socket",
+      );
       this.connectionState = "connecting";
 
       let authResolveHandler: () => void = () => {};
@@ -1979,7 +2040,7 @@ export class SecureConnection implements Connection {
       const ws = this.ws;
 
       ws.onerror = (event) => {
-        console.error("[SecureConnection] Error:", event);
+        this.scopedConsole.error("[SecureConnection] Error:", event);
       };
 
       ws.onclose = (event) => {
@@ -2006,7 +2067,10 @@ export class SecureConnection implements Connection {
 
       // Start SRP handshake (no session resume for relay connections)
       this.startFullSrpHandshake(authRejectHandler).catch((err) => {
-        console.error("[SecureConnection] SRP handshake error:", err);
+        this.scopedConsole.error(
+          "[SecureConnection] SRP handshake error:",
+          err,
+        );
         this.connectionState = "failed";
         authRejectHandler(err instanceof Error ? err : new Error(String(err)));
         ws.close();

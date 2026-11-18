@@ -29,13 +29,13 @@ function ChildBreadcrumb({
       <Link to={parentHref}>
         {parentTitle ?? t("providerChildParentFallback")}
       </Link>
-      <span aria-hidden="true">›</span>
+      <span aria-hidden="true">/</span>
       <span>{t("sessionInspectorTabChildren")}</span>
     </nav>
   );
 }
 
-/** Read-only notice where a session's composer would be. */
+/** Studio read-only dock anchored where a session's composer would sit. */
 function ReadOnlyDock({ parentHref }: { parentHref: string }) {
   const { t } = useI18n();
   return (
@@ -81,7 +81,8 @@ function ChildSessionView({
           }
           actions={
             <Link className={styles.parentLink} to={parentHref}>
-              {t("providerChildPageBack")}
+              <span aria-hidden="true">←</span>
+              <span>{t("providerChildPageBack")}</span>
             </Link>
           }
           subheader={
@@ -112,7 +113,7 @@ export function ProviderChildSessionPage() {
   if (!projectId || !sessionId || !agentId) {
     return (
       <div className={styles.page}>
-        <p className={styles.status}>{t("providerChildPageInvalidUrl")}</p>
+        <p className={styles.statusCard}>{t("providerChildPageInvalidUrl")}</p>
       </div>
     );
   }

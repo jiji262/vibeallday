@@ -3,11 +3,11 @@ import { ClearloopRemainingBadge } from "../components/ClearloopRemainingBadge";
 import { ContextUsageIndicator } from "../components/ContextUsageIndicator";
 import { Button } from "../components/garden/Button";
 import { Td } from "../components/garden/DataTable";
-import { Status } from "../components/garden/StatusDot";
 import type { ProcessInfo } from "../hooks/useProcesses";
 import { useI18n } from "../i18n";
 import styles from "./AgentsPage.module.css";
 import { ProcessMetrics } from "./AgentsProcessMetrics";
+import type { ProcessRowProps } from "./AgentsProcessRows";
 import {
   formatCpu,
   formatUptime,
@@ -15,17 +15,33 @@ import {
   getStateStatus,
   meterPercent,
 } from "./agentsFormat";
-import type { ProcessRowProps } from "./AgentsProcessRows";
 
 export const EMPTY_CELL = "—";
+const HIGH_CPU_PERCENT = 65;
+
+function statusPillClasses(state: ProcessInfo["state"]) {
+  const tone = getStateStatus(state);
+  if (tone === "run") {
+    return { pill: styles.statusPillRun, dot: styles.statusDotPulse };
+  }
+  if (tone === "attn") {
+    return { pill: styles.statusPillAttn, dot: styles.statusDotAttn };
+  }
+  if (tone === "idle") {
+    return { pill: styles.statusPillIdle, dot: styles.statusDotIdle };
+  }
+  return { pill: styles.statusPillMuted, dot: styles.statusDotMuted };
+}
 
 export function ProcessStatus({ process }: { process: ProcessInfo }) {
   const { t } = useI18n();
+  const { pill, dot } = statusPillClasses(process.state);
   return (
     <span className={styles.status}>
-      <Status state={getStateStatus(process.state)}>
-        {getStateLabel(process.state, t)}
-      </Status>
+      <span className={`${styles.statusPill} ${pill}`}>
+        <span className={`${styles.statusDot} ${dot}`} aria-hidden="true" />
+        <span>{getStateLabel(process.state, t)}</span>
+      </span>
       {process.clearloop !== undefined && (
         <ClearloopRemainingBadge badge={process.clearloop} />
       )}
@@ -50,6 +66,7 @@ function KillAction({
     <Button
       variant="danger-soft"
       size="sm"
+      className={styles.killButton}
       disabled={killing}
       onClick={() => onKill(process)}
       title={t("agentsKillTitle")}
@@ -59,7 +76,7 @@ function KillAction({
   );
 }
 
-/** Process-tree CPU as a small meter plus the percent. */
+/** Process-tree CPU as a Studio micro-meter plus tabular percentage. */
 export function CpuMeter({
   observation,
 }: {
@@ -73,11 +90,12 @@ export function CpuMeter({
       <span className={styles.cpuPending}>{t("agentsMetricsCpuSampling")}</span>
     );
   }
+  const high = cpu.treePercent >= HIGH_CPU_PERCENT;
   return (
     <span className={styles.resource}>
       <span className={styles.meter} aria-hidden="true">
         <span
-          className={styles.meterFill}
+          className={`${styles.meterFill} ${high ? styles.meterFillAttn : ""}`}
           style={{ width: `${meterPercent(cpu.treePercent)}%` }}
         />
       </span>
@@ -147,8 +165,6 @@ export function ProcessRowCells({
   live: boolean;
 }) {
   const { t } = useI18n();
-  // A hosted provider process outlives VIBEALLDAY restarts, so the OS process
-  // age is the age; VIBEALLDAY's attach time is secondary.
   const ageTitle = observation
     ? t("agentsAgeTooltip", {
         started: new Date(observation.startedAt).toLocaleString(),

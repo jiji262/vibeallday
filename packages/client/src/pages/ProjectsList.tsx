@@ -5,7 +5,7 @@ import { PlusIcon } from "../components/garden/icons";
 import { useI18n } from "../i18n";
 import styles from "./ProjectsPage.module.css";
 
-const ADD_ICON_SIZE = 20;
+const ADD_ICON_SIZE = 18;
 
 interface ProjectsListProps {
   /** Cards of the filtered list currently revealed. */
@@ -25,7 +25,9 @@ function AddProjectTile({ onAddProject }: { onAddProject: () => void }) {
   return (
     <li className={styles.addItem}>
       <button type="button" className={styles.addTile} onClick={onAddProject}>
-        <PlusIcon size={ADD_ICON_SIZE} />
+        <span className={styles.addIconWrap} aria-hidden="true">
+          <PlusIcon size={ADD_ICON_SIZE} />
+        </span>
         <span className={styles.addTitle}>{t("projectsAddCardTitle")}</span>
         <span className={styles.addHint}>{t("projectsAddCardHint")}</span>
       </button>
@@ -34,8 +36,8 @@ function AddProjectTile({ onAddProject }: { onAddProject: () => void }) {
 }
 
 /**
- * The projects as an auto-fill card grid (`.project-list-cards`) ending in
- * the dashed Add project tile, and a "show more" button while cards remain.
+ * The projects as a Studio repository workspace grid (`.project-list-cards`)
+ * ending in the dashed Add project tile, and a "show more" button while cards remain.
  */
 export function ProjectsList({
   children,

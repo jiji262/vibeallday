@@ -1,5 +1,8 @@
-/* Phone tab bar (design `.tabbar`): four equal cells, New as the centre
-   accent pill, the active cell in `--tab-on`. */
+/*
+ * Studio Workbench phone tab bar: frosted glass dock, crisp top hairline,
+ * active indicator pill, and clean accent New trigger.
+ */
+
 .bar {
   position: relative;
   z-index: var(--z-tabbar);
@@ -10,8 +13,9 @@
   height: calc(var(--tabbar-height) + env(safe-area-inset-bottom, 0px));
   padding: 6px 8px calc(6px + env(safe-area-inset-bottom, 0px));
   border-top: 1px solid var(--line);
-  background: var(--tabbar-bg);
-  backdrop-filter: blur(14px);
+  background: color-mix(in srgb, var(--surface) 84%, transparent);
+  box-shadow: 0 -1px 0 color-mix(in srgb, var(--surface) 45%, transparent);
+  backdrop-filter: blur(18px) saturate(160%);
 }
 
 /* Full view owns the phone viewport. A retained, parked session must not
@@ -35,17 +39,74 @@
   color: var(--ink-3);
   font-size: 11px;
   font-weight: 600;
+  letter-spacing: -0.01em;
   text-decoration: none;
   -webkit-tap-highlight-color: transparent;
+}
+
+.active {
+  color: var(--accent-ink);
+}
+
+.newTab {
+  color: var(--ink-2);
+}
+
+.tab:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: -2px;
+}
+
+.active:not(.newTab)::before {
+  position: absolute;
+  top: -6px;
+  left: 50%;
+  width: 20px;
+  height: 2px;
+  border-radius: 999px;
+  background: var(--accent);
+  transform: translateX(-50%);
+  content: "";
 }
 
 .iconWrap {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 22px;
-  height: 22px;
-  transition: transform var(--duration-fast) var(--ease-standard);
+  width: 42px;
+  height: 26px;
+  border-radius: 999px;
+  transition:
+    background-color var(--duration-fast) var(--ease-standard),
+    color var(--duration-fast) var(--ease-standard),
+    transform var(--duration-fast) var(--ease-standard);
+}
+
+.active .iconWrap {
+  background: var(--accent-soft);
+  color: var(--accent-ink);
+}
+
+.iconWrap.fab {
+  width: 48px;
+  height: 30px;
+  border: 1px solid color-mix(in srgb, var(--on-accent) 16%, var(--accent));
+  border-radius: var(--r-btn);
+  background: var(--accent);
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--accent) 30%, transparent);
+  color: var(--on-accent);
+}
+
+.active .iconWrap.fab {
+  background: var(--accent);
+  box-shadow:
+    0 0 0 2px var(--accent-soft),
+    0 2px 8px color-mix(in srgb, var(--accent) 30%, transparent);
+  color: var(--on-accent);
+}
+
+.tab:active .iconWrap {
+  transform: scale(0.94);
 }
 
 .label {
@@ -55,38 +116,24 @@
   white-space: nowrap;
 }
 
-.active {
-  color: var(--tab-on);
-}
-
-.newTab {
-  color: var(--ink);
-}
-
-.iconWrap.fab {
-  width: 52px;
-  height: 34px;
-  border-radius: var(--r-fab);
-  background: var(--accent);
-  color: var(--on-accent);
-}
-
 .badge {
   position: absolute;
-  top: 2px;
-  left: calc(50% + 4px);
+  top: 0;
+  left: calc(50% + 5px);
+  box-sizing: border-box;
   min-width: 18px;
   height: 18px;
   padding: 0 5px;
+  border: 1.5px solid var(--surface);
   border-radius: 999px;
   background: var(--attn);
   color: var(--on-attn);
   font-family: var(--font-mono);
   font-size: 10px;
+  font-variant-numeric: tabular-nums;
   font-weight: 600;
-  line-height: 18px;
+  line-height: 15px;
   text-align: center;
-  box-sizing: border-box;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -97,14 +144,4 @@
   .tab:active .iconWrap {
     transform: none;
   }
-}
-
-/* After the state rules: the press scale composes with any of them. */
-.tab:active .iconWrap {
-  transform: scale(0.94);
-}
-
-.tab:focus-visible {
-  outline: 2px solid var(--focus);
-  outline-offset: -2px;
 }

@@ -1576,7 +1576,7 @@ test.describe("Full Relay Integration", () => {
               id: "stale-relay-host",
               displayName: relayUsername,
               mode: "relay",
-              relayUrl: "wss://vibeallday-relay.navs.dpdns.org/ws",
+              relayUrl: "wss://stale-relay.invalid/ws",
               relayUsername,
               srpUsername: relayUsername,
               createdAt: new Date().toISOString(),
@@ -1600,9 +1600,7 @@ test.describe("Full Relay Integration", () => {
     const savedHosts = await page.evaluate(() =>
       JSON.parse(localStorage.getItem("vibeallday-saved-hosts") ?? "{}"),
     );
-    expect(savedHosts.hosts[0]?.relayUrl).toBe(
-      "wss://vibeallday-relay.navs.dpdns.org/ws",
-    );
+    expect(savedHosts.hosts[0]?.relayUrl).toBe("wss://stale-relay.invalid/ws");
     const authenticated = savedHosts.hosts.find(
       (host: { relayUrl: string }) => host.relayUrl === relayWsURL,
     );

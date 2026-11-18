@@ -1,16 +1,45 @@
-/* Inbox aside: recent projects as new-session shortcuts (design .row). */
+/* Studio Workbench quick-dispatch composer card in Inbox aside. */
+
+.composer {
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--r-card);
+  background: var(--surface);
+  box-shadow: var(--shadow-card);
+  transition:
+    border-color var(--duration-fast) var(--ease-standard),
+    box-shadow var(--duration-fast) var(--ease-standard);
+}
+
+.composer:focus-within {
+  border-color: var(--accent-line);
+  box-shadow:
+    0 0 0 3px var(--accent-soft),
+    var(--shadow-card);
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--line);
+  background: var(--surface-2);
+}
 
 .title {
   margin: 0;
-  padding: 14px 16px 6px;
-  color: var(--ink);
-  font-size: var(--fs-h3);
-  font-weight: var(--title-weight);
+  color: var(--ink-2);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 
 .list {
   margin: 0;
-  padding: 0 0 8px;
+  padding: 0;
   list-style: none;
 }
 
@@ -21,31 +50,63 @@
 .row {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   min-height: var(--tap-min);
-  padding: 8px 16px;
+  padding: 9px 14px;
   color: inherit;
   text-decoration: none;
+  transition: background-color var(--duration-fast) var(--ease-standard);
 }
 
 .row:hover {
-  background: var(--surface-3);
+  background: var(--surface-2);
 }
 
 .row:focus-visible {
-  outline: 2px solid var(--focus);
-  outline-offset: -2px;
+  outline: none;
+  background: var(--surface-2);
 }
 
-.icon {
+.iconWell {
+  display: grid;
   flex: none;
-  color: var(--ink-3);
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  background: var(--surface-2);
+  color: var(--ink-2);
+}
+
+.dispatch {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-btn);
+  background: var(--surface-2);
+  color: var(--ink-2);
+  transition:
+    background-color var(--duration-fast) var(--ease-standard),
+    border-color var(--duration-fast) var(--ease-standard),
+    color var(--duration-fast) var(--ease-standard);
+}
+
+.row:hover .dispatch,
+.row:focus-visible .dispatch {
+  border-color: var(--accent-line);
+  background: var(--accent-soft);
+  color: var(--accent-ink);
 }
 
 .text {
   display: flex;
   flex: 1;
   flex-direction: column;
+  gap: 1px;
   min-width: 0;
 }
 
@@ -57,6 +118,7 @@
 }
 
 .name {
+  color: var(--ink);
   font-size: var(--fs-small);
   font-weight: 600;
 }
@@ -65,4 +127,12 @@
   color: var(--ink-3);
   font-family: var(--font-mono);
   font-size: var(--fs-meta);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .composer,
+  .row,
+  .dispatch {
+    transition: none;
+  }
 }

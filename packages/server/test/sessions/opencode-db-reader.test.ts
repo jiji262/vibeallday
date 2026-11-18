@@ -604,5 +604,106 @@ describe.skipIf(!DatabaseSync)(
         isSubagent: true,
       });
     });
+
+    it("reads OpenCode 2.x session_v2 + session_message + session_part stores and cache.write tokens", async () => {
+      const db = new (DatabaseSync as DatabaseSyncCtor)(databasePath);
+      db.exec(
+        "CREATE TABLE session_v2 (id TEXT PRIMARY KEY, directory TEXT NOT NULL, title TEXT)",
+      );
+      db.exec(
+        "CREATE TABLE session_message (id TEXT PRIMARY KEY, session_id TEXT NOT NULL, type TEXT NOT NULL, time_created INTEGER, data TEXT NOT NULL)",
+      );
+      db.exec(
+        "CREATE TABLE session_part (id TEXT PRIMARY KEY, message_id TEXT NOT NULL, session_id TEXT NOT NULL, data TEXT NOT NULL)",
+      );
+      db.prepare(
+        "INSERT INTO session_v2 (id, directory, title) VALUES (?, ?, ?)",
+      ).run("ses_v2", projectPath, "OpenCode 2.x Session");
+      db.prepare(
+        "INSERT INTO session_message (id, session_id, type, time_created, data) VALUES (?, ?, ?, ?, ?)",
+      ).run("msg_v2_u1", "ses_v2", "user", 10_000, JSON.stringify({}));
+      db.prepare(
+        "INSERT INTO session_part (id, message_id, session_id, data) VALUES (?, ?, ?, ?)",
+      ).run(
+        "prt_v2_u1",
+        "msg_v2_u1",
+        "ses_v2",
+        JSON.stringify({ type: "text", text: "hello from v2" }),
+      );
+      db.prepare(
+        "INSERT INTO session_message (id, session_id, type, time_created, data) VALUES (?, ?, ?, ?, ?)",
+      ).run(
+        "msg_v2_a1",
+        "ses_v2",
+        "assistant",
+        12_000,
+        JSON.stringify({
+          model: { id: "claude-sonnet-4-5", providerID: "anthropic" },
+          time: { created: 12_000, completed: 15_000 },
+          tokens: {
+            input: 2_000,
+            output: 300,
+            reasoning: 50,
+            cache: { read: 8_000, write: 1_500 },
+          },
+        }),
+      );
+      db.prepare(
+        "INSERT INTO session_part (id, message_id, session_id, data) VALUES (?, ?, ?, ?)",
+      ).run(
+        "prt_v2_a1",
+        "msg_v2_a1",
+        "ses_v2",
+        JSON.stringify({ type: "text", text: "reply from v2" }),
+      );
+      db.close();
+
+      const { OpenCodeDbReader } = await import(
+        "../../src/sessions/opencode-db-reader.js"
+      );
+      const dbReader = new OpenCodeDbReader(databasePath);
+      await expect(dbReader.listAllSessionRows()).resolves.toEqual([
+        {
+          id: "ses_v2",
+          worktree: projectPath,
+          title: "OpenCode 2.x Session",
+          timeCreated: 10_000,
+          timeUpdated: 15_000,
+        },
+      ]);
+      dbReader.close();
+
+      const reader = await makeReader();
+      const summaries = await reader.listSessions(projectId);
+      expect(summaries).toEqual([
+        expect.objectContaining({
+          id: "ses_v2",
+          title: "OpenCode 2.x Session",
+          model: "anthropic/claude-sonnet-4-5",
+          messageCount: 2,
+          contextUsage: {
+            inputTokens: 10_000,
+            percentage: 5,
+            contextWindow: 200_000,
+            outputTokens: 300,
+            cacheReadTokens: 8_000,
+            cacheCreationTokens: 1_500,
+          },
+        }),
+      ]);
+
+      const loaded = await reader.getSession("ses_v2", projectId);
+      expect(spawnMock).not.toHaveBeenCalled();
+      const normalized = normalizeSession(loaded!);
+      expect(normalized.messages).toHaveLength(2);
+      expect(normalized.messages[1]).toMatchObject({
+        type: "assistant",
+        message: {
+          role: "assistant",
+          model: "claude-sonnet-4-5",
+          content: [{ type: "text", text: "reply from v2" }],
+        },
+      });
+    });
   },
 );

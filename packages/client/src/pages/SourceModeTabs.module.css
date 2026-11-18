@@ -1,21 +1,60 @@
-/* Source Control mode tabs: the garden underline strip (TabList) with a
-   design count capsule. In the page intro the strip spans its row under a
-   hairline; on phones the tabs split the row evenly so every mode stays
-   visible without scrolling. */
+/* Studio Source Control mode switcher: crisp underline strip with tabular mono
+   count badges. Spans full width in the intro and splits evenly on phones. */
 .tabs {
   min-width: 0;
+  gap: 4px;
 }
 
 .tab {
-  font-size: var(--fs-small);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  color: var(--ink-2);
+  font-family: var(--font-ui);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  transition:
+    color 120ms ease,
+    background-color 120ms ease;
 }
 
 .count {
-  font-size: var(--fs-meta);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  color: var(--ink-2);
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
 }
 
 .stacked {
   width: 100%;
+}
+
+.tab:hover {
+  color: var(--ink);
+}
+
+.tab[aria-selected="true"] {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.tab[aria-selected="true"] .count {
+  color: var(--accent-ink);
+  background: var(--accent-soft);
+  border-color: var(--accent-line);
 }
 
 @media (width < 760px) {
@@ -26,6 +65,7 @@
     justify-content: space-between;
     box-sizing: border-box;
     width: 100%;
+    gap: 2px;
   }
 
   .tabs.stacked .tab {
@@ -38,6 +78,6 @@
   }
 
   .tabs.stacked .count {
-    padding-inline: 5px;
+    padding-inline: 4px;
   }
 }

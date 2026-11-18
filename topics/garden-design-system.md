@@ -1,11 +1,14 @@
-# Garden design system
+# Studio Workbench design system (Garden evolution)
 
-> VIBEALLDAY's client presents one mobile-first layout in two skins. Celadon
-> (light): porcelain surfaces, celadon-green action, amber for "needs you",
-> rounded shapes. Night (dark): blue-black surfaces, lime only on primary
-> actions and focus, amber attention, compact square shapes; Night · OLED is
-> its pure-black variant. State is always colour plus shape. Phones get a
-> tab bar on root pages; desktop keeps the sidebar.
+> VIBEALLDAY's client presents one responsive Studio Workbench layout across
+> three cohesive skins: **Daylight** (`light`: cool neutral paper `#f6f7f9`,
+> crisp `#ffffff` surfaces, studio cobalt `#2563eb` primary accent),
+> **Graphite** (`dark`: deep slate `#0b0d12`, elevated `#11141c` surfaces,
+> electric cobalt `#4f8cff` accent), and **Graphite · OLED** (`verydark`:
+> pure-black `#000000` canvas for OLED displays). All skins share unified
+> precision geometry and unified Geist + JetBrains Mono typography so switching
+> themes never shifts layout metrics. State is always colour plus shape. Phones
+> get a bottom tab bar on root pages; desktop keeps the sidebar.
 
 Topic: garden-design-system
 
@@ -14,35 +17,28 @@ Related: [UI design](ui-design.md), [CSS architecture](css-architecture.md),
 
 ## Status and scope
 
-This fork (jiji262/vibeallday, imported from upstream v0.10.2) replaces the
-previous grey utility look with Garden as the only appearance. It is a
-deliberate, owner-approved exception to the vanilla-defaults rule: the
-redesign is the default and there is no "classic" toggle. Behavior that is not
+This fork (jiji262/vibeallday, imported from upstream v0.10.2) establishes
+**Studio Workbench** (built on the `components/garden/` primitive library) as
+the unified appearance across all client routes. Behavior that is not
 presentation (session control, transcripts, provider contracts, URLs, REST and
 WebSocket payloads) is unchanged.
 
-Decisions recorded 2026-10-24:
+Key design system invariants:
 
-1. Upstream is no longer tracked closely; page structure may be rewritten.
-2. Depth: tokens restyle every surface; the core phone flow (shell, Now/Inbox,
-   Sessions, Projects, Session, New session, Settings, sign-in) gets layout
-   redesign; secondary surfaces (source control, files, agents, issues,
-   devices, bang commands, workstreams, share pages) get Garden styling and
-   phone fixes.
-3. Themes (revised 2026-10-30, the two-skin redesign): theme ids and the
-   `vibeallday-theme` storage key are unchanged; `light` = Celadon (清瓷),
-   `dark` = Night (夜航), `verydark` = Night · OLED (夜航·纯黑), `auto`
-   (default) = System (跟随系统: Celadon under a light OS, Night under a
-   dark one).
-4. Fonts (revised 2026-10-30): each skin sets its own self-hosted latin
-   subsets. Celadon uses Instrument Sans with DM Mono; Night and OLED use
-   Archivo (titles widen through `--display-stretch`) with IBM Plex Mono. CJK
-   falls back to system fonts. An explicit font setting still overrides the
-   skin's choice.
-5. The phone shell (`width < 768px` or a coarse pointer, below 1100 px) has a
-   bottom tab bar on root pages only; desktop keeps the sidebar.
-6. The redesign replaces the old look outright.
-7. New copy is added to `en.json` and `zh-CN.json`.
+1. Every client route shares one visual language, surface hierarchy, and
+   precision control scale across desktop and mobile.
+2. Themes: theme ids and the `vibeallday-theme` storage key are unchanged;
+   `light` = Daylight (浅色), `dark` = Graphite (深色),
+   `verydark` = Graphite · OLED (纯黑 OLED), `auto` (default) = System
+   (跟随系统: Daylight under a light OS, Graphite under a dark one).
+3. Fonts: all skins share self-hosted `VIBEALLDAY Geist` for UI/titles
+   (`--display-stretch: 100%`) and `VIBEALLDAY JetBrains Mono` for code, paths,
+   hashes, counters, and telemetry. CJK falls back to PingFang SC / Noto Sans SC
+   / system fonts. An explicit font setting in Appearance still overrides the
+   default.
+4. The phone shell (`width < 768px` or a coarse pointer, below 1100 px) has a
+   frosted bottom tab bar on root pages only; desktop keeps the sidebar.
+5. New copy is added to `en.json` and `zh-CN.json`.
 
 ## Tokens
 
@@ -52,72 +48,63 @@ source of truth for design values. Design names (`--canvas`, `--surface`,
 values; existing token names (`--bg-surface`, `--text-primary`,
 `--border-color`, `--primary-color`, `--indigo`, `--rose`, ...) alias them, so
 untouched components recolor without edits. New components use the design
-names directly. Skins map to theme ids: `:root` is Celadon, `[data-theme="dark"]`
-and `[data-theme="verydark"]` share Night, `verydark` then overrides surfaces
-only, and `auto` under a dark OS repeats Night. `data-theme` sits on `<html>`;
-a nested `data-theme` subtree re-scopes the skin tokens, which is how the
-Appearance skin previews paint every skin side by side.
+names directly. Skins map to theme ids: `:root` is Daylight, `[data-theme="dark"]`
+and `[data-theme="verydark"]` share Graphite, `verydark` then overrides surfaces
+to pure black, and `auto` under a dark OS repeats Graphite. `data-theme` sits on
+`<html>`; a nested `data-theme` subtree re-scopes the skin tokens for side-by-side
+skin previews in Appearance.
 
-### Palette (Celadon / Night)
+### Palette (Daylight / Graphite)
 
-| Role | Token | Celadon | Night |
+| Role | Token | Daylight | Graphite |
 |---|---|---|---|
-| Page | `--canvas` (`--bg-surface`) | `#F3F5F3` | `#0C0F14` |
-| Card, sheet | `--surface` (`--bg-card`, `--bg-secondary`) | `#FFFFFF` | `#12161D` |
-| Sunken, table heads | `--surface-2` (`--bg-sunken`) | `#F7F9F8` | `#181D26` |
-| Hover, track | `--surface-3` (`--bg-tertiary`) | `#EDF1EE` | `#1F2530` |
-| Sidebar | `--side-bg` | `#F3F5F3` | `#0F131A` |
-| Ink | `--ink` (`--text-primary`) | `#102019` | `#E9EEF5` |
-| Ink 2 | `--ink-2` (`--text-secondary`) | `#3A4A43` | `#B3BCC9` |
-| Ink 3 (meta) | `--ink-3` (`--text-muted`) | `#57665F` | `#95A0AF` |
-| Ink 4 (placeholder only) | `--ink-4` (`--text-dimmed`) | `#8D9A94` | `#5E6878` |
-| Hairline | `--line` (`--border-color`) | `#DDE3DF` | `#252C38` |
-| Strong line | `--line-strong` (`--border-input`, `--dash`) | `#C5CEC9` | `#333C4A` |
-| Accent (primary, selected, focus, ok) | `--accent` / `--accent-ink` | `#0E7A66` / `#0B5F50` | `#C8F25A` / `#C8F25A` |
-| Link | `--link` | `#0B6A58` | `#7CCFFF` |
-| Needs you | `--attn` / `--attn-ink` | `#D08A12` / `#8A5A00` | `#FFB648` / `#FFC46B` |
-| Running | `--run` / `--run-ink` | `#2D6CB5` / `#1F5797` | `#62C6FF` / `#7CCFFF` |
-| Error, destructive | `--err` / `--err-ink` | `#C8412A` / `#A3311C` | `#FF6A5C` / `#FF8E83` |
-| Idle | `--idle` | `#8D9A94` | `#8590A0` |
+| Page | `--canvas` (`--bg-surface`) | `#F6F7F9` | `#0B0D12` |
+| Card, sheet | `--surface` (`--bg-card`, `--bg-secondary`) | `#FFFFFF` | `#11141C` |
+| Sunken, table heads | `--surface-2` (`--bg-sunken`) | `#F0F2F6` | `#161A24` |
+| Hover, track | `--surface-3` (`--bg-tertiary`) | `#E6E9F0` | `#1D2330` |
+| Sidebar | `--side-bg` | `#F1F3F7` | `#0E1117` |
+| Ink | `--ink` (`--text-primary`) | `#0F172A` | `#EDF2FA` |
+| Ink 2 | `--ink-2` (`--text-secondary`) | `#334155` | `#B4BFCE` |
+| Ink 3 (meta) | `--ink-3` (`--text-muted`) | `#5B677A` | `#8A96A8` |
+| Ink 4 (placeholder only) | `--ink-4` (`--text-dimmed`) | `#8B96A8` | `#5C6778` |
+| Hairline | `--line` (`--border-color`) | `#E2E6EE` | `#222836` |
+| Strong line | `--line-strong` (`--border-input`, `--dash`) | `#CBD2DF` | `#30394B` |
+| Accent (primary, selected, focus) | `--accent` / `--accent-ink` | `#2563EB` / `#1D4ED8` | `#4F8CFF` / `#7AABFF` |
+| Link | `--link` | `#1D4ED8` | `#7AABFF` |
+| Needs you | `--attn` / `--attn-ink` | `#D97706` / `#9A5200` | `#F59E0B` / `#FBBF24` |
+| Running | `--run` / `--run-ink` | `#0284C7` / `#0369A1` | `#38BDF8` / `#7DD3FC` |
+| Ok / Healthy | `--ok` / `--ok-ink` | `#059669` / `#047857` | `#34D399` / `#6EE7B7` |
+| Error, destructive | `--err` / `--err-ink` | `#DC2626` / `#B91C1C` | `#F87171` / `#FCA5A5` |
+| Idle | `--idle` | `#8B96A8` | `#7D899B` |
 
 Each family has a `-soft` fill used behind its `-ink` text, most have a
 `-line`, and filled controls take `--on-accent`, `--on-attn` or `--on-err`
-text (Night's lime takes dark text). `--ok` equals `--accent`. Component
-tokens (`--switch-*`, `--seg-*`, `--nav-on-*`, `--tabbar-bg`, `--phead-*`,
-`--toast-*`, `--ask-*`, `--user-bubble*`, `--code-bg`, `--scrim`) carry the
-per-skin details. The legacy accent families alias the design families:
-indigo = accent, rose = err, mint = ok, sand = attn; peach keeps its own hue
-and has no design role. The Garden Console (license-hub) names `--bg-2`,
-`--bg-soft`, `--card` and the label recipes (`--label-font`,
-`--eyebrow-size`, `--eyebrow-tracking`, `--meta-tracking`,
-`--badge-tracking`) and page-frame tokens (`--topbar-height`,
-`--page-max-width`, `--page-gutter`, `--z-topbar`, `--overlay-scrim`) still
-alias the semantic tokens. `verydark` keeps Night's ink and accents over
-pure-black surfaces (`#000000` page and sidebar, `#0A0C10` card).
+text. Component tokens (`--switch-*`, `--seg-*`, `--nav-on-*`, `--tabbar-bg`,
+`--phead-*`, `--toast-*`, `--ask-*`, `--user-bubble*`, `--code-bg`, `--scrim`)
+carry the per-skin details. `verydark` keeps Graphite's ink and accents over
+pure-black surfaces (`#000000` page and sidebar, `#090B10` card).
 
 Semantic map, used everywhere a state is shown, always colour plus shape
 (`StatusDot` / `Status`): attn = needs you (filled circle); run = running
 (circle with a halo that pulses only while its row is in view); idle =
-idle/stopped (hollow ring); err = error (square in Celadon, diamond in Night);
-queued = queued (dashed ring); ok = done (check). Accent also marks
-primary/selected/info; a dashed border on a soft fill = archived/inert.
-Providers take per-skin hues in `provider-colors.css`; every provider color
-keeps >= 4.5:1 against its skin's page.
+idle/stopped (hollow ring); err = error; queued = queued (dashed ring);
+ok = done (check). Providers take per-skin hues in `provider-colors.css`; every
+provider color keeps >= 4.5:1 against its skin's page.
 
 ### Shape, depth, spacing
 
-- Shape is per skin: `--r-btn`, `--r-chip`, `--r-seg`, `--r-input`,
-  `--r-card`, `--r-sheet`, `--r-dialog`, `--r-bubble`, `--r-composer`,
-  `--r-send`, `--r-icon-btn`, `--r-toast` and friends. Celadon is rounded
-  (pill buttons and chips, 20 px cards); Night is square (8 px buttons, 12 px
-  cards). The older `--radius-*` scale remains for legacy rules.
-- Sizes are per skin too: `--btn-h{,-sm,-lg}`, `--icon-btn`, `--input-h`,
-  `--chip-h`, `--seg-h`, `--row-h`, `--pad-card`, `--sw-w`/`--sw-h`. Below
-  768 px one `@media (width < 768px)` block raises them for every skin
+- Unified precision geometry across all skins: `--r-btn: 8px`, `--r-chip: 999px`,
+  `--r-seg: 9px`, `--r-input: 8px`, `--r-card: 12px`, `--r-sheet: 16px`,
+  `--r-dialog: 14px`, `--r-bubble: 12px`, `--r-composer: 14px`,
+  `--r-send: 9px`, `--r-icon-btn: 8px`, `--r-toast: 10px`.
+- Unified desktop control heights across all skins: `--btn-h: 34px` (`sm` 28 px,
+  `lg` 40 px), `--icon-btn: 32px`, `--input-h: 36px`, `--chip-h: 26px`,
+  `--seg-h: 32px`, `--row-h: 44px`, `--pad-card: 16px`. Below 768 px one
+  `@media (width < 768px)` block raises interactive targets for every skin
   (44 px buttons and icon buttons, 48 px inputs with 16 px text).
 - Depth: `--shadow-card`, `--shadow-pop` (menus, dialogs, sheets) and
-  `--shadow-composer`; Night draws cards flat and outlines popovers. The
-  legacy `--shadow-xs..lg` scale remains.
+  `--shadow-composer`, paired with frosted translucent topbars (`--phead-bg` +
+  `backdrop-filter`).
 - Spacing is a 4 px grid: `--space-1..8` = 4/8/12/16/20/24/32/40 px.
 - Touch: `--tap-min: 44px`; every phone control meets it.
 - Layering: `--z-tabbar` (40) sits under the drawer (101); `--z-sheet` and
@@ -125,23 +112,20 @@ keeps >= 4.5:1 against its skin's page.
 
 ## Typography
 
-- `--font-ui`: the skin's UI face (Celadon: Instrument Sans; Night and OLED:
-  Archivo), then PingFang SC / Noto Sans SC / system. All controls, titles
-  and body copy. `--font-display` and `--font-brand` equal `--font-ui`; page
-  and card titles differ only by `--title-weight` (600 Celadon, 700 Night),
-  `--display-stretch` (Night widens to 110%) and `--display-tracking`.
-- `--font-mono`: the skin's mono face (Celadon: DM Mono; Night and OLED: IBM
-  Plex Mono). Code, paths, ids, hashes, branch names, timestamps, counters,
-  and small metadata labels.
+- `--font-ui`: `VIBEALLDAY Geist` across all skins, then PingFang SC / Noto
+  Sans SC / system. All controls, titles and body copy. `--font-display` and
+  `--font-brand` equal `--font-ui`, with `--title-weight: 600`,
+  `--display-stretch: 100%`, and `-0.02em` display tracking.
+- `--font-mono`: `VIBEALLDAY JetBrains Mono` across all skins. Code, paths,
+  ids, hashes, branch names, timestamps, counters, and metadata badges.
 - Assistant prose keeps its own Output Typography font (Geist by default).
   Choosing a UI or code font in Appearance sets `--font-ui` / `--font-mono`
-  inline on `<html>` and wins over the skin; the default choice follows the
-  skin.
-- Chrome sizes come from the per-skin `--fs-display|h1|h2|h3|body|small|meta|
-  btn|input|code` scale (Celadon is slightly larger: body 15 px, Night 14 px).
-  Apply `--fs-*` to chrome only (buttons, inputs, headings, rows, settings);
-  transcript and prose keep their Output Typography sizes. Phones raise body
-  text (`--fs-body-phone`) and use 16 px inputs (prevents iOS focus zoom).
+  inline on `<html>` and wins over the skin.
+- Chrome sizes come from the unified `--fs-display|h1|h2|h3|body|small|meta|
+  btn|input|code` scale (`14px` body, `13px` small, `12px` meta). Apply
+  `--fs-*` to chrome only; transcript and prose keep their Output Typography
+  sizes. Phones raise body text (`--fs-body-phone: 15px`) and use 16 px inputs
+  (prevents iOS focus zoom).
 - The Garden Console label recipe still exists for mono UPPERCASE eyebrows
   and table heads (`--label-font`, `--eyebrow-size`, `--eyebrow-tracking`);
   eyebrows and meta appear only when they carry information (context, counts,

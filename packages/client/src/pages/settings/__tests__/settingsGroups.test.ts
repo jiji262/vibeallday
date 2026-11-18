@@ -8,7 +8,9 @@ describe("settings home groups", () => {
   const categories = getSettingsCategories((key) => key);
   const mappedIds = SETTINGS_GROUPS.flatMap((group) => group.categoryIds);
 
-  it("maps every category id to exactly one group", () => {
+  it("maps every category id to exactly one group across 5 groups and 12 categories", () => {
+    expect(SETTINGS_GROUPS).toHaveLength(5);
+    expect(categories).toHaveLength(12);
     expect(new Set(mappedIds).size).toBe(mappedIds.length);
     const unmapped = categories
       .map((category) => category.id)
@@ -16,12 +18,12 @@ describe("settings home groups", () => {
     expect(unmapped).toEqual([]);
   });
 
-  it("names only categories that exist, plus the extension-only one", () => {
+  it("names only categories that exist", () => {
     const known = new Set([...categories.map((category) => category.id)]);
     expect(mappedIds.filter((id) => !known.has(id))).toEqual([]);
   });
 
-  it("lists every visible category once, with Advanced & debug last", () => {
+  it("lists every visible category once, with About in the final group", () => {
     const groups = groupSettingsCategories(categories);
     const listed = groups.flatMap((group) =>
       group.categories.map((category) => category.id),
@@ -29,17 +31,23 @@ describe("settings home groups", () => {
     expect([...listed].sort()).toEqual(
       categories.map((category) => category.id).sort(),
     );
-    expect(groups.at(-1)?.id).toBe("advanced");
+    expect(groups.at(-1)?.id).toBe("data");
+    expect(groups.at(-1)?.categories.map((c) => c.id)).toEqual(["about"]);
   });
 
-  it("places Agent behavior after Agent context and Import/Export in Data", () => {
+  it("groups consolidated categories cleanly by domain", () => {
     const ids = (groupId: string) =>
       SETTINGS_GROUPS.find((group) => group.id === groupId)?.categoryIds ?? [];
-    const agents = ids("agents");
-    expect(agents.indexOf("agent-behavior")).toBe(
-      agents.indexOf("agent-context") + 1,
-    );
-    expect(ids("data")).toEqual(["storage", "import-export", "about"]);
+    expect(ids("agents")).toEqual(["providers", "model"]);
+    expect(ids("look")).toEqual(["appearance", "speech"]);
+    expect(ids("access")).toEqual([
+      "local-access",
+      "remote",
+      "notifications",
+      "users",
+    ]);
+    expect(ids("projects")).toEqual(["source-control", "apps", "storage"]);
+    expect(ids("data")).toEqual(["about"]);
   });
 
   it("drops groups a limited user or older server leaves empty", () => {

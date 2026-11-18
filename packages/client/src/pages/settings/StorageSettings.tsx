@@ -9,6 +9,7 @@ import { useCallback, useMemo } from "react";
 import { useServerSettings } from "../../hooks/useServerSettings";
 import { useVersion } from "../../hooks/useVersion";
 import { useI18n } from "../../i18n";
+import { SettingsClipboardTransfer } from "./SettingsClipboardTransfer";
 import { SettingsItem } from "./SettingsItem";
 import { useSettingsPaneTitle } from "./SettingsPaneTitleContext";
 import { SettingsSection } from "./SettingsSection";
@@ -263,6 +264,9 @@ export function StorageSettings() {
         </SettingsItem>
       </div>
       {error && <p className="settings-warning">{error}</p>}
+      <SettingsSection title={t("settingsImportExportTabText")} scope="local">
+        <SettingsClipboardTransfer />
+      </SettingsSection>
     </SettingsSection>
   );
 }

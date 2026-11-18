@@ -9,6 +9,7 @@ import { mutateResumeCredentials } from "../lib/rejectedResumeStorage";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import {
+  AuthAdvanced,
   AuthCheck,
   AuthError,
   AuthField,
@@ -348,47 +349,47 @@ export function RelayLoginPage() {
         </AuthLinkButton>
 
         {showAdvanced && (
-          <AuthField
-            id="limitedUsername"
-            label={t("relayLoginLimitedUsername")}
-            hint={t("relayLoginLimitedUsernameHint")}
-          >
-            <input
-              className={inputClassName()}
+          <AuthAdvanced>
+            <AuthField
               id="limitedUsername"
-              name="limited-user"
-              type="text"
-              value={limitedUsername}
-              onChange={(e) => setLimitedUsername(e.target.value)}
-              placeholder={t("relayLoginLimitedUsernamePlaceholder")}
-              disabled={isConnecting}
-              autoComplete="off"
-              autoCapitalize="none"
-              spellCheck={false}
-              data-testid="relay-limited-username-input"
-            />
-          </AuthField>
-        )}
+              label={t("relayLoginLimitedUsername")}
+              hint={t("relayLoginLimitedUsernameHint")}
+            >
+              <input
+                className={inputClassName()}
+                id="limitedUsername"
+                name="limited-user"
+                type="text"
+                value={limitedUsername}
+                onChange={(e) => setLimitedUsername(e.target.value)}
+                placeholder={t("relayLoginLimitedUsernamePlaceholder")}
+                disabled={isConnecting}
+                autoComplete="off"
+                autoCapitalize="none"
+                spellCheck={false}
+                data-testid="relay-limited-username-input"
+              />
+            </AuthField>
 
-        {showAdvanced && (
-          <AuthField
-            id="customRelayUrl"
-            label={t("relayLoginCustomRelayUrl")}
-            hint={t("relayLoginCustomRelayUrlHint")}
-          >
-            <input
-              className={inputClassName()}
+            <AuthField
               id="customRelayUrl"
-              type="text"
-              value={customRelayUrl}
-              onChange={(e) => setCustomRelayUrl(e.target.value)}
-              placeholder={defaultRelayUrl}
-              disabled={isConnecting}
-              autoCapitalize="none"
-              spellCheck={false}
-              data-testid="custom-relay-url-input"
-            />
-          </AuthField>
+              label={t("relayLoginCustomRelayUrl")}
+              hint={t("relayLoginCustomRelayUrlHint")}
+            >
+              <input
+                className={inputClassName()}
+                id="customRelayUrl"
+                type="text"
+                value={customRelayUrl}
+                onChange={(e) => setCustomRelayUrl(e.target.value)}
+                placeholder={defaultRelayUrl}
+                disabled={isConnecting}
+                autoCapitalize="none"
+                spellCheck={false}
+                data-testid="custom-relay-url-input"
+              />
+            </AuthField>
+          </AuthAdvanced>
         )}
 
         {previewRelayHost && (

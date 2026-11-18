@@ -2,11 +2,11 @@ import {
   GIT_SOURCE_REVIEW_SUBMISSIONS_CAPABILITY,
   SERVER_CAPABILITIES,
 } from "@vibeallday/shared";
-import type { SidebarSpacing } from "./hooks/useSidebarSpacing";
 import type {
   OutputFixedFont,
   OutputProseFont,
 } from "./hooks/useOutputAppearance";
+import type { SidebarSpacing } from "./hooks/useSidebarSpacing";
 import type { TabSize } from "./hooks/useTabSize";
 import type { Theme } from "./hooks/useTheme";
 import type { Locale, TranslationFn } from "./i18n";
@@ -94,19 +94,9 @@ export function getSettingsCategories(
 ): SettingsCategory[] {
   return [
     {
-      id: "appearance",
-      label: t("settingsAppearanceTitle"),
-      description: t("settingsAppearanceDescription"),
-    },
-    {
-      id: "performance",
-      label: t("settingsPerformanceTitle"),
-      description: t("settingsPerformanceDescription"),
-    },
-    {
-      id: "toolbar",
-      label: t("settingsToolbarTitle"),
-      description: t("settingsToolbarDescription"),
+      id: "providers",
+      label: t("settingsProvidersTitle"),
+      description: t("settingsProvidersDescription"),
     },
     {
       id: "model",
@@ -114,67 +104,29 @@ export function getSettingsCategories(
       description: t("settingsModelDescription"),
     },
     {
-      id: "message-delivery",
-      label: t("settingsMessageDeliveryTitle"),
-      description: t("settingsMessageDeliveryDescription"),
+      id: "appearance",
+      label: t("settingsAppearanceTitle"),
+      description: t("settingsAppearanceDescription"),
     },
     {
-      id: "source-control",
-      label: t("settingsSourceControlTitle"),
-      description: t("settingsSourceControlDescription"),
-      requires: {
-        anyCapability: [GIT_SOURCE_REVIEW_SUBMISSIONS_CAPABILITY],
-        unsupportedMessage: t("sourceControlUnsupportedServer"),
-      },
-    },
-    {
-      id: "issues",
-      label: t("issuesTitle"),
-      description: t("issuesSettingsDescription"),
-      requires: {
-        anyCapability: [SERVER_CAPABILITIES.issueSessionAssociations.name],
-        unsupportedMessage: t("issuesUnavailable"),
-      },
-    },
-    {
-      id: "storage",
-      label: t("settingsStorageTitle"),
-      description: t("settingsStorageDescription"),
-    },
-    {
-      id: "import-export",
-      label: t("settingsImportExportTitle"),
-      description: t("settingsImportExportDescription"),
-    },
-    {
-      id: "agent-context",
-      label: t("settingsAgentContextTitle"),
-      description: t("settingsAgentContextDescription"),
-    },
-    {
-      id: "agent-behavior",
-      label: t("settingsAgentBehaviorTitle"),
-      description: t("settingsAgentBehaviorDescription"),
-    },
-    {
-      id: "notifications",
-      label: t("settingsNotificationsTitle"),
-      description: t("settingsNotificationsDescription"),
-    },
-    {
-      id: "webhooks",
-      label: t("settingsWebhooksTitle"),
-      description: t("settingsWebhooksDescription"),
-    },
-    {
-      id: "devices",
-      label: t("settingsDevicesTitle"),
-      description: t("settingsDevicesDescription"),
+      id: "speech",
+      label: t("settingsSpeechCategoryTitle"),
+      description: t("settingsSpeechDescription"),
     },
     {
       id: "local-access",
       label: t("settingsLocalAccessTitle"),
       description: t("settingsLocalAccessDescription"),
+    },
+    {
+      id: "remote",
+      label: t("settingsRemoteTitle"),
+      description: t("settingsRemoteDescription"),
+    },
+    {
+      id: "notifications",
+      label: t("settingsNotificationsTitle"),
+      description: t("settingsNotificationsDescription"),
     },
     {
       id: "users",
@@ -186,12 +138,12 @@ export function getSettingsCategories(
       },
     },
     {
-      id: "project-templates",
-      label: t("settingsProjectTemplatesTitle"),
-      description: t("settingsProjectTemplatesDescription"),
+      id: "source-control",
+      label: t("settingsSourceControlTitle"),
+      description: t("settingsSourceControlDescription"),
       requires: {
-        anyCapability: [SERVER_CAPABILITIES.projectTemplateSources.name],
-        unsupportedMessage: t("projectTemplatesUnsupportedServer"),
+        anyCapability: [GIT_SOURCE_REVIEW_SUBMISSIONS_CAPABILITY],
+        unsupportedMessage: t("sourceControlUnsupportedServer"),
       },
     },
     {
@@ -200,39 +152,9 @@ export function getSettingsCategories(
       description: t("settingsAppsDescription"),
     },
     {
-      id: "remote",
-      label: t("settingsRemoteTitle"),
-      description: t("settingsRemoteDescription"),
-    },
-    {
-      id: "providers",
-      label: t("settingsProvidersTitle"),
-      description: t("settingsProvidersDescription"),
-    },
-    {
-      id: "cache-miss-billing",
-      label: t("settingsCacheMissBillingTitle"),
-      description: t("settingsCacheMissBillingDescription"),
-    },
-    {
-      id: "speech",
-      label: t("settingsSpeechCategoryTitle"),
-      description: t("settingsSpeechDescription"),
-    },
-    {
-      id: "remote-executors",
-      label: t("settingsRemoteExecutorsTitle"),
-      description: t("settingsRemoteExecutorsDescription"),
-    },
-    {
-      id: "environment",
-      label: t("settingsEnvironmentTitle"),
-      description: t("settingsEnvironmentDescription"),
-    },
-    {
-      id: "development",
-      label: t("settingsDevelopmentTitle"),
-      description: t("settingsDevelopmentDescription"),
+      id: "storage",
+      label: t("settingsStorageTitle"),
+      description: t("settingsStorageDescription"),
     },
     {
       id: "about",

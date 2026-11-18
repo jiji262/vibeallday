@@ -209,7 +209,7 @@ import {
   useClientSummarySourceKey,
 } from "../lib/clientSummaryStore";
 import { hasCoarsePointer } from "../lib/deviceDetection";
-import { logSessionUiTrace } from "../lib/diagnostics/uiTrace";
+import { useSessionUiTrace } from "../lib/diagnostics/useSessionUiTrace";
 import {
   isFullPaneComposerShortcut,
   resizeComposerTextarea,
@@ -524,6 +524,7 @@ export function NewSessionForm({
     useSpeechSourceRuntime();
   const clientSummarySourceKey = useClientSummarySourceKey();
   const sourceRuntime = useCurrentSourceRuntime();
+  const logSessionUiTrace = useSessionUiTrace();
   const sourceSummary = sourceRuntime.summary;
   const sourceTransport = sourceRuntime.transport;
   const newSessionDraftKey = useMemo(
@@ -3332,6 +3333,7 @@ export function NewSessionForm({
       }
     },
     [
+      logSessionUiTrace,
       basePath,
       draftControls,
       routerSelection,
@@ -4249,7 +4251,7 @@ export function NewSessionForm({
               // scrollable so it can still be read, just not sent.
               readOnly={composerMuted}
               rows={composerMuted ? Math.min(rows, 3) : rows}
-              className="new-session-form-textarea"
+              className={`new-session-form-textarea ${styles.composerTextarea}`}
             />
           </div>
           {interimTranscript && (
@@ -4264,7 +4266,7 @@ export function NewSessionForm({
           )}
         </div>
         <ProjectFileCompletionMenu completion={fileCompletion} />
-        <div className="new-session-form-toolbar">
+        <div className={`new-session-form-toolbar ${styles.composerToolbar}`}>
           <div className="new-session-form-toolbar-left">
             {allowAttachments && (
               <>
@@ -4277,7 +4279,7 @@ export function NewSessionForm({
                 />
                 <button
                   type="button"
-                  className="toolbar-button"
+                  className={`toolbar-button ${styles.composerToolButton}`}
                   onClick={(event) => {
                     if (attachGesture.current.swiped) {
                       attachGesture.current.swiped = false;
@@ -4359,7 +4361,7 @@ export function NewSessionForm({
                   onListeningStop={handleListeningStop}
                   onPendingSpeechChange={handlePendingSpeechChange}
                   disabled={isStarting}
-                  className="toolbar-button"
+                  className={`toolbar-button ${styles.composerToolButton}`}
                   speechMethod={selectedSpeechMethod}
                   getTranscriptionContext={getTranscriptionContext}
                   smartTurn={activeSpeechSmartTurnSettings}
@@ -4369,7 +4371,7 @@ export function NewSessionForm({
             {!compact && !composerMuted && (
               <FullPaneComposerToggle
                 expanded={fullPane}
-                className={`toolbar-button ${styles.fullPaneToggle}`}
+                className={`toolbar-button ${styles.composerToolButton} ${styles.fullPaneToggle}`}
                 onToggle={() => {
                   toggleFullPane();
                   textareaRef.current?.focus();
@@ -4412,7 +4414,7 @@ export function NewSessionForm({
                   templateProjectBusy ||
                   !canStart
                 }
-                className={`send-button new-session-submit-button ${controls.startButton}`}
+                className={`send-button new-session-submit-button ${controls.startButton} ${styles.startActionButton}`}
                 aria-label={describePrefixedDelivery(
                   launch?.startLabel ??
                     t(
@@ -4507,7 +4509,7 @@ export function NewSessionForm({
         <div className="new-session-project-controls">
           <button
             type="button"
-            className="new-session-project-summary"
+            className={`new-session-project-summary ${styles.projectSummaryButton}`}
             onClick={() => setIsProjectChooserExpanded((prev) => !prev)}
             aria-expanded={isProjectChooserExpanded}
             aria-controls="new-session-project-panel"
@@ -4550,7 +4552,9 @@ export function NewSessionForm({
             </svg>
           </button>
 
-          <label className="new-session-project-inline-field">
+          <label
+            className={`new-session-project-inline-field ${styles.projectInlineField}`}
+          >
             <span className="new-session-project-inline-label">
               {t("newSessionProjectPathLabel")}
             </span>
@@ -4571,7 +4575,7 @@ export function NewSessionForm({
               onKeyDown={handleProjectInputKeyDown}
               placeholder={t("newSessionProjectPathPlaceholder")}
               disabled={isStarting}
-              className="new-session-project-input"
+              className={`new-session-project-input ${styles.projectPathInput}`}
               spellCheck={false}
               list="new-session-project-options"
             />
@@ -4595,7 +4599,7 @@ export function NewSessionForm({
               type="button"
               aria-expanded={newProjectOpen}
               aria-controls="new-session-new-project"
-              className={`${templateStyles.secondary} ${controls.newProjectButton}`}
+              className={`${templateStyles.secondary} ${controls.newProjectButton} ${styles.newProjectButton}`}
               disabled={templateProjectBusy || isStarting}
               onClick={toggleNewProject}
             >
@@ -4607,7 +4611,7 @@ export function NewSessionForm({
         {isProjectChooserExpanded && projectPanelRows && (
           <div
             id="new-session-project-panel"
-            className="new-session-project-panel"
+            className={`new-session-project-panel ${styles.projectDropdownPanel}`}
           >
             <p className="new-session-project-field-hint">
               {t("newSessionProjectPathHint")}
@@ -5497,11 +5501,11 @@ export function NewSessionForm({
   if (compact) {
     return (
       <div
-        className="new-session-form new-session-form-compact"
+        className={`new-session-form new-session-form-compact ${styles.compactShell}`}
         onKeyDownCapture={handleComposerKeyDown}
       >
         {displayDefaultsError}
-        {inputArea}
+        <div className={styles.composerCard}>{inputArea}</div>
       </div>
     );
   }
@@ -5525,7 +5529,9 @@ export function NewSessionForm({
       {!launch && (
         <div className={`new-session-header ${styles.header}`}>
           <h2 className={styles.heading}>{t("newSessionPromptHeading")}</h2>
-          <p className="new-session-subtitle">{t("newSessionPromptLead")}</p>
+          <p className={`new-session-subtitle ${styles.subtitle}`}>
+            {t("newSessionPromptLead")}
+          </p>
         </div>
       )}
 
@@ -5534,7 +5540,7 @@ export function NewSessionForm({
       <div className={`new-session-top-layout ${styles.optionLayout}`}>
         <div ref={mainStackRef} className="new-session-main-stack">
           <div
-            className={`new-session-input-area${
+            className={`new-session-input-area ${styles.composerCard}${
               composerMuted ? ` ${styles.mutedComposer}` : ""
             }`}
             data-composer-shell="true"
@@ -5649,7 +5655,7 @@ export function NewSessionForm({
           </div>
         )}
         {providerSlotFilled && (
-          <div className="new-session-provider-slot">
+          <div className={`new-session-provider-slot ${styles.chipToolbarRow}`}>
             {fixedLaunchSection}
             {showProviderPicker && providerSection}
             {showModelPicker && modelSection}

@@ -152,7 +152,7 @@ function SessionSearchPage() {
     () => createSessionApi(runtime.transport.fetch.bind(runtime.transport)),
     [runtime],
   );
-  const { openSidebar, isWideScreen, setRightPaneExpanded, tabBarNavigation } =
+  const { openSidebar, isWideScreen, setRightPaneExpanded } =
     useNavigationLayout();
   const { sessionRightPaneEnabled } = useSessionRightPaneSetting();
   const [detailHost, setDetailHost] = useState<HTMLDivElement | null>(null);
@@ -865,10 +865,9 @@ function SessionSearchPage() {
   const pageTitle = projectName
     ? t("sessionsTitleWithProject", { project: projectName })
     : t("tabSessions");
-  // The phone top bar already names the Sessions tab; the heading names the
+  // The top bar already names the Sessions destination; the heading names the
   // active All view instead of repeating it.
-  const introTitle =
-    tabBarNavigation && !projectName ? t("sessionViewAllTitle") : pageTitle;
+  const introTitle = !projectName ? t("sessionViewAllTitle") : pageTitle;
   const shownCount = Math.min(renderedCount, results.length);
   // Turn search ranks rows by discovery, so date runs would only fragment it.
   const groupHeaders = contentSearch ? NO_GROUP_HEADERS : dateHeaders;

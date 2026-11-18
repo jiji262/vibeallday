@@ -56,8 +56,12 @@ vi.mock("../../../i18n", () => ({
   useI18n: () => ({ t: (key: string) => key }),
 }));
 
-vi.mock("../ProjectTemplatesSettings", () => ({
-  ProjectTemplatesSettings: () => <p>project templates pane</p>,
+vi.mock("../UsersSettings", () => ({
+  UsersSettings: () => <p>users pane</p>,
+}));
+
+vi.mock("../AppearanceSettings", () => ({
+  AppearanceSettings: () => <p>appearance pane</p>,
 }));
 
 const gatedCategories = getSettingsCategories((key) => key).filter(
@@ -68,6 +72,7 @@ function renderAt(path: string) {
   return render(
     <MemoryRouter initialEntries={[path]}>
       <Routes>
+        <Route path="/settings" element={<SettingsLayout />} />
         <Route path="/settings/:category" element={<SettingsLayout />} />
       </Routes>
     </MemoryRouter>,
@@ -83,11 +88,9 @@ afterEach(() => {
   cleanup();
 });
 
-describe("SettingsLayout capability gating", () => {
+describe("SettingsLayout capability gating and legacy redirects", () => {
   it("covers the categories whose panes an older server cannot serve", () => {
     expect(gatedCategories.map((category) => category.id).sort()).toEqual([
-      "issues",
-      "project-templates",
       "source-control",
       "users",
     ]);
@@ -110,27 +113,32 @@ describe("SettingsLayout capability gating", () => {
   );
 
   it("mounts no pane for a category the server cannot serve", async () => {
-    renderAt("/settings/project-templates");
+    renderAt("/settings/users");
     await act(async () => {});
-    expect(screen.queryByText("project templates pane")).toBeNull();
+    expect(screen.queryByText("users pane")).toBeNull();
   });
 
   it("mounts the pane once the server has the capability", async () => {
-    versionState.version = { capabilities: ["project-template-sources"] };
-    renderAt("/settings/project-templates");
+    versionState.version = { capabilities: ["limited-users"] };
+    renderAt("/settings/users");
 
-    expect(await screen.findByText("project templates pane")).toBeTruthy();
-    expect(screen.queryByText("projectTemplatesUnsupportedServer")).toBeNull();
+    expect(await screen.findByText("users pane")).toBeTruthy();
+    expect(screen.queryByText("usersUnsupportedServer")).toBeNull();
   });
 
   it("waits for the server version before calling a server unsupported", async () => {
     versionState.version = null;
     versionState.loading = true;
-    renderAt("/settings/project-templates");
+    renderAt("/settings/users");
     await act(async () => {});
 
-    expect(screen.queryByText("projectTemplatesUnsupportedServer")).toBeNull();
-    expect(screen.queryByText("project templates pane")).toBeNull();
+    expect(screen.queryByText("usersUnsupportedServer")).toBeNull();
+    expect(screen.queryByText("users pane")).toBeNull();
     expect(screen.getByText("loading")).toBeTruthy();
+  });
+
+  it("redirects legacy consolidated category URLs to their host category", async () => {
+    renderAt("/settings/toolbar");
+    expect(await screen.findByText("appearance pane")).toBeTruthy();
   });
 });

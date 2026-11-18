@@ -143,12 +143,12 @@ describe("resolveClientSummarySourceKey", () => {
     ).toBe("host:direct-host");
   });
 
-  it("keeps bang-command history bound to the direct host", () => {
+  it("keeps the inbox session view bound to the direct host", () => {
     saveHost(directHost("direct-host", "ws://127.0.0.1:3400/api/ws"));
 
     expect(
       resolveClientSummarySourceKey({
-        pathname: "/bang-commands",
+        pathname: "/inbox",
         remote: remote({ currentHostId: "direct-host" }),
       }),
     ).toBe("host:direct-host");

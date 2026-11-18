@@ -1,7 +1,6 @@
 /*
- * Projects page: PageIntro, load and remove notices, the folded Project
- * Queue, the search/source/sort toolbar, then the auto-fill card grid ending
- * in the dashed Add project tile. The card itself lives in ProjectCard.
+ * Studio Workbench Repository Grid: framed search/filter/sort toolbar,
+ * auto-fill repository card grid, and dashed Add Repository tile.
  */
 
 .notice {
@@ -9,43 +8,68 @@
 }
 
 .toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
   margin-bottom: var(--space-4);
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-card);
+  background: var(--surface);
+  box-shadow: var(--shadow-card);
 }
 
-/* Phones stretch every FilterDropdown to the row; these stay pill-sized. */
-.toolbar .pill {
+.searchSlot {
+  flex: 1 1 240px;
+  min-width: 0;
+}
+
+.toolbarControls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.pill {
   width: auto;
   flex: 0 1 auto;
 }
 
-/* The sort select wears the FilterDropdown trigger beside it: same text
-   size and colour, no edge shadow, and the same thin stroked chevron in
-   place of the garden select's filled caret. */
 .sortField {
   position: relative;
   display: inline-flex;
   align-items: center;
 }
 
-.sortField .sort {
+.sort {
   width: auto;
   min-width: 140px;
   padding-left: var(--space-3);
+  border-color: var(--line-strong);
+  border-radius: var(--r-sm);
+  background-color: var(--surface);
   background-image: none;
   box-shadow: none;
   color: var(--ink-2);
-  font-size: var(--font-size-sm);
+  font-size: var(--fs-small);
+  font-weight: 500;
   transition:
     border-color var(--duration-fast) var(--ease-standard),
-    background-color var(--duration-fast) var(--ease-standard);
+    background-color var(--duration-fast) var(--ease-standard),
+    color var(--duration-fast) var(--ease-standard);
 }
 
-.sortField .sort:hover {
-  background-color: var(--bg-soft);
+.sort:hover {
+  border-color: var(--line-strong);
+  background-color: var(--surface-2);
+  color: var(--ink);
 }
 
-.sortField .sort:focus-visible {
-  border-color: var(--focus);
+.sort:focus-visible {
+  border-color: var(--accent-line);
   box-shadow: 0 0 0 3px var(--accent-soft);
   outline: none;
 }
@@ -53,20 +77,28 @@
 .sortChevron {
   position: absolute;
   right: var(--space-3);
-  color: var(--ink-2);
+  color: var(--ink-3);
   pointer-events: none;
 }
 
-/* iOS zooms into selects under 16px; keep the garden phone size there. */
-@media (width < 768px) {
-  .sortField .sort {
-    font-size: 16px;
-  }
+.countPill {
+  display: inline-flex;
+  align-items: center;
+  height: 30px;
+  padding: 0 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  background: var(--surface-2);
+  color: var(--ink-3);
+  font-family: var(--font-mono);
+  font-size: var(--fs-meta);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr));
   gap: var(--space-4);
   margin: 0;
   padding: 0;
@@ -78,28 +110,54 @@
   min-width: 0;
 }
 
-/* Design .prj-add: a dashed tile as tall as a short card. */
 .addTile {
   display: flex;
   flex: 1;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 10px;
-  min-height: 220px;
+  gap: 8px;
+  min-height: 196px;
   padding: 20px;
-  border: 1.5px dashed var(--line-strong);
+  border: 1px dashed var(--line-strong);
   border-radius: var(--r-card);
-  background: transparent;
-  color: var(--ink-3);
+  background: color-mix(in srgb, var(--surface) 55%, transparent);
+  color: var(--ink-2);
   font: inherit;
   text-align: center;
   cursor: pointer;
+  transition:
+    border-color var(--duration-fast) var(--ease-standard),
+    background-color var(--duration-fast) var(--ease-standard),
+    color var(--duration-fast) var(--ease-standard);
+}
+
+.addIconWrap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  margin-bottom: 2px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  background: var(--surface-2);
+  color: var(--ink-2);
+  transition:
+    border-color var(--duration-fast) var(--ease-standard),
+    background-color var(--duration-fast) var(--ease-standard),
+    color var(--duration-fast) var(--ease-standard);
 }
 
 .addTile:hover {
   border-color: var(--accent-line);
   background: var(--accent-soft);
+  color: var(--accent-ink);
+}
+
+.addTile:hover .addIconWrap {
+  border-color: var(--accent-line);
+  background: var(--surface);
   color: var(--accent-ink);
 }
 
@@ -109,11 +167,20 @@
 }
 
 .addTitle {
+  color: var(--ink);
+  font-size: var(--fs-body);
   font-weight: 600;
 }
 
+.addTile:hover .addTitle {
+  color: var(--accent-ink);
+}
+
 .addHint {
-  font-size: var(--fs-small);
+  max-width: 24ch;
+  color: var(--ink-3);
+  font-size: var(--fs-meta);
+  line-height: 1.4;
 }
 
 .showMore {
@@ -122,9 +189,35 @@
   margin-top: var(--space-4);
 }
 
-/* Phones stack the cards in one column and shrink Add project to a
-   full-width secondary button (design Projects-Phone). */
+@media (prefers-reduced-motion: reduce) {
+  .sort,
+  .addTile,
+  .addIconWrap {
+    transition: none;
+  }
+}
+
 @media (width < 768px) {
+  .toolbar {
+    padding: 8px;
+  }
+
+  .searchSlot {
+    flex: 1 1 100%;
+  }
+
+  .toolbarControls {
+    width: 100%;
+  }
+
+  .sort {
+    font-size: 16px;
+  }
+
+  .countPill {
+    margin-inline-start: auto;
+  }
+
   .grid {
     gap: var(--space-3);
   }
@@ -138,6 +231,14 @@
     border-radius: var(--r-btn);
     background: var(--surface);
     color: var(--ink);
+  }
+
+  .addIconWrap {
+    width: auto;
+    height: auto;
+    margin-bottom: 0;
+    border: none;
+    background: transparent;
   }
 
   .addHint {

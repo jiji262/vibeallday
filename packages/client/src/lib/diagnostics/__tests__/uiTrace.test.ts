@@ -3,16 +3,23 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 const mocks = vi.hoisted(() => ({
   isClientLogCollectionActive: vi.fn(() => true),
   record: vi.fn(),
+  captureRecorder: vi.fn(),
 }));
 
 vi.mock("../index", () => ({
   clientLogCollector: {
     record: mocks.record,
+    captureRecorder: mocks.captureRecorder,
   },
   isClientLogCollectionActive: mocks.isClientLogCollectionActive,
 }));
 
-import { logSessionUiTrace } from "../uiTrace";
+import {
+  createSessionUiTrace,
+  createSourceSessionUiTrace,
+  logSessionUiTrace,
+} from "../uiTrace";
+import type { ClientSummarySourceKey } from "../../clientSummaryStore";
 
 function parseTraceMessage(message: string): Record<string, unknown> {
   const prefix = "[SessionUITrace] ";
@@ -26,6 +33,11 @@ describe("logSessionUiTrace", () => {
     vi.setSystemTime(new Date("2026-05-01T00:00:00.000Z"));
     vi.clearAllMocks();
     mocks.isClientLogCollectionActive.mockReturnValue(true);
+    mocks.captureRecorder.mockReturnValue({
+      key: "a",
+      generation: 1,
+      record: mocks.record,
+    });
   });
 
   afterEach(() => {
@@ -59,6 +71,92 @@ describe("logSessionUiTrace", () => {
     expect(mocks.record).not.toHaveBeenCalled();
   });
 
+  it("keeps an asynchronous completion bound to its originating recorder", async () => {
+    const recordA = vi.fn();
+    const recordB = vi.fn();
+    const traceA = createSessionUiTrace({
+      key: "a",
+      generation: 1,
+      record: recordA,
+    });
+    let finish!: () => void;
+    const request = new Promise<void>((resolve) => {
+      finish = resolve;
+    });
+    const completion = request.then(() =>
+      traceA("composer-send-resume-success", { sessionId: "private-a" }),
+    );
+    mocks.captureRecorder.mockReturnValue({
+      key: "b",
+      generation: 1,
+      record: recordB,
+    });
+    finish();
+    await completion;
+    expect(recordA.mock.calls[0]?.[2]).toContain("private-a");
+    expect(recordB).not.toHaveBeenCalled();
+  });
+
+  it("starts a new batch when collection restarts on the same destination", () => {
+    const oldRecord = vi.fn();
+    const newRecord = vi.fn();
+    mocks.captureRecorder.mockReturnValue({
+      key: "a",
+      generation: 1,
+      record: oldRecord,
+    });
+    logSessionUiTrace("session-stream-dispatch", {
+      eventType: "pending",
+      eventId: "old",
+    });
+    mocks.captureRecorder.mockReturnValue({
+      key: "a",
+      generation: 2,
+      record: newRecord,
+    });
+    logSessionUiTrace("session-stream-dispatch", {
+      eventType: "pending",
+      eventId: "new",
+    });
+    vi.advanceTimersByTime(1_000);
+    expect(newRecord).toHaveBeenCalledTimes(1);
+    expect(newRecord.mock.calls[0]?.[2]).toContain('"total":1');
+    expect(newRecord.mock.calls[0]?.[2]).not.toContain('"old"');
+  });
+
+  it("requests the originating source after switching and rejects a rebound endpoint", () => {
+    const sourceA = "host:a" as ClientSummarySourceKey;
+    const recordA = vi.fn();
+    const recordB = vi.fn();
+    const trace = createSourceSessionUiTrace(sourceA, "destination-a");
+    mocks.captureRecorder.mockImplementation((key) =>
+      key === sourceA
+        ? { key: "destination-a", generation: 1, record: recordA }
+        : { key: "destination-b", generation: 1, record: recordB },
+    );
+    trace("new-session-created", { sessionId: "private-a" });
+    expect(mocks.captureRecorder).toHaveBeenLastCalledWith(sourceA);
+    expect(recordA.mock.calls[0]?.[2]).toContain("private-a");
+    mocks.captureRecorder.mockReturnValue({
+      key: "destination-b",
+      generation: 1,
+      record: recordB,
+    });
+    trace("new-session-created", { sessionId: "late-private-a" });
+    expect(recordB).not.toHaveBeenCalled();
+  });
+
+  it("lets a stable source callback use the new collection lifecycle", () => {
+    const trace = createSourceSessionUiTrace(
+      "host:a" as ClientSummarySourceKey,
+      "a",
+    );
+    const record = vi.fn();
+    mocks.captureRecorder.mockReturnValue({ key: "a", generation: 2, record });
+    trace("stream-complete", { sessionId: "current-a" });
+    expect(record).toHaveBeenCalledTimes(1);
+  });
+
   it("batches token-level stream dispatch traces", () => {
     logSessionUiTrace("session-stream-dispatch", {
       sessionId: "session-1",
@@ -90,5 +188,25 @@ describe("logSessionUiTrace", () => {
         "dispatch:message:stream_event": 3,
       },
     });
+  });
+
+  it("keeps delayed batches bound to their original server", () => {
+    const recordA = vi.fn();
+    const recordB = vi.fn();
+    mocks.captureRecorder.mockReturnValue({ key: "a", record: recordA });
+    logSessionUiTrace("session-stream-dispatch", {
+      eventType: "pending",
+      sessionId: "private-a",
+    });
+    mocks.captureRecorder.mockReturnValue({ key: "b", record: recordB });
+    logSessionUiTrace("session-stream-dispatch", {
+      eventType: "pending",
+      sessionId: "private-b",
+    });
+    vi.advanceTimersByTime(1_000);
+    expect(recordA).toHaveBeenCalledTimes(1);
+    expect(recordB).toHaveBeenCalledTimes(1);
+    expect(recordA.mock.calls[0]?.[2]).toContain("private-a");
+    expect(recordB.mock.calls[0]?.[2]).not.toContain("private-a");
   });
 });

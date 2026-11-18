@@ -1,5 +1,6 @@
 import type { IssueItem } from "@vibeallday/shared";
-import { Fragment, type ReactNode } from "react";
+import type { ReactNode } from "react";
+import { Badge } from "../components/garden/Badge";
 import {
   TRACKER_STATUS_LABELS,
   TrackerStatusBadge,
@@ -84,27 +85,29 @@ function issueFacts(item: IssueItem, t: Translate): Fact[] {
   return facts.filter((fact): fact is Fact => fact !== null);
 }
 
-/** Design detail eyebrow: the key, then what it is and where it stands. */
+/** Detail eyebrow: mono key badge, reference type badge, and tracker status. */
 export function IssueDetailKeyRow({ item }: { item: IssueItem }) {
+  const { t } = useI18n();
   return (
     <p className={styles.keyRow}>
       <span className={styles.key}>{item.key}</span>
       <IssueTypeBadge item={item} />
       <TrackerStatusBadge item={item} />
+      {item.unresolved && <Badge tone="outline">{t("issuesUnresolved")}</Badge>}
     </p>
   );
 }
 
-/** Design .iss-dl: what the index knows about the reference. */
+/** Structured 2-column Studio metadata grid for the selected issue/PR. */
 export function IssueDetailFacts({ item }: { item: IssueItem }) {
   const { t } = useI18n();
   return (
     <dl className={styles.facts}>
       {issueFacts(item, t).map((fact) => (
-        <Fragment key={fact.key}>
-          <dt>{fact.label}</dt>
-          <dd>{fact.value}</dd>
-        </Fragment>
+        <div key={fact.key} className={styles.factCell}>
+          <dt className={styles.factLabel}>{fact.label}</dt>
+          <dd className={styles.factValue}>{fact.value}</dd>
+        </div>
       ))}
     </dl>
   );

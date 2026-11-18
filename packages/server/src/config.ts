@@ -17,6 +17,7 @@ import { readArtifactConfig, type ArtifactConfig } from "./artifacts/config.js";
 import { DEFAULT_IDLE_TIMEOUT_SECONDS } from "./defaults.js";
 import { captureStartupEnvSettings } from "./envSettings.js";
 import { getDefaultCodexSessionsDir } from "./projects/codex-scanner.js";
+import { resolvePiSessionsDir } from "./projects/paths.js";
 import type { PermissionMode } from "./sdk/types.js";
 import {
   parseSummaryParserWorkerMode,
@@ -302,9 +303,7 @@ export function loadConfig(): Config {
     path.join(os.homedir(), ".gemini", "tmp");
   const codexSessionsDir =
     process.env.CODEX_SESSIONS_DIR ?? getDefaultCodexSessionsDir();
-  const piSessionsDir =
-    process.env.PI_SESSIONS_DIR ??
-    path.join(os.homedir(), ".pi", "agent", "sessions");
+  const piSessionsDir = resolvePiSessionsDir();
   // Enable periodic rescan on macOS (fs.watch misses deep file writes)
   // and Windows (fs.watch({ recursive: true }) can be unreliable for deep trees)
   const defaultCodexWatchPeriodicRescanMs =

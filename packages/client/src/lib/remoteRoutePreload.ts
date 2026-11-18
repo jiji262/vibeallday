@@ -2,7 +2,6 @@ import { isDirectAppRouteSegment } from "./remoteRouteSegments";
 
 export type RemoteRouteModuleKey =
   | "agentsPage"
-  | "bangCommandsPage"
   | "directLoginPage"
   | "filePage"
   | "gitStatusPage"
@@ -14,7 +13,6 @@ export type RemoteRouteModuleKey =
   | "legacyRelayRouteRedirect"
   | "morePage"
   | "localSourcePage"
-  | "multiHostMonitorPage"
   | "newSessionPage"
   | "projectHomePage"
   | "projectsPage"
@@ -61,9 +59,6 @@ function selectedAppPageModules(pathname: string): RemoteRouteModuleKey[] {
   if (pathname === "/agents") return [...modules, "agentsPage"];
   if (pathname === "/issues") return [...modules, "issuesPage"];
   if (pathname === "/git-status") return [...modules, "gitStatusPage"];
-  if (pathname === "/bang-commands") {
-    return [...modules, "bangCommandsPage"];
-  }
   if (pathname === "/settings" || pathname.startsWith("/settings/")) {
     return [...modules, "settings"];
   }
@@ -84,7 +79,6 @@ export function getInitialRemoteRouteModuleKeys(
   if (/^\/(?:remote\/)?share\/[^/]+(?:\/|$)/.test(pathname)) {
     return ["publicSharePage"];
   }
-  if (pathname === "/-/monitor") return ["multiHostMonitorPage"];
 
   if (pathname === "/login" || pathname === "/login/") {
     return ["remoteApp", "hostPickerPage"];

@@ -7,7 +7,7 @@ import {
   useState,
 } from "react";
 import { useI18n } from "../i18n";
-import styles from "./AgentsPage.module.css";
+import styles from "./AgentsProcessMetrics.module.css";
 import {
   formatCpu,
   formatMemory,
@@ -19,7 +19,19 @@ import {
 const INTERACTIVE_SELECTOR =
   "a, button, input, select, textarea, [role='button'], [role='link']";
 
+/** 1 GiB scale ceiling for the inline RSS visual meter. */
+const RSS_SCALE_BYTES = 1024 * 1024 * 1024;
+const HIGH_RSS_BYTES = 768 * 1024 * 1024;
+
 type Translate = ReturnType<typeof useI18n>["t"];
+
+function rssMeterWidth(bytes: number): number {
+  if (bytes <= 0) return 8;
+  return Math.max(
+    10,
+    Math.min(100, Math.round((bytes / RSS_SCALE_BYTES) * 100)),
+  );
+}
 
 function metricsDetail(
   observation: HostAgentProcessObservation,
@@ -122,7 +134,7 @@ interface ProcessMetricsProps {
   touchSurfaceRef?: RefObject<HTMLElement | null>;
 }
 
-/** Root RSS chip with a detail popover sampled from the host. */
+/** Root RSS pill with mini bar and a detail popover sampled from the host. */
 export function ProcessMetrics({
   observation,
   sessionId,
@@ -136,12 +148,14 @@ export function ProcessMetrics({
   useDismiss({ open, close, wrapper: wrapperRef, surface: touchSurfaceRef });
   useSurfaceToggle(touchSurfaceRef, wrapperRef, toggle);
   const detail = metricsDetail(observation, sessionId, t);
+  const rssBytes = observation.memory.rootRssBytes;
+  const highRss = rssBytes >= HIGH_RSS_BYTES;
 
   return (
-    <span className={styles.metricsWrap} ref={wrapperRef}>
+    <span className={styles.wrap} ref={wrapperRef}>
       <button
         type="button"
-        className={styles.metrics}
+        className={styles.trigger}
         title={detail}
         aria-label={detail}
         aria-expanded={open}
@@ -151,10 +165,16 @@ export function ProcessMetrics({
           toggle();
         }}
       >
-        <span>{formatMemory(observation.memory.rootRssBytes)} RSS</span>
+        <span className={styles.rssBar} aria-hidden="true">
+          <span
+            className={`${styles.rssFill} ${highRss ? styles.rssFillHigh : ""}`}
+            style={{ width: `${rssMeterWidth(rssBytes)}%` }}
+          />
+        </span>
+        <span>{formatMemory(rssBytes)} RSS</span>
       </button>
       {open && (
-        <span className={styles.metricsPopover} role="status">
+        <span className={styles.popover} role="status">
           {detail}
         </span>
       )}

@@ -1,6 +1,18 @@
 import { randomUUID } from "node:crypto";
 import { defineConfig } from "@playwright/test";
 
+// Worker 内直接运行的服务也必须在导入 ws 之前安装测试网络边界。
+const fixtureRuntime = new URL(
+  "./e2e/support/fixture-runtime.mjs",
+  import.meta.url,
+).href;
+process.env.NODE_OPTIONS = [
+  process.env.NODE_OPTIONS,
+  `--import=${fixtureRuntime}`,
+]
+  .filter(Boolean)
+  .join(" ");
+
 // Playwright forces color for its worker output after loading this config. Do
 // not pass the contradictory NO_COLOR setting into those workers, which makes
 // Node warn before tests run.

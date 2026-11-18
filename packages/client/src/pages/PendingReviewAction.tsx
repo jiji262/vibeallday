@@ -5,7 +5,7 @@ import { CommentIcon } from "../components/garden/icons";
 import type { TranslationFn } from "../i18n";
 import styles from "./PendingReviewAction.module.css";
 
-const ICON_SIZE = 16;
+const ICON_SIZE = 15;
 
 /** File name and line of a draft, e.g. `DraftSyncBridge.ts:43`. */
 function draftLocation(comment: ReviewComment): string {
@@ -16,8 +16,9 @@ function draftLocation(comment: ReviewComment): string {
 }
 
 /**
- * Design 提交审查: drafts waiting outside the review tab. Wide layouts float
- * a button over the page corner; phones show it as a card in the flow.
+ * Studio Floating Review Action Bar: surfaces pending inline review drafts
+ * outside the Review tab as an elevated floating dock on desktop and a crisp
+ * card in the flow on mobile.
  */
 export function PendingReviewAction({
   pending,
@@ -34,17 +35,21 @@ export function PendingReviewAction({
   const locations = [...new Set(pending.map(draftLocation))].join(", ");
   return (
     <aside className={styles.root} aria-label={summary}>
-      <CommentIcon size={ICON_SIZE} className={styles.icon} />
+      <span className={styles.iconWrap} aria-hidden="true">
+        <CommentIcon size={ICON_SIZE} className={styles.icon} />
+      </span>
       <div className={styles.summary}>
         <span className={styles.title}>{summary}</span>
         <span className={styles.meta}>{locations}</span>
       </div>
-      <Button className={styles.submit} onClick={onSubmit}>
-        <CommentIcon size={ICON_SIZE} className={styles.buttonIcon} />
+      <Button
+        variant="primary"
+        size="sm"
+        className={styles.submit}
+        onClick={onSubmit}
+      >
         {t("sourceReviewSubmitTitle")}
-        <Count tone="accent" className={styles.count}>
-          {count}
-        </Count>
+        <Count className={styles.count}>{count}</Count>
       </Button>
     </aside>
   );

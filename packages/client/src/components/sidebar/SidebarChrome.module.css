@@ -8,21 +8,27 @@
   width: 100%;
   min-width: 0;
   height: var(--btn-h);
-  padding: 0 12px;
-  border: 1px solid var(--line-strong);
+  padding: 0 10px;
+  border: 1px solid var(--line);
   border-radius: var(--r-btn);
   background: var(--surface);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.03);
   color: var(--ink-3);
   font: inherit;
-  font-size: var(--fs-btn);
+  font-size: var(--fs-small);
   font-weight: 500;
   text-align: start;
   cursor: pointer;
-  transition: background-color var(--duration-fast) var(--ease-standard);
+  transition:
+    background-color var(--duration-fast) var(--ease-standard),
+    border-color var(--duration-fast) var(--ease-standard),
+    color var(--duration-fast) var(--ease-standard);
 }
 
 .search:hover {
+  border-color: var(--line-strong);
   background: var(--surface-3);
+  color: var(--ink-2);
 }
 
 .search:focus-visible {

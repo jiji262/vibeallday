@@ -75,6 +75,10 @@ vi.mock("../../../components/PublicShareManagerModal", () => ({
   PublicShareManagerModal: () => <div>publicShareManager</div>,
 }));
 
+vi.mock("../DevicesSettings", () => ({
+  DevicesSettings: () => <div>devicesSettings</div>,
+}));
+
 vi.mock("../../../contexts/HostIdentityContext", () => ({
   useHostIdentity: () => ({
     supported: hostIdentityState.supported,
@@ -130,9 +134,14 @@ vi.mock("../../../i18n", () => ({
   }),
 }));
 
-vi.mock("../SettingsPaneTitleContext", () => ({
-  useSettingsPaneTitle: vi.fn(),
-}));
+vi.mock("../SettingsPaneTitleContext", async (importOriginal) => {
+  const actual =
+    await importOriginal<typeof import("../SettingsPaneTitleContext")>();
+  return {
+    ...actual,
+    useSettingsPaneTitle: vi.fn(),
+  };
+});
 
 describe("RemoteAccessSettings host identity", () => {
   beforeEach(() => {

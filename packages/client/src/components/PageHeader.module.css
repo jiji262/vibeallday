@@ -6,9 +6,12 @@
  * button, the title (header intro or last crumb), host chip and actions.
  */
 .header:global(.session-header) {
+  position: sticky;
+  top: 0;
   z-index: var(--z-topbar);
-  border-bottom: 1px solid var(--line);
-  background: var(--canvas);
+  border-bottom: 1px solid var(--phead-line);
+  background: var(--phead-bg);
+  backdrop-filter: blur(16px);
 }
 
 .header::after {
@@ -17,16 +20,15 @@
 
 .header .inner:global(.session-header-inner) {
   display: grid;
-  grid-template-areas:
-    "lead tools"
-    "intro intro";
-  grid-template-columns: minmax(0, 1fr) auto;
-  grid-template-rows: minmax(var(--topbar-height), auto) auto;
+  grid-template:
+    "lead tools" minmax(52px, auto)
+    "intro intro" auto
+    / minmax(0, 1fr) auto;
   align-items: center;
   column-gap: 12px;
   width: 100%;
-  min-height: var(--topbar-height);
-  padding: 0 28px;
+  min-height: 52px;
+  padding: 0 24px;
 }
 
 .lead:global(.session-header-left) {

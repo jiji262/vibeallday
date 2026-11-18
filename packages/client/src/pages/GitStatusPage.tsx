@@ -495,7 +495,7 @@ export function GitStatusPage() {
             supportsWorkingTreeSections ? (
             <GlossaryProjectBoundary projectId={effectiveProjectId}>
               <ProjectWorktreePauseContext.Provider value={worktreeLeasePaused}>
-                <div className="git-status">
+                <div className={`git-status ${styles.workbench}`}>
                   <BlameBrowser
                     projectId={effectiveProjectId}
                     isWideScreen={isWideScreen}
@@ -583,7 +583,9 @@ function GitStatusCompatibilityContent({
   t: TranslationFn;
 }) {
   return (
-    <div className="git-status git-status-compatibility">
+    <div
+      className={`git-status git-status-compatibility ${styles.compatibilityCard}`}
+    >
       <div
         className={`source-control-action-row ${styles.compatibilityActions}`}
       >
@@ -700,11 +702,14 @@ function GitStatusContent({
     setIgnoreWhitespace(!ignoreWhitespace);
   }, [ignoreWhitespace, supportsProjections]);
   const projectionNotice = showProjectionNotice ? (
-    <div className="source-projection-notice" role="status">
+    <div
+      className={`source-projection-notice ${styles.projectionNotice}`}
+      role="status"
+    >
       <span>{t("sourceProjectionUpgradeNotice")}</span>
       <button
         type="button"
-        className="source-projection-notice-dismiss"
+        className={`source-projection-notice-dismiss ${styles.projectionDismiss}`}
         aria-label={t("sourceDismissProjectionNotice")}
         onClick={() => setShowProjectionNotice(false)}
       >
@@ -712,11 +717,14 @@ function GitStatusContent({
       </button>
     </div>
   ) : projectionRequestError ? (
-    <div className="source-projection-notice" role="alert">
+    <div
+      className={`source-projection-notice ${styles.projectionNotice} ${styles.projectionNoticeError}`}
+      role="alert"
+    >
       <span>{projectionRequestError}</span>
       <button
         type="button"
-        className="source-projection-notice-dismiss"
+        className={`source-projection-notice-dismiss ${styles.projectionDismiss}`}
         aria-label={t("sourceDismissProjectionError")}
         onClick={() => setProjectionRequestError(null)}
       >
@@ -792,7 +800,7 @@ function GitStatusContent({
     );
   }, [location.state, setSearchParams]);
   return (
-    <div className="git-status">
+    <div className={`git-status ${styles.workbench}`}>
       <GitActionNotices gitActions={gitActions} t={t} />
       {projectionNotice &&
         (projectionNoticeNeedsPortal
@@ -922,7 +930,7 @@ function GitActionNotices({
   }
 
   return (
-    <div className="git-status-action-notices">
+    <div className={`git-status-action-notices ${styles.actionNotices}`}>
       {gitActions.actionFeedback && gitActions.actionFeedbackTone && (
         <GitActionFeedback
           message={gitActions.actionFeedback}
@@ -955,7 +963,7 @@ function GitIntegrationOptionsPanel({
 }) {
   if (loading) {
     return (
-      <div className="git-integration-options">
+      <div className={`git-integration-options ${styles.integrationCard}`}>
         <span>{t("gitStatusAutoOptionsChecking")}</span>
       </div>
     );
@@ -963,7 +971,9 @@ function GitIntegrationOptionsPanel({
 
   if (error) {
     return (
-      <div className="git-integration-options git-integration-options-warning">
+      <div
+        className={`git-integration-options git-integration-options-warning ${styles.integrationCard} ${styles.integrationCardWarning}`}
+      >
         <span>{error}</span>
       </div>
     );
@@ -975,19 +985,21 @@ function GitIntegrationOptionsPanel({
 
   if (options.status === "available") {
     return (
-      <div className="git-integration-options">
-        <span className="git-integration-options-label">
+      <div className={`git-integration-options ${styles.integrationCard}`}>
+        <span
+          className={`git-integration-options-label ${styles.integrationLabel}`}
+        >
           {t("gitStatusAutoOptionsLabel")}
         </span>
         <span
-          className="git-integration-option-pill"
+          className={`git-integration-option-pill ${styles.integrationPill}`}
           aria-disabled="true"
           title={t("gitStatusAutoActionNotEnabled")}
         >
           {t("gitStatusAutoRebase")}
         </span>
         <span
-          className="git-integration-option-pill"
+          className={`git-integration-option-pill ${styles.integrationPill}`}
           aria-disabled="true"
           title={t("gitStatusAutoActionNotEnabled")}
         >
@@ -999,7 +1011,9 @@ function GitIntegrationOptionsPanel({
   }
 
   return (
-    <div className="git-integration-options git-integration-options-warning">
+    <div
+      className={`git-integration-options git-integration-options-warning ${styles.integrationCard} ${styles.integrationCardWarning}`}
+    >
       <span>
         {t("gitStatusAutoOptionsUnavailable", {
           reason: getIntegrationUnavailableReason(options.reasons, t),
@@ -1012,14 +1026,17 @@ function GitIntegrationOptionsPanel({
 
 function GitIntegrationOptionsHelp({ t }: { t: TranslationFn }) {
   return (
-    <details className="git-integration-help">
+    <details className={`git-integration-help ${styles.integrationHelp}`}>
       <summary
+        className={styles.integrationHelpSummary}
         aria-label={t("gitStatusAutoHelpLabel")}
         title={t("gitStatusAutoHelpLabel")}
       >
         ?
       </summary>
-      <div className="git-integration-help-popover">
+      <div
+        className={`git-integration-help-popover ${styles.integrationHelpPopover}`}
+      >
         {t("gitStatusAutoHelp")}
       </div>
     </details>

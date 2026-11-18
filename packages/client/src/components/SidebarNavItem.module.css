@@ -16,13 +16,13 @@
 }
 
 .groupLabel {
-  margin: var(--space-4) 0 4px;
+  margin: var(--space-3) 0 4px;
   padding: 0 10px;
   color: var(--ink-3);
   font-family: var(--font-mono);
-  font-size: 11px;
-  font-weight: 400;
-  letter-spacing: 0.08em;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
   line-height: 1.4;
   text-transform: uppercase;
 }
@@ -40,15 +40,15 @@
   align-items: center;
   gap: var(--sidebar-navigation-inline-spacing, 10px);
   min-width: 0;
-  min-height: 36px;
+  min-height: 34px;
   padding: var(--sidebar-navigation-padding-block, 0)
     var(--sidebar-navigation-inline-spacing, 10px);
   border: 0;
-  border-radius: var(--r-md);
+  border-radius: var(--r-btn);
   background: transparent;
   color: var(--ink-2);
   font: inherit;
-  font-size: var(--fs-body);
+  font-size: var(--fs-small);
   font-weight: 500;
   line-height: 1.35;
   text-align: start;

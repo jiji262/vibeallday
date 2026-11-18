@@ -9,12 +9,12 @@ import {
 } from "../SettingsLayout";
 
 describe("SettingsLayout", () => {
-  it("keeps Development before About, with only a served Emulator between", () => {
+  it("keeps Storage before About at the end of the consolidated categories", () => {
     const categoryIds = getSettingsCategories((key) => key).map(
       (category) => category.id,
     );
 
-    expect(categoryIds.slice(-2)).toEqual(["development", "about"]);
+    expect(categoryIds.slice(-2)).toEqual(["storage", "about"]);
   });
 
   it("uses the actual settings-container width for the two-column layout", () => {

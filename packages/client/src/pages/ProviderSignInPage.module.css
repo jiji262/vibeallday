@@ -1,22 +1,55 @@
-/* Provider sign-in: one form-width Card holding the sign-in flow. */
+/* Provider sign-in: focused Studio Workbench card holding the CLI sign-in flow. */
+.providerHead {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px var(--card-pad);
+  border-bottom: 1px solid var(--line);
+}
+
+.providerName {
+  color: var(--ink);
+  font-size: var(--fs-body);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.providerSlug {
+  margin-left: auto;
+  padding: 2px 8px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface-2);
+  color: var(--ink-2);
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+
 .body {
   display: grid;
   gap: var(--space-4);
 }
 
 .settingsLink {
-  color: var(--indigo);
-  font-size: 13px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--accent-ink);
+  font-size: var(--fs-small);
+  font-weight: 500;
   text-decoration: none;
   overflow-wrap: anywhere;
+  transition: color 140ms ease;
 }
 
 .settingsLink:hover {
+  color: var(--ink);
   text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
 .settingsLink:focus-visible {
-  border-radius: var(--radius-xs);
-  outline: 2px solid var(--indigo);
+  border-radius: var(--r-sm);
+  outline: 2px solid var(--focus);
   outline-offset: 2px;
 }

@@ -1,0 +1,20 @@
+/* Studio settings section typography and spacing. */
+.section {
+  min-width: 0;
+}
+
+.heading {
+  margin: 0 0 6px;
+  color: var(--ink);
+  font-size: var(--fs-h3);
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  line-height: 1.3;
+}
+
+.description {
+  margin: 0 0 12px;
+  color: var(--ink-3);
+  font-size: var(--fs-small);
+  line-height: 1.5;
+}

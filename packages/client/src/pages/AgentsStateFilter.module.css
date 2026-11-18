@@ -1,6 +1,116 @@
-.chips {
-  display: flex;
+/* Studio Workbench segmented state filter pills. */
+
+@keyframes statePulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.45;
+  }
+}
+
+.segmented {
+  display: inline-flex;
   flex-wrap: wrap;
   align-items: center;
+  gap: 2px;
+  padding: 3px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-btn);
+  background: var(--surface-2);
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
   gap: 6px;
+  min-height: 28px;
+  padding: 0 10px;
+  border: 1px solid transparent;
+  border-radius: calc(var(--r-btn) - 2px);
+  background: transparent;
+  color: var(--ink-2);
+  font-family: var(--font-ui);
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background-color var(--duration-fast) var(--ease-standard),
+    border-color var(--duration-fast) var(--ease-standard),
+    color var(--duration-fast) var(--ease-standard);
+}
+
+.pill:hover {
+  color: var(--ink);
+}
+
+.pill:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 1px;
+}
+
+.pillActive {
+  border-color: var(--line-strong);
+  background: var(--surface);
+  box-shadow: var(--shadow-card);
+  color: var(--ink);
+}
+
+.pillLabel {
+  line-height: 1;
+}
+
+.pillCount {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: var(--surface-3);
+  color: var(--ink-3);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+  line-height: 1;
+}
+
+.pillCountActive {
+  background: var(--accent-soft);
+  color: var(--accent-ink);
+}
+
+.dot {
+  flex-shrink: 0;
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--ink-3);
+}
+
+.dotRun {
+  background: var(--run);
+}
+
+.dotRunLive {
+  background: var(--run);
+  box-shadow: 0 0 0 2px var(--run-soft);
+  animation: statePulse 2s ease-in-out infinite;
+}
+
+.dotIdle {
+  background: var(--ink-3);
+}
+
+.dotStopped {
+  background: var(--line-strong);
+}
+
+.dotAttn {
+  background: var(--attn);
 }

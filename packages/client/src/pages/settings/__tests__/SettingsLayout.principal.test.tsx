@@ -63,10 +63,6 @@ vi.mock("../LocalAccessSettings", () => ({
   LocalAccessSettings: () => <p>local access pane</p>,
 }));
 
-vi.mock("../SettingsBackupActions", () => ({
-  SettingsBackupActions: () => <p>backup actions</p>,
-}));
-
 function renderAt(path: string) {
   return render(
     <MemoryRouter initialEntries={[path]}>
@@ -98,7 +94,6 @@ describe("SettingsLayout principal gating", () => {
     renderAt("/settings/local-access");
     await act(async () => {});
     expect(screen.queryByText("local access pane")).toBeNull();
-    expect(screen.queryByText("backup actions")).toBeNull();
     expect(screen.queryByRole("button", { name: /local-access/i })).toBeNull();
   });
 
@@ -122,6 +117,5 @@ describe("SettingsLayout principal gating", () => {
     renderAt("/settings/local-access");
     await act(async () => {});
     expect(screen.queryByText("local access pane")).toBeNull();
-    expect(screen.queryByText("backup actions")).toBeNull();
   });
 });

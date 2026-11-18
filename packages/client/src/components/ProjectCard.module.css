@@ -1,35 +1,56 @@
 /*
- * One card in the projects grid (design .prj-card): identity head with the
- * overflow menu, caption, status counts, and New session / Open at the foot.
- * The grid itself lives in ProjectsPage.module.css.
+ * Studio Workbench Repository Card: elevated card surface with crisp border,
+ * subtle hover lift, repo badge + title + mono codeName + quick icon triggers,
+ * one-line caption slot, `--surface-2` mono path pill, and structured footer.
  */
 
 .card {
   position: relative;
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
+  gap: 10px;
   min-width: 0;
-  padding: 18px 18px 14px;
+  padding: 16px;
   border: 1px solid var(--card-line);
   border-radius: var(--r-card);
   background: var(--surface);
   color: var(--ink);
   box-shadow: var(--shadow-card);
+  transition:
+    border-color var(--duration-fast) var(--ease-standard),
+    transform var(--duration-fast) var(--ease-standard),
+    box-shadow var(--duration-fast) var(--ease-standard);
+}
+
+.cardAttn {
+  border-color: color-mix(in srgb, var(--attn) 40%, var(--card-line));
 }
 
 .head {
   display: flex;
-  align-items: flex-start;
-  gap: var(--space-2);
+  align-items: center;
+  gap: 10px;
   min-width: 0;
+}
+
+.repoBadge {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  background: var(--surface-2);
+  color: var(--ink-2);
 }
 
 .identity {
   display: flex;
   flex: 1;
   flex-direction: column;
-  gap: var(--space-1);
+  gap: 2px;
   min-width: 0;
 }
 
@@ -40,14 +61,14 @@
   min-width: 0;
 }
 
-/* Truncates the name itself so the code-name chip beside it stays visible. */
 .name {
   min-width: 0;
   overflow: hidden;
   color: var(--ink);
-  font-size: var(--fs-h2);
+  font-size: var(--fs-h3);
   font-weight: var(--title-weight);
   font-stretch: var(--display-stretch);
+  letter-spacing: -0.01em;
   line-height: 1.25;
   text-decoration: none;
   text-overflow: ellipsis;
@@ -55,17 +76,17 @@
 }
 
 .name:hover {
+  color: var(--accent-ink);
   text-decoration: underline;
   text-underline-offset: 3px;
 }
 
 .name:focus-visible {
-  border-radius: var(--r-chip);
+  border-radius: var(--r-sm);
   outline: 2px solid var(--focus);
   outline-offset: 2px;
 }
 
-/* Its own row under the title line, which would clip it. */
 .codeNameError {
   display: block;
   color: var(--err-ink);
@@ -73,50 +94,106 @@
   line-height: 1.25;
 }
 
+.headActions {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 2px;
+  margin-right: -4px;
+}
+
+.iconAction {
+  flex: none;
+  color: var(--ink-3);
+}
+
+.iconAction:hover {
+  background: var(--surface-2);
+  color: var(--ink);
+}
+
+.captionSlot {
+  min-width: 0;
+  min-height: 20px;
+}
+
+.pathPill {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  padding: 5px 9px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  background: var(--surface-2);
+}
+
 .path {
   min-width: 0;
+  width: 100%;
   overflow: hidden;
-  color: var(--ink-3);
+  color: var(--ink-2);
   font-family: var(--font-mono);
   font-size: var(--fs-meta);
-  line-height: 1.4;
+  line-height: 1.35;
   text-overflow: ellipsis;
   white-space: nowrap;
-  /* Truncate the head, keeping the project's own directory visible. The
-     `bdi` around the path keeps it reading left to right inside this box. */
+  /* Truncate the head, keeping the project's own directory visible. */
   direction: rtl;
   text-align: left;
 }
 
-.more {
-  flex: none;
-  margin: -4px -6px 0 0;
+.footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  margin-top: auto;
+  padding-top: 10px;
+  border-top: 1px solid var(--line);
 }
 
 .stats {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: var(--space-1) 14px;
-  color: var(--ink-2);
-  font-size: var(--fs-small);
+  gap: 6px;
+  min-width: 0;
+  font-size: var(--fs-meta);
 }
 
-.stat {
+.statPill {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
+  height: 22px;
+  padding: 0 7px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  background: var(--surface-2);
+  color: var(--ink-2);
+  font-weight: 500;
   white-space: nowrap;
 }
 
-.attn {
+.statAttn {
+  border-color: color-mix(in srgb, var(--attn) 32%, var(--line));
+  background: var(--attn-soft);
   color: var(--attn-ink);
   font-weight: 600;
 }
 
-.meta {
-  color: var(--ink-3);
-  white-space: nowrap;
+.statRun {
+  border-color: color-mix(in srgb, var(--run) 32%, var(--line));
+  background: var(--run-soft);
+  color: var(--ink);
+  font-weight: 500;
+}
+
+.statQueued {
+  border-color: var(--line);
+  background: var(--surface-2);
+  color: var(--ink-2);
 }
 
 .queueWarning {
@@ -133,29 +210,50 @@
   font-weight: 700;
 }
 
-.actions {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  margin-top: auto;
+.sessionCount {
+  color: var(--ink-3);
+  font-size: var(--fs-meta);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
 
-/* The design's ghost `btn-sm`, drawn on a router link. */
+.footerRight {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-inline-start: auto;
+}
+
+.timestamp {
+  color: var(--ink-3);
+  font-family: var(--font-mono);
+  font-size: var(--fs-meta);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
 .open {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: var(--btn-h-sm);
-  padding: 0 12px;
-  border-radius: var(--r-btn);
+  height: 24px;
+  padding: 0 8px;
+  border: 1px solid transparent;
+  border-radius: var(--r-sm);
   color: var(--ink-2);
-  font-size: var(--fs-small);
+  font-size: var(--fs-meta);
   font-weight: 600;
   text-decoration: none;
+  white-space: nowrap;
+  transition:
+    border-color var(--duration-fast) var(--ease-standard),
+    background-color var(--duration-fast) var(--ease-standard),
+    color var(--duration-fast) var(--ease-standard);
 }
 
 .open:hover {
-  background: var(--surface-3);
+  border-color: var(--line);
+  background: var(--surface-2);
   color: var(--ink);
 }
 
@@ -164,9 +262,16 @@
   outline-offset: 2px;
 }
 
-/* Inline editors keep their edit affordance out of the way until the card is
-   hovered or focused; touch screens always show it. */
 @media (hover: hover) and (pointer: fine) {
+  .card:hover {
+    border-color: var(--line-strong);
+    transform: translateY(-1px);
+  }
+
+  .cardAttn:hover {
+    border-color: var(--attn);
+  }
+
   .card [data-row-affordance] {
     opacity: 0;
     transition: opacity var(--duration-fast) var(--ease-standard);
@@ -181,22 +286,22 @@
 @media (pointer: coarse) {
   .open {
     min-height: var(--tap-min);
+    padding: 0 10px;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .card,
+  .open,
   .card [data-row-affordance] {
     transition: none;
+    transform: none;
   }
 }
 
 @media (width < 768px) {
   .card {
-    gap: 10px;
+    gap: 8px;
     padding: 14px;
-  }
-
-  .name {
-    font-size: var(--fs-h3);
   }
 }

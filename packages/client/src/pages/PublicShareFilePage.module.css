@@ -1,0 +1,101 @@
+/* Studio Workbench public share file viewer shell. */
+.page:global(.file-page) {
+  display: flex;
+  min-height: 100dvh;
+  flex-direction: column;
+  background: var(--canvas);
+  color: var(--ink);
+}
+
+.nav:global(.file-page-nav) {
+  position: sticky;
+  top: 0;
+  z-index: var(--z-topbar);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  min-height: var(--topbar-height);
+  padding: var(--space-2) var(--page-gutter);
+  border-bottom: 1px solid var(--phead-line);
+  background: var(--phead-bg);
+  backdrop-filter: saturate(180%) blur(12px);
+}
+
+.backLink:global(.file-page-back-link) {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: var(--btn-h);
+  padding-inline: var(--space-3);
+  border: 1px solid var(--line);
+  border-radius: var(--r-btn);
+  background: var(--surface);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.03);
+  color: var(--ink);
+  font-size: var(--fs-small);
+  font-weight: 500;
+  text-decoration: none;
+  white-space: nowrap;
+  transition:
+    background-color 140ms ease,
+    border-color 140ms ease;
+}
+
+.backLink:global(.file-page-back-link):hover,
+.backLink:global(.file-page-back-link):focus-visible {
+  border-color: var(--line-strong);
+  background: var(--surface-3);
+  text-decoration: none;
+}
+
+@media (pointer: coarse) {
+  .backLink:global(.file-page-back-link) {
+    min-height: var(--tap-min);
+  }
+}
+
+.pathChip {
+  min-width: 0;
+  max-width: 60%;
+  overflow: hidden;
+  padding: 2px 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-chip);
+  background: var(--surface-2);
+  color: var(--ink-2);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.content:global(.file-page-content) {
+  flex: 1 1 auto;
+  width: 100%;
+  max-width: 1120px;
+  margin-inline: auto;
+  padding: var(--space-4) var(--page-gutter) var(--space-8);
+}
+
+.errorBox:global(.file-viewer-error) {
+  max-width: 36rem;
+  margin: var(--space-6) auto;
+  padding: var(--space-4) var(--space-5);
+  border: 1px solid var(--err-line);
+  border-radius: var(--r-card);
+  background: var(--err-soft);
+  color: var(--err-ink);
+  font-size: var(--fs-small);
+  line-height: 1.5;
+}
+
+@media (width <= 600px) {
+  .pathChip {
+    display: none;
+  }
+
+  .content:global(.file-page-content) {
+    padding: var(--space-3) var(--space-3) var(--space-6);
+  }
+}

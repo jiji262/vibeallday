@@ -1,15 +1,16 @@
-/* Design diff options row under the file header. */
+/* Studio diff layout sub-toolbar directly beneath the file viewer header. */
 .bar {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 10px;
-  padding: 6px 14px;
+  gap: 8px;
+  padding: 5px 12px;
   border-bottom: 1px solid var(--line);
   background: var(--surface-2);
 }
 
-/* The board's compact track: 26px options inside the toolbar row. */
 .layout {
-  --seg-h: 26px;
+  --seg-h: 24px;
+  font-family: var(--font-ui);
+  font-size: 11.5px;
 }

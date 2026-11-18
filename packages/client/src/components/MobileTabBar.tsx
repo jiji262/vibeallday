@@ -51,15 +51,7 @@ const TABS: readonly TabSpec[] = [
     key: "more",
     to: "/more",
     labelKey: "tabMore",
-    prefixes: [
-      "/more",
-      "/settings",
-      "/agents",
-      "/issues",
-      "/bang-commands",
-      "/devices",
-      "/git-status",
-    ],
+    prefixes: ["/more", "/settings", "/agents", "/issues", "/git-status"],
     icon: <MoreHorizontalIcon size={TAB_ICON_SIZE} />,
   },
 ];

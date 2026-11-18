@@ -1,66 +1,97 @@
-/* A muted composer holds a draft the launch will not send — a fork copies the
-   provider transcript instead. It stays readable so it can still inform the
-   choice, but reads as inert and gives its height back to the options below. */
+/* Studio Workbench AI Session Launchpad Composer (`NewSessionForm`) */
+
+.compactShell,
+.projectInlineField,
+.compactProviderSection,
+.permissionSlot,
+.secondaryOptions > * {
+  min-width: 0;
+}
+.composerCard.composerCard {
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-card);
+  background: var(--surface);
+  box-shadow: var(--shadow-composer);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .composerCard.composerCard {
+    transition:
+      border-color var(--duration-fast) var(--ease-standard),
+      box-shadow var(--duration-fast) var(--ease-standard);
+  }
+}
+.composerCard.composerCard:focus-within {
+  border-color: var(--accent-line);
+  box-shadow:
+    0 0 0 3px var(--accent-soft),
+    var(--shadow-composer);
+}
 .mutedComposer textarea {
   opacity: 0.55;
   cursor: default;
 }
-
 .mutedComposer textarea:focus {
   outline: none;
 }
-
-.fullPaneToggle[aria-pressed="true"] {
-  color: var(--app-accent);
-  border-color: color-mix(in srgb, var(--app-accent) 62%, var(--border-input));
-  background: color-mix(in srgb, var(--app-accent) 10%, transparent);
-}
-
-.projectControlsSlot,
-.secondaryOptions {
-  display: grid;
-  align-content: start;
-  gap: var(--space-2);
-  min-width: 0;
-}
-
-/*
- * The sheet holds one column of options with sentence-case labels, as neutral
- * 44px pickers. The dropdown tints a trigger that has a selection with
- * indigo; inside this sheet every picker has one, so the tint would only be
- * noise. Scoping the tokens reaches the pickers of components this form does
- * not own (router pool, machine control) as well.
- */
-.secondaryOptions {
-  --indigo: var(--line-strong);
-  --indigo-soft: var(--bg-card);
-  --indigo-ink: var(--text-primary);
-  gap: var(--space-4);
-  grid-template-columns: minmax(0, 1fr);
-}
-
-.secondaryOptions.secondaryOptions :is(h3) {
-  margin: 0 0 var(--space-1);
-  color: var(--ink-3);
+.composerTextarea.composerTextarea {
+  background: transparent;
+  color: var(--ink);
   font-family: var(--font-ui);
-  font-size: 13px;
+  font-size: var(--fs-body);
+  line-height: 1.55;
+}
+.composerToolbar.composerToolbar {
+  border-top: 1px solid var(--line);
+  border-radius: 0 0 calc(var(--r-card) - 1px) calc(var(--r-card) - 1px);
+  background: color-mix(in srgb, var(--surface-2) 55%, var(--surface));
+}
+.composerToolButton.composerToolButton {
+  border-radius: var(--r-sm);
+  color: var(--ink-2);
+}
+.composerToolButton.composerToolButton:hover:not(:disabled) {
+  background: var(--surface-3);
+  color: var(--ink);
+}
+.fullPaneToggle.fullPaneToggle[aria-pressed="true"] {
+  border-color: var(--accent-line);
+  background: var(--accent-soft);
+  color: var(--accent-ink);
+}
+.startActionButton.startActionButton {
+  border-color: var(--accent);
+  border-radius: var(--r-btn);
+  background: var(--accent);
+  color: #ffffff;
   font-weight: 600;
-  letter-spacing: 0;
-  text-transform: none;
 }
-
-.secondaryOptions > * {
-  min-width: 0;
+.startActionButton.startActionButton:hover:not(:disabled) {
+  filter: brightness(1.06);
 }
-
-/* Prompt-first heading (design t-display over a t-2 lead). */
+.startActionButton.startActionButton:disabled {
+  border-color: var(--line);
+  background: var(--surface-3);
+  color: var(--ink-3);
+  filter: none;
+}
+.pendingFilesList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+  padding: 0 12px 10px;
+}
 .header.header {
   display: flex;
   flex-direction: column;
-  gap: var(--space-2);
-  margin: 0 0 28px;
+  gap: 6px;
+  margin: 0 0 22px;
 }
-
+@media (width < 768px) {
+  .header.header {
+    display: none;
+  }
+}
 .heading {
   margin: 0;
   color: var(--ink);
@@ -69,279 +100,42 @@
   font-weight: var(--title-weight);
   font-stretch: var(--display-stretch);
   letter-spacing: var(--display-tracking);
-  line-height: 1.1;
+  line-height: 1.12;
 }
-
-.header :global(.new-session-subtitle) {
+.subtitle.subtitle {
   max-width: none;
+  margin: 0;
   color: var(--ink-2);
   font-size: var(--fs-body);
   line-height: 1.5;
 }
 
-/* Phones open straight on the prompt; the page header names it. */
-@media (width < 768px) {
-  .header.header {
-    display: none;
-  }
-}
-
-.advancedSection {
-  grid-area: advanced;
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: var(--space-2);
-}
-
-.hintSlot {
-  grid-area: hints;
-}
-
-.recentSlot {
-  grid-area: recent;
-}
-
-.sheetCount {
-  margin-inline-start: var(--space-2);
-  vertical-align: middle;
-}
-
-.advancedToggle {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  min-height: var(--new-session-chip-h, var(--chip-h));
-  padding: 0 12px;
-  border: 1px solid var(--line-strong);
-  border-radius: var(--r-chip);
-  background: var(--surface);
-  color: var(--ink-2);
-  font: inherit;
-  font-size: var(--fs-small);
-  font-weight: 500;
-  line-height: 1.2;
-  white-space: nowrap;
-  cursor: pointer;
-}
-
-.advancedToggle:hover,
-.advancedToggle[aria-expanded="true"] {
-  background: var(--surface-3);
-  color: var(--ink);
-}
-
-.advancedToggle:focus-visible,
-.captionToggle:focus-visible {
-  outline: 2px solid var(--focus);
-  outline-offset: 2px;
-}
-
-.advancedIcon {
-  flex: none;
-  width: 14px;
-  height: 14px;
-}
-
-.advancedCount {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 18px;
-  height: 18px;
-  padding: 0 5px;
-  border-radius: var(--r-chip);
-  background: var(--accent-soft);
-  color: var(--accent-ink);
-  font-family: var(--font-mono);
-  font-size: 11px;
-  font-weight: 600;
-  line-height: 1;
-}
-
-.selectedChoice {
-  display: flex;
-  align-items: center;
-  gap: 0.55rem;
+.secondaryOptions {
+  --indigo: var(--line-strong);
+  --indigo-soft: var(--surface-2);
+  --indigo-ink: var(--ink);
+  display: grid;
+  align-content: start;
+  gap: var(--space-4);
+  grid-template-columns: minmax(0, 1fr);
   min-width: 0;
-  text-align: left;
 }
-
-.leftAlignedTrigger {
-  text-align: left;
-}
-
-.selectedChoice :global(.mode-option-dot),
-.selectedChoice :global(.model-switch-indicator-dot) {
-  width: 10px;
-  height: 10px;
-}
-
-.selectedChoiceText {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.selectedChoiceText > span {
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.choiceStatus {
-  color: var(--warning-color);
-  font-size: var(--font-size-xs);
-  line-height: 1.2;
-}
-
-.effortSection {
-  grid-column: auto;
-}
-
-.optionPlaceholder {
-  visibility: hidden;
-}
-
-/*
- * Provider, model and thinking read as context chips: one pill each, the
- * heading kept for screen readers. The triple class beats the dropdown's own
- * "has selection" tint, which would paint every chip indigo.
- */
-.chipTrigger.chipTrigger.chipTrigger {
-  min-height: var(--new-session-chip-h, var(--chip-h));
-  padding: 0 12px;
-  border: 1px solid var(--line-strong);
-  border-radius: var(--r-chip);
-  background: var(--surface);
-  color: var(--ink);
-  font-size: var(--fs-small);
-  font-weight: 600;
-  line-height: 1.2;
-  box-shadow: none;
-}
-
-.chipTrigger.chipTrigger.chipTrigger:hover,
-.chipTrigger.chipTrigger.chipTrigger[aria-expanded="true"] {
-  background: var(--surface-3);
-}
-
-.chipLabel {
-  flex-shrink: 0;
+.secondaryOptions.secondaryOptions :is(h3) {
+  margin: 0 0 var(--space-1);
   color: var(--ink-3);
-  font-weight: 500;
+  font-family: var(--font-ui);
+  font-size: var(--fs-small);
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+}
+.secondaryOptions button[aria-haspopup="listbox"] {
+  min-height: var(--tap-min);
+  border-radius: var(--r-md);
+  background: var(--surface);
+  font-size: var(--fs-body);
 }
 
-.visuallyHidden {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  margin: -1px;
-  padding: 0;
-  overflow: hidden;
-  border: 0;
-  clip-path: inset(50%);
-  white-space: nowrap;
-}
-
-/*
- * The chip row (design: project, provider and model, thinking, permission,
- * Advanced). Each chip starts on a fixed track and sizes to its value, so a
- * value that arrives late (a model name, a saved mode) never moves the chips
- * after it.
- */
-.optionLayout :global(.new-session-provider-slot) {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--space-2);
-}
-
-.optionLayout :global(.new-session-provider-slot) > * {
-  justify-self: start;
-  max-width: 100%;
-}
-
-.optionLayout :global(.new-session-provider-slot) .compactProviderSection {
-  grid-column: auto;
-}
-
-/* Permission mode: a chip whose menu lists the modes by risk. The global
-   rule spans the mode section across the slot; this one is a chip. */
-.optionLayout :global(.new-session-provider-slot) > .permissionSlot {
-  grid-column: auto;
-  display: grid;
-  min-width: 0;
-  margin: 0;
-}
-
-.templateProjectSlot {
-  grid-area: template;
-  min-width: 0;
-  padding: var(--space-4);
-  border: 1px solid var(--line);
-  border-radius: var(--radius-md);
-  background: var(--bg-2);
-}
-.templateProjectSlot[hidden] {
-  display: none;
-}
-
-.newProject {
-  grid-area: newproject;
-  display: grid;
-  gap: 10px;
-  min-width: 0;
-  padding: var(--space-4);
-  border: 1px solid var(--line);
-  border-radius: var(--radius-md);
-  background: var(--bg-2);
-}
-/* The row spans the page; a path field that wide would be hard to scan. */
-.newProjectField,
-.newProjectTarget {
-  max-width: 36rem;
-}
-.newProjectField {
-  display: grid;
-  gap: 4px;
-  font-size: var(--font-size-sm);
-  color: var(--text-muted);
-}
-.newProjectField input {
-  min-width: 0;
-  min-height: 40px;
-  padding: 8px 10px;
-  color: var(--text-primary);
-  background: var(--bg-input);
-  border: 1px solid var(--border-input);
-  border-radius: var(--radius-md);
-  font: inherit;
-  font-family: var(--font-mono);
-}
-.newProjectTarget {
-  margin: 0;
-  font-size: var(--font-size-sm);
-  color: var(--text-muted);
-  overflow-wrap: anywhere;
-}
-.newProjectGit {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  min-height: 32px;
-  color: var(--text-secondary);
-  cursor: pointer;
-}
-.newProjectPlan {
-  margin: 0;
-  padding-left: 8px;
-  border-left: 2px solid var(--border-color);
-  font-size: var(--font-size-sm);
-  color: var(--text-muted);
-  overflow-wrap: anywhere;
-}
-
-/* One prompt-first column at every width: composer, then the chip rows. */
 .optionLayout.optionLayout {
   --new-session-chip-h: var(--chip-h);
   row-gap: 0;
@@ -356,109 +150,423 @@
     "hints"
     "recent";
 }
-
-@media (width >= 600px) {
-  .optionLayout :global(.new-session-provider-slot) {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
-}
-
-/* Touch screens keep 44px chips. */
 @media (width < 768px), (pointer: coarse) {
   .optionLayout.optionLayout {
     --new-session-chip-h: var(--tap-min);
   }
 }
+.optionLayout > :not(:global(.new-session-main-stack)) {
+  margin-top: var(--space-2);
+}
 
-.captionToggle {
-  display: inline-grid;
-  place-items: center;
-  width: var(--tap-min);
-  height: var(--tap-min);
-  padding: 0;
-  margin-inline-start: auto;
+.projectControlsSlot {
+  display: grid;
+  align-content: start;
+  gap: var(--space-2);
+  min-width: 0;
+}
+.optionLayout > .projectControlsSlot {
+  margin-top: var(--space-3);
+}
+
+.projectSearchAnchor {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 8px 10px;
   border: 1px solid var(--line);
-  border-radius: 50%;
-  background: transparent;
-  color: var(--ink-3);
+  border-radius: var(--r-card);
+  background: var(--surface);
+  box-shadow: var(--shadow-card);
+}
+.projectSearchAnchor > :global(.new-session-project-controls) {
+  flex: 1 1 9rem;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-2);
+  min-width: 0;
+}
+@media (width > 600px) {
+  .projectSearchAnchor > :global(.new-session-project-controls) {
+    grid-template-columns: minmax(0, 15rem) minmax(0, 1fr);
+  }
+}
+.projectSearchAnchor > :global(.new-session-project-empty),
+:global(.new-session-project-chooser.expanded)
+  .projectSearchAnchor
+  > :global(.new-session-project-controls) {
+  flex-basis: 100%;
+}
+
+.projectSummaryButton.projectSummaryButton {
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  background: var(--surface-2);
+  color: var(--ink);
+}
+.projectSummaryButton.projectSummaryButton:hover,
+.projectSummaryButton.projectSummaryButton[aria-expanded="true"] {
+  border-color: var(--line-strong);
+  background: var(--surface-3);
+}
+.projectPathInput.projectPathInput {
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  background: var(--surface-2);
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-size: var(--fs-small);
+}
+.projectPathInput.projectPathInput:focus {
+  border-color: var(--accent-line);
+  background: var(--surface);
+  box-shadow: 0 0 0 2px var(--accent-soft);
+  outline: none;
+}
+.newProjectButton.newProjectButton {
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-btn);
+  background: var(--surface-2);
+  color: var(--ink-2);
+  font-size: var(--fs-small);
+  font-weight: 500;
+}
+.newProjectButton.newProjectButton:hover:not(:disabled),
+.newProjectButton.newProjectButton[aria-expanded="true"] {
+  border-color: var(--accent-line);
+  background: var(--accent-soft);
+  color: var(--accent-ink);
+}
+.projectDropdownPanel.projectDropdownPanel {
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-card);
+  background: var(--surface);
+  box-shadow: var(--shadow-composer);
+}
+
+.newProject,
+.templateProjectSlot {
+  min-width: 0;
+  padding: var(--space-4);
+  border: 1px solid var(--card-line);
+  border-radius: var(--r-card);
+  background: var(--surface);
+  box-shadow: var(--shadow-card);
+}
+.newProject {
+  grid-area: newproject;
+  display: grid;
+  gap: 10px;
+}
+.templateProjectSlot {
+  grid-area: template;
+}
+.templateProjectSlot[hidden] {
+  display: none;
+}
+
+.newProjectField,
+.newProjectTarget {
+  max-width: 36rem;
+}
+.newProjectField {
+  display: grid;
+  gap: 4px;
+  color: var(--ink-2);
+  font-size: var(--fs-small);
+}
+.newProjectField input {
+  min-width: 0;
+  min-height: 38px;
+  padding: 8px 10px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-sm);
+  background: var(--surface-2);
+  color: var(--ink);
   font: inherit;
-  font-size: 14px;
-  font-weight: 700;
+  font-family: var(--font-mono);
+}
+.newProjectField input:focus {
+  border-color: var(--accent-line);
+  background: var(--surface);
+  box-shadow: 0 0 0 2px var(--accent-soft);
+  outline: none;
+}
+.newProjectTarget {
+  margin: 0;
+  color: var(--ink-3);
+  font-size: var(--fs-small);
+  overflow-wrap: anywhere;
+}
+.newProjectGit {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 32px;
+  color: var(--ink-2);
+  font-size: var(--fs-small);
   cursor: pointer;
 }
-
-.captionToggle:hover,
-.captionToggle[aria-pressed="true"] {
-  border-color: var(--indigo);
-  color: var(--indigo-ink);
-  background: var(--indigo-soft);
-}
-
-.optionCaption {
-  margin: var(--space-2) 0 0;
+.newProjectPlan {
+  margin: 0;
+  padding-left: 10px;
+  border-left: 2px solid var(--line-strong);
   color: var(--ink-3);
-  font-size: 13px;
-  line-height: 1.35;
+  font-size: var(--fs-small);
   overflow-wrap: anywhere;
 }
 
-/* A risk the selected option carries; shown whether or not captions are. */
-.optionWarning {
-  composes: optionCaption;
-  color: var(--peach-ink);
+.chipToolbarRow.chipToolbarRow {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-2);
+}
+@media (width >= 600px) {
+  .chipToolbarRow.chipToolbarRow {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+.chipToolbarRow.chipToolbarRow > * {
+  justify-self: start;
+  max-width: 100%;
+}
+.chipToolbarRow.chipToolbarRow .compactProviderSection,
+.effortSection {
+  grid-column: auto;
+}
+.chipToolbarRow.chipToolbarRow > .permissionSlot {
+  grid-column: auto;
+  display: grid;
+  min-width: 0;
+  margin: 0;
 }
 
+.optionPlaceholder {
+  visibility: hidden;
+}
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  border: 0;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.optionCaption {
+  margin: var(--space-2) 0 0;
+  color: var(--ink-3);
+  font-size: var(--fs-meta);
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+.optionWarning {
+  composes: optionCaption;
+  color: var(--attn-ink);
+}
+
+.chipTrigger.chipTrigger.chipTrigger {
+  min-height: var(--new-session-chip-h, var(--chip-h));
+  padding: 0 11px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-sm);
+  background: var(--surface);
+  color: var(--ink);
+  font-size: var(--fs-small);
+  font-weight: 500;
+  line-height: 1.2;
+  box-shadow: var(--shadow-card);
+}
+.chipTrigger.chipTrigger.chipTrigger:hover,
+.chipTrigger.chipTrigger.chipTrigger[aria-expanded="true"] {
+  border-color: var(--accent-line);
+  background: var(--surface-2);
+}
+.chipLabel {
+  flex-shrink: 0;
+  color: var(--ink-3);
+  font-weight: 500;
+}
+
+.selectedChoice {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+  text-align: left;
+}
+.selectedChoice :global(.mode-option-dot),
+.selectedChoice :global(.model-switch-indicator-dot) {
+  width: 9px;
+  height: 9px;
+}
+.selectedChoiceText {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.selectedChoiceText > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.choiceStatus {
+  color: var(--attn-ink);
+  font-size: var(--fs-meta);
+  line-height: 1.2;
+}
+.leftAlignedTrigger {
+  text-align: left;
+}
 .captionedRecapDuration {
   grid-template-columns: minmax(0, 1fr);
 }
-
 .captionedRecapDuration :global(.recap-after-seconds-label) {
   white-space: normal;
 }
 
-/* The page or modal header remains visible. Everything below it yields to the
-   editing surface until this mode is restored. */
+.advancedSection {
+  grid-area: advanced;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+.advancedToggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: var(--new-session-chip-h, var(--chip-h));
+  padding: 0 11px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  background: var(--surface);
+  color: var(--ink-2);
+  font: inherit;
+  font-size: var(--fs-small);
+  font-weight: 500;
+  line-height: 1.2;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.advancedToggle:hover,
+.advancedToggle[aria-expanded="true"] {
+  border-color: var(--line-strong);
+  background: var(--surface-2);
+  color: var(--ink);
+}
+.advancedIcon {
+  flex: none;
+  width: 14px;
+  height: 14px;
+}
+.advancedCount {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: var(--r-sm);
+  background: var(--accent-soft);
+  color: var(--accent-ink);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.captionToggle {
+  display: inline-grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  margin-inline-start: auto;
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  background: var(--surface);
+  color: var(--ink-3);
+  font: inherit;
+  font-size: var(--fs-small);
+  font-weight: 600;
+  cursor: pointer;
+}
+@media (pointer: coarse) {
+  .captionToggle {
+    width: var(--tap-min);
+    height: var(--tap-min);
+  }
+}
+.captionToggle:hover,
+.captionToggle[aria-pressed="true"] {
+  border-color: var(--accent-line);
+  background: var(--accent-soft);
+  color: var(--accent-ink);
+}
+.advancedToggle:focus-visible,
+.captionToggle:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.hintSlot {
+  grid-area: hints;
+}
+.recentSlot {
+  grid-area: recent;
+}
+.sheetCount {
+  margin-inline-start: var(--space-2);
+  vertical-align: middle;
+}
+
 :global(.page-scroll-container):has(.fullPane) {
   display: flex;
   flex-direction: column;
   overflow: hidden;
 }
-
-:global(.page-content-inner):has(.fullPane) {
-  display: flex;
-  flex: 1 1 auto;
-  flex-direction: column;
-  align-items: center;
-  min-height: 0;
-  width: 100%;
-}
-
-:global(.modal):has(.fullPane) > :global(.modal-content) {
-  overflow: hidden;
-}
-
-:global(.modal):has(.fullPane) {
-  height: calc(100dvh - 1.5rem);
-  max-height: calc(100dvh - 1.5rem);
-}
-
-:global(.model-switch-content):has(.fullPane) {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  min-height: 0;
-}
-
-:global(.model-switch-content):has(.fullPane) > :not(:has(.fullPane)) {
-  display: none;
-}
-
+:global(.page-content-inner):has(.fullPane),
 :global(.model-switch-content):has(.fullPane) > :has(.fullPane) {
   display: flex;
   flex: 1 1 auto;
   flex-direction: column;
   align-items: center;
   min-height: 0;
+}
+:global(.page-content-inner):has(.fullPane) {
+  width: 100%;
+}
+:global(.modal):has(.fullPane) > :global(.modal-content) {
+  overflow: hidden;
+}
+:global(.modal):has(.fullPane) {
+  height: calc(100dvh - 1.5rem);
+  max-height: calc(100dvh - 1.5rem);
+}
+@media (width <= 600px) {
+  :global(.modal):has(.fullPane) {
+    height: 100dvh;
+    max-height: 100dvh;
+  }
+}
+:global(.model-switch-content):has(.fullPane) {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+:global(.model-switch-content):has(.fullPane) > :not(:has(.fullPane)),
+.fullPane > :global(.new-session-header),
+.fullPane :global(.new-session-project-slot),
+.fullPane .newProject,
+.fullPane :global(.new-session-provider-slot),
+.fullPane .advancedSection,
+.fullPane .secondaryOptions {
+  display: none;
 }
 
 .fullPane {
@@ -471,107 +579,24 @@
   margin-bottom: 0;
   overflow: hidden;
 }
-
-.fullPane > :global(.new-session-header),
-.fullPane :global(.new-session-project-slot),
-.fullPane .newProject,
-.fullPane :global(.new-session-provider-slot),
-.fullPane .advancedSection,
-.fullPane .secondaryOptions {
-  display: none;
-}
-
 .fullPane :global(.new-session-top-layout),
 .fullPane :global(.new-session-main-stack) {
   display: block;
   min-height: 0;
   width: 100%;
 }
-
 .fullPane :global(.new-session-input-area) {
   min-height: 0;
 }
-
 .fullPane :global(.speech-draft-field textarea) {
   max-height: 100%;
 }
-
-.fullPaneWide {
-  width: 100%;
-  max-width: none;
-}
-
-:global(.main-content-constrained)
-  :global(.page-content-inner.new-session-page-shell):has(.fullPaneWide) {
-  max-width: none;
-}
-
+.fullPaneWide,
 :global(.model-switch-content):has(.fullPaneWide) {
   width: 100%;
   max-width: none;
 }
-
-@media (width <= 600px) {
-  :global(.modal):has(.fullPane) {
-    height: 100dvh;
-    max-height: 100dvh;
-  }
-}
-
-.pendingFilesList {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
-  margin-top: var(--space-3);
-}
-
-/* The project row: the project chip (and its search field on wider
-   screens), New project beside it. */
-.projectSearchAnchor {
-  position: relative;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--space-2);
-}
-
-.projectSearchAnchor > :global(.new-session-project-controls) {
-  flex: 1 1 9rem;
-  grid-template-columns: minmax(0, 1fr);
-  min-width: 0;
-}
-
-.projectSearchAnchor > :global(.new-session-project-empty) {
-  flex-basis: 100%;
-}
-
-/* An open chooser needs the whole row for its search field. */
-:global(.new-session-project-chooser.expanded)
-  .projectSearchAnchor
-  > :global(.new-session-project-controls) {
-  flex-basis: 100%;
-}
-
-@media (width > 600px) {
-  .projectSearchAnchor > :global(.new-session-project-controls) {
-    grid-template-columns: minmax(0, 15rem) minmax(0, 1fr);
-  }
-}
-
-/* Rows are spaced by margins: the empty New project and template rows of the
-   grid would otherwise each add a gap of their own. The chip rows sit close
-   under the composer. */
-.optionLayout > :not(:global(.new-session-main-stack)) {
-  margin-top: var(--space-2);
-}
-
-.optionLayout > .projectControlsSlot {
-  margin-top: var(--space-3);
-}
-
-.secondaryOptions button[aria-haspopup="listbox"] {
-  min-height: var(--tap-min);
-  border-radius: var(--radius-md);
-  background: var(--bg-card);
-  font-size: 15px;
+:global(.main-content-constrained)
+  :global(.page-content-inner.new-session-page-shell):has(.fullPaneWide) {
+  max-width: none;
 }

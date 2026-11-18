@@ -1335,6 +1335,9 @@ export class OpenCodeSessionReader implements ISessionReader {
     if (tokens.cache?.read !== undefined && tokens.cache.read > 0) {
       result.cacheReadTokens = tokens.cache.read;
     }
+    if (tokens.cache?.write !== undefined && tokens.cache.write > 0) {
+      result.cacheCreationTokens = tokens.cache.write;
+    }
     return result;
   }
 

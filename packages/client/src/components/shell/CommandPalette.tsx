@@ -40,7 +40,6 @@ const GROUP_LABEL: Record<PaletteGroup, MessageKey | null> = {
   jump: "paletteGroupJump",
   projects: "paletteGroupProjects",
   recent: "paletteGroupRecent",
-  settings: "paletteGroupSettings",
   actions: "paletteGroupActions",
 };
 

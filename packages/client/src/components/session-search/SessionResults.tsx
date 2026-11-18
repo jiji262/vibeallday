@@ -86,7 +86,7 @@ export function SessionResults({
     .join(" ");
   if (total === 0 && !band) return null;
   return (
-    <Card className={styles.card}>
+    <Card flush className={styles.card}>
       {band}
       <ul ref={listRef} className={listClass} style={listStyle}>
         {children}

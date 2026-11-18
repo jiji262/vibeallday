@@ -6,16 +6,14 @@ import {
 } from "@vibeallday/shared";
 import { useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
+import { Tag } from "../components/garden/Badge";
 import { Button } from "../components/garden/Button";
 import { Count } from "../components/garden/Count";
 import { EmptyState } from "../components/garden/EmptyState";
-import { PlusIcon } from "../components/garden/icons";
+import { FolderIcon, PlusIcon } from "../components/garden/icons";
 import { LoadingState } from "../components/garden/LoadingState";
-import { Tag } from "../components/garden/Badge";
-import { TabList, tabClassName } from "../components/garden/Tabs";
 import { PageHeader } from "../components/PageHeader";
 import { ProjectSessionDefaultsModal } from "../components/ProjectSessionDefaultsModal";
-import { PageIntro } from "../components/shell/PageIntro";
 import { pageWidthClass } from "../components/shell/pageWidth";
 import { useDocumentTitle } from "../hooks/useDocumentTitle";
 import { useProjectCodeNamePreferences } from "../hooks/useProjectCodeNamePreferences";
@@ -29,6 +27,8 @@ import type { Project } from "../types";
 import { ProjectBranchChip } from "./ProjectBranchChip";
 import styles from "./ProjectHomePage.module.css";
 import { ProjectHomeSessions } from "./ProjectHomeSessions";
+
+const HERO_REPO_ICON_SIZE = 16;
 
 interface ProjectHrefs {
   sessions: string;
@@ -75,7 +75,7 @@ interface TabsProps {
   onOpenSettings?: () => void;
 }
 
-/** 会话 / 源码 / 文件 / 应用 / 设置: the other views live on existing routes. */
+/** Workspace navigation tabs: Sessions / Source / Files / App / Settings. */
 function ProjectHomeTabs({
   project,
   hrefs,
@@ -84,32 +84,35 @@ function ProjectHomeTabs({
 }: TabsProps) {
   const { t } = useI18n();
   return (
-    <TabList role="navigation" aria-label={t("projectHomeTabsLabel")}>
-      <span className={tabClassName(true)} aria-current="page">
-        {t("tabSessions")}
+    <nav className={styles.tabBar} aria-label={t("projectHomeTabsLabel")}>
+      <span
+        className={`${styles.tabItem} ${styles.tabItemActive}`}
+        aria-current="page"
+      >
+        <span>{t("tabSessions")}</span>
         <Count>{project.sessionCount}</Count>
       </span>
-      <Link to={hrefs.source} className={tabClassName(false)}>
+      <Link to={hrefs.source} className={styles.tabItem}>
         {t("projectHomeTabSource")}
       </Link>
-      <Link to={hrefs.files} className={tabClassName(false)}>
+      <Link to={hrefs.files} className={styles.tabItem}>
         {t("projectHomeTabFiles")}
       </Link>
       {appEnabled && (
-        <Link to={hrefs.app} className={tabClassName(false)}>
+        <Link to={hrefs.app} className={styles.tabItem}>
           {t("projectHomeTabApp")}
         </Link>
       )}
       {onOpenSettings && (
         <button
           type="button"
-          className={tabClassName(false)}
+          className={styles.tabItem}
           onClick={onOpenSettings}
         >
           {t("projectHomeTabSettings")}
         </button>
       )}
-    </TabList>
+    </nav>
   );
 }
 
@@ -142,7 +145,7 @@ function ProjectHomeActions({
   const { t } = useI18n();
   const navigate = useNavigate();
   return (
-    <>
+    <div className={styles.heroActions}>
       {appEnabled && (
         <Button
           variant="secondary"
@@ -160,11 +163,11 @@ function ProjectHomeActions({
       >
         {t("projectCardNewSession")}
       </Button>
-    </>
+    </div>
   );
 }
 
-/** Header, view tabs and sessions of one project. */
+/** Structured Repository Hero Surface, workspace tabs, and framed session lists. */
 function ProjectHome({ project }: { project: Project }) {
   const basePath = useRemoteBasePath();
   const { appEnabled, settingsEnabled, localBrowse } = useProjectCapabilities();
@@ -174,29 +177,34 @@ function ProjectHome({ project }: { project: Project }) {
   const name = projectDisplayName(project);
   return (
     <>
-      <PageIntro
-        title={
-          <span className={styles.title}>
-            {name}
-            {projectCodeNamesEnabled && project.codeName && (
-              <Tag>{project.codeName}</Tag>
+      <section className={styles.heroSurface}>
+        <div className={styles.heroMain}>
+          <div className={styles.heroIdentity}>
+            <div className={styles.titleRow}>
+              <span className={styles.heroRepoBadge} aria-hidden="true">
+                <FolderIcon size={HERO_REPO_ICON_SIZE} />
+              </span>
+              <h1 className={styles.titleText}>{name}</h1>
+              {projectCodeNamesEnabled && project.codeName && (
+                <Tag>{project.codeName}</Tag>
+              )}
+            </div>
+            {project.caption?.text && (
+              <p className={styles.heroLede}>{project.caption.text}</p>
             )}
-          </span>
-        }
-        lede={project.caption?.text}
-        meta={
-          <span className={styles.meta}>
-            <span className={styles.path} title={project.path}>
-              {shortenPath(project.path)}
-            </span>
-            <ProjectBranchChip
-              projectId={project.id}
-              sourceHref={hrefs.source}
-            />
-          </span>
-        }
-        actions={<ProjectHomeActions hrefs={hrefs} appEnabled={appEnabled} />}
-        filters={
+            <div className={styles.metaRow}>
+              <span className={styles.pathChip} title={project.path}>
+                <bdi>{shortenPath(project.path)}</bdi>
+              </span>
+              <ProjectBranchChip
+                projectId={project.id}
+                sourceHref={hrefs.source}
+              />
+            </div>
+          </div>
+          <ProjectHomeActions hrefs={hrefs} appEnabled={appEnabled} />
+        </div>
+        <div className={styles.heroNavBar}>
           <ProjectHomeTabs
             project={project}
             hrefs={hrefs}
@@ -205,8 +213,8 @@ function ProjectHome({ project }: { project: Project }) {
               settingsEnabled ? () => setSettingsOpen(true) : undefined
             }
           />
-        }
-      />
+        </div>
+      </section>
       <ProjectHomeSessions project={project} allSessionsHref={hrefs.sessions} />
       {settingsOpen && (
         <ProjectSessionDefaultsModal
@@ -221,8 +229,8 @@ function ProjectHome({ project }: { project: Project }) {
 }
 
 /**
- * Project home at /projects/:projectId: name, path, branch, the view tabs and
- * the project's sessions grouped by needs-you, running and recent.
+ * Project home at /projects/:projectId: structured repository hero surface,
+ * mono path & branch badges, workspace navigation tabs, and framed session groups.
  */
 export function ProjectHomePage() {
   const { t } = useI18n();

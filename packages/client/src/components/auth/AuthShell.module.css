@@ -1,64 +1,91 @@
-/* Auth shell (design auth/Login): a brand column beside one form card on
-   the canvas, wrapping into a single column when the window is narrow. */
+/* Architectural Studio Sign-In Stage: ambient grid + radial glow on the
+   canvas, elevated split container on desktop, single focused card on mobile. */
 .page {
   display: flex;
   align-items: center;
   justify-content: center;
   min-height: 100dvh;
-  padding: 56px 32px max(56px, env(safe-area-inset-bottom));
-  background: var(--canvas);
+  padding: 48px 28px max(48px, env(safe-area-inset-bottom));
+  background-color: var(--canvas);
+  background-image:
+    radial-gradient(
+      ellipse 75% 50% at 50% 0%,
+      var(--accent-soft),
+      transparent 70%
+    ),
+    linear-gradient(to right, rgb(127 127 127 / 5%) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(127 127 127 / 5%) 1px, transparent 1px);
+  background-size:
+    100% 100%,
+    32px 32px,
+    32px 32px;
   color: var(--ink);
   font-family: var(--font-ui);
+  box-sizing: border-box;
 }
 
 .top {
   align-items: flex-start;
-  padding-top: 12dvh;
+  padding-top: 10dvh;
 }
 
 .layout {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: center;
-  gap: 48px 64px;
+  display: grid;
+  grid-template-columns: minmax(0, 1.08fr) minmax(360px, 436px);
+  align-items: stretch;
+  gap: 8px;
   width: 100%;
-  max-width: 1040px;
+  max-width: 980px;
+  padding: 8px;
+  border: 1px solid var(--card-line);
+  border-radius: calc(var(--r-card) + 6px);
+  background: var(--surface-2);
+  box-shadow: var(--shadow-pop);
+  box-sizing: border-box;
 }
 
 .card {
   display: flex;
-  flex: 0 1 420px;
   flex-direction: column;
-  gap: 20px;
+  justify-content: center;
+  gap: 18px;
   width: 100%;
   min-width: 0;
-  padding: 28px;
+  padding: 30px 28px;
   border: 1px solid var(--card-line);
   border-radius: var(--r-card);
   background: var(--surface);
-  box-shadow: var(--shadow-card);
+  box-shadow: var(--shadow-pop);
+  box-sizing: border-box;
 }
 
 .back {
   display: inline-flex;
   align-items: center;
-  gap: var(--space-1);
+  gap: 4px;
   align-self: flex-start;
-  min-height: 32px;
-  margin-top: calc(-1 * var(--space-2));
-  color: var(--ink-3);
+  min-height: 28px;
+  padding: 0 10px 0 6px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface-2);
+  color: var(--ink-2);
   font-size: var(--fs-small);
+  font-weight: 500;
   text-decoration: none;
-  transition: color var(--duration-fast) var(--ease-standard);
+  transition:
+    background-color 140ms ease,
+    border-color 140ms ease,
+    color 140ms ease;
 }
 
 .back:hover {
+  border-color: var(--line-strong);
+  background: var(--surface-3);
   color: var(--ink);
 }
 
 .back:focus-visible {
-  border-radius: var(--r-xs);
   outline: 2px solid var(--focus);
   outline-offset: 2px;
 }
@@ -66,7 +93,7 @@
 .heading {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
 }
 
 .title {
@@ -76,21 +103,26 @@
   font-size: var(--fs-h1);
   font-weight: var(--title-weight);
   font-stretch: var(--display-stretch);
-  line-height: 1.2;
+  line-height: 1.18;
   letter-spacing: var(--display-tracking);
 }
 
 .subtitle {
   margin: 0;
-  color: var(--ink-3);
+  color: var(--ink-2);
   font-size: var(--fs-small);
   line-height: 1.5;
+}
+
+.controls {
+  display: flex;
+  flex-direction: column;
 }
 
 .form {
   display: flex;
   flex-direction: column;
-  gap: var(--space-4);
+  gap: 14px;
 }
 
 .field {
@@ -99,58 +131,80 @@
 }
 
 .field label {
-  color: var(--ink);
-  font-size: var(--fs-small);
+  color: var(--ink-2);
+  font-size: 12.5px;
   font-weight: 600;
-  line-height: 1.2;
+  letter-spacing: -0.005em;
+  line-height: 1.25;
 }
 
 .hint {
   margin: 0;
   color: var(--ink-3);
   font-size: 12px;
-  line-height: 1.5;
+  line-height: 1.45;
+}
+
+.advanced {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  background: var(--surface-2);
+}
+
+.check {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
 .check label {
   display: flex;
   align-items: center;
-  gap: var(--space-3);
-  min-height: var(--tap-min);
+  gap: 10px;
+  min-height: 36px;
   color: var(--ink);
-  font-size: 14px;
+  font-size: var(--fs-small);
+  font-weight: 500;
   cursor: pointer;
 }
 
 .check input {
-  width: 16px;
-  height: 16px;
+  width: 15px;
+  height: 15px;
   margin: 0;
   accent-color: var(--accent);
 }
 
 .check .hint {
-  margin-top: calc(-1 * var(--space-2));
-  padding-inline-start: calc(16px + var(--space-3));
+  padding-inline-start: 25px;
 }
 
 .note {
   margin: 0;
-  color: var(--ink-3);
-  font-family: var(--label-font);
+  padding: 6px 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  background: var(--surface-2);
+  color: var(--ink-2);
+  font-family: var(--font-mono);
   font-size: 11px;
-  letter-spacing: var(--meta-tracking);
   text-align: center;
+  overflow-wrap: anywhere;
 }
 
 .error {
-  padding: 8px 12px;
+  padding: 9px 12px;
   border: 1px solid var(--err-line);
   border-radius: var(--r-md);
   background: var(--err-soft);
   color: var(--err-ink);
   font-size: var(--fs-small);
-  line-height: 1.55;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
 }
 
 .status {
@@ -158,7 +212,7 @@
   align-items: center;
   gap: var(--space-3);
   padding: 10px 12px;
-  border: 1px solid var(--run-soft);
+  border: 1px solid var(--line);
   border-radius: var(--r-md);
   background: var(--run-soft);
   color: var(--run-ink);
@@ -168,19 +222,20 @@
 .loading {
   display: flex;
   justify-content: center;
-  padding: var(--space-4);
+  padding: var(--space-5);
 }
 
 .linkButton {
   align-self: flex-start;
-  min-height: 32px;
-  margin-block: calc(-1 * var(--space-2));
-  padding: 0;
+  min-height: 28px;
+  margin-block: -2px;
+  padding: 0 2px;
   border: 0;
   background: none;
-  color: var(--ink-3);
+  color: var(--ink-2);
   font: inherit;
   font-size: var(--fs-small);
+  font-weight: 500;
   cursor: pointer;
   text-decoration: underline;
   text-decoration-color: var(--line-strong);
@@ -189,16 +244,18 @@
 
 .linkButton:hover:not(:disabled) {
   color: var(--ink);
+  text-decoration-color: var(--ink-2);
 }
 
 .linkButton:focus-visible {
-  border-radius: var(--r-xs);
+  border-radius: var(--r-sm);
   outline: 2px solid var(--focus);
   outline-offset: 2px;
 }
 
 .linkButton:disabled {
-  color: var(--ink-4);
+  color: var(--ink-3);
+  opacity: 0.6;
   cursor: not-allowed;
 }
 
@@ -207,10 +264,10 @@
   flex-direction: column;
   gap: 8px;
   margin: 0;
-  padding-top: 20px;
+  padding-top: 16px;
   border-top: 1px solid var(--line);
   color: var(--ink-3);
-  font-size: var(--fs-small);
+  font-size: 12px;
   line-height: 1.5;
 }
 
@@ -228,37 +285,45 @@
 .commandText {
   flex: 1;
   min-width: 0;
-  padding: 10px 12px;
+  padding: 8px 11px;
   overflow-x: auto;
   border: 1px solid var(--line);
   border-radius: var(--r-md);
-  background: var(--code-bg);
+  background: var(--surface-2);
   color: var(--ink);
   font-family: var(--font-mono);
   font-size: var(--fs-code);
-  line-height: 1.6;
+  line-height: 1.55;
   white-space: pre;
 }
 
 @media (pointer: coarse) {
   .back,
-  .linkButton {
+  .linkButton,
+  .check label {
     min-height: var(--tap-min);
   }
 }
 
-@media (width < 768px) {
+@media (width < 880px) {
   .page {
-    padding: 40px 20px max(28px, env(safe-area-inset-bottom));
+    padding: 32px 16px max(24px, env(safe-area-inset-bottom));
   }
 
   .layout {
-    gap: 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    max-width: 440px;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
   }
 
   .card {
-    flex-basis: 100%;
     gap: 16px;
-    padding: 18px 16px;
+    padding: 22px 18px;
   }
 }

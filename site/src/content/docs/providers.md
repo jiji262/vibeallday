@@ -36,15 +36,16 @@ and [Codex access through a ChatGPT plan](https://help.openai.com/en/articles/11
 
 ## Experimental providers
 
+Experimental providers are opt-in via `ENABLED_PROVIDERS` and are not recommended as primary remote-supervision backends where full approval parity is required:
+
 | Provider | Current shape |
 | --- | --- |
 | OpenCode | Start/resume, history, permissions/questions, tools, thinking, and images; capability parity varies |
 | Grok Build | ACP-based sessions with approvals, suggestions, effort, and steering where upstream supports them |
-| Gemini CLI | Direct and experimental ACP paths with narrower approval, steering, and history behavior |
-| pi | Headless RPC sessions with streaming, tool rendering, model/thinking controls, compaction, forks, and durable history; tools currently run without a VibeAllDay approval bridge |
+| Gemini CLI | Experimental ACP path with narrower approval, steering, and history behavior |
+| pi | Local-only headless RPC experimental backend (`ENABLED_PROVIDERS=pi`); tools currently run without a VibeAllDay approval bridge, so do not expose to untrusted prompts |
 
-Experimental means the integration ships and can be used, but it may require
-extra setup, expose fewer controls, or change as its upstream protocol evolves.
+Experimental means the integration ships behind explicit configuration, may expose fewer controls, or change as its upstream protocol evolves.
 
 ## Advanced and legacy Claude routes
 

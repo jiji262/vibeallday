@@ -1,19 +1,14 @@
-import { serverHasCapability } from "@vibeallday/shared";
 import { useMemo } from "react";
-import { useActingPrincipal } from "../../hooks/useActingPrincipal";
 import { useGlobalSessionsFeed } from "../../hooks/useGlobalSessionsFeed";
 import { useProjects } from "../../hooks/useProjects";
 import {
   SIDEBAR_SESSION_FEED_LIMIT,
   useSidebarSessionFeeds,
 } from "../../hooks/useSidebarSessionFeeds";
-import { useVersion } from "../../hooks/useVersion";
 import { type TranslationFn, useI18n } from "../../i18n";
-import { getSettingsCategories } from "../../i18n-settings";
 import type { SessionCollectionRecord } from "../../lib/clientSummaryCollections";
 import { useSessionCollectionQueryRecords } from "../../lib/clientSummaryStore";
-import { limitedUserMaySeeSettingsCategory } from "../../lib/limitedUserSettings";
-import { FolderIcon, ListIcon, SettingsIcon } from "../garden/icons";
+import { FolderIcon, ListIcon } from "../garden/icons";
 import { pathTail, recentProjects } from "../sidebar/projectSwitcherModel";
 import { useShellDestinations } from "../sidebar/shellDestinations";
 import type { PaletteItem } from "./paletteData";
@@ -24,18 +19,29 @@ const RECENT_SESSION_POOL = 40;
 
 function useJumpItems(t: TranslationFn): PaletteItem[] {
   const destinations = useShellDestinations();
-  return useMemo(
-    () =>
-      destinations.map((destination) => ({
+  return useMemo(() => {
+    const items: PaletteItem[] = [];
+    for (const destination of destinations) {
+      items.push({
         id: `jump:${destination.key}`,
         group: "jump" as const,
         label: t(destination.labelKey),
         hint: destination.hintKey ? t(destination.hintKey) : undefined,
         to: destination.to,
         Icon: destination.Icon,
-      })),
-    [destinations, t],
-  );
+      });
+      if (destination.key === "sessions") {
+        items.push({
+          id: "jump:all-sessions",
+          group: "jump" as const,
+          label: t("sidebarAllSessions"),
+          to: "/sessions",
+          Icon: ListIcon,
+        });
+      }
+    }
+    return items;
+  }, [destinations, t]);
 }
 
 function useProjectItems(): PaletteItem[] {
@@ -91,49 +97,19 @@ function useRecentSessionItems(t: TranslationFn): PaletteItem[] {
   }, [records, t]);
 }
 
-function useSettingsItems(t: TranslationFn): PaletteItem[] {
-  const { version } = useVersion();
-  const { principal } = useActingPrincipal();
-  const limited = principal.username !== null;
-  return useMemo(
-    () =>
-      getSettingsCategories((key) => t(key as never))
-        .filter(
-          (category) =>
-            !category.requires ||
-            category.requires.anyCapability.some((capability) =>
-              serverHasCapability(version, capability),
-            ),
-        )
-        .filter(
-          (category) =>
-            !limited || limitedUserMaySeeSettingsCategory(category.id),
-        )
-        .map((category) => ({
-          id: `settings:${category.id}`,
-          group: "settings" as const,
-          label: category.label,
-          hint: category.description,
-          to: `/settings/${category.id}`,
-          Icon: SettingsIcon,
-        })),
-    [limited, t, version],
-  );
-}
-
 /**
  * Palette rows from data the shell has already loaded, then the commands;
- * no new requests.
+ * no new requests. Settings search lives inside Settings itself where it can
+ * match control-level labels and jump directly to individual items.
  */
 export function usePaletteCandidates(): PaletteItem[] {
   const { t } = useI18n();
   const jump = useJumpItems(t);
   const projects = useProjectItems();
   const recent = useRecentSessionItems(t);
-  const settings = useSettingsItems(t);
   const actions = usePaletteActions();
   return useMemo(
-    () => [...jump, ...projects, ...recent, ...settings, ...actions],
-    [actions, jump, projects, recent, settings],
+    () => [...jump, ...projects, ...recent, ...actions],
+    [actions, jump, projects, recent],
   );
 }

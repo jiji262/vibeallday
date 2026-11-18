@@ -1,10 +1,6 @@
 import "./lib/developmentPerformanceBootstrap";
-import { Fragment, lazy, StrictMode, type ReactNode } from "react";
+import { Fragment, lazy, type ReactNode, StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-
-// Toggle to disable StrictMode for easier debugging (avoids double renders)
-const STRICT_MODE = false;
-const Wrapper = STRICT_MODE ? StrictMode : Fragment;
 import {
   BrowserRouter,
   Navigate,
@@ -12,23 +8,23 @@ import {
   Routes,
   useLocation,
 } from "react-router-dom";
+import { initializeClientEnvironment } from "./bootstrap/initializeClientEnvironment";
+import {
+  preloadNewSessionRouteModules,
+  SHARED_NAVIGATION_LAYOUT_ROUTE,
+  sharedPageModuleLoaders,
+} from "./bootstrap/sharedAppRoutes";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { PrebootComposerRetirement } from "./components/PrebootComposerRetirement";
 import { RouteModule, routeModule } from "./components/RouteModule";
 import { TooltipLayer } from "./components/ui/TooltipLayer";
-import { initializeFontSize } from "./hooks/useFontSize";
-import { initializeSidebarSpacing } from "./hooks/useSidebarSpacing";
-import { initializeContentMaxWidth } from "./hooks/useContentMaxWidth";
-import { initializeOutputAppearance } from "./hooks/useOutputAppearance";
-import { initializeTabSize } from "./hooks/useTabSize";
-import { initializeTheme } from "./hooks/useTheme";
-import { initializeTooltipAppearance } from "./hooks/useTooltipAppearance";
-import { initializeUnicodeProseMath } from "./lib/unicodeProseMath";
 import { I18nProvider, useI18n } from "./i18n";
-import { installFontDiagnostics } from "./lib/diagnostics/fontDiagnostics";
-import { installModifierChordTracking } from "./lib/modifierChords";
 import { preloadableComponent } from "./lib/preloadableComponent";
 import "./styles/index.css";
+
+// Toggle to disable StrictMode for easier debugging (avoids double renders)
+const STRICT_MODE = false;
+const Wrapper = STRICT_MODE ? StrictMode : Fragment;
 
 const App = preloadableComponent(async () => ({
   default: (await import("./App")).App,
@@ -38,116 +34,17 @@ const ConversationPreviewPage = lazy(() =>
     ({ ConversationPreviewPage }) => ({ default: ConversationPreviewPage }),
   ),
 );
-
-/** The experimental client owns its connections without the full app runtime. */
-function LocalAppShell({ children }: { children: ReactNode }) {
-  const { pathname } = useLocation();
-  return /^\/-\/preview\/?$/.test(pathname) ? children : <App>{children}</App>;
-}
-const NavigationLayout = preloadableComponent(async () => ({
-  default: (await import("./layouts")).NavigationLayout,
-}));
-const SessionDomLingerRouteMarker = lazy(() =>
-  import("./layouts").then(({ SessionDomLingerRouteMarker }) => ({
-    default: SessionDomLingerRouteMarker,
-  })),
-);
-const AgentsPage = lazy(() =>
-  import("./pages/AgentsPage").then(({ AgentsPage }) => ({
-    default: AgentsPage,
-  })),
-);
-const IssuesPage = lazy(() =>
-  import("./pages/IssuesPage").then((m) => ({ default: m.IssuesPage })),
-);
-const BangCommandsPage = lazy(() =>
-  import("./pages/BangCommandsPage").then(({ BangCommandsPage }) => ({
-    default: BangCommandsPage,
-  })),
-);
-const FilePage = lazy(() =>
-  import("./pages/FilePage").then(({ FilePage }) => ({ default: FilePage })),
-);
-const LocalSourcePage = lazy(() =>
-  import("./pages/LocalSourcePage").then(({ LocalSourcePage }) => ({
-    default: LocalSourcePage,
-  })),
-);
-const ViewerModePage = lazy(() =>
-  import("./pages/ViewerModePage").then(({ ViewerModePage }) => ({
-    default: ViewerModePage,
-  })),
-);
-const GitStatusPage = lazy(() =>
-  import("./pages/GitStatusPage").then(({ GitStatusPage }) => ({
-    default: GitStatusPage,
-  })),
-);
-const GlobalSessionsPage = lazy(() =>
-  import("./pages/GlobalSessionsPage").then(({ GlobalSessionsPage }) => ({
-    default: GlobalSessionsPage,
-  })),
-);
-const InboxPage = lazy(() =>
-  import("./pages/InboxPage").then(({ InboxPage }) => ({
-    default: InboxPage,
-  })),
-);
-const MorePage = lazy(() =>
-  import("./pages/MorePage").then(({ MorePage }) => ({
-    default: MorePage,
-  })),
-);
 const LoginPage = lazy(() =>
   import("./pages/LoginPage").then(({ LoginPage }) => ({
     default: LoginPage,
   })),
 );
-const NewSessionPage = preloadableComponent(async () => ({
-  default: (await import("./pages/NewSessionPage")).NewSessionPage,
-}));
-const ProjectAppPage = lazy(() =>
-  import("./pages/ProjectAppPage").then(({ ProjectAppPage }) => ({
-    default: ProjectAppPage,
-  })),
-);
-const ProjectsPage = lazy(() =>
-  import("./pages/ProjectsPage").then(({ ProjectsPage }) => ({
-    default: ProjectsPage,
-  })),
-);
-const ProjectHomePage = lazy(() =>
-  import("./pages/ProjectHomePage").then(({ ProjectHomePage }) => ({
-    default: ProjectHomePage,
-  })),
-);
-const TriagePage = lazy(() =>
-  import("./pages/TriagePage").then(({ TriagePage }) => ({
-    default: TriagePage,
-  })),
-);
-const SessionPage = lazy(() =>
-  import("./pages/SessionPage").then(({ SessionPage }) => ({
-    default: SessionPage,
-  })),
-);
-const ProviderChildSessionPage = lazy(() =>
-  import("./pages/ProviderChildSessionPage").then(
-    ({ ProviderChildSessionPage }) => ({
-      default: ProviderChildSessionPage,
-    }),
-  ),
-);
-const SettingsLayout = lazy(() =>
-  import("./pages/settings").then(({ SettingsLayout }) => ({
-    default: SettingsLayout,
-  })),
-);
-const ProviderSignInPage = lazy(() =>
-  import("./pages/ProviderSignInPage").then((m) => ({
-    default: m.ProviderSignInPage,
-  })),
-);
+
+/** The preview route owns its connections without the full app runtime. */
+function LocalAppShell({ children }: { children: ReactNode }) {
+  const { pathname } = useLocation();
+  return /^\/-\/preview\/?$/.test(pathname) ? children : <App>{children}</App>;
+}
 
 /**
  * Dev-only notice shown when the app is loaded directly from the Vite dev port
@@ -241,12 +138,6 @@ if (!rootElement) {
   throw new Error("Root element not found");
 }
 
-// Direct access to the Vite dev server port (e.g. localhost:3402) serves the SPA
-// shell but has no backend/API — the first /api fetch returns index.html and the
-// app dies with a confusing "Unexpected token '<'" JSON error. The main server
-// (port 3400) proxies to Vite, so when accessed correctly window.location.port is
-// the backend port, not the Vite port. Detect the wrong-port case and show a
-// pointer to the real app instead. Stripped from production via import.meta.env.DEV.
 if (import.meta.env.DEV && window.location.port === String(__VITE_DEV_PORT__)) {
   const backendUrl = `${window.location.protocol}//${window.location.hostname}:${__BACKEND_PORT__}${window.location.pathname}${window.location.search}${window.location.hash}`;
   createRoot(rootElement).render(
@@ -255,22 +146,7 @@ if (import.meta.env.DEV && window.location.port === String(__VITE_DEV_PORT__)) {
     </I18nProvider>,
   );
 } else {
-  installModifierChordTracking();
-  // Apply saved preferences before React renders to avoid flash
-  initializeTheme();
-  initializeFontSize();
-  initializeSidebarSpacing();
-  initializeOutputAppearance();
-  installFontDiagnostics();
-  initializeTabSize();
-  initializeContentMaxWidth();
-  initializeTooltipAppearance();
-  initializeUnicodeProseMath();
-
-  // Register SW at startup so PWA install is available without visiting settings
-  void import("./lib/registerServiceWorker").then(
-    ({ registerServiceWorkerAtStartup }) => registerServiceWorkerAtStartup(),
-  );
+  initializeClientEnvironment();
 
   if (import.meta.env.VITE_E2E_SOURCE_TRANSPORT_SMOKE === "true") {
     void import("./lib/e2e/sourceTransportCoexistenceSmoke").then(
@@ -280,30 +156,22 @@ if (import.meta.env.DEV && window.location.port === String(__VITE_DEV_PORT__)) {
     );
   }
 
-  // SSE activity stream connection is managed by useActivityBusConnection hook
-  // in App.tsx, which connects only when authenticated (or auth is disabled)
-
-  // Get base URL for router (Vite sets this based on --base flag)
-  // Remove trailing slash for BrowserRouter basename
   const basename = import.meta.env.BASE_URL.replace(/\/$/, "") || undefined;
-
   const initialPath = basename
     ? window.location.pathname.slice(basename.length)
     : window.location.pathname;
   let initialModules: Promise<unknown> | undefined;
-  // Start independent downloads before lazy ancestors can serialize them.
-  // Route error boundaries retain ownership of any import failure's UI.
+
   if (/^\/settings(?:\/|$)/.test(initialPath)) {
     void Promise.allSettled([
       import("./App"),
-      import("./layouts"),
-      import("./pages/settings"),
+      sharedPageModuleLoaders.layouts(),
+      sharedPageModuleLoaders.settings(),
     ]);
   } else if (/^\/new-session\/?$/.test(initialPath)) {
     initialModules = Promise.all([
       App.preload(),
-      NavigationLayout.preload(),
-      NewSessionPage.preload(),
+      preloadNewSessionRouteModules(),
     ]);
   }
 
@@ -322,114 +190,9 @@ if (import.meta.env.DEV && window.location.port === String(__VITE_DEV_PORT__)) {
                     element={routeModule(<ConversationPreviewPage local />)}
                   />
                   <Route path="/" element={<Navigate to="/inbox" replace />} />
-                  {/* Login page (no layout wrapper) */}
                   <Route path="/login" element={routeModule(<LoginPage />)} />
-                  {/* IMPORTANT: Keep routes in sync with remote-main.tsx — adding a route here? Add it there too! */}
-                  <Route
-                    element={
-                      <RouteModule>
-                        <NavigationLayout
-                          sessionElement={(
-                            route,
-                            { parked, progressiveRenderPauseSignal },
-                          ) => (
-                            <RouteModule key={route.key}>
-                              <SessionPage
-                                projectId={route.projectId}
-                                sessionId={route.sessionId}
-                                routeLocation={route.location}
-                                isDomLingerParked={parked}
-                                progressiveRenderPauseSignal={
-                                  progressiveRenderPauseSignal
-                                }
-                              />
-                            </RouteModule>
-                          )}
-                        />
-                      </RouteModule>
-                    }
-                  >
-                    <Route
-                      path="/projects"
-                      element={routeModule(<ProjectsPage />)}
-                    />
-                    <Route
-                      path="/sessions"
-                      element={routeModule(<GlobalSessionsPage />)}
-                    />
-                    <Route
-                      path="/agents"
-                      element={routeModule(<AgentsPage />)}
-                    />
-                    <Route
-                      path="/issues"
-                      element={routeModule(<IssuesPage />)}
-                    />
-                    <Route path="/inbox" element={routeModule(<InboxPage />)} />
-                    <Route
-                      path="/triage"
-                      element={routeModule(<TriagePage />)}
-                    />
-                    <Route path="/more" element={routeModule(<MorePage />)} />
-                    <Route
-                      path="/settings"
-                      element={routeModule(<SettingsLayout />)}
-                    />
-                    <Route
-                      path="/settings/:category"
-                      element={routeModule(<SettingsLayout />)}
-                    />
-                    <Route
-                      path="/settings/:category/:itemId"
-                      element={routeModule(<SettingsLayout />)}
-                    />
-                    {/* Project-scoped pages */}
-                    <Route
-                      path="/projects/:projectId/app"
-                      element={routeModule(<ProjectAppPage />)}
-                    />
-                    <Route
-                      path="/projects/:projectId"
-                      element={routeModule(<ProjectHomePage />)}
-                    />
-                    <Route
-                      path="/git-status"
-                      element={routeModule(<GitStatusPage />)}
-                    />
-                    <Route
-                      path="/provider-sign-in/:provider"
-                      element={routeModule(<ProviderSignInPage />)}
-                    />
-                    <Route
-                      path="/bang-commands"
-                      element={routeModule(<BangCommandsPage />)}
-                    />
-
-                    <Route
-                      path="/new-session"
-                      element={routeModule(<NewSessionPage />)}
-                    />
-                    <Route
-                      path="/projects/:projectId/file"
-                      element={routeModule(<FilePage />)}
-                    />
-                    <Route
-                      path="/projects/:projectId/browse"
-                      element={routeModule(<LocalSourcePage />)}
-                    />
-                    <Route
-                      path="/file-view"
-                      element={routeModule(<ViewerModePage />)}
-                    />
-                    <Route
-                      path="/projects/:projectId/sessions/:sessionId"
-                      element={routeModule(<SessionDomLingerRouteMarker />)}
-                    />
-                    <Route
-                      path="/projects/:projectId/sessions/:sessionId/agents/:agentId"
-                      element={routeModule(<ProviderChildSessionPage />)}
-                    />
-                  </Route>
+                  {SHARED_NAVIGATION_LAYOUT_ROUTE}
+                  <Route path="*" element={<Navigate to="/inbox" replace />} />
                 </Routes>
               </LocalAppShell>
             </RouteModule>
@@ -438,8 +201,7 @@ if (import.meta.env.DEV && window.location.port === String(__VITE_DEV_PORT__)) {
       </ErrorBoundary>
     </Wrapper>
   );
-  // The inline composer holds input while code loads. Mounting ready route
-  // components avoids React's minimum fallback display delay on a fresh tab.
+
   const renderApp = () => createRoot(rootElement).render(app);
   if (initialModules) void initialModules.then(renderApp, renderApp);
   else renderApp();

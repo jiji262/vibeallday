@@ -20,7 +20,7 @@ import { MainContent, useNavigationLayout } from "../layouts";
  */
 export function InboxPage() {
   const { t } = useI18n();
-  const { openSidebar, isWideScreen, tabBarNavigation } = useNavigationLayout();
+  const { openSidebar, isWideScreen } = useNavigationLayout();
   const basePath = useRemoteBasePath();
   const { projects } = useProjects();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -45,7 +45,7 @@ export function InboxPage() {
   }, [projectId, projects]);
 
   const title = t("shellNavInbox");
-  const headerTitle = tabBarNavigation ? t("tabSessions") : title;
+  const headerTitle = t("tabSessions");
   const breadcrumbs: Crumb[] | undefined = projectName
     ? [{ label: headerTitle, to: `${basePath}/inbox` }, { label: projectName }]
     : undefined;

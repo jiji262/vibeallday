@@ -1,7 +1,6 @@
 import { projectDisplayName } from "@vibeallday/shared";
 import { Link } from "react-router-dom";
 import type { InboxItem } from "../api/client";
-import { Card } from "../components/garden/Card";
 import { Count, type CountTone } from "../components/garden/Count";
 import { EmptyState } from "../components/garden/EmptyState";
 import { LoadingState } from "../components/garden/LoadingState";
@@ -22,7 +21,7 @@ interface SectionProps {
   basePath: string;
 }
 
-/** One status group of the project's sessions: heading, count, link rows. */
+/** Framed Studio status panel of the project's sessions: header bar + link rows. */
 function SessionSection({
   titleKey,
   items,
@@ -35,11 +34,14 @@ function SessionSection({
   const headingId = `project-home-${titleKey}`;
   return (
     <section className={styles.section} aria-labelledby={headingId}>
-      <div className={styles.sectionHead}>
-        <h2 id={headingId}>{t(titleKey)}</h2>
-        <Count tone={tone}>{items.length}</Count>
-      </div>
-      <Card flush>
+      <div className={styles.sectionPanel}>
+        <div className={styles.sectionHead}>
+          <StatusDot state={state} />
+          <h2 id={headingId} className={styles.sectionHeading}>
+            {t(titleKey)}
+          </h2>
+          <Count tone={tone}>{items.length}</Count>
+        </div>
         <ul className={styles.rows}>
           {items.map((item) => (
             <li key={item.sessionId}>
@@ -61,14 +63,14 @@ function SessionSection({
             </li>
           ))}
         </ul>
-      </Card>
+      </div>
     </section>
   );
 }
 
 /**
- * The project's sessions from the shared overview feed, grouped by
- * needs-you, running and recent, with a link to the full filtered list.
+ * The project's sessions from the shared overview feed, grouped into framed
+ * Studio panels by needs-you, running and recent, with a link to all sessions.
  */
 export function ProjectHomeSessions({
   project,
@@ -89,7 +91,11 @@ export function ProjectHomeSessions({
   }
   return (
     <div className={styles.sessions}>
-      {empty && <EmptyState compact title={t("projectHomeEmpty")} />}
+      {empty && (
+        <div className={styles.emptyFrame}>
+          <EmptyState compact title={t("projectHomeEmpty")} />
+        </div>
+      )}
       <SessionSection
         titleKey="inboxTierNeedsAttention"
         items={overview.needsAttention}
@@ -109,9 +115,11 @@ export function ProjectHomeSessions({
         state="idle"
         basePath={basePath}
       />
-      <Link to={allSessionsHref} className={styles.viewAll}>
-        {t("projectHomeViewAll", { name: projectDisplayName(project) })}
-      </Link>
+      <div className={styles.sessionsFooter}>
+        <Link to={allSessionsHref} className={styles.viewAll}>
+          {t("projectHomeViewAll", { name: projectDisplayName(project) })}
+        </Link>
+      </div>
     </div>
   );
 }

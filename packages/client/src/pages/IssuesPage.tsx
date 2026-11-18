@@ -1,13 +1,12 @@
 import type {
   IssueItem,
-  IssueSort,
   IssueSearchResult,
   IssueSessionsResult,
+  IssueSort,
 } from "@vibeallday/shared";
 import { useEffect, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { Button } from "../components/garden/Button";
-import { Card, CardFooter } from "../components/garden/Card";
+import { Button, IconButton } from "../components/garden/Button";
 import { EmptyState } from "../components/garden/EmptyState";
 import { SearchField, selectClassName } from "../components/garden/Field";
 import { BugIcon, RefreshIcon, SettingsIcon } from "../components/garden/icons";
@@ -74,13 +73,22 @@ function IssuesIntro() {
       title={t("issuesTitle")}
       lede={t("issuesLede")}
       actions={
-        <Link className={styles.settingsLink} to={`${base}/settings/issues`}>
-          <SettingsIcon size={16} />
+        <Link
+          className={styles.settingsLink}
+          to={`${base}/settings/source-control`}
+        >
+          <SettingsIcon size={15} />
           {t("issuesSettings")}
         </Link>
       }
     />
   );
+}
+
+function coverageProgressPercent(result: IssueSearchResult | undefined) {
+  if (!result) return 24;
+  if (result.coverage.active) return 64;
+  return 100;
 }
 
 function IssueBrowser() {
@@ -224,7 +232,7 @@ function IssueBrowser() {
     if (item.id !== selected?.id) setDetail(undefined);
   };
   const edit = (item: IssueItem, kind: IssueEditKind) => {
-    if (kind === "url") select(item);
+    select(item);
     setEditing({ item, kind });
     setValue(kind === "title" ? (item.title ?? "") : "");
   };
@@ -312,86 +320,111 @@ function IssueBrowser() {
         setOffset(0);
       }}
     >
-      {result?.supportedSorts?.map((value) => (
-        <option key={value} value={value}>
-          {t(`issuesSort_${value}`)}
+      {result?.supportedSorts?.map((sortKey) => (
+        <option key={sortKey} value={sortKey}>
+          {t(`issuesSort_${sortKey}`)}
         </option>
       ))}
     </select>
   ) : (
     <span className={styles.keyOrder}>{t("issuesKeyOrder")}</span>
   );
+  const indexing = Boolean(result?.coverage.active);
   return (
     <>
       <IssuesIntro />
-      <ListToolbar
-        label={t("issuesResults")}
-        search={
-          <SearchField
-            label={t("issuesSearch")}
-            placeholder={t("issuesSearch")}
-            value={query}
-            onChange={(e) => {
-              setQuery(e.target.value);
-              setOffset(0);
-            }}
-          />
-        }
-        filters={
-          <>
-            {sortControl}
-            <label className={styles.choice}>
-              <input
-                type="checkbox"
-                checked={dismissed}
+      <div className={styles.commandCard}>
+        <div className={styles.toolbarWrap}>
+          <ListToolbar
+            label={t("issuesResults")}
+            search={
+              <SearchField
+                label={t("issuesSearch")}
+                placeholder={t("issuesSearch")}
+                value={query}
                 onChange={(e) => {
-                  setDismissed(e.target.checked);
+                  setQuery(e.target.value);
                   setOffset(0);
-                  setSessionOffset(0);
                 }}
               />
-              {t("issuesShowDismissed")}
-            </label>
-          </>
-        }
-        count={
-          result
-            ? t("issuesResultCount", { count: result.items.length })
-            : undefined
-        }
-        actions={
-          <Button
-            size="sm"
-            icon={<RefreshIcon size={14} />}
-            onClick={() => setRevision((x) => x + 1)}
-          >
-            {t("issuesRefresh")}
-          </Button>
-        }
-      />
-      <details className={styles.coverage}>
-        <summary>
-          {result?.coverage.active
-            ? t("issuesIndexing")
-            : t("issuesDiscoveryDetails")}
-        </summary>
-        {result && (
-          <p>
-            {result.coverage.settings.scope === "viewed"
-              ? t("issuesViewedCoverage")
-              : t("issuesRecentCoverage", {
-                  days: result.coverage.settings.recentDays,
-                })}
-          </p>
-        )}
-        <div className={styles.coverageCounts}>
-          {result?.coverage.counts.map((row) => (
-            <span key={row.state}>
-              {t(`issuesState_${row.state}` as never)}: {row.count}
-            </span>
-          ))}
+            }
+            filters={
+              <>
+                {sortControl}
+                <label
+                  className={`${styles.dismissedPill} ${dismissed ? styles.dismissedPillActive : ""}`}
+                >
+                  <input
+                    type="checkbox"
+                    className={styles.dismissedCheckbox}
+                    checked={dismissed}
+                    onChange={(e) => {
+                      setDismissed(e.target.checked);
+                      setOffset(0);
+                      setSessionOffset(0);
+                    }}
+                  />
+                  <span
+                    className={`${styles.dismissedDot} ${dismissed ? styles.dismissedDotActive : ""}`}
+                    aria-hidden="true"
+                  />
+                  <span>{t("issuesShowDismissed")}</span>
+                </label>
+              </>
+            }
+            count={
+              result
+                ? t("issuesResultCount", { count: result.items.length })
+                : undefined
+            }
+            actions={
+              <IconButton
+                label={t("issuesRefresh")}
+                size="sm"
+                className={styles.refreshButton}
+                onClick={() => setRevision((x) => x + 1)}
+              >
+                <RefreshIcon size={14} />
+              </IconButton>
+            }
+          />
         </div>
-      </details>
+        <details className={styles.coverage}>
+          <summary className={styles.coverageSummary}>
+            <span
+              className={`${styles.coverageDot} ${indexing ? styles.coverageDotActive : ""}`}
+              aria-hidden="true"
+            />
+            <span>
+              {indexing ? t("issuesIndexing") : t("issuesDiscoveryDetails")}
+            </span>
+            <span className={styles.coverageTrack} aria-hidden="true">
+              <span
+                className={`${styles.coverageFill} ${indexing ? styles.coverageFillActive : ""}`}
+                style={{ width: `${coverageProgressPercent(result)}%` }}
+              />
+            </span>
+          </summary>
+          <div className={styles.coverageBody}>
+            {result && (
+              <p className={styles.coverageScope}>
+                {result.coverage.settings.scope === "viewed"
+                  ? t("issuesViewedCoverage")
+                  : t("issuesRecentCoverage", {
+                      days: result.coverage.settings.recentDays,
+                    })}
+              </p>
+            )}
+            <div className={styles.coverageCounts}>
+              {result?.coverage.counts.map((row) => (
+                <span key={row.state} className={styles.coveragePill}>
+                  {t(`issuesState_${row.state}` as never)}: {row.count}
+                </span>
+              ))}
+            </div>
+          </div>
+        </details>
+      </div>
       {sessionId && (
         <Notice
           className={styles.notice}
@@ -405,16 +438,10 @@ function IssueBrowser() {
           {error}
         </Notice>
       )}
-      <div className={`${styles.columns} ${selected ? styles.withDetail : ""}`}>
-        <Card
-          as="section"
-          flush
-          className={`${styles.list} ${editing ? styles.editingList : ""}`}
-          aria-label={t("issuesResults")}
-        >
+      <div className={styles.workspace}>
+        <section className={styles.listCard} aria-label={t("issuesResults")}>
           <div className={styles.listHeader} aria-hidden="true">
             <span>{t("issuesColumnReference")}</span>
-            <span>{t("issuesColumnSessions")}</span>
             <span>{t("issuesColumnState")}</span>
           </div>
           {result?.items.length === 0 && (
@@ -429,37 +456,30 @@ function IssueBrowser() {
                 sort={result.sort}
                 onSelect={() => select(item)}
                 onMenu={(event) => openMenu(event, item)}
-                editor={editorFor(item)}
               />
             ))}
           </ul>
           {(offset > 0 || result?.nextOffset != null) && (
-            <CardFooter band>
-              <span />
-              <span className={styles.actions}>
-                {offset > 0 && (
-                  <Button
-                    size="sm"
-                    onClick={() =>
-                      setOffset(Math.max(0, offset - ISSUE_PAGE_SIZE))
-                    }
-                  >
-                    {t("issuesPrevious")}
-                  </Button>
-                )}
-                {result?.nextOffset != null && (
-                  <Button
-                    size="sm"
-                    onClick={() => setOffset(result.nextOffset!)}
-                  >
-                    {t("issuesNext")}
-                  </Button>
-                )}
-              </span>
-            </CardFooter>
+            <div className={styles.listFooter}>
+              {offset > 0 && (
+                <Button
+                  size="sm"
+                  onClick={() =>
+                    setOffset(Math.max(0, offset - ISSUE_PAGE_SIZE))
+                  }
+                >
+                  {t("issuesPrevious")}
+                </Button>
+              )}
+              {result?.nextOffset != null && (
+                <Button size="sm" onClick={() => setOffset(result.nextOffset!)}>
+                  {t("issuesNext")}
+                </Button>
+              )}
+            </div>
           )}
-        </Card>
-        {selected && (
+        </section>
+        {selected ? (
           <IssueDetailPane
             selected={selected}
             detail={detail}
@@ -470,8 +490,23 @@ function IssueBrowser() {
             onSort={setSort}
             sessionOffset={sessionOffset}
             onSessionOffset={setSessionOffset}
-            onClose={() => setSelected(undefined)}
+            onMenu={(event) => openMenu(event, selected)}
+            editor={editorFor(selected)}
+            onClose={() => {
+              setEditing(undefined);
+              setSelected(undefined);
+            }}
           />
+        ) : (
+          <aside className={styles.emptyInspector} aria-hidden="true">
+            <span className={styles.emptyInspectorIcon}>
+              <BugIcon />
+            </span>
+            <p className={styles.emptyInspectorTitle}>
+              {t("issuesAssociatedSessions")}
+            </p>
+            <p className={styles.emptyInspectorHint}>{t("issuesLede")}</p>
+          </aside>
         )}
       </div>
       {menu.menu}

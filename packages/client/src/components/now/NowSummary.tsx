@@ -105,8 +105,10 @@ export function NowSummary(props: NowSummaryProps) {
             disabled={!pressed && tile.value === 0}
             onClick={() => onFilterChange(pressed ? null : tile.filter)}
           >
-            <span className={styles.label}>{tile.label}</span>
-            <span className={styles.num}>{count}</span>
+            <span className={styles.top}>
+              <span className={styles.label}>{tile.label}</span>
+              <span className={styles.num}>{count}</span>
+            </span>
             <span className={styles.hint}>{tile.hint}</span>
           </button>
         );

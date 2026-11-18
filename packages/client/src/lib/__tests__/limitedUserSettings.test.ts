@@ -9,9 +9,9 @@ describe("settings categories for a limited user", () => {
     for (const id of [
       "users",
       "appearance",
-      "toolbar",
       "notifications",
       "speech",
+      "about",
     ]) {
       expect(limitedUserMaySeeSettingsCategory(id)).toBe(true);
     }
@@ -25,6 +25,7 @@ describe("settings categories for a limited user", () => {
       "remote",
       "devices",
       "apps",
+      "models",
       "environment",
       "development",
       "issues",

@@ -32,6 +32,8 @@ import { HideInSettingsSearch } from "./SettingsSearchContext";
 import styles from "./RemoteAccessSettings.module.css";
 import { SettingsSection } from "./SettingsSection";
 import { AppsSettingsLink } from "./AppsSettings";
+import { DevicesSettings } from "./DevicesSettings";
+import { EmbeddedSettingsPane } from "./EmbeddedSettingsPane";
 
 const DEFAULT_PUBLIC_SHARE_VIEWER_BASE_URL =
   buildVibeAllDayClientPublicShareBaseUrl(DEFAULT_VIBEALLDAY_CLIENT_BASE_URL);
@@ -653,85 +655,95 @@ export function RemoteAccessSettings() {
       t("remoteAccessDefaultHost");
 
     return (
-      <SettingsSection
-        description={t("remoteAccessConnectedDescription")}
-        scope="server"
-      >
-        <SettingsSection title={t("remoteAccessConnectionSection")}>
-          <div className="settings-group">
-            <SettingsItem
-              label={t("remoteAccessCurrentHostTitle")}
-              description={displayName}
-              valueText={displayName}
-              scope="local"
-            >
-              <div className="settings-item-actions">
+      <>
+        <SettingsSection
+          description={t("remoteAccessConnectedDescription")}
+          scope="server"
+        >
+          <SettingsSection title={t("remoteAccessConnectionSection")}>
+            <div className="settings-group">
+              <SettingsItem
+                label={t("remoteAccessCurrentHostTitle")}
+                description={displayName}
+                valueText={displayName}
+                scope="local"
+              >
+                <div className="settings-item-actions">
+                  <button
+                    type="button"
+                    className="settings-button"
+                    onClick={handleSwitchHost}
+                  >
+                    {t("sidebarSwitchHost")}
+                  </button>
+                </div>
+              </SettingsItem>
+              {hostIdentityItem}
+              {currentHost?.relayUrl && (
+                <SettingsItem
+                  label={t("remoteAccessRelayUrlTitle")}
+                  description={currentHost.relayUrl}
+                  valueText={currentHost.relayUrl}
+                  scope="local"
+                />
+              )}
+              <SettingsItem
+                label={t("remoteAccessLogoutTitle")}
+                description={t("remoteAccessLogoutDescription")}
+                scope={null}
+              >
                 <button
                   type="button"
-                  className="settings-button"
-                  onClick={handleSwitchHost}
+                  className="settings-button settings-button-danger-subtle"
+                  onClick={() => remoteConnection.disconnect()}
                 >
-                  {t("sidebarSwitchHost")}
+                  {t("remoteAccessLogout")}
                 </button>
-              </div>
-            </SettingsItem>
-            {hostIdentityItem}
-            {currentHost?.relayUrl && (
-              <SettingsItem
-                label={t("remoteAccessRelayUrlTitle")}
-                description={currentHost.relayUrl}
-                valueText={currentHost.relayUrl}
-                scope="local"
-              />
-            )}
-            <SettingsItem
-              label={t("remoteAccessLogoutTitle")}
-              description={t("remoteAccessLogoutDescription")}
-              scope={null}
-            >
-              <button
-                type="button"
-                className="settings-button settings-button-danger-subtle"
-                onClick={() => remoteConnection.disconnect()}
-              >
-                {t("remoteAccessLogout")}
-              </button>
-            </SettingsItem>
-          </div>
+              </SettingsItem>
+            </div>
+          </SettingsSection>
+          {persistSessionsToggle}
+          <SettingsSection title={t("remoteAccessHostSection")}>
+            {hostAwakeConfig}
+            {publicShareConfig}
+            {vibeAllDayClientInfo}
+          </SettingsSection>
+          <AppsSettingsLink />
         </SettingsSection>
-        {persistSessionsToggle}
-        <SettingsSection title={t("remoteAccessHostSection")}>
-          {hostAwakeConfig}
-          {publicShareConfig}
-          {vibeAllDayClientInfo}
-        </SettingsSection>
-        <AppsSettingsLink />
-      </SettingsSection>
+        <EmbeddedSettingsPane title={t("settingsDevicesTitle")}>
+          <DevicesSettings />
+        </EmbeddedSettingsPane>
+      </>
     );
   }
 
   // Server-side: show relay configuration
   return (
-    <SettingsSection scope="server">
-      <HideInSettingsSearch>
-        {/* Relay connection card, its config card and signed-in browsers. */}
-        <div className={styles.setupBlock}>
-          <RemoteAccessSetup
-            title={t("remoteAccessConnectedTitle")}
-            description={t("remoteAccessSetupDescription")}
-            vibeAllDayClientInfo={vibeAllDayClientInfo}
-          />
-        </div>
-      </HideInSettingsSearch>
-      {persistSessionsToggle}
-      <SettingsSection title={t("remoteAccessHostSection")}>
-        {hostIdentityItem && (
-          <div className="settings-group">{hostIdentityItem}</div>
-        )}
-        {hostAwakeConfig}
-        {publicShareConfig}
+    <>
+      <SettingsSection scope="server">
+        <HideInSettingsSearch>
+          {/* Relay connection card, its config card and signed-in browsers. */}
+          <div className={styles.setupBlock}>
+            <RemoteAccessSetup
+              title={t("remoteAccessConnectedTitle")}
+              description={t("remoteAccessSetupDescription")}
+              vibeAllDayClientInfo={vibeAllDayClientInfo}
+            />
+          </div>
+        </HideInSettingsSearch>
+        {persistSessionsToggle}
+        <SettingsSection title={t("remoteAccessHostSection")}>
+          {hostIdentityItem && (
+            <div className="settings-group">{hostIdentityItem}</div>
+          )}
+          {hostAwakeConfig}
+          {publicShareConfig}
+        </SettingsSection>
+        <AppsSettingsLink />
       </SettingsSection>
-      <AppsSettingsLink />
-    </SettingsSection>
+      <EmbeddedSettingsPane title={t("settingsDevicesTitle")}>
+        <DevicesSettings />
+      </EmbeddedSettingsPane>
+    </>
   );
 }

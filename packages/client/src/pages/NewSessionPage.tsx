@@ -249,7 +249,7 @@ export function NewSessionPage() {
           isWideScreen={isWideScreen}
         />
         <main className="page-scroll-container">
-          <div className="page-content-inner">
+          <div className={`page-content-inner ${styles.errorStage}`}>
             <ErrorState
               tag={t("errorTag")}
               message={`${t("newSessionErrorPrefix")} ${renderError.message}`}
@@ -269,9 +269,13 @@ export function NewSessionPage() {
         actions={projectAppButton}
       />
 
-      <main className={`page-scroll-container ${styles.workspace}`}>
+      <main
+        className={`page-scroll-container ${styles.workspace}${
+          appOpen ? ` ${styles.workspaceSplit}` : ""
+        }`}
+      >
         <div
-          className={`page-content-inner new-session-page-shell ${styles.formColumn}`}
+          className={`page-content-inner new-session-page-shell ${styles.composerPane}`}
           hidden={appOpen && !isWideScreen}
         >
           <NewSessionForm
@@ -297,7 +301,7 @@ export function NewSessionPage() {
           />
         </div>
         {appMounted && projectId && (
-          <div className={styles.appColumn} hidden={!appOpen}>
+          <div className={styles.appPane} hidden={!appOpen}>
             <Suspense fallback={null}>
               <ProjectAppViewer
                 key={projectId}

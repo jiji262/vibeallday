@@ -1,84 +1,36 @@
-import { fetchJSON } from "../../api/client";
-import { subscribeClientSummarySourceKey } from "../clientSummaryStore";
-import { getSessionTranscriptMemoryStats } from "../sessionDetail/sessionDetailStore";
-import { getSourceRuntimeRegistry } from "../sourceRuntime";
-import { generateUUID } from "../uuid";
 import {
-  countEntries,
-  deleteEntries,
-  getAllEntries,
-  openDatabase,
-  putEntry,
-} from "./idb";
+  subscribeClientSummarySourceKey,
+  type ClientSummarySourceKey,
+} from "../clientSummaryStore";
+import type { ResumeObservation } from "../resumeDiagnostics";
+import { getSourceRuntimeRegistry } from "../sourceRuntime";
+import { ClientLogQueue } from "./ClientLogQueue";
+import {
+  captureClientLogTarget,
+  isCurrentClientLogTarget,
+  observationMatchesTarget,
+  canCaptureConsoleForCurrentTarget,
+} from "./ClientLogTarget";
+import { clientLogIdentity, clientTelemetryMessage } from "./clientTelemetry";
+import { consoleLogMessage } from "./scopedConsole";
 
-export interface LogEntry {
-  id?: number;
-  timestamp: number;
-  level: string;
-  prefix: string;
-  message: string;
-  /**
-   * Which browser tab wrote this entry. Every tab of one origin shares the
-   * IndexedDB queue below, so a collected batch interleaves tabs and any tab
-   * may post another's entries. Without this, two windows on one session and
-   * one window flapping between rendered and empty look identical in the
-   * collected log, which is the distinction a lock investigation turns on.
-   */
-  tabId?: string;
+export interface ClientLogRecorder {
+  key: string;
+  generation: number;
+  record(level: string, prefix: string, message: string): void;
 }
 
-const DB_NAME = "vibeallday-client-logs";
-const DB_VERSION = 2;
-const STORE_NAME = "entries";
-const MAX_ENTRIES = 2000;
-const FLUSH_BATCH_SIZE = 500;
 const FLUSH_DEBOUNCE_MS = 1000;
 const TELEMETRY_INTERVAL_MS = 15_000;
-
-const PREFIX_REGEX = /^\[([A-Za-z]+)\]/;
-const DEVICE_ID_KEY = "vibeallday-device-id";
-const TAB_ID_KEY = "vibeallday-tab-id";
-
-function getDeviceId(): string | undefined {
-  try {
-    let id = localStorage.getItem(DEVICE_ID_KEY);
-    if (!id) {
-      id = generateUUID();
-      localStorage.setItem(DEVICE_ID_KEY, id);
-    }
-    return id;
-  } catch {
-    return undefined;
-  }
-}
-
-/**
- * Session storage is per tab and survives that tab's reloads, which is exactly
- * the identity a growth curve needs: one series per window, continuous across
- * a reload the reader performed.
- */
-function getTabId(): string | undefined {
-  try {
-    let id = sessionStorage.getItem(TAB_ID_KEY);
-    if (!id) {
-      id = generateUUID();
-      sessionStorage.setItem(TAB_ID_KEY, id);
-    }
-    return id;
-  } catch {
-    return undefined;
-  }
-}
-
 export class ClientLogCollector {
-  private _db: IDBDatabase | null = null;
-  private _memoryBuffer: LogEntry[] = [];
-  private _useMemoryFallback = false;
+  private _generation = 0;
+  private _recorder: ClientLogRecorder | null = null;
+  private _queue: ClientLogQueue | null = null;
   private _started = false;
-  private _flushing = false;
+  private _flushPromise: Promise<void> | null = null;
+  private _flushAgain = false;
   private _deviceId: string | undefined;
   private _tabId: string | undefined;
-
   private _origLog: typeof console.log | null = null;
   private _origWarn: typeof console.warn | null = null;
   private _origError: typeof console.error | null = null;
@@ -92,31 +44,15 @@ export class ClientLogCollector {
   async start(): Promise<void> {
     if (this._started) return;
     this._started = true;
-    this._deviceId = getDeviceId();
-    this._tabId = getTabId();
+    this._generation += 1;
+    const identity = clientLogIdentity();
+    this._deviceId = identity.deviceId;
+    this._tabId = identity.tabId;
 
-    try {
-      const db = await openDatabase(DB_NAME, DB_VERSION, (db) => {
-        if (!db.objectStoreNames.contains(STORE_NAME)) {
-          db.createObjectStore(STORE_NAME, {
-            keyPath: "id",
-            autoIncrement: true,
-          });
-        }
-      });
-      if (!this._started) {
-        db.close();
-        return;
-      }
-      if (!db.objectStoreNames.contains(STORE_NAME)) {
-        db.close();
-        throw new Error("Client log database is missing its entries store");
-      }
-      this._db = db;
-    } catch {
-      if (!this._started) return;
-      this._useMemoryFallback = true;
-    }
+    const queue = new ClientLogQueue();
+    this._queue = queue;
+    await queue.open();
+    if (!this._started || this._queue !== queue) return;
 
     this._wrapConsole();
     this._writeEntry(
@@ -131,11 +67,6 @@ export class ClientLogCollector {
     this._unsubscribeSourceKey = subscribeClientSummarySourceKey(() => {
       this._subscribeCurrentTransportStatus();
     });
-
-    // Flush immediately if already connected (e.g. setting enabled mid-session)
-    if (this._isCurrentTransportReady()) {
-      this.flush();
-    }
   }
 
   stop(): void {
@@ -150,14 +81,8 @@ export class ClientLogCollector {
     this._unsubscribeSourceKey = null;
     this._clearScheduledFlush();
     this._stopTelemetry();
-
-    if (this._db) {
-      this._db.close();
-      this._db = null;
-    }
-
-    this._memoryBuffer = [];
-    this._useMemoryFallback = false;
+    this._queue?.close();
+    this._queue = null;
   }
 
   record(level: string, prefix: string, message: string): void {
@@ -165,102 +90,92 @@ export class ClientLogCollector {
     this._writeEntry(level, prefix, message);
   }
 
-  async flush(): Promise<void> {
-    if (this._flushing) return;
-    this._flushing = true;
-    try {
-      await this._doFlush();
-    } catch {
-      if (this._started) this._enableMemoryFallback();
-    } finally {
-      this._flushing = false;
+  captureRecorder(
+    sourceKey?: ClientSummarySourceKey,
+  ): ClientLogRecorder | null {
+    const queue = this._queue;
+    if (!this._started || !queue) return null;
+    const target = captureClientLogTarget(sourceKey);
+    if (!target) return null;
+    if (
+      this._recorder?.key === target.key &&
+      this._recorder.generation === this._generation
+    )
+      return this._recorder;
+    this._recorder = {
+      key: target.key,
+      generation: this._generation,
+      record: (level, prefix, message) => {
+        if (!this._started || this._queue !== queue) return;
+        queue.add(target.key, {
+          timestamp: Date.now(),
+          level,
+          prefix,
+          message,
+          tabId: this._tabId,
+        });
+        this._scheduleFlush();
+      },
+    };
+    return this._recorder;
+  }
+
+  recordResumeObservation(event: ResumeObservation): void {
+    const target = captureClientLogTarget();
+    if (target && observationMatchesTarget(event, target.scope)) {
+      this.record("info", "SrpResume", JSON.stringify(event));
     }
   }
 
+  flush(): Promise<void> {
+    this._flushAgain = true;
+    this._flushPromise ??= this._flushLoop().finally(() => {
+      this._flushPromise = null;
+    });
+    return this._flushPromise;
+  }
+
+  private async _flushLoop(): Promise<void> {
+    do {
+      this._flushAgain = false;
+      await this._doFlush();
+    } while (this._flushAgain && this._started);
+  }
+
   private async _doFlush(): Promise<void> {
-    let entries: LogEntry[];
-
-    if (this._useMemoryFallback || !this._db) {
-      entries = this._memoryBuffer.splice(0, FLUSH_BATCH_SIZE);
-      if (entries.length === 0) return;
-    } else {
-      entries = await getAllEntries<LogEntry>(
-        this._db,
-        STORE_NAME,
-        FLUSH_BATCH_SIZE,
-      );
-      if (entries.length === 0) return;
-    }
-
+    const queue = this._queue;
+    const target = captureClientLogTarget();
+    if (
+      !this._started ||
+      !queue ||
+      !target ||
+      target.transport.status.getSnapshot().state !== "ready"
+    )
+      return;
+    const batch = await queue.take(target.key);
+    if (
+      !batch?.entries.length ||
+      !this._started ||
+      this._queue !== queue ||
+      !isCurrentClientLogTarget(target)
+    )
+      return;
     try {
-      await fetchJSON("/client-logs", {
+      await target.fetch({
         method: "POST",
         body: JSON.stringify({
-          entries,
+          entries: batch.entries,
           deviceId: this._deviceId,
         }),
       });
-
-      // Delete flushed entries from IDB
-      if (!this._useMemoryFallback && this._db) {
-        const keys = entries
-          .map((e) => e.id)
-          .filter((id): id is number => id != null);
-        if (keys.length > 0) {
-          await deleteEntries(this._db, STORE_NAME, keys);
-        }
-      }
+      await batch.acknowledge();
     } catch {
-      // If flush fails (e.g. not connected), put memory entries back
-      if (this._useMemoryFallback) {
-        this._memoryBuffer.unshift(...entries);
-      }
+      /* 失败批次留在原队列，重试时仍验证目的地。 */
     }
   }
 
   private _writeEntry(level: string, prefix: string, message: string): void {
-    const entry: LogEntry = {
-      timestamp: Date.now(),
-      level,
-      prefix,
-      message,
-      tabId: this._tabId,
-    };
-
-    if (this._useMemoryFallback || !this._db) {
-      this._bufferEntry(entry);
-      this._scheduleFlush();
-      return;
-    }
-
-    void this._persistEntry(entry);
-  }
-
-  private async _persistEntry(entry: LogEntry): Promise<void> {
-    try {
-      if (!this._db) throw new Error("Client log database is unavailable");
-      await putEntry(this._db, STORE_NAME, entry);
-      await this._trimEntries();
-      this._scheduleFlush();
-    } catch {
-      if (!this._started) return;
-      this._enableMemoryFallback(entry);
-      this._scheduleFlush();
-    }
-  }
-
-  private _enableMemoryFallback(entry?: LogEntry): void {
-    this._db?.close();
-    this._db = null;
-    this._useMemoryFallback = true;
-    if (entry) this._bufferEntry(entry);
-  }
-
-  private _bufferEntry(entry: LogEntry): void {
-    this._memoryBuffer.push(entry);
-    if (this._memoryBuffer.length > MAX_ENTRIES) {
-      this._memoryBuffer = this._memoryBuffer.slice(-MAX_ENTRIES);
-    }
+    this.captureRecorder()?.record(level, prefix, message);
   }
 
   private _scheduleFlush(): void {
@@ -299,10 +214,9 @@ export class ClientLogCollector {
     const transport =
       getSourceRuntimeRegistry().getCurrentSourceRuntime().transport;
     this._unsubscribeStatus = transport.status.subscribe(() => {
-      if (this._isCurrentTransportReady()) {
-        this.flush();
-      }
+      if (this._isCurrentTransportReady()) void this.flush();
     });
+    if (this._isCurrentTransportReady()) void this.flush();
   }
 
   private _isCurrentTransportReady(): boolean {
@@ -315,61 +229,11 @@ export class ClientLogCollector {
 
   private _writeTelemetryEntry(): void {
     if (!this._started || typeof window === "undefined") return;
-    const perf = window.performance as Performance & {
-      memory?: {
-        jsHeapSizeLimit?: number;
-        totalJSHeapSize?: number;
-        usedJSHeapSize?: number;
-      };
-    };
-    const memory = perf.memory;
-    const payload = {
-      path: window.location.pathname,
-      visibility:
-        typeof document !== "undefined" ? document.visibilityState : "unknown",
-      memory: memory
-        ? {
-            usedJSHeapSize: memory.usedJSHeapSize,
-            totalJSHeapSize: memory.totalJSHeapSize,
-            jsHeapSizeLimit: memory.jsHeapSizeLimit,
-          }
-        : null,
-      dom:
-        typeof document !== "undefined"
-          ? {
-              nodes: document.getElementsByTagName("*").length,
-              messageRows: document.querySelectorAll(".message-render-row")
-                .length,
-              streamingBlocks:
-                document.querySelectorAll(".streaming-block").length,
-              toolRows: document.querySelectorAll(".tool-row").length,
-            }
-          : null,
-      // Attributes multi-day heap growth to transcript-store retention vs
-      // DOM/other without needing a live heap snapshot from the device.
-      transcriptMemory: getSessionTranscriptMemoryStats(),
-    };
     this._writeEntry(
       "info",
       "[ClientTelemetry]",
-      `[ClientTelemetry] ${JSON.stringify(payload)}`,
+      clientTelemetryMessage(captureClientLogTarget()?.scope === null),
     );
-  }
-
-  private async _trimEntries(): Promise<void> {
-    if (!this._db) return;
-    const count = await countEntries(this._db, STORE_NAME);
-    if (count <= MAX_ENTRIES) return;
-
-    // Get the oldest entries to delete
-    const excess = count - MAX_ENTRIES;
-    const oldest = await getAllEntries<LogEntry>(this._db, STORE_NAME, excess);
-    const keys = oldest
-      .map((e) => e.id)
-      .filter((id): id is number => id != null);
-    if (keys.length > 0) {
-      await deleteEntries(this._db, STORE_NAME, keys);
-    }
   }
 
   private _wrapConsole(): void {
@@ -396,14 +260,14 @@ export class ClientLogCollector {
         e.error instanceof Error
           ? (e.error.stack ?? e.error.message)
           : e.message;
-      this._writeEntry("error", "[UncaughtError]", msg);
+      this._capture("error", [`[UncaughtError] ${msg}`]);
     };
     this._rejectionHandler = (e: PromiseRejectionEvent) => {
       const reason =
         e.reason instanceof Error
           ? (e.reason.stack ?? e.reason.message)
           : String(e.reason);
-      this._writeEntry("error", "[UnhandledRejection]", reason);
+      this._capture("error", [`[UnhandledRejection] ${reason}`]);
     };
     window.addEventListener("error", this._errorHandler);
     window.addEventListener("unhandledrejection", this._rejectionHandler);
@@ -429,20 +293,8 @@ export class ClientLogCollector {
 
   /** Capture all warn/error messages unconditionally */
   private _capture(level: string, args: unknown[]): void {
-    if (args.length === 0) return;
-    const message = args
-      .map((a) =>
-        typeof a === "string"
-          ? a
-          : a instanceof Error
-            ? `${a.message}${a.stack ? `\n${a.stack}` : ""}`
-            : JSON.stringify(a),
-      )
-      .join(" ");
-
-    const first = args[0];
-    const prefix =
-      typeof first === "string" ? (PREFIX_REGEX.exec(first)?.[0] ?? "") : "";
-    this._writeEntry(level, prefix, message);
+    if (!canCaptureConsoleForCurrentTarget()) return;
+    const entry = consoleLogMessage(args);
+    if (entry) this._writeEntry(level, entry.prefix, entry.message);
   }
 }

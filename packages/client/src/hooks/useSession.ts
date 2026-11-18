@@ -18,7 +18,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { api } from "../api/client";
 import { useCurrentSourceRuntime } from "../contexts/SourceRuntimeContext";
 import { markReloadPerfPhase } from "../lib/diagnostics/reloadPerfProbe";
-import { logSessionUiTrace } from "../lib/diagnostics/uiTrace";
+import { useSessionUiTrace } from "../lib/diagnostics/useSessionUiTrace";
 import { createStreamDispatchCoalescer } from "../lib/streamDispatchCoalescer";
 import {
   isBrowserDebugPerformanceRecording,
@@ -576,6 +576,7 @@ export function useSession(
   },
 ) {
   const sourceSummary = useCurrentSourceRuntime().summary;
+  const logSessionUiTrace = useSessionUiTrace();
   const backgroundEffectsPaused = options?.backgroundEffectsPaused === true;
   useEffect(() => {
     markReloadPerfPhase("session_background_effects_changed", {
@@ -1423,7 +1424,7 @@ export function useSession(
       ]);
       return { tempId, clientOrder };
     },
-    [sessionId],
+    [logSessionUiTrace, sessionId],
   );
 
   const isMessageDelivered = useCallback(
@@ -1440,7 +1441,7 @@ export function useSession(
       logSessionUiTrace("pending-remove", { sessionId, tempId });
       setPendingMessages((prev) => prev.filter((p) => p.tempId !== tempId));
     },
-    [sessionId],
+    [logSessionUiTrace, sessionId],
   );
 
   // Update a pending message's fields (e.g. status text)
@@ -1455,7 +1456,7 @@ export function useSession(
         prev.map((p) => (p.tempId === tempId ? { ...p, ...updates } : p)),
       );
     },
-    [sessionId],
+    [logSessionUiTrace, sessionId],
   );
 
   // Track if we've loaded pending agents for this session
@@ -1766,7 +1767,13 @@ export function useSession(
         throttledFetch();
       }
     },
-    [noteLifecycleObservation, sessionId, status.owner, throttledFetch],
+    [
+      logSessionUiTrace,
+      noteLifecycleObservation,
+      sessionId,
+      status.owner,
+      throttledFetch,
+    ],
   );
 
   // Listen for process state changes via activity bus as a backup for session stream
@@ -1823,6 +1830,7 @@ export function useSession(
       }
     },
     [
+      logSessionUiTrace,
       beginRuntimeSnapshot,
       isRuntimeSnapshotCurrent,
       pendingInputRequest,
@@ -2572,6 +2580,7 @@ export function useSession(
       }
     },
     [
+      logSessionUiTrace,
       applyFinalMarkdownAugment,
       applyServerModeUpdate,
       sessionId,

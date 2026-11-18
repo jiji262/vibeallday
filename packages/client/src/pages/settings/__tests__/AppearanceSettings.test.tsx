@@ -19,6 +19,10 @@ vi.mock("../../../hooks/useVersion", () => ({
   useVersion: () => ({ version: null }),
 }));
 
+vi.mock("../ToolbarSettings", () => ({
+  ToolbarSettings: () => null,
+}));
+
 function renderAppearanceSettings() {
   return render(
     <I18nProvider>
@@ -39,9 +43,9 @@ describe("AppearanceSettings", () => {
   it("maps the skin cards to theme ids and reflects the pick with aria-pressed", () => {
     localStorage.setItem(UI_KEYS.theme, "light");
     renderAppearanceSettings();
-    const celadon = screen.getByRole("button", { name: "Celadon" });
-    const oled = screen.getByRole("button", { name: "Night · OLED" });
-    expect(celadon.getAttribute("aria-pressed")).toBe("true");
+    const daylight = screen.getByRole("button", { name: "Daylight" });
+    const oled = screen.getByRole("button", { name: "Graphite · OLED" });
+    expect(daylight.getAttribute("aria-pressed")).toBe("true");
     expect(oled.getAttribute("aria-pressed")).toBe("false");
     act(() => fireEvent.click(oled));
     expect(localStorage.getItem(UI_KEYS.theme)).toBe("verydark");
@@ -49,7 +53,7 @@ describe("AppearanceSettings", () => {
       "verydark",
     );
     expect(oled.getAttribute("aria-pressed")).toBe("true");
-    expect(celadon.getAttribute("aria-pressed")).toBe("false");
+    expect(daylight.getAttribute("aria-pressed")).toBe("false");
   });
 
   it("keeps project-app composing off independently of the right pane", () => {

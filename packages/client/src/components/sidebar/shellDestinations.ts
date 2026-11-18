@@ -5,33 +5,24 @@ import {
 import { type ComponentType, useMemo } from "react";
 import { useActingPrincipal } from "../../hooks/useActingPrincipal";
 import { useIssuesEnabled } from "../../hooks/useIssuesEnabled";
-import { useServerSettings } from "../../hooks/useServerSettings";
 import { useVersion } from "../../hooks/useVersion";
 import type { MessageKey } from "../../i18n";
-import { bangHistoryViewEnabled } from "../../lib/bangCommandAvailability";
-import { isRemoteClient } from "../../lib/connection";
 import {
   BugIcon,
   CpuIcon,
   FolderIcon,
   GitBranchIcon,
-  GlobeIcon,
   type IconProps,
   InboxIcon,
-  ListIcon,
   SettingsIcon,
-  TerminalIcon,
 } from "../garden/icons";
 
 export type ShellDestinationKey =
-  | "overview"
   | "sessions"
   | "projects"
   | "source-control"
-  | "bang-commands"
   | "issues"
   | "agents"
-  | "hosts"
   | "settings";
 
 /** Sidebar group, also the More page and palette grouping. */
@@ -42,45 +33,36 @@ export interface ShellDestination {
   group: ShellDestinationGroup;
   /** Route without the relay base path. */
   to: string;
+  /** Additional route paths highlighted as active for this destination. */
+  activePaths?: readonly string[];
   labelKey: MessageKey;
   /** One-line description for the More page. */
   hintKey?: MessageKey;
   Icon: ComponentType<IconProps>;
   /** Shown with a Beta badge in navigation. */
   beta?: boolean;
-  /**
-   * Route at the router root rather than under the relay base path, so links
-   * must not prefix `useRemoteBasePath()`.
-   */
-  appRoot?: boolean;
 }
 
 interface DestinationGates {
   limited: boolean;
   sourceControl: boolean;
-  bangHistory: boolean;
   issues: boolean;
 }
 
 /**
- * One table of app destinations in sidebar order. The sidebar, the phone
+ * One table of app destinations in sidebar order. Desktop sidebar, phone
  * More page and the command palette all read it, so gating lives in one place.
- * The sidebar draws the System group (Settings) in its footer.
+ * Sessions consolidates Inbox (/inbox), All (/sessions) and Triage (/triage)
+ * behind one entry with in-page view tabs on both desktop and phone.
  */
 const SHELL_DESTINATIONS: readonly ShellDestination[] = [
   {
-    key: "overview",
-    group: "work",
-    to: "/inbox",
-    labelKey: "shellNavInbox",
-    Icon: InboxIcon,
-  },
-  {
     key: "sessions",
     group: "work",
-    to: "/sessions",
-    labelKey: "sidebarAllSessions",
-    Icon: ListIcon,
+    to: "/inbox",
+    activePaths: ["/inbox", "/sessions", "/triage"],
+    labelKey: "tabSessions",
+    Icon: InboxIcon,
   },
   {
     key: "projects",
@@ -115,14 +97,6 @@ const SHELL_DESTINATIONS: readonly ShellDestination[] = [
     beta: true,
   },
   {
-    key: "bang-commands",
-    group: "tools",
-    to: "/bang-commands",
-    labelKey: "sidebarBangCommands",
-    hintKey: "moreBangCommandsHint",
-    Icon: TerminalIcon,
-  },
-  {
     key: "settings",
     group: "system",
     to: "/settings",
@@ -132,20 +106,6 @@ const SHELL_DESTINATIONS: readonly ShellDestination[] = [
   },
 ];
 
-/**
- * The multi-host monitor exists only in the remote build, at the router root
- * outside any relay host. Callers opt in because they must link it without
- * the relay base path.
- */
-const ALL_HOSTS_DESTINATION: ShellDestination = {
-  key: "hosts",
-  group: "tools",
-  to: "/-/monitor",
-  labelKey: "multiHostMonitorTitle",
-  Icon: GlobeIcon,
-  appRoot: true,
-};
-
 function isDestinationAvailable(
   key: ShellDestinationKey,
   gates: DestinationGates,
@@ -153,8 +113,6 @@ function isDestinationAvailable(
   switch (key) {
     case "source-control":
       return gates.sourceControl;
-    case "bang-commands":
-      return gates.bangHistory && !gates.limited;
     case "issues":
       return gates.issues && !gates.limited;
     case "agents":
@@ -168,17 +126,11 @@ function isDestinationAvailable(
  * Destinations the connected server and acting principal can use. Hiding is
  * cosmetic for limited users; the server refuses the same operations anyway.
  */
-export function useShellDestinations({
-  includeAppRoot = false,
-}: {
-  includeAppRoot?: boolean;
-} = {}): readonly ShellDestination[] {
+export function useShellDestinations(): readonly ShellDestination[] {
   const { version } = useVersion();
-  const { settings } = useServerSettings();
   const issues = useIssuesEnabled();
   const { principal } = useActingPrincipal();
   const limited = principal.username !== null;
-  const clientDefaults = settings?.clientDefaults;
   return useMemo(() => {
     const gates: DestinationGates = {
       limited,
@@ -187,15 +139,11 @@ export function useShellDestinations({
         version,
         GIT_STATUS_ENHANCED_CAPABILITY,
       ),
-      bangHistory: bangHistoryViewEnabled(version, clientDefaults),
     };
-    const available = SHELL_DESTINATIONS.filter((destination) =>
+    return SHELL_DESTINATIONS.filter((destination) =>
       isDestinationAvailable(destination.key, gates),
     );
-    return includeAppRoot && isRemoteClient()
-      ? [...available, ALL_HOSTS_DESTINATION]
-      : available;
-  }, [clientDefaults, includeAppRoot, issues, limited, version]);
+  }, [issues, limited, version]);
 }
 
 export function destinationsInGroup(

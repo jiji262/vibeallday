@@ -1,0 +1,259 @@
+/* Studio Workbench reader pane styles for ConversationPreviewPage. */
+.empty {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-5);
+}
+
+.emptyCard {
+  width: 100%;
+  max-width: 480px;
+  padding: var(--space-6);
+  border: 1px solid var(--card-line);
+  border-radius: var(--r-card);
+  background: var(--surface);
+  box-shadow: var(--shadow-card);
+}
+
+.emptyCard h2 {
+  margin-bottom: var(--space-2);
+  font-size: var(--fs-h2);
+  font-weight: var(--title-weight);
+  letter-spacing: var(--display-tracking);
+}
+
+.emptyCard p {
+  margin-top: var(--space-2);
+  color: var(--ink-2);
+  font-size: var(--fs-small);
+  line-height: 1.6;
+}
+
+.conversationHeader {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3) var(--space-4);
+  padding: var(--space-4) var(--space-5);
+  border-bottom: 1px solid var(--line);
+  background: var(--surface);
+}
+
+.conversationTitleBlock {
+  display: flex;
+  flex: 1 1 18rem;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.conversationCrumb {
+  color: var(--ink-3);
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+}
+
+.conversationHeader h2 {
+  display: -webkit-box;
+  overflow: hidden;
+  font-size: var(--fs-h2);
+  font-weight: var(--title-weight);
+  line-height: 1.3;
+  letter-spacing: var(--display-tracking);
+  overflow-wrap: anywhere;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  color: var(--ink-3);
+  font-size: var(--fs-meta);
+}
+
+.badge,
+.activityTag {
+  display: inline-flex;
+  align-items: center;
+  height: var(--chip-h);
+  padding: 0 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-chip);
+  background: var(--surface-2);
+  color: var(--ink-2);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: var(--badge-tracking);
+}
+
+.badge {
+  text-transform: uppercase;
+}
+
+.transcript {
+  flex: 1;
+  min-height: 0;
+  padding: var(--space-4) var(--space-5) var(--space-8);
+  overflow-y: auto;
+  overflow-wrap: anywhere;
+}
+
+.transcriptInner {
+  width: 100%;
+  max-width: var(--content-max-width);
+  margin-inline: auto;
+}
+
+.history {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: var(--space-3);
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--line);
+  color: var(--ink-3);
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+
+.history span {
+  margin-inline-end: auto;
+}
+
+.prose {
+  color: var(--ink);
+  line-height: 1.65;
+  white-space: pre-wrap;
+}
+
+.activity {
+  margin: 10px 0;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-inline-start: 2px solid var(--line-strong);
+  border-radius: var(--r-sm);
+  background: var(--surface-2);
+  font-size: var(--fs-small);
+  line-height: 1.5;
+}
+
+.activity small {
+  display: inline-block;
+  margin-top: 4px;
+  color: var(--ink-3);
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+
+.failure {
+  margin: 10px 0;
+  padding: 10px 12px;
+  border: 1px solid var(--err-line);
+  border-radius: var(--r-sm);
+  background: var(--err-soft);
+  color: var(--err-ink);
+  font-size: var(--fs-small);
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+
+.failure strong {
+  display: block;
+  margin-bottom: 4px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+
+.notice {
+  margin: 12px 0;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-card);
+  background: var(--surface);
+  color: var(--ink-2);
+  font-size: var(--fs-small);
+  line-height: 1.5;
+}
+
+.notice button {
+  margin-top: 8px;
+}
+
+.pendingCard {
+  margin: 14px 0;
+  padding: 14px 16px;
+  border: 1px solid var(--attn-line);
+  border-radius: var(--r-card);
+  background: var(--attn-soft);
+  color: var(--attn-ink);
+  font-size: var(--fs-small);
+  line-height: 1.5;
+}
+
+.pendingCard strong {
+  display: block;
+  margin-bottom: 4px;
+}
+
+.pendingCard small {
+  display: block;
+  margin-top: 6px;
+  opacity: 0.85;
+}
+
+.message {
+  margin: 14px 0;
+  padding: 14px 16px;
+  border: 1px solid var(--card-line);
+  border-radius: var(--r-card);
+  background: var(--surface);
+  box-shadow: var(--shadow-card);
+}
+
+.message[data-role="user"] {
+  border-color: var(--user-bubble-line);
+  background: var(--user-bubble);
+  box-shadow: none;
+}
+
+.message header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+  color: var(--ink-3);
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+}
+
+.message header strong {
+  color: var(--ink-2);
+  font-weight: 600;
+}
+
+@media (width <= 640px) {
+  .conversationHeader {
+    padding: var(--space-3) var(--space-4);
+  }
+
+  .conversationHeader h2 {
+    font-size: var(--fs-h3);
+  }
+
+  .transcript {
+    padding: var(--space-3) var(--space-4) var(--space-6);
+  }
+
+  .message {
+    padding: 12px 14px;
+  }
+}

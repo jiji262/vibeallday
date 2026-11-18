@@ -8,13 +8,18 @@ export function IssueTypeBadge({ item }: { item: IssueItem }) {
   const jira = item.provider === "jira";
   const pr = item.provider === "github" && item.kind === "pr";
   const issue = item.kind === "issue";
+  const toneClass = jira
+    ? styles.jira
+    : pr
+      ? styles.pr
+      : issue
+        ? styles.issue
+        : styles.unknown;
   return (
-    <span
-      className={`${styles.badge} ${jira ? styles.jira : pr ? styles.pr : issue ? styles.issue : styles.unknown}`}
-    >
+    <span className={`${styles.badge} ${toneClass}`}>
       <svg
-        width="12"
-        height="12"
+        width="11"
+        height="11"
         viewBox="0 0 16 16"
         fill="none"
         stroke="currentColor"

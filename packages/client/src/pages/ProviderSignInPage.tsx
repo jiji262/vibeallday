@@ -1,7 +1,9 @@
 import { Link, useParams } from "react-router-dom";
 import { Card, CardBody, CardFooter } from "../components/garden/Card";
+import { ChevronRightIcon } from "../components/garden/icons";
 import { LoadingState } from "../components/garden/LoadingState";
 import { Notice } from "../components/garden/Notice";
+import { ProviderMark } from "../components/garden/ProviderMark";
 import { PageHeader } from "../components/PageHeader";
 import { PageIntro } from "../components/shell/PageIntro";
 import { pageWidthClass } from "../components/shell/pageWidth";
@@ -89,6 +91,13 @@ export function ProviderSignInPage() {
         <div className={`page-content-inner ${pageWidthClass("form")}`}>
           <PageIntro title={title} lede={t("providerSignInHostHint")} />
           <Card as="section" aria-label={title}>
+            {provider ? (
+              <div className={styles.providerHead}>
+                <ProviderMark provider={provider} size="md" />
+                <span className={styles.providerName}>{name}</span>
+                <code className={styles.providerSlug}>{provider}</code>
+              </div>
+            ) : null}
             <CardBody className={styles.body}>
               <SignInBody provider={provider} name={name} />
             </CardBody>
@@ -97,7 +106,8 @@ export function ProviderSignInPage() {
                 className={styles.settingsLink}
                 to={`${basePath}/settings/providers`}
               >
-                {t("providerSignInSettings")}
+                <span>{t("providerSignInSettings")}</span>
+                <ChevronRightIcon size={14} />
               </Link>
             </CardFooter>
           </Card>

@@ -6,7 +6,6 @@ import { Button } from "../components/garden/Button";
 import { CopyChip } from "../components/garden/CopyChip";
 import { EmptyState } from "../components/garden/EmptyState";
 import { FolderIcon, RefreshIcon } from "../components/garden/icons";
-import { Notice } from "../components/garden/Notice";
 import { PageHeader } from "../components/PageHeader";
 import { PageIntro } from "../components/shell/PageIntro";
 import { GlossaryProjectBoundary } from "../contexts/GlossaryContext";
@@ -61,26 +60,9 @@ export function LocalSourcePage() {
       <main className="page-scroll-container">
         <div className="page-content-inner">
           <PageIntro
+            className={styles.intro}
+            eyebrow={[t("gitStatusTitle"), t("localSourceTitle")]}
             title={name}
-            lede={
-              title ? (
-                <span className={styles.lede}>
-                  {snapshotTime ? (
-                    <Tag>
-                      {t("localSourceSnapshotTag", { time: snapshotTime })}
-                    </Tag>
-                  ) : null}
-                  <span className={styles.path} title={title}>
-                    {title}
-                  </span>
-                  <CopyChip
-                    value={title}
-                    label={t("sourceCopyPath")}
-                    copiedLabel={t("copied")}
-                  />
-                </span>
-              ) : undefined
-            }
             actions={
               canBrowse ? (
                 <Button
@@ -93,26 +75,52 @@ export function LocalSourcePage() {
               ) : undefined
             }
           />
-          {canBrowse && snapshotTime ? (
-            <Notice className={styles.notice}>
-              {t("localSourceSnapshotNotice", { time: snapshotTime })}
-            </Notice>
-          ) : null}
           {!projectId || !requestedPath ? (
             <MissingPathState projectId={projectId} />
           ) : (
             <GlossaryProjectBoundary projectId={projectId}>
-              <div className="git-status">
-                <BlameBrowser
-                  key={`${requestedPath}\0${snapshotGeneration}`}
-                  projectId={projectId}
-                  isWideScreen={isWideScreen}
-                  supportsWorkingTreeFiles
-                  localSourcePath={requestedPath}
-                  onLocalSourceRoot={handleRoot}
-                  t={t}
-                />
-              </div>
+              <section className={styles.directoryFrame}>
+                {title ? (
+                  <header className={styles.pathBar}>
+                    <div className={styles.pathIdentity}>
+                      <span className={styles.folderBadge} aria-hidden="true">
+                        <FolderIcon />
+                      </span>
+                      <span className={styles.path} title={title}>
+                        {title}
+                      </span>
+                      <CopyChip
+                        value={title}
+                        label={t("sourceCopyPath")}
+                        copiedLabel={t("copied")}
+                      />
+                    </div>
+                    {snapshotTime ? (
+                      <div className={styles.pathMeta}>
+                        <Tag>
+                          {t("localSourceSnapshotTag", { time: snapshotTime })}
+                        </Tag>
+                        <span className={styles.snapshotNotice}>
+                          {t("localSourceSnapshotNotice", {
+                            time: snapshotTime,
+                          })}
+                        </span>
+                      </div>
+                    ) : null}
+                  </header>
+                ) : null}
+                <div className={`git-status ${styles.browserBody}`}>
+                  <BlameBrowser
+                    key={`${requestedPath}\0${snapshotGeneration}`}
+                    projectId={projectId}
+                    isWideScreen={isWideScreen}
+                    supportsWorkingTreeFiles
+                    localSourcePath={requestedPath}
+                    onLocalSourceRoot={handleRoot}
+                    t={t}
+                  />
+                </div>
+              </section>
             </GlossaryProjectBoundary>
           )}
         </div>
@@ -129,16 +137,18 @@ function MissingPathState({ projectId }: { projectId?: string }) {
     ? `${basePath}/git-status?projectId=${encodeURIComponent(projectId)}`
     : `${basePath}/projects`;
   return (
-    <EmptyState
-      title={t("localSourceMissingPathTitle")}
-      hint={t("localSourceMissingPathHint")}
-      icon={<FolderIcon />}
-      action={
-        <Link to={target} className={styles.action}>
-          {t(projectId ? "localSourceOpenSourceControl" : "fileGoToProjects")}
-        </Link>
-      }
-    />
+    <div className={styles.emptyCard}>
+      <EmptyState
+        title={t("localSourceMissingPathTitle")}
+        hint={t("localSourceMissingPathHint")}
+        icon={<FolderIcon />}
+        action={
+          <Link to={target} className={styles.action}>
+            {t(projectId ? "localSourceOpenSourceControl" : "fileGoToProjects")}
+          </Link>
+        }
+      />
+    </div>
   );
 }
 

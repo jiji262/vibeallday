@@ -14,12 +14,12 @@ Add a library you trust before enabling project creation. VibeAllDay retrieves
 and validates configured libraries and creates projects from `ready` templates;
 `draft` templates can be inspected but are not approved for creation.
 
-## Add a source in VIBEALLDAY
+## Configure a source in VIBEALLDAY
 
-Open **Settings → Project templates**, add a source, and enter its GitHub or
-local directory. Enable templates and choose **Fetch / update**. A GitHub
-subdirectory may follow the repository URL, or use its full GitHub `tree` URL.
-For a branch name containing `/`, enter the branch in the revision field first.
+Configure `projectTemplates` (`enabled` and `sources`) in your server settings
+or through `/api/project-templates/settings`, then trigger a fetch/update with
+`POST /api/project-templates/update`. Each source accepts a GitHub repository
+(with optional subdirectory) or a local directory path.
 
 GitHub sources also have a revision:
 
@@ -28,26 +28,23 @@ GitHub sources also have a revision:
 - Use a branch, tag or full commit SHA to select a particular version. A full
   commit SHA makes a shared example reproducible.
 
-For GitHub sources, VIBEALLDAY displays the commit SHA it actually fetched. Updating
-checks the selected revision and reports **Already up to date** if it has not
-changed. **Update from default branch** selects `HEAD` for that source.
+For GitHub sources, VIBEALLDAY records the commit SHA it actually fetched. Updating
+checks the selected revision and skips re-downloading if it has not changed.
 There is no automatic background update or automatic check when opening the
 template chooser.
-While templates are disabled, Save records your settings without downloading.
 
-For local work, enter an absolute directory or a path such as
+For local work, use an absolute directory or a path such as
 `~/community/project-templates`. VIBEALLDAY uses its files directly, without copying
-or rewriting them. If it belongs to a Git repository, VIBEALLDAY shows that repository's
+or rewriting them. If it belongs to a Git repository, VIBEALLDAY records that repository's
 HEAD and permits file references within that repository. Otherwise the chosen
 directory is the source boundary. Git HEAD is provenance, not a fingerprint of
-uncommitted files: Update always revalidates local sources. A local directory
+uncommitted files: updating always revalidates local sources. A local directory
 can be a primary source or a supplementary overlay, just like a GitHub directory.
 
-Use **Add source** for your own or a community library. Keep any source whose bases your templates require in the list. Later sources replace
-earlier entries with the same base or template ID. **Move up** changes that
-order. Give new templates distinctive IDs unless you deliberately want to
-replace an existing entry. The inventory identifies the source supplying
-each effective template.
+Keep any source whose bases your templates require in the `sources` list. Later
+sources replace earlier entries with the same base or template ID. Give new
+templates distinctive IDs unless you deliberately want to replace an existing
+entry.
 
 ## Make a small community library
 

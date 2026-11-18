@@ -11,7 +11,7 @@ import styles from "./ProjectHomePage.module.css";
 
 const BRANCH_ICON_SIZE = 13;
 
-/** Branch chip linking to Source Control, when the server reports status. */
+/** Studio pill badge linking to Source Control when the server reports Git status. */
 export function ProjectBranchChip({
   projectId,
   sourceHref,
@@ -35,7 +35,9 @@ export function ProjectBranchChip({
       className={styles.branch}
       aria-label={t("projectHomeBranchLabel", { branch })}
     >
-      <GitBranchIcon size={BRANCH_ICON_SIZE} />
+      <span className={styles.branchIcon} aria-hidden="true">
+        <GitBranchIcon size={BRANCH_ICON_SIZE} />
+      </span>
       <span className={styles.branchName}>{branch}</span>
       {gitStatus.ahead > 0 && (
         <span className={styles.branchMeta}>

@@ -107,7 +107,7 @@ test.beforeAll(async () => {
     disableTelemetry: true,
     allowedOrigins: clientOrigin,
   });
-  relayUrl = `ws://localhost:${relay.port}/ws`;
+  relayUrl = `ws://127.0.0.1:${relay.port}/ws`;
   const remoteAccess = new RemoteAccessService({ dataDir });
   await remoteAccess.initialize();
   await remoteAccess.setRelayConfig({ url: relayUrl, username });

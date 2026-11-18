@@ -1,0 +1,129 @@
+/*
+ * Studio Workbench Project App Viewport: full-height edge-to-edge frame
+ * with optional left session composer split pane.
+ */
+
+.workspace.workspace {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  height: 100dvh;
+  max-height: 100dvh;
+  overflow: hidden;
+  background: var(--canvas);
+}
+
+.composerPane.composerPane {
+  display: flex;
+  flex: 0 0 min(460px, 44%);
+  flex-direction: column;
+  min-width: 320px;
+  min-height: 0;
+  padding: 0;
+  overflow: hidden;
+  border-right: 1px solid var(--line);
+  background: var(--canvas);
+}
+
+@media (width < 960px) {
+  .composerPane.composerPane {
+    flex: 1 1 100%;
+    min-width: 0;
+    border-right: none;
+  }
+}
+
+.composerTopBar {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--line);
+  background: var(--surface);
+}
+
+@media (width >= 960px) {
+  .composerTopBar {
+    display: none;
+  }
+}
+
+.appSwitchButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--btn-h-sm);
+  padding: 0 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-btn);
+  background: var(--surface-2);
+  color: var(--ink);
+  font-family: var(--font-ui);
+  font-size: var(--fs-small);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .appSwitchButton {
+    transition:
+      border-color var(--duration-fast) var(--ease-standard),
+      background-color var(--duration-fast) var(--ease-standard);
+  }
+}
+
+.appSwitchButton:hover {
+  border-color: var(--accent-line);
+  background: var(--accent-soft);
+  color: var(--accent-ink);
+}
+
+.appSwitchButton:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.composerScroll {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  overflow-y: auto;
+  padding: var(--space-4);
+}
+
+.appViewport.appViewport {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+  overflow: hidden;
+  background: var(--surface);
+}
+
+.concealed.concealed {
+  display: none;
+}
+
+.unsupportedFrame {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
+  padding: var(--space-6) var(--space-4);
+}
+
+.unsupportedMessage {
+  margin: 0;
+  padding: 16px 20px;
+  border: 1px solid var(--card-line);
+  border-radius: var(--r-card);
+  background: var(--surface);
+  color: var(--ink-2);
+  font-size: var(--fs-body);
+  box-shadow: var(--shadow-card);
+}

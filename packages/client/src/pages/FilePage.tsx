@@ -8,9 +8,10 @@ import { GlossaryProjectBoundary } from "../contexts/GlossaryContext";
 import { useRemoteBasePath } from "../hooks/useRemoteBasePath";
 import { useI18n } from "../i18n";
 import { useNavigationLayout } from "../layouts";
+import styles from "./FilePage.module.css";
 
 /**
- * FilePage - Standalone page for viewing files.
+ * FilePage - Standalone Studio code-viewer page for project files.
  * Route: /projects/:projectId/file?path=<path>
  */
 export function FilePage() {
@@ -28,45 +29,56 @@ export function FilePage() {
 
   if (!projectId) {
     return (
-      <div className="file-page file-page-error">
-        <EmptyState
-          title={t("fileInvalidUrl" as never)}
-          hint={t("fileMissingProjectId" as never)}
-          icon={<AlertIcon />}
-          action={
-            <Link to={`${basePath}/projects`} className="file-page-back-link">
-              {t("fileGoToProjects" as never)}
-            </Link>
-          }
-        />
+      <div
+        className={`file-page file-page-error ${styles.viewport} ${styles.errorViewport}`}
+      >
+        <div className={styles.errorCard}>
+          <EmptyState
+            title={t("fileInvalidUrl" as never)}
+            hint={t("fileMissingProjectId" as never)}
+            icon={<AlertIcon />}
+            action={
+              <Link
+                to={`${basePath}/projects`}
+                className={`file-page-back-link ${styles.backLink}`}
+              >
+                {t("fileGoToProjects" as never)}
+              </Link>
+            }
+          />
+        </div>
       </div>
     );
   }
 
   if (!filePath) {
     return (
-      <div className="file-page file-page-error">
-        <EmptyState
-          title={t("fileInvalidUrl" as never)}
-          hint={t("fileMissingPath" as never)}
-          icon={<AlertIcon />}
-          action={
-            <Link
-              to={`${basePath}/projects/${projectId}`}
-              className="file-page-back-link"
-            >
-              {t("fileGoToProject" as never)}
-            </Link>
-          }
-        />
+      <div
+        className={`file-page file-page-error ${styles.viewport} ${styles.errorViewport}`}
+      >
+        <div className={styles.errorCard}>
+          <EmptyState
+            title={t("fileInvalidUrl" as never)}
+            hint={t("fileMissingPath" as never)}
+            icon={<AlertIcon />}
+            action={
+              <Link
+                to={`${basePath}/projects/${projectId}`}
+                className={`file-page-back-link ${styles.backLink}`}
+              >
+                {t("fileGoToProject" as never)}
+              </Link>
+            }
+          />
+        </div>
       </div>
     );
   }
 
   return (
     <GlossaryProjectBoundary projectId={projectId}>
-      <div className="file-page">
-        <div className="file-page-content">
+      <div className={`file-page ${styles.viewport}`}>
+        <div className={`file-page-content ${styles.frame}`}>
           <FileViewer
             projectId={projectId}
             filePath={filePath}
@@ -76,7 +88,7 @@ export function FilePage() {
             diffMode={diffMode}
             standalone
             headerLeading={
-              <>
+              <span className={styles.headerNav}>
                 <SidebarLauncher
                   label={t("actionOpenSidebar")}
                   newSessionLabel={t("sidebarNewSession")}
@@ -84,13 +96,13 @@ export function FilePage() {
                 />
                 <Link
                   to={`${basePath}/projects/${projectId}`}
-                  className="file-viewer-action"
+                  className={`file-viewer-action ${styles.backAction}`}
                   title={t("fileBackToProject" as never)}
                   aria-label={t("fileBackToProject" as never)}
                 >
                   <BackArrowIcon />
                 </Link>
-              </>
+              </span>
             }
           />
         </div>

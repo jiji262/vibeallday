@@ -24,6 +24,7 @@ import {
   type VibeAllDayServerProcess,
 } from "./support/vibeallday-server-process.js";
 import { terminateChildProcess } from "./support/process-lifecycle.js";
+import { assertLoopbackWebSocket } from "./support/loopback-websocket.mjs";
 
 function getTempDir(): string {
   const tempDir = getE2EProfileDirectory();
@@ -145,7 +146,7 @@ export interface RemoteAccessConfig {
   username: string;
   /** Password for SRP authentication */
   password: string;
-  /** Optional relay URL (defaults to wss://vibeallday-relay.navs.dpdns.org/ws) */
+  /** 本地 relay URL；仅测试直接 SRP 时默认使用不可达的 loopback 端口。 */
   relayUrl?: string;
 }
 
@@ -153,6 +154,8 @@ export async function configureRemoteAccess(
   baseURL: string,
   config: RemoteAccessConfig,
 ): Promise<void> {
+  const relayUrl = config.relayUrl ?? "ws://127.0.0.1:9/ws";
+  assertLoopbackWebSocket(relayUrl);
   // First configure relay (username is used as SRP identity)
   const relayResponse = await fetch(`${baseURL}/api/remote-access/relay`, {
     method: "PUT",
@@ -161,7 +164,7 @@ export async function configureRemoteAccess(
       "X-VibeAllDay": "true",
     },
     body: JSON.stringify({
-      url: config.relayUrl ?? "wss://vibeallday-relay.navs.dpdns.org/ws",
+      url: relayUrl,
       username: config.username,
     }),
   });
@@ -434,7 +437,7 @@ export const test = base.extend<TestFixtures, WorkerFixtures>({
   },
   relayWsURL: async ({ workerRelay }, use) => {
     const port = workerRelay?.port ?? getRelayPort();
-    await use(`ws://localhost:${port}/ws`);
+    await use(`ws://127.0.0.1:${port}/ws`);
   },
 });
 

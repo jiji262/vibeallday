@@ -1,45 +1,76 @@
-/* Repository operations in the Source Control identity bar. They are garden
-   secondary sm buttons; the leading indicator keeps a fixed slot so a glyph,
-   the running spinner, and the outcome mark swap without moving the label. */
+/* Studio Source Control action group: Sync split button, fetch/pull/push actions,
+   and live-update pause toggle. A fixed 0.75rem indicator slot keeps labels
+   width-stable across glyph, spinner, and outcome transitions. */
 .actionGroup {
   display: inline-flex;
   flex-shrink: 0;
   flex-wrap: wrap;
   align-items: center;
-  gap: var(--space-2);
+  gap: 6px;
 }
 
 .action {
+  min-height: 34px;
+  color: var(--ink);
+  font-family: var(--font-ui);
+  font-size: 12.5px;
+  font-weight: 500;
   white-space: nowrap;
+  background: var(--surface);
+  border-color: var(--line);
+  border-radius: var(--r-btn);
+  box-shadow: var(--shadow-card);
+  transition:
+    background-color 120ms ease,
+    border-color 120ms ease,
+    color 120ms ease;
+}
+
+.actionLabel {
+  font-weight: 500;
 }
 
 .iconOnly {
   padding-inline: 0;
-  width: var(--btn-h-sm);
+  width: 34px;
+  border-radius: var(--r-card);
 }
 
-/* Design .split: Sync and its overflow share one outline with a seam. */
+/* Segmented Sync split: primary operation + overflow trigger share one crisp frame. */
 .split {
   display: inline-flex;
   flex: none;
+  border-radius: var(--r-card);
+  box-shadow: var(--shadow-card);
 }
 
 .splitMain {
+  border-start-start-radius: var(--r-card);
+  border-end-start-radius: var(--r-card);
   border-start-end-radius: 0;
   border-end-end-radius: 0;
+  border-inline-end: 0;
+  box-shadow: none;
 }
 
 .splitToggle {
   padding-inline: 8px;
   border-start-start-radius: 0;
   border-end-start-radius: 0;
-  box-shadow: inset 1px 0 0 var(--line);
+  border-start-end-radius: var(--r-card);
+  border-end-end-radius: var(--r-card);
+  box-shadow: none;
 }
 
 .syncCounts {
-  color: var(--ink-3);
+  padding: 1px 5px;
+  margin-inline-start: 2px;
+  color: var(--attn);
+  background: var(--attn-soft);
+  border-radius: var(--r-sm);
   font-family: var(--font-mono);
-  font-size: var(--fs-meta);
+  font-size: 11px;
+  font-weight: 600;
   font-variant-numeric: tabular-nums;
 }
 
@@ -57,6 +88,17 @@
   line-height: 1;
 }
 
+.action:hover {
+  background: var(--surface-2);
+  border-color: var(--line-strong);
+}
+
+.action[aria-pressed="true"] {
+  color: var(--accent-ink);
+  background: var(--accent-soft);
+  border-color: var(--accent-line);
+}
+
 .indicator .glyph {
   display: block;
   width: 0.75rem;
@@ -64,11 +106,15 @@
 }
 
 .success .indicator {
-  color: var(--ok-ink);
+  color: var(--run);
 }
 
 .warning .indicator {
-  color: var(--attn-ink);
+  color: var(--attn);
+}
+
+.action[aria-pressed="true"] .indicator {
+  color: var(--accent-ink);
 }
 
 @media (width < 768px) {
@@ -76,7 +122,6 @@
     width: 100%;
   }
 
-  /* Repository operations are thumb targets on phones. */
   .action {
     min-height: var(--tap-min);
   }

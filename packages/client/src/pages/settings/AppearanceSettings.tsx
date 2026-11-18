@@ -7,7 +7,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ThinkingText } from "../../components/ThinkingText";
 import tooltipStyles from "../../components/ui/TooltipLayer.module.css";
-import styles from "./AppearanceSettings.module.css";
 import { renderFixedFontMath } from "../../components/ui/FixedFontMathToggle";
 import {
   DEFAULT_CONTENT_MAX_WIDTH_PX,
@@ -98,11 +97,6 @@ import { useSettingsPaneTitle } from "./SettingsPaneTitleContext";
 import { SettingsSection } from "./SettingsSection";
 import { useSettingsUndoBaseline } from "./SettingsUndoContext";
 import { useRemoteBasePath } from "../../hooks/useRemoteBasePath";
-import {
-  SETTINGS_ICON_STYLES,
-  type SettingsIconStyle,
-  useSettingsIconStyle,
-} from "../../hooks/useSettingsIconStyle";
 import { useSidebarDuplicateHiding } from "../../hooks/useSidebarDuplicateHiding";
 import { useHideAutomationSessions } from "../../hooks/useHideAutomationSessions";
 import {
@@ -120,7 +114,8 @@ import {
   getSidebarSpacingLabel,
   getTabSizeLabel,
 } from "../../i18n-settings";
-import { SettingsIconTile } from "./SettingsCategoryIcons";
+import { EmbeddedSettingsPane } from "./EmbeddedSettingsPane";
+import { ToolbarSettings } from "./ToolbarSettings";
 import { CommittedRangeInput } from "../../components/ui/CommittedRangeInput";
 import { InnerHtml } from "../../components/ui/InnerHtml";
 import { CommittedRangeNumberInput } from "../../components/ui/CommittedRangeNumberInput";
@@ -176,20 +171,6 @@ function undoEntry<T>(
       syncDraft?.(restored);
     },
   };
-}
-
-function getSettingsIconStyleLabel(
-  value: SettingsIconStyle,
-  translate: (key: string) => string,
-): string {
-  switch (value) {
-    case "flat":
-      return translate("appearanceSettingsIconStyleFlat");
-    case "flat-white":
-      return translate("appearanceSettingsIconStyleFlatWhite");
-    case "emoji":
-      return translate("appearanceSettingsIconStyleEmoji");
-  }
 }
 
 function getQuoteReplyButtonModeLabel(
@@ -318,7 +299,6 @@ export function AppearanceSettings() {
   const [outputToolPreviewLineCountDraft, setOutputToolPreviewLineCountDraft] =
     useState(() => formatNumberSetting(outputToolPreviewLineCount));
   const { theme, setTheme } = useTheme();
-  const { settingsIconStyle, setSettingsIconStyle } = useSettingsIconStyle();
   const {
     compactMultiImageGalleries,
     inlineMediaExpandedByDefault,
@@ -440,7 +420,6 @@ export function AppearanceSettings() {
       setGeneratedTitleLengthDraft(String(value)),
     ),
     undoEntry(theme, setTheme),
-    undoEntry(settingsIconStyle, setSettingsIconStyle),
     undoEntry(inlineMediaExpandedByDefault, setInlineMediaExpandedByDefault),
     undoEntry(compactMultiImageGalleries, setCompactMultiImageGalleries),
     undoEntry(recentProjectPathLinksEnabled, setRecentProjectPathLinksEnabled),
@@ -643,38 +622,6 @@ export function AppearanceSettings() {
                 </option>
               ))}
             </select>
-          </SettingsItem>
-          <SettingsItem
-            label={t("appearanceSettingsIconStyleTitle")}
-            description={t("appearanceSettingsIconStyleDescription")}
-            valueText={getSettingsIconStyleLabel(settingsIconStyle, translate)}
-            className="settings-item--wide-control"
-          >
-            <div
-              className={`font-size-selector settings-icon-style-selector ${styles.iconStyleSelector}`}
-              role="group"
-              aria-label={t("appearanceSettingsIconStyleTitle")}
-            >
-              {SETTINGS_ICON_STYLES.map((style) => {
-                const selected = settingsIconStyle === style;
-                return (
-                  <button
-                    key={style}
-                    type="button"
-                    className={`font-size-option settings-icon-style-option ${selected ? "active" : ""}`}
-                    onClick={() => setSettingsIconStyle(style)}
-                    aria-pressed={selected}
-                  >
-                    <SettingsIconTile
-                      id="local-access"
-                      iconStyle={style}
-                      compact
-                    />
-                    <span>{getSettingsIconStyleLabel(style, translate)}</span>
-                  </button>
-                );
-              })}
-            </div>
           </SettingsItem>
         </div>
       </SettingsSection>
@@ -2132,6 +2079,9 @@ export function AppearanceSettings() {
           </SettingsItem>
         </div>
       </SettingsSection>
+      <EmbeddedSettingsPane title={t("settingsToolbarTitle")}>
+        <ToolbarSettings />
+      </EmbeddedSettingsPane>
     </>
   );
 }

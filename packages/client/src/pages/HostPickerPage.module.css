@@ -35,18 +35,33 @@
   margin: 0;
   padding: 0;
   overflow: hidden;
-  border: 1px solid var(--line);
-  border-radius: var(--r-md);
-  background: var(--surface);
+  border: 1px solid var(--card-line);
+  border-radius: var(--r-card);
+  background: var(--surface-2);
   list-style: none;
 }
 
 .host {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   min-height: var(--row-h);
-  padding: 12px 8px 12px 12px;
+  padding: 11px 10px 11px 12px;
+  background: var(--surface);
+  transition: background-color 140ms ease;
+}
+
+.host:hover {
+  background: var(--surface-2);
+}
+
+.hostCurrent {
+  background: color-mix(in srgb, var(--accent-soft) 36%, var(--surface));
+}
+
+.hostCurrent:hover {
+  background: color-mix(in srgb, var(--accent-soft) 52%, var(--surface));
 }
 
 .host + .host {
@@ -58,16 +73,19 @@
   display: grid;
   flex: none;
   place-items: center;
-  width: 36px;
-  height: 36px;
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--line);
   border-radius: var(--r-md);
-  background: var(--surface-3);
+  background: var(--surface-2);
   color: var(--ink-2);
   font-family: var(--font-mono);
+  font-size: 13px;
   font-weight: 700;
 }
 
 .avatarOn {
+  border-color: var(--accent-line);
   background: var(--accent-soft);
   color: var(--accent-ink);
 }
@@ -76,14 +94,14 @@
   position: absolute;
   right: -3px;
   bottom: -3px;
-  box-shadow: 0 0 0 3px var(--surface);
+  box-shadow: 0 0 0 2px var(--surface);
 }
 
 .hostText {
   display: flex;
-  flex: 1;
+  flex: 1 1 140px;
   flex-direction: column;
-  gap: 3px;
+  gap: 2px;
   min-width: 0;
 }
 
@@ -97,8 +115,9 @@
 .hostName {
   overflow: hidden;
   color: var(--ink);
-  font-size: var(--fs-h3);
+  font-size: var(--fs-body);
   font-weight: 600;
+  letter-spacing: -0.01em;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -120,8 +139,8 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  border: 1px solid var(--line);
-  border-radius: var(--r-md);
+  border: 1px solid var(--card-line);
+  border-radius: var(--r-card);
   background: var(--surface);
 }
 
@@ -129,15 +148,15 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  min-height: 60px;
-  padding: 12px 12px 12px 16px;
+  min-height: 58px;
+  padding: 12px 14px 12px 16px;
   border: 0;
   background: transparent;
   color: var(--ink);
   font: inherit;
   text-align: start;
   cursor: pointer;
-  transition: background-color var(--duration-fast) var(--ease-standard);
+  transition: background-color 140ms ease;
 }
 
 .option + .option {
@@ -145,7 +164,7 @@
 }
 
 .option:hover {
-  background: var(--surface-3);
+  background: var(--surface-2);
 }
 
 .option:focus-visible {
@@ -164,6 +183,7 @@
 .optionTitle {
   font-size: var(--fs-body);
   font-weight: 600;
+  letter-spacing: -0.01em;
 }
 
 .optionDesc {
@@ -175,4 +195,12 @@
 .chevron {
   flex-shrink: 0;
   color: var(--ink-3);
+  transition:
+    color 140ms ease,
+    transform 140ms ease;
+}
+
+.option:hover .chevron {
+  color: var(--ink);
+  transform: translateX(2px);
 }

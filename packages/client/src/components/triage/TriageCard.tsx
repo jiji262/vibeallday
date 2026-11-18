@@ -118,18 +118,20 @@ export function TriageCard(props: TriageCardProps) {
           )}
         </div>
         {inline && (
-          <NeedsYouActions
-            pending={pending}
-            armed={props.armed}
-            sessionHref={href}
-            projectPath={projectPathOf(item.projectId)}
-            onOpenSession={onOpenLink}
-            reason={props.reason}
-            keyHints
-            hideOpenLink
-            phoneDock
-            trailing={skip}
-          />
+          <div className={styles.decisionFrame}>
+            <NeedsYouActions
+              pending={pending}
+              armed={props.armed}
+              sessionHref={href}
+              projectPath={projectPathOf(item.projectId)}
+              onOpenSession={onOpenLink}
+              reason={props.reason}
+              keyHints
+              hideOpenLink
+              phoneDock
+              trailing={skip}
+            />
+          </div>
         )}
         {ask.kind !== "approval" && (
           <div className={styles.actions}>

@@ -1,29 +1,38 @@
-/* The Review tab (design GitReview boards): pending comments, then the
-   submitted reviews, each under an eyebrow heading. */
+/* Studio Review tab: pending drafts above submitted review history, separated
+   by mono eyebrow headings with trailing hairlines. */
 .panel {
   display: flex;
   flex-direction: column;
-  gap: var(--space-6);
+  gap: 24px;
   min-width: 0;
+  max-width: 68rem;
+  padding-top: 4px;
 }
 
 .section {
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
+  gap: 10px;
   min-width: 0;
-  scroll-margin-top: var(--space-4);
+  scroll-margin-top: 16px;
 }
 
 .heading {
   display: flex;
   align-items: center;
-  gap: var(--space-2);
+  gap: 8px;
   margin: 0;
   color: var(--ink-3);
   font-family: var(--font-mono);
-  font-size: var(--fs-meta);
+  font-size: 11px;
   font-weight: 600;
-  letter-spacing: var(--meta-tracking);
+  letter-spacing: 0.06em;
   text-transform: uppercase;
+}
+
+.heading::after {
+  content: "";
+  flex: 1 1 auto;
+  height: 1px;
+  background: var(--line);
 }

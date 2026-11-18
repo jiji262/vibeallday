@@ -1,30 +1,45 @@
+import { SERVER_CAPABILITIES, serverHasCapability } from "@vibeallday/shared";
 import { useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
-import { SERVER_CAPABILITIES, serverHasCapability } from "@vibeallday/shared";
-import { NewSessionForm } from "../components/NewSessionForm";
-import { ProjectAppViewer } from "../components/ProjectAppViewer";
-import type { VoiceInputButtonRef } from "../components/VoiceInputButton";
 import type { ProjectAppTarget } from "../api/projectApp";
+import { NewSessionForm } from "../components/NewSessionForm";
+import { PageHeader } from "../components/PageHeader";
+import { ProjectAppViewer } from "../components/ProjectAppViewer";
+import viewerStyles from "../components/ProjectAppViewer.module.css";
+import type { VoiceInputButtonRef } from "../components/VoiceInputButton";
 import { useProject } from "../hooks/useProjects";
 import { useRemoteBasePath } from "../hooks/useRemoteBasePath";
 import { useVersion } from "../hooks/useVersion";
-import { MainContent, useNavigationLayout } from "../layouts";
-import styles from "../components/ProjectAppViewer.module.css";
 import { useI18n } from "../i18n";
+import { MainContent, useNavigationLayout } from "../layouts";
+import styles from "./ProjectAppPage.module.css";
 
 export function ProjectAppPage() {
   const { t } = useI18n();
   const { projectId } = useParams<{ projectId: string }>();
   const { version } = useVersion();
+  const { openSidebar, isWideScreen } = useNavigationLayout();
   const enabled = serverHasCapability(
     version,
     SERVER_CAPABILITIES.projectService.name,
   );
-  return projectId && enabled ? (
-    <ProjectAppWorkspace key={projectId} projectId={projectId} />
-  ) : (
-    <p>{t("projectAppUpdateRequired")}</p>
-  );
+  if (!projectId || !enabled) {
+    return (
+      <MainContent isWideScreen={isWideScreen}>
+        <PageHeader
+          title={t("projectAppLabel")}
+          onOpenSidebar={openSidebar}
+          isWideScreen={isWideScreen}
+        />
+        <div className={styles.unsupportedFrame}>
+          <p className={styles.unsupportedMessage}>
+            {t("projectAppUpdateRequired")}
+          </p>
+        </div>
+      </MainContent>
+    );
+  }
+  return <ProjectAppWorkspace key={projectId} projectId={projectId} />;
 }
 
 function ProjectAppWorkspace({ projectId }: { projectId: string }) {
@@ -44,33 +59,48 @@ function ProjectAppWorkspace({ projectId }: { projectId: string }) {
     setComposing(true);
     setShowApp(isWideScreen);
   };
+  const composerHidden = !composing || (!isWideScreen && showApp);
   return (
-    <MainContent isWideScreen={isWideScreen} innerClassName={styles.workspace}>
+    <MainContent
+      isWideScreen={isWideScreen}
+      innerClassName={`${viewerStyles.workspace} ${styles.workspace}`}
+    >
       {project && (
         <div
-          className={`${styles.composer} ${!composing || (!isWideScreen && showApp) ? styles.concealed : ""}`}
+          className={`${viewerStyles.composer} ${styles.composerPane}${
+            composerHidden
+              ? ` ${viewerStyles.concealed} ${styles.concealed}`
+              : ""
+          }`}
         >
-          <button
-            type="button"
-            onClick={() => {
-              setShowApp(true);
-            }}
-          >
-            {t("projectAppLabel")}
-          </button>
-          <NewSessionForm
-            projectId={projectId}
-            selectedProject={project}
-            projects={[project]}
-            autoFocus={false}
-            fixedProject={showApp}
-            projectApp={target}
-            onVoiceControl={setVoice}
-          />
+          <div className={styles.composerTopBar}>
+            <button
+              type="button"
+              className={styles.appSwitchButton}
+              onClick={() => {
+                setShowApp(true);
+              }}
+            >
+              {t("projectAppLabel")}
+            </button>
+          </div>
+          <div className={styles.composerScroll}>
+            <NewSessionForm
+              projectId={projectId}
+              selectedProject={project}
+              projects={[project]}
+              autoFocus={false}
+              fixedProject={showApp}
+              projectApp={target}
+              onVoiceControl={setVoice}
+            />
+          </div>
         </div>
       )}
       <div
-        className={`${styles.appColumn} ${!showApp ? styles.concealed : ""}`}
+        className={`${viewerStyles.appColumn} ${styles.appViewport}${
+          !showApp ? ` ${viewerStyles.concealed} ${styles.concealed}` : ""
+        }`}
       >
         <ProjectAppViewer
           projectId={projectId}

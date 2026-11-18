@@ -41,12 +41,8 @@ const ROW_ICON_SIZE = 18;
 const CHEVRON_SIZE = 16;
 const ACTION_ICON_SIZE = 16;
 
-/** The tab bar already carries Sessions (Overview and All) and Projects. */
-const TAB_BAR_KEYS: ReadonlySet<string> = new Set([
-  "overview",
-  "sessions",
-  "projects",
-]);
+/** The tab bar already carries Sessions and Projects. */
+const TAB_BAR_KEYS: ReadonlySet<string> = new Set(["sessions", "projects"]);
 
 interface MoreItem {
   key: string;
@@ -158,7 +154,9 @@ function HostCard() {
             <h2 className={styles.hostName} id={titleId}>
               {name}
             </h2>
-            <Status state={connection.state}>{t(connection.labelKey)}</Status>
+            <span className={styles.hostStatus}>
+              <Status state={connection.state}>{t(connection.labelKey)}</Status>
+            </span>
           </span>
           <span className={styles.caption}>{caption}</span>
         </span>

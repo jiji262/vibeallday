@@ -1,37 +1,105 @@
 /*
- * Project home: intro title with the code tag, a meta line holding the mono
- * path and the branch chip, the view tabs, then the project's sessions by
- * status (needs you, running, recent) as link rows in flush cards.
+ * Studio Workbench Project Home: structured Repository Hero Surface with
+ * repo icon badge, title + code tag, mono path chip + pill branch badge,
+ * flush workspace navigation tabs, and framed session status panels.
  */
 
-.title {
-  display: inline-flex;
+.heroSurface {
+  overflow: hidden;
+  border: 1px solid var(--card-line);
+  border-radius: var(--r-card);
+  background: var(--surface);
+  box-shadow: var(--shadow-card);
+}
+
+.heroMain {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: 20px 22px 16px;
+}
+
+.heroIdentity {
+  display: flex;
+  flex: 1 1 280px;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+.titleRow {
+  display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 10px;
   min-width: 0;
 }
 
-.meta {
+.heroRepoBadge {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  background: var(--surface-2);
+  color: var(--ink-2);
+}
+
+.titleText {
+  margin: 0;
+  min-width: 0;
+  color: var(--ink);
+  font-family: var(--font-ui);
+  font-size: var(--fs-h2);
+  font-weight: var(--title-weight);
+  font-stretch: var(--display-stretch);
+  letter-spacing: -0.015em;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+
+.heroLede {
+  margin: 0;
+  max-width: 68ch;
+  color: var(--ink-2);
+  font-size: var(--fs-body);
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.metaRow {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: var(--space-2) 10px;
+  gap: 8px;
   min-width: 0;
 }
 
-.path {
+.pathChip {
+  display: inline-flex;
+  align-items: center;
   min-width: 0;
   max-width: 100%;
+  height: 26px;
+  padding: 0 10px;
   overflow: hidden;
-  color: var(--ink-3);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  background: var(--surface-2);
+  color: var(--ink-2);
   font-family: var(--font-mono);
   font-size: var(--fs-meta);
   text-overflow: ellipsis;
   white-space: nowrap;
+  direction: rtl;
+  text-align: left;
 }
 
-/* Design chip: 26px pill with the branch in mono. */
 .branch {
   display: inline-flex;
   align-items: center;
@@ -42,20 +110,37 @@
   padding: 0 10px;
   border: 1px solid var(--line-strong);
   border-radius: var(--r-chip);
-  background: var(--surface);
-  color: var(--ink-2);
+  background: var(--surface-2);
+  color: var(--ink);
   font-size: var(--fs-meta);
+  font-weight: 500;
   text-decoration: none;
+  transition:
+    border-color var(--duration-fast) var(--ease-standard),
+    background-color var(--duration-fast) var(--ease-standard),
+    color var(--duration-fast) var(--ease-standard);
 }
 
 .branch:hover {
-  background: var(--surface-3);
-  color: var(--ink);
+  border-color: var(--accent-line);
+  background: var(--accent-soft);
+  color: var(--accent-ink);
 }
 
 .branch:focus-visible {
   outline: 2px solid var(--focus);
   outline-offset: 2px;
+}
+
+.branchIcon {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  color: var(--ink-3);
+}
+
+.branch:hover .branchIcon {
+  color: var(--accent-ink);
 }
 
 .branchName {
@@ -68,34 +153,131 @@
 
 .branchMeta {
   flex: none;
-  color: var(--ink-3);
+  padding: 1px 5px;
+  border-radius: var(--r-sm);
+  background: var(--surface-3);
+  color: var(--ink-2);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+
+.heroActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.heroNavBar {
+  padding: 0 14px;
+  border-top: 1px solid var(--line);
+  background: color-mix(in srgb, var(--surface-2) 60%, var(--surface));
+}
+
+.tabBar {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: stretch;
+  gap: 2px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.tabBar::-webkit-scrollbar {
+  display: none;
+}
+
+.tabItem {
+  position: relative;
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 6px;
+  min-height: 40px;
+  padding: 0 12px;
+  border: none;
+  background: transparent;
+  color: var(--ink-2);
+  font-family: var(--font-ui);
+  font-size: var(--fs-small);
+  font-weight: 500;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: color var(--duration-fast) var(--ease-standard);
+}
+
+.tabItem:hover {
+  color: var(--ink);
+}
+
+.tabItem:focus-visible {
+  border-radius: var(--r-sm);
+  outline: 2px solid var(--focus);
+  outline-offset: -2px;
+}
+
+.tabItemActive {
+  color: var(--ink);
+  font-weight: 600;
+  cursor: default;
+}
+
+.tabItemActive::after {
+  content: "";
+  position: absolute;
+  right: 8px;
+  bottom: 0;
+  left: 8px;
+  height: 2px;
+  border-radius: 2px 2px 0 0;
+  background: var(--accent);
 }
 
 .sessions {
   display: flex;
   flex-direction: column;
-  gap: 22px;
-  margin-top: var(--space-5);
+  gap: var(--space-4);
+  margin-top: var(--space-4);
+}
+
+.emptyFrame {
+  border: 1px solid var(--card-line);
+  border-radius: var(--r-card);
+  background: var(--surface);
+  box-shadow: var(--shadow-card);
 }
 
 .section {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  min-width: 0;
+}
+
+.sectionPanel {
+  overflow: hidden;
+  border: 1px solid var(--card-line);
+  border-radius: var(--r-card);
+  background: var(--surface);
+  box-shadow: var(--shadow-card);
 }
 
 .sectionHead {
   display: flex;
-  align-items: baseline;
-  gap: 10px;
-  padding: 0 4px;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--line);
+  background: var(--surface-2);
 }
 
-.sectionHead h2 {
+.sectionHeading {
   margin: 0;
   color: var(--ink);
-  font-size: var(--fs-h2);
-  font-weight: var(--title-weight);
+  font-size: var(--fs-small);
+  font-weight: 600;
+  letter-spacing: 0.01em;
   line-height: 1.3;
 }
 
@@ -113,10 +295,11 @@
   display: flex;
   align-items: center;
   gap: var(--space-3);
-  min-height: var(--row-h);
-  padding: 0 var(--pad-card);
+  min-height: 44px;
+  padding: 0 16px;
   color: var(--ink);
   text-decoration: none;
+  transition: background-color var(--duration-fast) var(--ease-standard);
 }
 
 .row:hover {
@@ -133,7 +316,7 @@
   min-width: 0;
   overflow: hidden;
   font-size: var(--fs-body);
-  font-weight: 600;
+  font-weight: 500;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -141,26 +324,39 @@
 .rowTime {
   flex: none;
   color: var(--ink-3);
+  font-family: var(--font-mono);
   font-size: var(--fs-meta);
+  font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
 
-/* Design ghost `btn-sm` with a trailing arrow, as a router link. */
+.sessionsFooter {
+  display: flex;
+  align-items: center;
+}
+
 .viewAll {
   display: inline-flex;
   align-items: center;
-  align-self: flex-start;
   min-height: var(--btn-h-sm);
   padding: 0 12px;
+  border: 1px solid var(--line);
   border-radius: var(--r-btn);
-  color: var(--link);
+  background: var(--surface);
+  color: var(--ink-2);
   font-size: var(--fs-small);
   font-weight: 600;
   text-decoration: none;
+  transition:
+    border-color var(--duration-fast) var(--ease-standard),
+    background-color var(--duration-fast) var(--ease-standard),
+    color var(--duration-fast) var(--ease-standard);
 }
 
 .viewAll:hover {
-  background: var(--surface-3);
+  border-color: var(--line-strong);
+  background: var(--surface-2);
+  color: var(--ink);
 }
 
 .viewAll:focus-visible {
@@ -169,8 +365,29 @@
 }
 
 @media (pointer: coarse) {
+  .tabItem,
   .row,
   .viewAll {
     min-height: var(--tap-min);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .branch,
+  .tabItem,
+  .row,
+  .viewAll {
+    transition: none;
+  }
+}
+
+@media (width < 768px) {
+  .heroMain {
+    padding: 16px 14px 14px;
+    gap: var(--space-3);
+  }
+
+  .heroNavBar {
+    padding: 0 8px;
   }
 }

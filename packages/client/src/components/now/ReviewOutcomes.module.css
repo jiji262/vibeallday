@@ -1,4 +1,4 @@
-/* Review outcome rows inside their Overview card. */
+/* Studio Workbench review outcome rows inside their Inbox aside card. */
 
 .list {
   margin: 0;
@@ -8,13 +8,18 @@
 
 .row {
   display: grid;
-  gap: var(--space-2);
-  padding: 14px var(--space-5);
+  gap: 6px;
+  padding: 12px 14px;
   border-bottom: 1px solid var(--line);
+  transition: background-color var(--duration-fast) var(--ease-standard);
 }
 
 .row:last-child {
   border-bottom: 0;
+}
+
+.row:hover {
+  background: var(--surface-2);
 }
 
 .head {
@@ -28,21 +33,21 @@
 .name {
   min-width: 0;
   color: var(--ink);
-  font-size: 14px;
-  font-weight: 500;
+  font-size: var(--fs-small);
+  font-weight: 600;
   text-decoration: none;
   overflow-wrap: anywhere;
 }
 
 .name:hover {
-  color: var(--link);
+  color: var(--accent-ink);
   text-decoration: underline;
 }
 
 .text {
   color: var(--ink-2);
-  font-size: 14px;
-  line-height: 1.5;
+  font-size: var(--fs-small);
+  line-height: 1.45;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
@@ -51,14 +56,14 @@
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
-  gap: var(--space-1) var(--space-3);
+  gap: var(--space-1) var(--space-2);
   color: var(--ink-3);
-  font-family: var(--label-font);
-  font-size: 12px;
+  font-family: var(--font-mono);
+  font-size: var(--fs-meta);
 }
 
 .meta a {
-  color: var(--link);
+  color: var(--accent-ink);
   text-decoration: none;
 }
 
@@ -71,8 +76,8 @@
   overflow-wrap: anywhere;
 }
 
-@media (width < 768px) {
+@media (prefers-reduced-motion: reduce) {
   .row {
-    padding: var(--space-3) var(--space-4);
+    transition: none;
   }
 }

@@ -4,9 +4,12 @@
   display: flex;
   flex: 1 1 400px;
   flex-direction: column;
-  gap: 28px;
+  justify-content: space-between;
+  gap: 24px;
   min-width: 0;
   max-width: 520px;
+  padding: 26px 24px;
+  box-sizing: border-box;
 }
 
 .wordmark {
@@ -200,10 +203,11 @@
 
 /* Phone and narrow windows: the card comes first in reading weight, so the
    column keeps only the wordmark, tagline and lead. */
-@media (width < 768px) {
+@media (width < 880px) {
   .column {
     flex-basis: 100%;
-    gap: 16px;
+    gap: 12px;
+    padding: 0 2px;
   }
 
   .wideOnly {

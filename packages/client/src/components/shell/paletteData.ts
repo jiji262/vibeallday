@@ -6,7 +6,6 @@ export type PaletteGroup =
   | "jump"
   | "projects"
   | "recent"
-  | "settings"
   | "actions";
 
 export interface PaletteItem {
@@ -32,7 +31,6 @@ export const PALETTE_GROUP_LIMIT: Record<PaletteGroup, number> = {
   jump: Number.POSITIVE_INFINITY,
   projects: 6,
   recent: 6,
-  settings: 6,
   actions: Number.POSITIVE_INFINITY,
 };
 
@@ -40,7 +38,6 @@ const GROUP_ORDER: readonly PaletteGroup[] = [
   "jump",
   "projects",
   "recent",
-  "settings",
   "actions",
 ];
 

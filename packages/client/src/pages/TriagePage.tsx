@@ -87,20 +87,20 @@ function ShortcutHints({
     >
       {canDecide && (
         <>
-          <span>
+          <span className={styles.hintItem}>
             <Kbd>A</Kbd> {t("inboxTriageKeyApprove")}
           </span>
-          <span>
+          <span className={styles.hintItem}>
             <Kbd>D</Kbd> {t("inboxTriageKeyDeny")}
           </span>
         </>
       )}
       {canSkip && (
-        <span>
+        <span className={styles.hintItem}>
           <Kbd>S</Kbd> {t("inboxTriageSkip")}
         </span>
       )}
-      <span>
+      <span className={styles.hintItem}>
         <Kbd>Esc</Kbd> {t("inboxTriageKeyExit")}
       </span>
     </div>

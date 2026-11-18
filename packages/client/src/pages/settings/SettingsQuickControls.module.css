@@ -1,4 +1,4 @@
-/* Quick controls card (design .shd-qrow / phone .set-row). */
+/* Studio quick controls card with framed header bar and mono value badge. */
 .card {
   display: flex;
   flex-direction: column;
@@ -12,32 +12,48 @@
 
 .head {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: var(--space-2);
-  padding: var(--space-4) var(--pad-card) var(--space-1);
+  padding: 10px 18px;
+  border-bottom: 1px solid var(--line);
+  background: var(--surface-2);
 }
 
 /* The h2 reset beats the global heading margins in theme.css. */
 .heading {
   margin: 0;
-  color: var(--ink);
-  font-size: var(--fs-h3);
-  font-weight: var(--title-weight);
+  color: var(--ink-2);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 
 .more {
   margin-left: auto;
-  color: var(--link);
+  color: var(--accent-ink);
   font-size: var(--fs-small);
+  font-weight: 500;
   text-decoration: none;
+}
+
+.more:hover {
+  text-decoration: underline;
+}
+
+.more:focus-visible {
+  border-radius: var(--r-sm);
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
 }
 
 .row {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 10px var(--space-6);
-  padding: 14px var(--pad-card);
+  gap: 10px var(--space-5);
+  padding: 12px 18px;
 }
 
 .row + .row {
@@ -59,23 +75,30 @@
   align-items: center;
   gap: var(--space-2);
   color: var(--ink);
-  font-size: var(--fs-body);
+  font-size: var(--fs-small);
   font-weight: 600;
 }
 
 .description {
   color: var(--ink-3);
-  font-size: var(--fs-small);
-  line-height: 1.55;
+  font-size: var(--fs-meta);
+  line-height: 1.5;
 }
 
 .detail {
-  min-width: 40px;
-  color: var(--ink-3);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  height: 22px;
+  padding: 0 7px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  background: var(--surface-2);
+  color: var(--ink-2);
   font-family: var(--font-mono);
-  font-size: var(--fs-meta);
+  font-size: 11px;
   font-variant-numeric: tabular-nums;
-  text-align: right;
 }
 
 /* Phone: the segmented control takes its own full-width line. */

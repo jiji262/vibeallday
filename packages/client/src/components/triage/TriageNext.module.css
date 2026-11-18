@@ -1,30 +1,33 @@
-/* "Up next" cards under the current triage item (design `.tri-next`). */
+/* Sleek compact Studio "Up next" queue cards under the active TriageCard. */
 
 .section {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
 }
 
 .head {
   display: flex;
-  align-items: baseline;
-  gap: 10px;
-  padding: 0 4px;
+  align-items: center;
+  gap: 8px;
+  padding: 0 2px;
 }
 
 .title {
   margin: 0;
-  color: var(--ink);
-  font-size: var(--fs-h2);
-  font-weight: var(--title-weight);
+  color: var(--ink-3);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.07em;
   line-height: 1.3;
+  text-transform: uppercase;
 }
 
 .list {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 10px;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -33,18 +36,22 @@
 .item {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
   min-width: 0;
-  padding: 14px 16px;
-  border: 1px solid var(--card-line);
+  padding: 11px 14px;
+  border: 1px solid var(--line);
   border-radius: var(--r-card);
   background: var(--surface);
   box-shadow: var(--shadow-card);
   color: inherit;
   text-decoration: none;
+  transition:
+    background-color var(--duration-fast) var(--ease-standard),
+    border-color var(--duration-fast) var(--ease-standard);
 }
 
 .item:hover {
+  border-color: var(--line-strong);
   background: var(--surface-2);
 }
 
@@ -64,13 +71,15 @@
   display: grid;
   flex: none;
   place-items: center;
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  background: var(--surface-3);
-  color: var(--ink-3);
+  width: 20px;
+  height: 20px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  background: var(--surface-2);
+  color: var(--ink-2);
   font-family: var(--font-mono);
   font-size: 11px;
+  font-variant-numeric: tabular-nums;
   font-weight: 600;
   line-height: 1;
 }
@@ -80,10 +89,13 @@
   color: var(--ink-3);
   font-family: var(--font-mono);
   font-size: var(--fs-meta);
+  font-variant-numeric: tabular-nums;
 }
 
 .name {
   overflow: hidden;
+  color: var(--ink);
+  font-size: var(--fs-small);
   font-weight: 600;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -99,16 +111,13 @@
 }
 
 @media (width < 768px) {
-  .title {
-    color: var(--ink-3);
-    font-family: var(--font-mono);
-    font-size: 11px;
-    font-weight: 500;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-  }
-
   .list {
     grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .item {
+    transition: none;
   }
 }

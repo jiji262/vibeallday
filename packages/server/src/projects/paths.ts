@@ -57,6 +57,7 @@
  * 4. Use `getSessionFilePath()` to construct paths to specific session files.
  */
 
+import { existsSync, readFileSync } from "node:fs";
 import { open } from "node:fs/promises";
 import { homedir, tmpdir } from "node:os";
 import { basename, dirname, isAbsolute, join, sep } from "node:path";
@@ -67,6 +68,16 @@ import { stripBom } from "../utils/jsonl.js";
 /** Check if a path is absolute (works for both Unix and Windows paths). */
 export function isAbsolutePath(p: string): boolean {
   return isAbsolute(p);
+}
+
+/** Expand a leading `~` or `~/...` against the supplied home directory. */
+export function expandHomePath(value: string, home = homedir()): string {
+  const trimmed = value.trim();
+  if (trimmed === "~") return home;
+  if (trimmed.startsWith("~/") || trimmed.startsWith("~\\")) {
+    return join(home, trimmed.slice(2));
+  }
+  return trimmed;
 }
 
 /** The root directory where Claude stores project sessions */
@@ -91,12 +102,43 @@ export function limitedDetachedProjectPath(username: string): string {
   );
 }
 
+/**
+ * Resolve Grok CLI's state directory (`GROK_HOME`, default `~/.grok`), matching
+ * `GrokACPProvider` and `vibe-usage` so relocated Grok stores are discovered
+ * consistently across live sessions, transcripts, and quota probes.
+ */
+export function resolveGrokHome(
+  env: NodeJS.ProcessEnv = process.env,
+  home = homedir(),
+): string {
+  const configuredHome = env.GROK_HOME?.trim();
+  if (configuredHome) {
+    return expandHomePath(configuredHome, home);
+  }
+  const configuredSessions = env.GROK_SESSIONS_DIR?.trim();
+  if (configuredSessions) {
+    return expandHomePath(configuredSessions, home).replace(
+      new RegExp(`\\${sep}sessions$`),
+      "",
+    );
+  }
+  return join(home, ".grok");
+}
+
+export function resolveGrokSessionsDir(
+  env: NodeJS.ProcessEnv = process.env,
+  home = homedir(),
+): string {
+  const configuredSessions = env.GROK_SESSIONS_DIR?.trim();
+  if (configuredSessions) {
+    return expandHomePath(configuredSessions, home);
+  }
+  return join(resolveGrokHome(env, home), "sessions");
+}
+
 /** Root for Grok Build sessions (persistent across restarts, similar to Gemini/Codex) */
-export const GROK_DIR =
-  process.env.GROK_SESSIONS_DIR?.replace(new RegExp(`\\${sep}sessions$`), "") ??
-  join(homedir(), ".grok");
-export const GROK_SESSIONS_DIR =
-  process.env.GROK_SESSIONS_DIR ?? join(GROK_DIR, "sessions");
+export const GROK_DIR = resolveGrokHome();
+export const GROK_SESSIONS_DIR = resolveGrokSessionsDir();
 
 /** Session-scoped Grok media roots VIBEALLDAY may materialize (images + videos). */
 export function grokSessionMediaRoots(
@@ -112,12 +154,99 @@ export function grokSessionMediaRoots(
   return [join(sessionDir, "images"), join(sessionDir, "videos")];
 }
 
+/**
+ * OMP inherits `PI_CODING_AGENT_DIR` from Pi. Avoid treating an identifiable
+ * OMP store as Pi's own agent directory (ported from `vibe-usage/src/pi-roots.js`).
+ */
+export function looksLikeOmpAgentDir(agentDir: string): boolean {
+  const normalized = agentDir.replace(/\\/g, "/");
+  return (
+    normalized.includes("/.omp/") ||
+    existsSync(join(agentDir, "config.yml")) ||
+    existsSync(join(agentDir, "agent.db"))
+  );
+}
+
+function readPiSettingsSessionDir(
+  agentDir: string,
+  home: string,
+): string | null {
+  try {
+    const raw = readFileSync(join(agentDir, "settings.json"), "utf-8");
+    const parsed = JSON.parse(raw) as { sessionDir?: unknown } | null;
+    if (typeof parsed?.sessionDir !== "string") return null;
+    const trimmed = parsed.sessionDir.trim();
+    if (!trimmed || !(isAbsolute(trimmed) || trimmed.startsWith("~"))) {
+      return null;
+    }
+    return expandHomePath(trimmed, home);
+  } catch {
+    return null;
+  }
+}
+
+export function resolvePiAgentDir(
+  env: NodeJS.ProcessEnv = process.env,
+  home = homedir(),
+): string {
+  const configuredSessions = env.PI_SESSIONS_DIR?.trim();
+  if (configuredSessions) {
+    return expandHomePath(configuredSessions, home).replace(
+      new RegExp(`\\${sep}sessions$`),
+      "",
+    );
+  }
+  const envAgentDir = env.PI_CODING_AGENT_DIR?.trim();
+  if (envAgentDir) {
+    const expanded = expandHomePath(envAgentDir, home);
+    if (!looksLikeOmpAgentDir(expanded)) {
+      return expanded;
+    }
+  }
+  return join(home, ".pi", "agent");
+}
+
+/**
+ * Pi resolves its session store from `PI_SESSIONS_DIR` (VibeAllDay override),
+ * then `PI_CODING_AGENT_SESSION_DIR`, then `sessionDir` in `<agentDir>/settings.json`,
+ * and finally `<agentDir>/sessions` (ported from `vibe-usage/src/pi-roots.js`).
+ */
+export function resolvePiSessionsDir(
+  env: NodeJS.ProcessEnv = process.env,
+  home = homedir(),
+): string {
+  const explicitOverride = env.PI_SESSIONS_DIR?.trim();
+  if (explicitOverride) {
+    return expandHomePath(explicitOverride, home);
+  }
+  const envAgentDir = env.PI_CODING_AGENT_DIR?.trim();
+  const expandedAgentDir = envAgentDir
+    ? expandHomePath(envAgentDir, home)
+    : undefined;
+  const isOmpStore =
+    expandedAgentDir !== undefined && looksLikeOmpAgentDir(expandedAgentDir);
+
+  if (!isOmpStore) {
+    const envSessionDir = env.PI_CODING_AGENT_SESSION_DIR?.trim();
+    if (envSessionDir) {
+      return expandHomePath(envSessionDir, home);
+    }
+  }
+
+  const agentDir =
+    expandedAgentDir && !isOmpStore
+      ? expandedAgentDir
+      : join(home, ".pi", "agent");
+  const configuredInSettings = readPiSettingsSessionDir(agentDir, home);
+  if (configuredInSettings) {
+    return configuredInSettings;
+  }
+  return join(agentDir, "sessions");
+}
+
 /** Root for pi sessions (append-only JSONL, persistent across restarts) */
-export const PI_DIR =
-  process.env.PI_SESSIONS_DIR?.replace(new RegExp(`\\${sep}sessions$`), "") ??
-  join(homedir(), ".pi", "agent");
-export const PI_SESSIONS_DIR =
-  process.env.PI_SESSIONS_DIR ?? join(PI_DIR, "sessions");
+export const PI_DIR = resolvePiAgentDir();
+export const PI_SESSIONS_DIR = resolvePiSessionsDir();
 
 /**
  * Encode an absolute project path to a projectId (base64url).

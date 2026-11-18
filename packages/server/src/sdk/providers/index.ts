@@ -57,14 +57,6 @@ export {
   type CodexProviderConfig,
 } from "./codex.js";
 
-// Gemini provider (uses gemini CLI)
-import { geminiProvider } from "./gemini.js";
-export {
-  GeminiProvider,
-  geminiProvider,
-  type GeminiProviderConfig,
-} from "./gemini.js";
-
 // Gemini ACP provider (uses gemini CLI with --experimental-acp)
 import { geminiACPProvider } from "./gemini-acp.js";
 export {
@@ -292,7 +284,6 @@ export function getAllProviders(): AgentProvider[] {
     ...(isClaudeOllamaVisible() ? [claudeOllamaProvider] : []),
     codexProvider,
     codexOSSProvider,
-    geminiProvider,
     geminiACPProvider,
     grokACPProvider, // Phase 1: additive only (see grok-acp.ts header + topics/grok.md)
     opencodeProvider,

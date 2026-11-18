@@ -688,3 +688,106 @@ describe("GrokSessionReader provider children", () => {
     expect(agent?.messages.length).toBeGreaterThan(0);
   });
 });
+
+describe("GrokSessionReader usage & relocated group markers", () => {
+  it("resolves .cwd group markers and extracts contextUsage from usage.json and updates.jsonl", async () => {
+    const root = mkdtempSync(join(tmpdir(), "grok-reader-usage-"));
+    tempRoots.push(root);
+    const sessionsDir = join(root, "sessions");
+    const projectPath = join(root, "workspace", "app");
+    const hashedGroupDir = join(sessionsDir, "hashed-group-key");
+    const ledgerSessionId = "grok-v1-ledger";
+    const legacySessionId = "grok-v02-updates";
+    const ledgerDir = join(hashedGroupDir, ledgerSessionId);
+    const legacyDir = join(hashedGroupDir, legacySessionId);
+    mkdirSync(projectPath, { recursive: true });
+    mkdirSync(ledgerDir, { recursive: true });
+    mkdirSync(legacyDir, { recursive: true });
+    writeFileSync(join(hashedGroupDir, ".cwd"), `${projectPath}\n`);
+    writeFileSync(
+      join(root, "models_cache.json"),
+      JSON.stringify({
+        models: {
+          "grok-4.6": { info: { id: "grok-4.6", context_window: 500_000 } },
+        },
+      }),
+    );
+
+    writeFileSync(
+      join(ledgerDir, "summary.json"),
+      JSON.stringify({
+        info: { id: ledgerSessionId, cwd: projectPath },
+        created_at: "2026-09-10T00:00:00.000Z",
+        updated_at: "2026-09-10T00:05:00.000Z",
+        generated_title: "Ledger session",
+        num_messages: 2,
+        current_model_id: "grok-4.6",
+      }),
+    );
+    writeFileSync(
+      join(ledgerDir, "usage.json"),
+      JSON.stringify({
+        turns: [
+          {
+            inputTokens: 90_000,
+            cachedReadTokens: 60_000,
+            cacheCreationTokens: 10_000,
+            outputTokens: 1_200,
+          },
+        ],
+      }),
+    );
+    writeFileSync(join(ledgerDir, "updates.jsonl"), "");
+
+    writeFileSync(
+      join(legacyDir, "summary.json"),
+      JSON.stringify({
+        info: { id: legacySessionId, cwd: projectPath },
+        created_at: "2026-09-09T00:00:00.000Z",
+        updated_at: "2026-09-09T00:05:00.000Z",
+        generated_title: "Legacy updates session",
+        num_messages: 2,
+        current_model_id: "grok-4.6",
+      }),
+    );
+    writeFileSync(
+      join(legacyDir, "updates.jsonl"),
+      `${JSON.stringify({
+        timestamp: 1_775_000_200,
+        params: {
+          update: {
+            sessionUpdate: "turn_completed",
+            usage: {
+              inputTokens: 50_000,
+              cachedReadTokens: 30_000,
+              outputTokens: 800,
+            },
+          },
+        },
+      })}\n`,
+    );
+
+    const reader = new GrokSessionReader({ sessionsDir, projectPath });
+    const projectId = toUrlProjectId(projectPath);
+
+    const summaries = await reader.listSessions(projectId);
+    const ledgerSummary = summaries.find((item) => item.id === ledgerSessionId);
+    expect(ledgerSummary?.contextUsage).toEqual({
+      inputTokens: 100_000,
+      percentage: 20,
+      contextWindow: 500_000,
+      outputTokens: 1_200,
+      cacheReadTokens: 60_000,
+      cacheCreationTokens: 10_000,
+    });
+
+    const loadedLegacy = await reader.getSession(legacySessionId, projectId);
+    expect(loadedLegacy?.summary.contextUsage).toEqual({
+      inputTokens: 50_000,
+      percentage: 10,
+      contextWindow: 500_000,
+      outputTokens: 800,
+      cacheReadTokens: 30_000,
+    });
+  });
+});

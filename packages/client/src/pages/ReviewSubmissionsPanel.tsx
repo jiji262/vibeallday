@@ -158,13 +158,13 @@ export function ReviewSubmissionsPanel({
 
   if (loading)
     return (
-      <section>
+      <section className={styles.stateCard}>
         <LoadingState label={t("loading")} variant="list" />
       </section>
     );
   if (submissions.length === 0) {
     return (
-      <section>
+      <section className={styles.stateCard}>
         <EmptyState title={t("sourceReviewNoSubmissions")} />
       </section>
     );
@@ -434,77 +434,79 @@ function ReviewSiteCard({
           </span>
         </span>
       </header>
-      <ol className={styles.entryList}>
-        {site.entries.map((entry) => {
-          const outcomes = site.outcomes.filter(
-            (outcome) => outcome.entryId === entry.id,
-          );
-          return (
-            <li key={entry.id} className={styles.entry}>
-              <div className={styles.entryHead}>
-                <span>
-                  {entry.submittedAt
-                    ? t("sourceReviewSubmittedEntry")
-                    : t("sourceReviewPendingFollowUp")}
-                </span>
-              </div>
-              <div className={styles.commentTextRow}>
-                <span
-                  className={styles.commentLine}
-                  title={commentLocation(entry.anchor)}
-                >
-                  {commentLine(entry.anchor)}
-                </span>
-                <div className={styles.text}>{entry.text}</div>
-              </div>
-              <CapturedSource source={sourceFor(entry.id).source} t={t} />
-              {outcomes.map((outcome) => (
-                <div key={outcome.responseHash} className={styles.outcome}>
-                  <div className={styles.outcomeHead}>
-                    <span>{dispositionLabel(outcome.disposition, t)}</span>
-                    {outcome.sessionId && (
-                      <Link to={sessionHref(outcome.sessionId)}>
-                        {t("sourceReviewOutcomeSession")}
-                      </Link>
-                    )}
-                  </div>
-                  <div>{outcome.text}</div>
+      <div className={styles.siteBody}>
+        <ol className={styles.entryList}>
+          {site.entries.map((entry) => {
+            const outcomes = site.outcomes.filter(
+              (outcome) => outcome.entryId === entry.id,
+            );
+            return (
+              <li key={entry.id} className={styles.entry}>
+                <div className={styles.entryHead}>
+                  <span>
+                    {entry.submittedAt
+                      ? t("sourceReviewSubmittedEntry")
+                      : t("sourceReviewPendingFollowUp")}
+                  </span>
                 </div>
-              ))}
-            </li>
-          );
-        })}
-      </ol>
-      {error && <div className={styles.error}>{error}</div>}
-      {!hasPending && (
-        <div className={styles.followUp}>
-          <textarea
-            aria-label={t("sourceReviewFollowUp")}
-            value={followUp}
-            maxLength={20_000}
-            placeholder={t("sourceReviewFollowUpPlaceholder")}
-            onChange={(event) => setFollowUp(event.target.value)}
-          />
-          <div className={styles.siteActions}>
-            {!site.resolvedAt && (
+                <div className={styles.commentTextRow}>
+                  <span
+                    className={styles.commentLine}
+                    title={commentLocation(entry.anchor)}
+                  >
+                    {commentLine(entry.anchor)}
+                  </span>
+                  <div className={styles.text}>{entry.text}</div>
+                </div>
+                <CapturedSource source={sourceFor(entry.id).source} t={t} />
+                {outcomes.map((outcome) => (
+                  <div key={outcome.responseHash} className={styles.outcome}>
+                    <div className={styles.outcomeHead}>
+                      <span>{dispositionLabel(outcome.disposition, t)}</span>
+                      {outcome.sessionId && (
+                        <Link to={sessionHref(outcome.sessionId)}>
+                          {t("sourceReviewOutcomeSession")}
+                        </Link>
+                      )}
+                    </div>
+                    <div>{outcome.text}</div>
+                  </div>
+                ))}
+              </li>
+            );
+          })}
+        </ol>
+        {error && <div className={styles.error}>{error}</div>}
+        {!hasPending && (
+          <div className={styles.followUp}>
+            <textarea
+              aria-label={t("sourceReviewFollowUp")}
+              value={followUp}
+              maxLength={20_000}
+              placeholder={t("sourceReviewFollowUpPlaceholder")}
+              onChange={(event) => setFollowUp(event.target.value)}
+            />
+            <div className={styles.siteActions}>
+              {!site.resolvedAt && (
+                <button
+                  type="button"
+                  disabled={busy}
+                  onClick={() => void resolve()}
+                >
+                  {t("sourceReviewResolve")}
+                </button>
+              )}
               <button
                 type="button"
-                disabled={busy}
-                onClick={() => void resolve()}
+                disabled={busy || !followUp.trim()}
+                onClick={() => void addFollowUp()}
               >
-                {t("sourceReviewResolve")}
+                {t("sourceReviewAddFollowUp")}
               </button>
-            )}
-            <button
-              type="button"
-              disabled={busy || !followUp.trim()}
-              onClick={() => void addFollowUp()}
-            >
-              {t("sourceReviewAddFollowUp")}
-            </button>
+            </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </li>
   );
 }

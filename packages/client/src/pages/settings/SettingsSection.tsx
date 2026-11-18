@@ -11,6 +11,7 @@ import {
   SettingsSearchScopeProvider,
   useSettingsSearchScope,
 } from "./SettingsSearchContext";
+import styles from "./SettingsSection.module.css";
 import { settingsTextMatches } from "./settingsSearchMatch";
 
 const SettingsDefaultScopeContext = createContext<SettingScope | undefined>(
@@ -77,8 +78,16 @@ export function SettingsSection({
 
   const sectionClassName = [
     "settings-section",
+    styles.section,
     className,
     scope && sectionMatched ? "settings-search-section-match" : null,
+  ]
+    .filter(Boolean)
+    .join(" ");
+
+  const descriptionClassName = [
+    "settings-section-description",
+    styles.description,
   ]
     .filter(Boolean)
     .join(" ");
@@ -91,12 +100,12 @@ export function SettingsSection({
       noValidate={onSubmit ? true : undefined}
     >
       {title && (
-        <h2>
+        <h2 className={styles.heading}>
           {scope ? renderSettingsSearchHighlight(title, scope.query) : title}
         </h2>
       )}
       {description && (
-        <p className="settings-section-description">
+        <p className={descriptionClassName}>
           {scope
             ? renderSettingsSearchHighlight(description, scope.query)
             : description}

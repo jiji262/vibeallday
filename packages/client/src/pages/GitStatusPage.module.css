@@ -1,20 +1,203 @@
-/* Released-server compatibility view: repository operations in their own row
-   above the compatibility notice. The page head is `SourceControlIntro`. */
+/* Studio Source Control Deck container & notice cards. */
+.workbench {
+  min-width: 0;
+}
+
+/* Released-server compatibility view: crisp Studio surface card. */
+.compatibilityCard {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  max-width: 48rem;
+  padding: 18px 20px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-card);
+  box-shadow: var(--shadow-card);
+}
+
 .compatibilityActions {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-2);
+  gap: 8px;
 }
 
-/* The compatibility note keeps a real heading above its warning banner. */
 .compatibilityNote {
   display: flex;
   flex-direction: column;
-  gap: var(--space-2);
+  gap: 8px;
 }
 
 .compatibilityNote h2 {
   margin: 0;
-  font-size: var(--font-size-md);
+  color: var(--ink);
+  font-family: var(--font-ui);
+  font-size: 15px;
   font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+/* Action feedback and diverged integration option cards stack cleanly above panes. */
+.actionNotices {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex-shrink: 0;
+  margin-bottom: 10px;
+}
+
+/* Whitespace / diff projection status or error banner. */
+.projectionNotice {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-shrink: 0;
+  padding: 8px 12px;
+  margin-bottom: 10px;
+  color: var(--ink);
+  font-family: var(--font-ui);
+  font-size: 12.5px;
+  background: var(--surface);
+  border: 1px solid var(--accent-line);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-card);
+}
+
+.projectionNoticeError {
+  color: var(--err);
+  border-color: color-mix(in srgb, var(--err) 40%, var(--line));
+}
+
+.projectionDismiss {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  color: var(--ink-3);
+  font-family: var(--font-mono);
+  font-size: 14px;
+  line-height: 1;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  transition:
+    background-color 120ms ease,
+    color 120ms ease;
+}
+
+.projectionDismiss:hover {
+  color: var(--ink);
+  background: var(--surface-2);
+}
+
+/* Diverged branch integration guidance card (auto-rebase / auto-merge preview). */
+.integrationCard {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 12px;
+  color: var(--ink-2);
+  font-family: var(--font-ui);
+  font-size: 12.5px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-card);
+  box-shadow: var(--shadow-card);
+}
+
+.integrationCardWarning {
+  color: var(--attn);
+  background: color-mix(in srgb, var(--attn-soft) 45%, var(--surface));
+  border-color: color-mix(in srgb, var(--attn) 38%, var(--line));
+}
+
+.integrationLabel {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.integrationPill {
+  display: inline-flex;
+  align-items: center;
+  height: 22px;
+  padding: 0 8px;
+  color: var(--ink-2);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+}
+
+.integrationHelp {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  margin-inline-start: auto;
+}
+
+.integrationHelpSummary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  color: var(--ink-3);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  list-style: none;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  cursor: pointer;
+  user-select: none;
+  transition:
+    background-color 120ms ease,
+    border-color 120ms ease,
+    color 120ms ease;
+}
+
+.integrationHelpSummary::-webkit-details-marker {
+  display: none;
+}
+
+.integrationHelpSummary:hover {
+  color: var(--ink);
+  background: var(--surface-3);
+  border-color: var(--line-strong);
+}
+
+.integrationHelpPopover {
+  position: absolute;
+  inset-block-start: calc(100% + 6px);
+  inset-inline-end: 0;
+  z-index: 20;
+  width: min(22rem, calc(100dvw - 32px));
+  padding: 10px 12px;
+  color: var(--ink-2);
+  font-family: var(--font-ui);
+  font-size: 12px;
+  line-height: 1.5;
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-card);
+  box-shadow: var(--shadow-card);
+}
+
+@media (width < 600px) {
+  .projectionNotice {
+    position: fixed;
+    inset-inline: 12px;
+    bottom: 12px;
+    z-index: 30;
+    margin-bottom: 0;
+  }
 }

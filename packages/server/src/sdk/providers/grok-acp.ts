@@ -62,6 +62,7 @@ import type {
   EffortLevel,
   ModelCatalogStatus,
   ModelInfo,
+  ProviderSubscriptionUsage,
   SlashCommand,
   SubagentMaxDepth,
 } from "@vibeallday/shared";
@@ -70,6 +71,7 @@ import {
   DEFAULT_SUBAGENT_MAX_DEPTH,
 } from "@vibeallday/shared";
 import { getLogger } from "../../logging/logger.js";
+import { resolveGrokHome } from "../../projects/paths.js";
 import {
   fallbackModelCatalog,
   liveModelCatalog,
@@ -101,6 +103,15 @@ import {
   isTerminalGrokToolUpdate,
   normalizeGrokToolUpdate,
 } from "./grok-tool-normalization.js";
+import {
+  type GrokNormalizedUsage,
+  addGrokNormalizedUsage,
+  extractGrokTurnUsageFromUpdate,
+  readGrokLedgerTurnCount,
+  readGrokLedgerUsageSince,
+  resolveGrokSessionDir,
+} from "./grok-usage.js";
+import { readGrokSubscriptionUsage } from "./provider-subscription-usage.js";
 import type {
   AgentProvider,
   AgentSession,
@@ -314,6 +325,7 @@ interface GrokPromptRuntime {
   sessionId?: string;
   activePromptCount: number;
   promptError: unknown;
+  turnUsage?: GrokNormalizedUsage;
 }
 
 type GrokLiveToolState = NormalizedGrokToolState & {
@@ -330,6 +342,8 @@ interface GrokCommandInventory {
 export interface GrokACPProviderConfig {
   /** Path to grok binary (auto-detected if not specified) */
   grokPath?: string;
+  /** Optional Grok state directory override (defaults to GROK_HOME or ~/.grok) */
+  grokHome?: string;
   /** Test seam for deterministic ACP client injection. */
   createClient?: () => ACPClient;
   /** Test seam for deterministic install detection. */
@@ -358,6 +372,7 @@ export class GrokACPProvider implements AgentProvider {
   readonly supportsSteering = true;
 
   private readonly grokPath?: string;
+  private readonly grokHome?: string;
   private readonly createClient: () => ACPClient;
   private readonly pathExists: (path: string) => boolean;
   private ambientXaiApiKey: string | undefined;
@@ -370,6 +385,7 @@ export class GrokACPProvider implements AgentProvider {
 
   constructor(config: GrokACPProviderConfig = {}) {
     this.grokPath = config.grokPath;
+    this.grokHome = config.grokHome;
     this.createClient = config.createClient ?? (() => new ACPClient());
     this.pathExists = config.pathExists ?? existsSync;
   }
@@ -475,6 +491,11 @@ export class GrokACPProvider implements AgentProvider {
 
   getModelCatalogStatus(): ModelCatalogStatus | undefined {
     return this.modelCatalogStatus;
+  }
+
+  async getSubscriptionUsage(): Promise<ProviderSubscriptionUsage | null> {
+    if (!(await this.isInstalled())) return null;
+    return readGrokSubscriptionUsage({ grokHome: this.getGrokHome() });
   }
 
   /**
@@ -765,7 +786,14 @@ export class GrokACPProvider implements AgentProvider {
           { textLength: userText.length },
           "Sending prompt to Grok",
         );
+        const sessionDir = resolveGrokSessionDir(
+          this.getGrokHome(),
+          options.cwd,
+          sessionId,
+        );
+        const ledgerTurnWatermark = readGrokLedgerTurnCount(sessionDir);
         runtime.promptError = null;
+        runtime.turnUsage = undefined;
         const promptPromise = this.promptWithTracking(
           client,
           sessionId,
@@ -790,9 +818,13 @@ export class GrokACPProvider implements AgentProvider {
           "Grok prompt complete",
         );
 
+        const turnUsage =
+          runtime.turnUsage ??
+          readGrokLedgerUsageSince(sessionDir, ledgerTurnWatermark);
         yield {
           type: "result",
           session_id: sessionId,
+          ...(turnUsage ? { usage: turnUsage } : {}),
         } as SDKMessage;
       }
     } catch (err) {
@@ -1251,6 +1283,13 @@ export class GrokACPProvider implements AgentProvider {
 
         const sessionUpdate = notification.update;
         const eventUuid = grokEventUuid(notification._meta);
+        const updateUsage = extractGrokTurnUsageFromUpdate(sessionUpdate);
+        if (updateUsage) {
+          runtime.turnUsage = addGrokNormalizedUsage(
+            runtime.turnUsage,
+            updateUsage,
+          );
+        }
 
         // Handle both text and thought chunks by accumulating (Grok streams thoughts
         // as many small agent_thought_chunk events, just like message chunks).
@@ -1586,7 +1625,7 @@ export class GrokACPProvider implements AgentProvider {
    * the override for binaries, auth, cache, docs, and sessions.
    */
   private getGrokHome(): string {
-    return nonemptyString(process.env.GROK_HOME) ?? join(homedir(), ".grok");
+    return this.grokHome ?? resolveGrokHome();
   }
 
   private getSubscriptionEnvironment(): NodeJS.ProcessEnv {

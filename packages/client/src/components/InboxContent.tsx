@@ -420,17 +420,24 @@ function InboxEmpty({ projectId }: { projectId?: string }) {
 interface InboxBodyProps {
   model: InboxModel;
   props: InboxContentProps;
+  filter: InboxFilter | null;
+  state: ReturnType<typeof pageState>;
+  counts: ReturnType<typeof inboxCounts>;
   onRetry: () => void;
 }
 
-/** Loading, error, status blocks and sections under the intro. */
-function InboxBody({ model, props, onRetry }: InboxBodyProps) {
+/** Loading, error, callout banner and sections under the command header. */
+function InboxBody({
+  model,
+  props,
+  filter,
+  state,
+  counts,
+  onRetry,
+}: InboxBodyProps) {
   const { t } = useI18n();
   const { overview, projectId, projects } = props;
-  const [filter, setFilter] = useState<InboxFilter | null>(null);
   const { tierState } = model;
-  const state = pageState(model, overview);
-  const counts = inboxCounts(model, overview);
   if (state.loading) {
     return (
       <div className={styles.loading}>
@@ -451,13 +458,6 @@ function InboxBody({ model, props, onRetry }: InboxBodyProps) {
   }
   return (
     <>
-      <NowSummary
-        counts={counts}
-        needs={needsBreakdown(tierState.tiers.needsAttention)}
-        partial={overview?.partial ?? false}
-        filter={filter}
-        onFilterChange={setFilter}
-      />
       <TriageBanner
         count={counts.needsYou}
         basePath={model.basePath}
@@ -479,48 +479,68 @@ function InboxBody({ model, props, onRetry }: InboxBodyProps) {
 }
 
 /**
- * The Inbox: status blocks that filter the page, then needs-you, running and
- * recent sections, with review outcomes and quick start in an aside. Data
- * comes from the overview model, or the legacy inbox feed when absent.
+ * The Inbox: unified Studio command header (intro, toolbar, KPI tiles), then
+ * needs-you, running and recent sections, with review outcomes and quick start
+ * in an aside. Data comes from the overview model, or the legacy inbox feed.
  */
 export function InboxContent(props: InboxContentProps) {
   const { projectId, projects, onProjectChange, overview } = props;
   const { t } = useI18n();
+  const [filter, setFilter] = useState<InboxFilter | null>(null);
   const model = useInboxModel(props);
   const { basePath, tierState } = model;
   const { refreshing, refresh } = useInboxRefresh(model, overview);
-  const needsYou =
-    overview?.counts.needsYou ?? tierState.tiers.needsAttention.length;
+  const state = pageState(model, overview);
+  const counts = inboxCounts(model, overview);
   const showTriage = !tierState.loading && !tierState.error;
+  const showSummary = !state.loading && !tierState.error;
   return (
     <main className="page-scroll-container">
       <div className={`page-content-inner ${pageWidthClass("wide")}`}>
-        <PageIntro
-          eyebrow={props.eyebrow}
-          title={props.title ?? t("shellNavInbox")}
-          lede={props.lede}
-          actions={
-            showTriage ? (
-              <TriageEntryButton
-                count={needsYou}
-                basePath={basePath}
+        <div className={styles.commandHeader}>
+          <PageIntro
+            eyebrow={props.eyebrow}
+            title={props.title ?? t("shellNavInbox")}
+            lede={props.lede}
+            actions={
+              showTriage ? (
+                <TriageEntryButton
+                  count={counts.needsYou}
+                  basePath={basePath}
+                  projectId={projectId}
+                />
+              ) : undefined
+            }
+            filters={
+              <OverviewToolbar
+                projects={projects}
                 projectId={projectId}
+                onProjectChange={onProjectChange}
+                basePath={basePath}
+                refreshing={refreshing}
+                refreshDisabled={refreshing || tierState.loading}
+                onRefresh={refresh}
               />
-            ) : undefined
-          }
-          filters={
-            <OverviewToolbar
-              projects={projects}
-              projectId={projectId}
-              onProjectChange={onProjectChange}
-              basePath={basePath}
-              refreshing={refreshing}
-              refreshDisabled={refreshing || tierState.loading}
-              onRefresh={refresh}
+            }
+          />
+          {showSummary && (
+            <NowSummary
+              counts={counts}
+              needs={needsBreakdown(tierState.tiers.needsAttention)}
+              partial={overview?.partial ?? false}
+              filter={filter}
+              onFilterChange={setFilter}
             />
-          }
+          )}
+        </div>
+        <InboxBody
+          model={model}
+          props={props}
+          filter={filter}
+          state={state}
+          counts={counts}
+          onRetry={refresh}
         />
-        <InboxBody model={model} props={props} onRetry={refresh} />
       </div>
     </main>
   );

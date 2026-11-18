@@ -1,58 +1,74 @@
 /*
- * Inbox status blocks (design .inb-tile). Each block is a filter toggle;
- * phone turns the same buttons into a horizontally scrolling chip row.
+ * Studio Workbench KPI filter tiles. Each tile toggles its Inbox filter;
+ * phone collapses the same buttons into a crisp scrolling chip strip.
  */
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
-  gap: 12px;
-  margin-bottom: var(--space-6);
+  grid-template-columns: repeat(auto-fit, minmax(168px, 1fr));
+  gap: 10px;
+  margin: 0;
 }
 
 .tile {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  gap: 8px;
+  align-items: stretch;
+  gap: 6px;
   min-width: 0;
   margin: 0;
-  padding: 14px 16px;
-  border: 1px solid var(--card-line);
-  border-radius: var(--r-lg);
+  padding: 10px 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-card);
   background: var(--surface);
   box-shadow: var(--shadow-card);
   color: var(--ink);
   font: inherit;
   text-align: left;
   cursor: pointer;
+  transition:
+    background-color var(--duration-fast) var(--ease-standard),
+    border-color var(--duration-fast) var(--ease-standard),
+    box-shadow var(--duration-fast) var(--ease-standard);
 }
 
 .tile:hover:not(:disabled) {
+  border-color: var(--line-strong);
   background: var(--surface-2);
 }
 
 .tile[aria-pressed="true"] {
   border-color: var(--accent-line);
+  background: color-mix(in srgb, var(--accent-soft) 45%, var(--surface));
   box-shadow:
-    0 0 0 1px var(--accent-line),
+    0 0 0 2px var(--accent-soft),
     var(--shadow-card);
 }
 
 .tile[data-summary-tile="needs"][aria-pressed="true"] {
   border-color: var(--attn-line);
+  background: color-mix(in srgb, var(--attn-soft) 45%, var(--surface));
   box-shadow:
-    0 0 0 1px var(--attn-line),
+    0 0 0 2px var(--attn-soft),
     var(--shadow-card);
 }
 
 .tile:disabled {
+  opacity: 0.65;
   cursor: default;
 }
 
 .tile:focus-visible {
   outline: 2px solid var(--focus);
   outline-offset: 2px;
+}
+
+.top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-width: 0;
 }
 
 .label {
@@ -73,16 +89,17 @@
 .unreadMark {
   width: 7px;
   height: 7px;
-  border-radius: 2px;
-  background: var(--ink);
+  border-radius: 50%;
+  background: var(--accent);
 }
 
 .num {
   color: var(--ink);
-  font-size: 30px;
-  font-stretch: var(--display-stretch);
+  font-family: var(--font-mono);
+  font-size: 20px;
   font-variant-numeric: tabular-nums;
-  font-weight: var(--title-weight);
+  font-weight: 600;
+  letter-spacing: -0.02em;
   line-height: 1;
 }
 
@@ -90,7 +107,8 @@
   overflow: hidden;
   max-width: 100%;
   color: var(--ink-3);
-  font-size: var(--fs-small);
+  font-size: 12px;
+  line-height: 1.3;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -99,7 +117,7 @@
   .grid {
     display: flex;
     gap: 8px;
-    margin: 0 calc(var(--page-gutter) * -1) var(--space-4);
+    margin: 0 calc(var(--page-gutter) * -1);
     padding: 0 var(--page-gutter) 2px;
     overflow-x: auto;
     scrollbar-width: none;
@@ -110,10 +128,10 @@
     flex-direction: row;
     align-items: center;
     gap: 6px;
-    min-height: var(--tap-min);
+    min-height: 36px;
     padding: 0 12px;
-    border-color: var(--line-strong);
-    border-radius: var(--r-chip);
+    border-color: var(--line);
+    border-radius: var(--r-btn);
     box-shadow: none;
     color: var(--ink-2);
     font-size: var(--fs-small);
@@ -121,12 +139,22 @@
     white-space: nowrap;
   }
 
-  .tile[aria-pressed="true"],
-  .tile[data-summary-tile="needs"][aria-pressed="true"] {
+  .tile[aria-pressed="true"] {
     border-color: var(--accent-line);
     background: var(--accent-soft);
     box-shadow: none;
     color: var(--accent-ink);
+  }
+
+  .tile[data-summary-tile="needs"][aria-pressed="true"] {
+    border-color: var(--attn-line);
+    background: var(--attn-soft);
+    box-shadow: none;
+    color: var(--attn-ink);
+  }
+
+  .top {
+    gap: 6px;
   }
 
   /* The pill collapses to marker plus text inside the chip. */
@@ -140,11 +168,18 @@
 
   .num {
     color: inherit;
-    font-size: inherit;
+    font-size: 12px;
     font-weight: 600;
+    letter-spacing: 0;
   }
 
   .hint {
     display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tile {
+    transition: none;
   }
 }

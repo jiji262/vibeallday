@@ -258,6 +258,18 @@ export const ENV_VAR_REGISTRY: EnvVarDescriptor[] = [
     description: "Override the pi sessions directory.",
   },
   {
+    name: "PI_CODING_AGENT_DIR",
+    group: "Data & profiles",
+    description:
+      "pi coding agent home directory for settings, custom models, and default sessions (default ~/.pi/agent).",
+  },
+  {
+    name: "PI_CODING_AGENT_SESSION_DIR",
+    group: "Sessions & scanning",
+    description:
+      "pi CLI native session directory override (honored when PI_SESSIONS_DIR is unset).",
+  },
+  {
     name: "CODEX_WATCH_PERIODIC_RESCAN_MS",
     group: "Sessions & scanning",
     description:

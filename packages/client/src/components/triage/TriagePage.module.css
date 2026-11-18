@@ -1,10 +1,10 @@
-/* Triage page layout (design Triage-Desktop / Triage-Phone). */
+/* Studio Workbench Review Deck layout (TriagePage). */
 
 .topActions {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 14px;
+  gap: 10px;
 }
 
 .kbd {
@@ -14,18 +14,31 @@
 .body {
   display: flex;
   flex-direction: column;
-  gap: 22px;
+  gap: 18px;
 }
 
+/* Subtle surface pill bar for keyboard shortcuts. */
 .hints {
-  display: flex;
+  display: inline-flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 6px 16px;
-  margin: 0;
-  padding: 0 4px;
-  color: var(--ink-3);
-  font-size: var(--fs-small);
+  align-self: center;
+  gap: 6px 14px;
+  margin: 2px auto 0;
+  padding: 6px 14px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface);
+  box-shadow: var(--shadow-card);
+  color: var(--ink-2);
+  font-size: 12px;
+}
+
+.hintItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
 }
 
 @media (width < 768px) {
@@ -39,6 +52,6 @@
   }
 
   .body {
-    gap: 18px;
+    gap: 14px;
   }
 }

@@ -51,7 +51,6 @@ import { prewarmVibeAllDayServerSpeechBackend } from "../../lib/speechProviders/
 import { SettingsItem } from "./SettingsItem";
 import { useSettingsPaneTitle } from "./SettingsPaneTitleContext";
 import { SettingsSection } from "./SettingsSection";
-import { SpeechVocabularyControls } from "./SpeechVocabularyControls";
 import { useSettingsUndoBaseline } from "./SettingsUndoContext";
 
 function prewarmSpeechModel(backend: string, model?: string): void {
@@ -623,48 +622,6 @@ export function SpeechSettings() {
             </div>
           </SettingsSection>
         )}
-      {canAdministerHost && (
-        <SettingsSection title={t("speechSectionVocabulary")} scope="server">
-          <div className="settings-group">
-            <SettingsItem
-              id="speech-vocabulary"
-              label={t("speechVocabularyTitle")}
-              description={t("speechVocabularyDescription")}
-              keywords={[
-                t("speechVocabularyScan"),
-                t("speechVocabularyReset"),
-                t("speechVocabularyExplore"),
-                t("speechVocabularyBiasing"),
-                "keyterms",
-                "lexicon",
-              ]}
-              layout="custom"
-              baseClassName=""
-            >
-              {serverHasCapability(
-                versionInfo,
-                SERVER_CAPABILITIES.speechVocabulary.name,
-              ) ? (
-                <SpeechVocabularyControls />
-              ) : (
-                <>
-                  <h3>{t("speechVocabularyTitle")}</h3>
-                  <p>
-                    {t(
-                      versionInfo?.sqlite?.state === "disabled"
-                        ? "speechVocabularyStorageDisabled"
-                        : versionInfo?.sqlite?.state === "error" ||
-                            versionInfo?.sqlite?.state === "unsupported"
-                          ? "speechVocabularyStorageUnavailable"
-                          : "speechVocabularyServerUnavailable",
-                    )}
-                  </p>
-                </>
-              )}
-            </SettingsItem>
-          </div>
-        </SettingsSection>
-      )}
     </>
   );
 }

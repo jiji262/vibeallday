@@ -41,6 +41,7 @@ import {
   isTerminalGrokToolUpdate,
   normalizeGrokToolUpdate,
 } from "../sdk/providers/grok-tool-normalization.js";
+import { extractGrokSessionContextUsage } from "../sdk/providers/grok-usage.js";
 import type { Message, SessionSummary } from "../supervisor/types.js";
 import type {
   GetSessionOptions,
@@ -49,13 +50,13 @@ import type {
 } from "./types.js";
 import { sortProviderChildSessions } from "./types.js";
 import {
-  GROK_SESSIONS_DIR,
   canonicalizeProjectPath,
   getProjectIdentityKey,
+  resolveGrokSessionsDir,
 } from "../projects/paths.js";
 
 export interface GrokSessionReaderOptions {
-  /** Override for testing (defaults to ~/.grok/sessions) */
+  /** Override for testing (defaults to $GROK_HOME/sessions or ~/.grok/sessions) */
   sessionsDir?: string;
   /** Filter to sessions belonging to this exact cwd */
   projectPath?: string;
@@ -106,13 +107,32 @@ export class GrokSessionReader implements ISessionReader {
   private readonly CACHE_TTL_MS = 5000;
 
   constructor(options: GrokSessionReaderOptions = {}) {
-    this.sessionsDir = options.sessionsDir ?? GROK_SESSIONS_DIR;
+    this.sessionsDir = options.sessionsDir ?? resolveGrokSessionsDir();
     this.projectPath = options.projectPath
       ? canonicalizeProjectPath(options.projectPath)
       : undefined;
     this.projectIdentityKey = this.projectPath
       ? getProjectIdentityKey(this.projectPath)
       : undefined;
+  }
+
+  private async decodeGroupCwd(
+    encoded: string,
+    cwdDir: string,
+  ): Promise<string | null> {
+    try {
+      const fromCwdFile = (
+        await readFile(join(cwdDir, ".cwd"), "utf-8")
+      ).trim();
+      if (fromCwdFile) return fromCwdFile;
+    } catch {
+      // Optional .cwd marker absent
+    }
+    try {
+      return decodeURIComponent(encoded);
+    } catch {
+      return null;
+    }
   }
 
   private async scanSessions(): Promise<GrokSessionInfo[]> {
@@ -138,19 +158,15 @@ export class GrokSessionReader implements ISessionReader {
     for (const encoded of cwdDirs) {
       if (encoded === "session_search.sqlite") continue;
 
-      let decodedCwd: string;
-      try {
-        decodedCwd = decodeURIComponent(encoded);
-      } catch {
-        continue;
-      }
+      const cwdDir = join(this.sessionsDir, encoded);
+      const decodedCwd = await this.decodeGroupCwd(encoded, cwdDir);
+      if (!decodedCwd) continue;
 
       const normalized = canonicalizeProjectPath(decodedCwd);
       if (targetCwd && getProjectIdentityKey(normalized) !== targetCwd) {
         continue;
       }
 
-      const cwdDir = join(this.sessionsDir, encoded);
       let uuids: string[];
       try {
         uuids = await readdir(cwdDir);
@@ -159,6 +175,7 @@ export class GrokSessionReader implements ISessionReader {
       }
 
       for (const uuid of uuids) {
+        if (uuid === ".cwd") continue;
         const sessionDir = join(cwdDir, uuid);
         const summaryPath = join(sessionDir, "summary.json");
 
@@ -207,6 +224,11 @@ export class GrokSessionReader implements ISessionReader {
         if (childIds.has(summaryId)) {
           continue;
         }
+        const model = data.current_model_id ?? "grok-build";
+        const contextUsage = extractGrokSessionContextUsage({
+          sessionDir: s.dirPath,
+          model,
+        });
 
         const summary: SessionSummary = {
           id: summaryId,
@@ -221,7 +243,8 @@ export class GrokSessionReader implements ISessionReader {
           fullTitle: data.session_summary ?? data.generated_title ?? null,
           messageCount: data.num_messages ?? data.num_chat_messages ?? 0,
           provider: "grok",
-          model: data.current_model_id ?? "grok-build",
+          model,
+          ...(contextUsage ? { contextUsage } : {}),
         };
         out.push(summary);
       } catch {
@@ -249,6 +272,11 @@ export class GrokSessionReader implements ISessionReader {
     try {
       const raw = await readFile(info.summaryPath, "utf-8");
       const data = JSON.parse(raw);
+      const model = data.current_model_id ?? "grok-build";
+      const contextUsage = extractGrokSessionContextUsage({
+        sessionDir: info.dirPath,
+        model,
+      });
 
       return {
         id: data.info?.id ?? sessionId,
@@ -263,7 +291,8 @@ export class GrokSessionReader implements ISessionReader {
         fullTitle: data.session_summary ?? data.generated_title ?? null,
         messageCount: data.num_messages ?? data.num_chat_messages ?? 0,
         provider: "grok",
-        model: data.current_model_id ?? "grok-build",
+        model,
+        ...(contextUsage ? { contextUsage } : {}),
       };
     } catch {
       return null;
@@ -315,11 +344,19 @@ export class GrokSessionReader implements ISessionReader {
     const filteredMessages = afterMessageId
       ? this.messagesAfter(messages, afterMessageId)
       : messages;
+    const contextUsage =
+      summary.contextUsage ??
+      extractGrokSessionContextUsage({
+        sessionDir: info.dirPath,
+        rawUpdates: transcriptSnapshot.raw,
+        model: summary.model,
+      });
 
     return {
       summary: {
         ...summary,
         messageCount: messages.length || summary.messageCount,
+        ...(contextUsage ? { contextUsage } : {}),
       },
       transcriptSnapshotUpdatedAt: transcriptSnapshot.updatedAt,
       data: {
@@ -341,7 +378,7 @@ export class GrokSessionReader implements ISessionReader {
 
   private async loadUpdatesSnapshot(
     info: GrokSessionInfo,
-  ): Promise<{ messages: Message[]; updatedAt: string }> {
+  ): Promise<{ messages: Message[]; updatedAt: string; raw?: string }> {
     const updatesPath = join(info.dirPath, "updates.jsonl");
     let raw: string;
     try {
@@ -350,6 +387,7 @@ export class GrokSessionReader implements ISessionReader {
       return {
         messages: this.parseUpdatesMessages(raw),
         updatedAt: stats.mtime.toISOString(),
+        raw,
       };
     } catch {
       return {

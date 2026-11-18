@@ -2,7 +2,6 @@ import type { LaunchSource } from "@vibeallday/shared";
 import { FilterDropdown } from "../components/FilterDropdown";
 import { SearchField, selectClassName } from "../components/garden/Field";
 import { ChevronDownIcon } from "../components/garden/icons";
-import { ListToolbar } from "../components/garden/ListToolbar";
 import { useI18n } from "../i18n";
 import {
   LAUNCH_SOURCE_LABEL_KEYS,
@@ -74,18 +73,20 @@ function SourceFilter({
 }
 
 /**
- * Search, source filter and sort over the loaded project list, with the
- * mono "shown / total" count. Filtering happens in the page behind a
+ * Studio Workbench toolbar: framed unified bar with search input, source/sort
+ * controls, and tabular mono count pill. Filtering happens in the page behind a
  * deferred value, so the search field echoes each keystroke at once.
  */
 export function ProjectsToolbar(props: ProjectsToolbarProps) {
   const { t } = useI18n();
   const { query, onQueryChange, sort, onSortChange, shown, total } = props;
   return (
-    <ListToolbar
-      label={t("projectsToolbarLabel")}
+    <div
+      role="region"
+      aria-label={t("projectsToolbarLabel")}
       className={styles.toolbar}
-      search={
+    >
+      <div className={styles.searchSlot}>
         <SearchField
           label={t("projectsSearchLabel")}
           placeholder={t("projectsSearchPlaceholder")}
@@ -94,34 +95,34 @@ export function ProjectsToolbar(props: ProjectsToolbarProps) {
           autoComplete="off"
           spellCheck={false}
         />
-      }
-      filters={
-        <>
-          <SourceFilter {...props} />
-          <span className={styles.sortField}>
-            <select
-              aria-label={t("projectsSort")}
-              className={selectClassName(styles.sort)}
-              value={sort}
-              onChange={(event) => {
-                if (isProjectSort(event.target.value))
-                  onSortChange(event.target.value);
-              }}
-            >
-              {PROJECT_SORTS.map((value) => (
-                <option key={value} value={value}>
-                  {t(`projectsSort_${value}`)}
-                </option>
-              ))}
-            </select>
-            <ChevronDownIcon
-              size={SORT_CHEVRON_SIZE}
-              className={styles.sortChevron}
-            />
-          </span>
-        </>
-      }
-      count={t("projectsShownCount", { shown, total })}
-    />
+      </div>
+      <div className={styles.toolbarControls}>
+        <SourceFilter {...props} />
+        <span className={styles.sortField}>
+          <select
+            aria-label={t("projectsSort")}
+            className={selectClassName(styles.sort)}
+            value={sort}
+            onChange={(event) => {
+              if (isProjectSort(event.target.value))
+                onSortChange(event.target.value);
+            }}
+          >
+            {PROJECT_SORTS.map((value) => (
+              <option key={value} value={value}>
+                {t(`projectsSort_${value}`)}
+              </option>
+            ))}
+          </select>
+          <ChevronDownIcon
+            size={SORT_CHEVRON_SIZE}
+            className={styles.sortChevron}
+          />
+        </span>
+        <span className={styles.countPill}>
+          {t("projectsShownCount", { shown, total })}
+        </span>
+      </div>
+    </div>
   );
 }

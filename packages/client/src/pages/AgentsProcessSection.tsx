@@ -1,18 +1,33 @@
 import type { ReactNode } from "react";
-import { Card, CardHeader } from "../components/garden/Card";
 import { Table, Th } from "../components/garden/DataTable";
 import { EmptyState } from "../components/garden/EmptyState";
 import { CpuIcon } from "../components/garden/icons";
 import { useI18n } from "../i18n";
-import styles from "./AgentsPage.module.css";
+import pageStyles from "./AgentsPage.module.css";
+import styles from "./AgentsProcessSection.module.css";
+import type { ProcessSectionKey } from "./AgentsStateFilter";
 
 interface ProcessSectionProps {
   title: string;
+  tone?: ProcessSectionKey;
   /** Rows shown after filtering; drives the mono count. */
   count: number;
   /** Rendered instead of the table when there are no rows. */
   empty: ReactNode;
   children: ReactNode;
+}
+
+function sectionDotClass(tone: ProcessSectionKey | undefined, count: number) {
+  switch (tone) {
+    case "active":
+      return count > 0 ? styles.dotActive : styles.dotActiveQuiet;
+    case "external":
+      return styles.dotExternal;
+    case "stopped":
+      return styles.dotStopped;
+    default:
+      return styles.dotIdle;
+  }
 }
 
 function ProcessTableHead() {
@@ -36,25 +51,35 @@ function ProcessTableHead() {
   );
 }
 
-/** One process group: title, count, then a flush table (cards on phones). */
+/** One process group: sunken mono header band, count, then flush table. */
 export function ProcessSection({
   title,
+  tone,
   count,
   empty,
   children,
 }: ProcessSectionProps) {
   return (
-    <Card as="section" flush className={styles.section} aria-label={title}>
-      <CardHeader title={title} meta={count} />
+    <section className={styles.section} aria-label={title}>
+      <div className={styles.header}>
+        <div className={styles.headingGroup}>
+          <span
+            className={`${styles.dot} ${sectionDotClass(tone, count)}`}
+            aria-hidden="true"
+          />
+          <h2 className={styles.title}>{title}</h2>
+        </div>
+        <span className={styles.count}>{count}</span>
+      </div>
       {count === 0 ? (
         empty
       ) : (
-        <Table label={title} className={styles.processTable}>
+        <Table label={title} className={pageStyles.processTable}>
           <ProcessTableHead />
           <tbody>{children}</tbody>
         </Table>
       )}
-    </Card>
+    </section>
   );
 }
 

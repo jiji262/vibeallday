@@ -27,61 +27,97 @@ export function ViewerModePage() {
     const number = Number(query.get(key));
     return Number.isSafeInteger(number) && number > 0 ? number : undefined;
   };
-  if (mode !== "edit" && mode !== "interactive")
-    return <ErrorState message={t("fileInvalidUrl")} />;
-  if (artifactUrl) {
-    if (!version)
-      return <LoadingState label={t("sourceEditorLoading")} variant="page" />;
-    if (
-      !isArtifactLink(artifactUrl, version.artifactViewer, window.location.href)
-    )
-      return <ErrorState message={t("artifactUnavailable")} />;
+  if (mode !== "edit" && mode !== "interactive") {
     return (
-      <div className={styles.artifactHost} ref={setArtifactHost}>
-        {artifactHost && (
-          <ArtifactLinkViewer
-            standalone
-            portalTarget={artifactHost}
-            inactive={false}
-            initiallyEditing={mode === "edit"}
-            controller={{
-              kind: "artifact",
-              id: artifactUrl,
-              sessionId: "standalone",
-              label:
-                new URL(artifactUrl).pathname.split("/").at(-1) ?? artifactUrl,
-              url: artifactUrl,
-              close,
-              minimize: close,
-              restore: () => {},
-              minimized: false,
-            }}
-          />
-        )}
+      <div className={`${styles.viewport} ${styles.stateViewport}`}>
+        <div className={styles.stateCard}>
+          <ErrorState message={t("fileInvalidUrl")} />
+        </div>
       </div>
     );
   }
-  if (!path) return <ErrorState message={t("fileMissingPath")} />;
+  if (artifactUrl) {
+    if (!version) {
+      return (
+        <div className={`${styles.viewport} ${styles.stateViewport}`}>
+          <div className={styles.stateCard}>
+            <LoadingState label={t("sourceEditorLoading")} variant="page" />
+          </div>
+        </div>
+      );
+    }
+    if (
+      !isArtifactLink(artifactUrl, version.artifactViewer, window.location.href)
+    ) {
+      return (
+        <div className={`${styles.viewport} ${styles.stateViewport}`}>
+          <div className={styles.stateCard}>
+            <ErrorState message={t("artifactUnavailable")} />
+          </div>
+        </div>
+      );
+    }
+    return (
+      <div className={styles.viewport}>
+        <div className={styles.artifactHost} ref={setArtifactHost}>
+          {artifactHost && (
+            <ArtifactLinkViewer
+              standalone
+              portalTarget={artifactHost}
+              inactive={false}
+              initiallyEditing={mode === "edit"}
+              controller={{
+                kind: "artifact",
+                id: artifactUrl,
+                sessionId: "standalone",
+                label:
+                  new URL(artifactUrl).pathname.split("/").at(-1) ??
+                  artifactUrl,
+                url: artifactUrl,
+                close,
+                minimize: close,
+                restore: () => {},
+                minimized: false,
+              }}
+            />
+          )}
+        </div>
+      </div>
+    );
+  }
+  if (!path) {
+    return (
+      <div className={`${styles.viewport} ${styles.stateViewport}`}>
+        <div className={styles.stateCard}>
+          <ErrorState message={t("fileMissingPath")} />
+        </div>
+      </div>
+    );
+  }
   return (
-    <LocalFileModal
-      resource={
-        projectId
-          ? {
-              kind: "project-file",
-              projectId,
-              path,
-              lineNumber: position("line"),
-              columnNumber: position("column"),
-            }
-          : {
-              kind: "local-file",
-              path,
-              lineNumber: position("line"),
-              columnNumber: position("column"),
-            }
-      }
-      initialMode={mode}
-      onClose={close}
-    />
+    <div className={styles.viewport}>
+      <div className={styles.modalHost}>
+        <LocalFileModal
+          resource={
+            projectId
+              ? {
+                  kind: "project-file",
+                  projectId,
+                  path,
+                  lineNumber: position("line"),
+                  columnNumber: position("column"),
+                }
+              : {
+                  kind: "local-file",
+                  path,
+                  lineNumber: position("line"),
+                  columnNumber: position("column"),
+                }
+          }
+          initialMode={mode}
+          onClose={close}
+        />
+      </div>
+    </div>
   );
 }

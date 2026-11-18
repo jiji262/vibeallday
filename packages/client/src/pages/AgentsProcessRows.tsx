@@ -113,8 +113,12 @@ export function ProcessRow({
 }: ProcessRowProps) {
   const { t } = useI18n();
   const live = !terminated;
+  const isActive =
+    live && (process.state === "in-turn" || process.state === "waiting-input");
   return (
-    <Tr className={rowStyles.processRow}>
+    <Tr
+      className={`${rowStyles.processRow} ${isActive ? rowStyles.processRowActive : ""}`}
+    >
       <Td className={rowStyles.sessionCell}>
         <span className={rowStyles.identity}>
           <ProviderMark provider={process.provider} />
@@ -147,8 +151,6 @@ function externalTitle(
   provider: string,
   t: ReturnType<typeof useI18n>["t"],
 ): string {
-  // Only an exact provider record names the session; without one the row
-  // stays a plain process and never guesses a title or link.
   if (observation.sessionTitle) return observation.sessionTitle;
   if (observation.sessionId) {
     return t("agentsExternalSessionTitle", {
@@ -201,8 +203,6 @@ export function ExternalProcessRow({
   basePath,
 }: ExternalProcessRowProps) {
   const { t } = useI18n();
-  // The whole row is the quiet touch surface for the metrics popover; garden
-  // `Tr` takes no ref, so the title element resolves its row once mounted.
   const rowRef = useRef<HTMLElement | null>(null);
   const attachRow = useCallback((node: HTMLElement | null) => {
     rowRef.current = node?.closest("tr") ?? null;

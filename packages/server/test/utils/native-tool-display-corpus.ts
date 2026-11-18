@@ -21,6 +21,7 @@ import type { ToolCallItem } from "@vibeallday/shared/transcript/items";
 import { ClaudeProvider } from "../../src/sdk/providers/claude.js";
 import { CodexOSSProvider } from "../../src/sdk/providers/codex-oss.js";
 import { CodexProvider } from "../../src/sdk/providers/codex.js";
+import type { SDKMessage } from "../../src/sdk/types.js";
 import type { LoadedSession } from "../../src/sessions/types.js";
 import {
   runPersistedPipeline,
@@ -352,7 +353,7 @@ export function preparedNativeRecord(item: ToolCallItem) {
   };
 }
 
-import { GeminiProvider } from "../../src/sdk/providers/gemini.js";
+import { normalizeGeminiTool } from "../../src/sdk/providers/gemini-tools.js";
 import { OpenCodeProvider } from "../../src/sdk/providers/opencode.js";
 import { GrokACPProvider } from "../../src/sdk/providers/grok-acp.js";
 import { GrokSessionReader } from "../../src/sessions/grok-reader.js";
@@ -481,33 +482,37 @@ for (const [tool, nativeName, input] of [
 
 async function runGeminiPair(fixture: NativeDisplayCase) {
   const callId = `display-${fixture.id}`;
-  const provider = new GeminiProvider();
   const nativeName = fixture.nativeName ?? fixture.tool;
-  const input = z.record(z.string(), z.unknown()).parse(fixture.input);
+  const rawInput = z.record(z.string(), z.unknown()).parse(fixture.input);
   const output = z.string().parse(fixture.result);
-  const messages = [
-    provider["convertEventToSDKMessage"](
-      {
-        type: "tool_use",
-        timestamp,
-        tool_name: nativeName,
-        tool_id: callId,
-        parameters: input,
+  const { name, input } = normalizeGeminiTool(nativeName, rawInput);
+  const messages: SDKMessage[] = [
+    {
+      type: "assistant",
+      session_id: "display-corpus",
+      timestamp,
+      message: {
+        role: "assistant",
+        content: [{ type: "tool_use", id: callId, name, input }],
       },
-      "display-corpus",
-    ),
-    provider["convertEventToSDKMessage"](
-      {
-        type: "tool_result",
-        timestamp,
-        tool_id: callId,
-        status: fixture.isError ? "error" : "success",
-        output,
-        ...(fixture.isError ? { error: output } : {}),
+    } as SDKMessage,
+    {
+      type: "user",
+      session_id: "display-corpus",
+      timestamp,
+      message: {
+        role: "user",
+        content: [
+          {
+            type: "tool_result",
+            tool_use_id: callId,
+            ...(fixture.isError ? { is_error: true } : {}),
+            content: output,
+          },
+        ],
       },
-      "display-corpus",
-    ),
-  ].filter((message) => message !== null);
+    } as SDKMessage,
+  ];
   const live = await runStreamPipeline(messages);
   const durable = await runPersistedPipeline(
     loaded({

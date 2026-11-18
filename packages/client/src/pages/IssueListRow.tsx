@@ -7,8 +7,8 @@ import { MoreHorizontalIcon } from "../components/garden/icons";
 import { TrackerStatusBadge } from "../components/TrackerStatusBadge";
 import { useI18n } from "../i18n";
 import { formatBriefAge } from "../lib/sessionAge";
+import styles from "./IssueListRow.module.css";
 import { IssueTypeBadge } from "./IssueTypeBadge";
-import styles from "./IssuesPage.module.css";
 
 const TITLE_MAX_LENGTH = 512;
 const URL_MAX_LENGTH = 4096;
@@ -22,13 +22,17 @@ function IssueActivity({ item, sort }: { item: IssueItem; sort: IssueSort }) {
   const age = formatBriefAge(timestamp);
   if (!age || !timestamp) {
     return (
-      <span>
+      <span className={styles.activityAge}>
         {t(mentioned ? "issuesMentionTimeUnknown" : "issuesActivityUnknown")}
       </span>
     );
   }
   return (
-    <time dateTime={timestamp} title={new Date(timestamp).toLocaleString()}>
+    <time
+      className={styles.activityAge}
+      dateTime={timestamp}
+      title={new Date(timestamp).toLocaleString()}
+    >
       {t(mentioned ? "issuesRecentlyMentionedAge" : "issuesSessionActiveAge", {
         age,
       })}
@@ -36,7 +40,7 @@ function IssueActivity({ item, sort }: { item: IssueItem; sort: IssueSort }) {
   );
 }
 
-interface IssueEditorProps {
+export interface IssueEditorProps {
   kind: IssueEditKind;
   value: string;
   onChange: (value: string) => void;
@@ -82,8 +86,8 @@ function IssueEditorFields({
   );
 }
 
-/** Inline title override, URL resolution or delete confirmation. */
-function IssueEditor({
+/** Inline title override, URL resolution or delete confirmation card. */
+export function IssueEditor({
   kind,
   value,
   onChange,
@@ -95,14 +99,14 @@ function IssueEditor({
   const { t } = useI18n();
   return (
     <form
-      className={styles.editor}
+      className={`${styles.editorCard} ${kind === "delete" ? styles.editorCardDanger : ""}`}
       onSubmit={(event) => {
         event.preventDefault();
         onSave();
       }}
     >
       <IssueEditorFields kind={kind} value={value} onChange={onChange} />
-      <div className={styles.actions}>
+      <div className={styles.editorActions}>
         <Button
           size="sm"
           variant={kind === "delete" ? "danger" : "primary"}
@@ -126,7 +130,6 @@ interface IssueListRowProps {
   sort?: IssueSort | "key";
   onSelect: () => void;
   onMenu: (event: ReactMouseEvent<HTMLElement>) => void;
-  editor?: IssueEditorProps;
 }
 
 function IssueSelectButton({
@@ -143,17 +146,25 @@ function IssueSelectButton({
       aria-pressed={selected}
       onClick={onSelect}
     >
-      <span className={styles.itemReference}>
-        <span className={styles.itemTitle}>
+      <span className={styles.topLine}>
+        <span className={styles.keyCluster}>
           <strong className={styles.itemKey}>{item.key}</strong>
           <IssueTypeBadge item={item} />
         </span>
-        {item.title && item.title !== item.key && (
-          <span className={styles.itemSummary}>{item.title}</span>
-        )}
+        <span className={styles.badges}>
+          <TrackerStatusBadge item={item} />
+          {item.unresolved && (
+            <Badge tone="outline">{t("issuesUnresolved")}</Badge>
+          )}
+        </span>
       </span>
-      <span className={styles.itemMeta}>
-        <span>
+      {item.title && item.title !== item.key && (
+        <span className={styles.itemSummary}>{item.title}</span>
+      )}
+      <span className={styles.metaLine}>
+        <span
+          className={`${styles.sessionCapsule} ${selected ? styles.sessionCapsuleSelected : ""}`}
+        >
           {t(
             item.sessionCount === 1
               ? "issuesSingleSession"
@@ -163,24 +174,17 @@ function IssueSelectButton({
         </span>
         {sort && sort !== "key" && <IssueActivity item={item} sort={sort} />}
       </span>
-      <span className={styles.itemState}>
-        <TrackerStatusBadge item={item} />
-        {item.unresolved && (
-          <Badge tone="outline">{t("issuesUnresolved")}</Badge>
-        )}
-      </span>
     </button>
   );
 }
 
-/** One reference: mono key + type tag, title, session count, tracker state. */
+/** One reference: mono key + type tag, title, session count capsule, tracker state. */
 export function IssueListRow({
   item,
   selected,
   sort,
   onSelect,
   onMenu,
-  editor,
 }: IssueListRowProps) {
   const { t } = useI18n();
   const rowClass = selected ? `${styles.item} ${styles.selected}` : styles.item;
@@ -201,9 +205,6 @@ export function IssueListRow({
           <MoreHorizontalIcon />
         </IconButton>
       </div>
-      {editor && <IssueEditor {...editor} />}
     </li>
   );
 }
-
-export type { IssueEditorProps };

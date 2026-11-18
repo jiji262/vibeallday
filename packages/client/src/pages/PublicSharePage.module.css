@@ -1,9 +1,6 @@
-/* Public share chrome: Garden type and badges over the legacy
-   `.public-share-*` layout vocabulary in `styles/index.css`. The doubled
-   selectors win over those single-class rules without editing them. */
+/* Studio Workbench public share reader chrome over `.public-share-*` layout
+   hooks in `styles/index.css`. */
 
-/* Compact read-only header (design Share): title over a quiet meta line,
-   snapshot tag and viewer count on the right. */
 .titleRow:global(.public-share-title-row) {
   flex-direction: column;
   align-items: flex-start;
@@ -18,6 +15,7 @@
   font-stretch: var(--display-stretch);
   font-weight: var(--title-weight);
   letter-spacing: var(--display-tracking);
+  line-height: 1.3;
 }
 
 .meta {
@@ -28,23 +26,26 @@
   max-width: 100%;
   overflow: hidden;
   color: var(--ink-3);
-  font-size: var(--fs-meta);
+  font-family: var(--font-mono);
+  font-size: 11.5px;
   white-space: nowrap;
 }
 
 .meta > * + *::before {
   margin-right: 6px;
+  color: var(--ink-4);
   content: "·";
 }
 
 .titleRow :global(.public-share-project) {
   max-width: 16rem;
   color: var(--ink-3);
-  font-size: var(--fs-meta);
+  font-family: var(--font-mono);
+  font-size: 11.5px;
 }
 
 .page:global(.public-share-page) {
-  --public-share-header-height: 60px;
+  --public-share-header-height: 58px;
 
   background: var(--canvas);
   color: var(--ink);
@@ -53,17 +54,14 @@
 .page :global(.public-share-header) {
   border-bottom-color: var(--phead-line);
   background: var(--phead-bg);
+  backdrop-filter: saturate(180%) blur(12px);
 }
 
 .headerInner:global(.public-share-header-inner) {
-  padding: 8px 28px;
+  padding: 8px var(--page-gutter);
 }
 
-/* One reading column for notices, the view switch and the transcript. It is
-   the session transcript's width (--content-max-width), not the board's
-   720px: the conversation activity row packs the activity column beside the
-   current thinking card only at that width, and a narrower column wraps the
-   card under the column, where a short window clips its top under follow. */
+/* Shared reading column matching SessionPage (--content-max-width). */
 .page :global(.public-share-caution),
 .page :global(.public-share-notice),
 .page :global(.public-share-error--inline),
@@ -85,15 +83,17 @@
 .viewBar {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 12px;
-  padding: 16px 16px 0;
+  padding: 14px 16px 6px;
 }
 
 .page :global(.public-share-notice) {
   border-color: var(--line);
-  border-left: 3px solid var(--accent);
+  border-inline-start: 3px solid var(--accent);
   border-radius: var(--r-card);
   background: var(--surface);
+  box-shadow: var(--shadow-card);
   color: var(--ink-2);
   font-size: var(--fs-small);
 }
@@ -111,27 +111,45 @@
   border: 1px solid var(--card-line);
   border-radius: var(--r-card);
   background: var(--surface);
+  box-shadow: var(--shadow-card);
   color: var(--ink);
+  line-height: 1.6;
 }
 
 .page :global(.public-share-fetch-status),
 .page :global(.public-share-empty) {
   color: var(--ink-3);
-  font-size: var(--fs-small);
+  font-family: var(--font-mono);
+  font-size: var(--fs-meta);
 }
 
 .page :global(.public-share-badge) {
   display: inline-flex;
   align-items: center;
+  gap: 6px;
   height: var(--chip-h);
   padding: 0 10px;
   border: 1px solid var(--line);
   border-radius: var(--r-chip);
   background: var(--surface-2);
   color: var(--ink-2);
-  font-family: var(--font-ui);
-  font-size: var(--fs-meta);
+  font-family: var(--font-mono);
+  font-size: 11px;
   font-weight: 600;
+}
+
+.page :global(.public-share-badge)[data-mode="live"] {
+  border-color: color-mix(in srgb, var(--run) 28%, transparent);
+  background: var(--run-soft);
+  color: var(--run-ink);
+}
+
+.page :global(.public-share-badge)[data-mode="live"]::before {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: currentColor;
+  content: "";
 }
 
 .page :global(.public-share-caution) {
@@ -148,15 +166,12 @@
   color: var(--err-ink);
 }
 
-/* Touch: the floating follow toggle is a 44px target. */
 @media (pointer: coarse) {
   .page :global(.public-share-floating-controls .message-follow-toggle) {
     height: var(--tap-min);
   }
 }
 
-/* Phone: brand and badges on one row, the title and meta on the next, so
-   the title keeps a readable column instead of squeezing to a few glyphs. */
 @media (width <= 600px) {
   .page:global(.public-share-page) {
     --public-share-header-height: 88px;
@@ -190,7 +205,7 @@
   }
 
   .titleRow :global(.public-share-project) {
-    max-width: 6rem;
+    max-width: 6.5rem;
     flex-shrink: 0;
   }
 }

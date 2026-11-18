@@ -185,7 +185,11 @@ export function InboxSection({
         <p className={styles.empty}>{t("inboxFilterEmpty")}</p>
       ) : (
         <Card flush className={styles.card}>
-          <ul className={`sessions-list ${styles.collection}`}>
+          <ul
+            className={`sessions-list ${styles.collection}${
+              model.key === "needsAttention" ? ` ${styles.needsList}` : ""
+            }`}
+          >
             {model.queueItems.map((item) => (
               <InboxQueueItem
                 key={item.id}

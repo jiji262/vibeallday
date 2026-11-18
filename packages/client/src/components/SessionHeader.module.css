@@ -1,15 +1,10 @@
 /*
- * SessionPage's own `.session-header`: the detail-page top bar. It matches
- * PageHeader's bar (`--topbar-height`, surface fill, hairline bottom, page
- * gutter) so moving between a list page and a session keeps the frame still.
- *
- * The leading back button or sidebar toggle brings its own padding, so the
- * row's start inset is the gutter minus that padding; with no leading control
- * (the desktop case, where the sidebar carries its own toggle) the title
- * starts on the gutter itself.
+ * SessionPage's Studio Workbench top bar. Matches PageHeader's bar
+ * (`--topbar-height`, frosted surface fill, crisp bottom rule, page gutter)
+ * so navigating between list views and active sessions keeps the shell anchored.
  */
 .row {
-  --header-control-size: 36px;
+  --header-control-size: 34px;
   --header-row-size: var(--topbar-height);
   --header-control-inset: var(--space-2);
 }
@@ -27,6 +22,7 @@
 .row :global(.sidebar-toggle) {
   min-width: var(--header-control-size);
   min-height: var(--header-control-size);
+  border-radius: var(--r-icon-btn);
 }
 
 .row:global(.session-header-inner).noLeadingControl {
@@ -43,40 +39,46 @@
 
 .header .actions {
   flex-wrap: nowrap;
+  gap: 6px;
 }
 
 .header .modelButton {
   align-items: center;
-  min-height: var(--header-control-size);
-  max-width: 14rem;
+  min-height: 30px;
+  max-width: 14.5rem;
   padding-inline: 10px;
-  border: 1px solid var(--line-strong);
+  border: 1px solid var(--line);
   border-radius: var(--r-chip);
-  background: var(--surface);
+  background: var(--surface-2);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.03);
   transform: none;
+  transition:
+    background-color 140ms ease,
+    border-color 140ms ease,
+    color 140ms ease;
 }
 
 .header .modelButton:hover {
+  border-color: var(--line-strong);
   background: var(--surface-3);
 }
 
-/* Inspector toggle: the same square as the menu trigger beside it. A fixed
-   size, not a minimum: IconButton's own `--icon-btn` (38px in Celadon) would
-   otherwise outgrow the row and push the bar past `--topbar-height`. */
 .header .inspectorToggle {
   flex-shrink: 0;
   width: var(--header-control-size);
   height: var(--header-control-size);
+  border-radius: var(--r-icon-btn);
 }
 
 .header .menuTrigger {
   min-width: var(--header-control-size);
   min-height: var(--header-control-size);
+  border-radius: var(--r-icon-btn);
   opacity: 1;
 }
 
 .header .project {
-  max-width: 8.5rem;
+  max-width: 9rem;
   flex-shrink: 0;
   min-width: 0;
 }
@@ -89,36 +91,37 @@
   color: var(--ink-3);
   font-family: var(--font-mono);
   font-size: 12px;
+  font-weight: 500;
   text-overflow: ellipsis;
   white-space: nowrap;
+  transition: color 120ms ease;
 }
 
 .header .project > :global(.project-breadcrumb):hover {
   color: var(--ink);
 }
 
-/* Wide headers read as a breadcrumb: project / session title. */
+/* Wide headers read as a studio breadcrumb: project / session title. */
 .header:not([data-header-layout="narrow"]) .project::after {
   flex-shrink: 0;
   margin-inline: 6px 2px;
   color: var(--ink-4);
+  font-family: var(--font-mono);
   content: "/";
 }
 
 .header[data-header-layout="compact"] .project {
-  max-width: 5rem;
+  max-width: 5.5rem;
   overflow: hidden;
 }
 
-/* Narrow headers give the project its natural width up to half the meta line
-   (the model and state follow it); the menu below must not be clipped. */
 .header[data-header-layout="narrow"] .project {
   max-width: 55%;
   flex: 0 1 auto;
 }
 
 .header[data-header-layout="narrow"] .modelButton {
-  max-width: 8rem;
+  max-width: 8.5rem;
 }
 
 /* Preserve the mounted inline field if a roomy header shrinks mid-edit. */
@@ -139,28 +142,25 @@
   }
 }
 
-/* Garden header: a hairline instead of the legacy fade, a display-serif title
-   and a mono meta line. The wrappers vanish on wide headers so the children
-   keep flowing in one row; narrow headers lay them out as two lines. */
+/* Studio Workbench frosted topbar across desktop & mobile. */
 .header:global(.session-header) {
   z-index: var(--z-topbar);
-  background: var(--canvas);
-  /* A hairline that adds no height to the row. */
-  box-shadow: 0 1px 0 var(--line);
+  background: var(--phead-bg);
+  backdrop-filter: saturate(180%) blur(12px);
+  box-shadow: 0 1px 0 var(--phead-line);
 }
 
 .header:global(.session-header)::after {
   content: none;
 }
 
-/* One title size at every width: --fs-h2 has no phone override. */
 .header :global(.session-title) {
   color: var(--ink);
   font-family: var(--font-ui);
-  font-size: var(--fs-h2);
+  font-size: var(--fs-h3);
   font-weight: var(--title-weight);
-  letter-spacing: -0.005em;
-  line-height: 24px;
+  letter-spacing: -0.012em;
+  line-height: 22px;
 }
 
 .header :global(.sidebar-toggle) {
@@ -175,7 +175,7 @@
 @media (width < 600px) {
   .header[data-header-layout="narrow"]:not([data-inline-rename="true"])
     .row:global(.session-header-inner) {
-    padding-block: 0;
+    padding-block: 2px;
   }
 
   .header[data-header-layout="narrow"]:not([data-inline-rename="true"]) .left {
@@ -197,19 +197,16 @@
   .header[data-header-layout="narrow"]:not([data-inline-rename="true"])
     .titleRow {
     grid-area: title;
-    min-height: 32px;
+    min-height: 30px;
     padding-inline-start: 6px;
   }
 
-  /* The title fills its row, so the whole 36px line opens the recents menu. */
   .header[data-header-layout="narrow"]:not([data-inline-rename="true"])
     .titleRow
     > :global(.session-title-recent-trigger) {
     align-self: stretch;
   }
 
-  /* The project link is a 20px line of mono type; a larger invisible target
-     keeps it tappable without making the meta row taller. */
   .header[data-header-layout="narrow"]
     .project
     > :global(.project-breadcrumb)::after {
@@ -235,16 +232,7 @@
     align-items: center;
   }
 
-  /* The title itself opens the recent-sessions menu; the chevron repeats it. */
   .header[data-header-layout="narrow"] :global(.session-title-chevron-trigger) {
     display: none;
-  }
-}
-
-/* Phone page header: the shell's translucent page-header fill. */
-@media (width < 768px) {
-  .header:global(.session-header) {
-    background: var(--phead-bg);
-    box-shadow: 0 1px 0 var(--phead-line);
   }
 }

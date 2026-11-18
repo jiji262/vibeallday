@@ -586,6 +586,11 @@ export interface SecureSourceTransportOptions
   extends MultiplexTransportOptions {}
 
 export class SecureSourceTransport extends MultiplexSourceTransport<SecureConnection> {
+  /** 捕获实际连接，避免异步诊断请求被后续 attach 转发到另一台主机。 */
+  captureDiagnosticConnection(): SecureConnection | null {
+    return this.getAttachedConnection();
+  }
+
   constructor(options: SecureSourceTransportOptions = {}) {
     super(
       {

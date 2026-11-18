@@ -42,7 +42,7 @@ interface DestinationItemProps {
   projectQueueCount: number;
 }
 
-/** One sidebar row; Overview and Projects carry their counts. */
+/** One sidebar row; Sessions and Projects carry their counts. */
 function DestinationItem({
   destination,
   basePath,
@@ -55,10 +55,8 @@ function DestinationItem({
   if (destination.key === "agents") {
     return <AgentsNavItem onClick={onNavigate} basePath={basePath} />;
   }
-  const isOverview = destination.key === "overview";
+  const isSessions = destination.key === "sessions";
   const isProjects = destination.key === "projects";
-  // App-root routes (All hosts) live outside the relay host's base path.
-  const linkBasePath = destination.appRoot ? "" : basePath;
   return (
     <SidebarNavItem
       to={
@@ -66,10 +64,11 @@ function DestinationItem({
           ? sourceControlPath
           : destination.to
       }
+      activePaths={destination.activePaths}
       icon={<destination.Icon size={SIDEBAR_ICON_SIZE} />}
       label={t(destination.labelKey)}
       tag={destination.beta ? t("sidebarBetaTag") : undefined}
-      badge={isOverview ? needsAttention : isProjects ? projectQueueCount : 0}
+      badge={isSessions ? needsAttention : isProjects ? projectQueueCount : 0}
       badgeVariant={isProjects ? "projectQueue" : "default"}
       badgeTitle={
         isProjects
@@ -77,7 +76,7 @@ function DestinationItem({
           : undefined
       }
       accessory={
-        isOverview ? (
+        isSessions ? (
           <SessionAsyncQuestionsButton
             basePath={basePath}
             onNavigate={onNavigate}
@@ -85,7 +84,7 @@ function DestinationItem({
         ) : undefined
       }
       onClick={onNavigate}
-      basePath={linkBasePath}
+      basePath={basePath}
     />
   );
 }
@@ -102,7 +101,7 @@ export function SidebarNavGroups({
   projectQueueCount,
 }: SidebarNavGroupsProps) {
   const { t } = useI18n();
-  const destinations = useShellDestinations({ includeAppRoot: true });
+  const destinations = useShellDestinations();
   const { needsAttention } = useInboxCounts();
   const renderDestination = (destination: ShellDestination) => (
     <DestinationItem

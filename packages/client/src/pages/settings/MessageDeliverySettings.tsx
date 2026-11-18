@@ -10,8 +10,6 @@ import {
   PATIENT_TOPIC_SHIFT_CAPABILITY,
   PROJECT_QUEUE_READINESS_CHECK_CAPABILITY,
   type ProjectQueueReadinessCommand,
-  RENDEZ_PROJECT_STATUS_CAPABILITY,
-  RENDEZ_UPLOADS_CAPABILITY,
   SESSION_REWIND_CAPABILITY,
   clampClearloopInactivitySeconds,
   clampProjectQueueQuietSeconds,
@@ -28,16 +26,12 @@ import {
 } from "../../hooks/useAttachmentUploadQuality";
 import { useKeepMobileKeyboardOpenAfterDelivery } from "../../hooks/useKeepMobileKeyboardOpenAfterDelivery";
 import { useQuestionAsideSetting } from "../../hooks/useQuestionAsideSetting";
-import { api } from "../../api/client";
-import { useProjects } from "../../hooks/useProjects";
 import { useServerSettings } from "../../hooks/useServerSettings";
 import { useVersion } from "../../hooks/useVersion";
 import { useI18n } from "../../i18n";
-import { serverSupportsBangCommands } from "../../lib/bangCommandAvailability";
 import { serverSupportsProjectQueue } from "../../lib/projectQueueVisibility";
 import { SettingsItem } from "./SettingsItem";
 import { ProjectQueueReadinessSettings } from "./ProjectQueueReadinessSettings";
-import { RendezSettings, type RendezSettingsValue } from "./RendezSettings";
 import { useSettingsPaneTitle } from "./SettingsPaneTitleContext";
 import { SettingsSection } from "./SettingsSection";
 import { useSettingsUndo } from "./SettingsUndoContext";
@@ -155,7 +149,6 @@ interface MessageDeliveryBaseline {
   projectQueueReadinessCheck: ProjectQueueReadinessCommand | null;
   composeAnchorsEnabled: boolean;
   turnTimestamps: TurnTimestampsPlacement;
-  bangCommandsEnabled: boolean;
   busyComposerDefaultAction: BusyComposerDefaultAction;
   steerNowDefault: boolean;
   patientQueueDefault: boolean;
@@ -165,60 +158,6 @@ interface MessageDeliveryBaseline {
   keepMobileKeyboardOpenAfterDelivery: boolean;
   questionAsidesEnabled: boolean;
   attachmentQuality: AttachmentUploadQuality;
-  rendez: RendezSettingsValue;
-}
-
-const RENDEZ_STATUS_REFRESH_MS = 10_000;
-const RENDEZ_OFF: RendezSettingsValue = { enabled: false, projects: {} };
-
-/** Same default and per-project choices, ignoring burst limits. */
-function sameRendezChoices(
-  a: RendezSettingsValue,
-  b: RendezSettingsValue,
-): boolean {
-  const aKeys = Object.keys(a.projects);
-  return (
-    a.enabled === b.enabled &&
-    aKeys.length === Object.keys(b.projects).length &&
-    aKeys.every((path) => a.projects[path] === b.projects[path])
-  );
-}
-
-/**
- * Which projects' .rendez observers run, refreshed while the pane is open
- * and visible; null when the server does not report it.
- */
-function useRendezWatching(supported: boolean): {
-  watching: ReadonlySet<string> | null;
-  refresh: () => void;
-} {
-  const [watching, setWatching] = useState<ReadonlySet<string> | null>(null);
-  const mountedRef = useRef(true);
-  const refresh = useCallback(() => {
-    if (!supported || document.visibilityState === "hidden") return;
-    void api.getRendezStatus().then(
-      (status) => {
-        if (mountedRef.current) setWatching(new Set(status.watching));
-      },
-      () => {
-        // Status is advisory; rows stay configurable without it.
-      },
-    );
-  }, [supported]);
-  useEffect(() => {
-    mountedRef.current = true;
-    if (!supported) {
-      setWatching(null);
-      return;
-    }
-    refresh();
-    const timer = setInterval(refresh, RENDEZ_STATUS_REFRESH_MS);
-    return () => {
-      mountedRef.current = false;
-      clearInterval(timer);
-    };
-  }, [supported, refresh]);
-  return { watching, refresh };
 }
 
 /**
@@ -234,15 +173,6 @@ export function MessageDeliverySettings() {
   const supportsReadinessCheck = serverHasCapability(
     version,
     PROJECT_QUEUE_READINESS_CHECK_CAPABILITY,
-  );
-  const supportsBangCommands = serverSupportsBangCommands(version);
-  const supportsRendez = serverHasCapability(
-    version,
-    RENDEZ_UPLOADS_CAPABILITY,
-  );
-  const supportsRendezStatus = serverHasCapability(
-    version,
-    RENDEZ_PROJECT_STATUS_CAPABILITY,
   );
   const supportsTopicShift = serverHasCapability(
     version,
@@ -273,9 +203,6 @@ export function MessageDeliverySettings() {
   const [draftAnchors, setDraftAnchors] = useState<boolean | null>(null);
   const [draftTurnTimestamps, setDraftTurnTimestamps] =
     useState<TurnTimestampsPlacement | null>(null);
-  const [draftBangCommands, setDraftBangCommands] = useState<boolean | null>(
-    null,
-  );
   const [draftBusyDefaultAction, setDraftBusyDefaultAction] =
     useState<BusyComposerDefaultAction | null>(null);
   const [draftSteerNow, setDraftSteerNow] = useState<boolean | null>(null);
@@ -286,28 +213,6 @@ export function MessageDeliverySettings() {
     boolean | null
   >(null);
   const baselineRef = useRef<MessageDeliveryBaseline | null>(null);
-  const [draftRendez, setDraftRendez] = useState<RendezSettingsValue | null>(
-    null,
-  );
-  const shownRendez = draftRendez ?? settings?.rendez ?? RENDEZ_OFF;
-  const { watching: rendezWatching, refresh: refreshRendezWatching } =
-    useRendezWatching(supportsRendez && supportsRendezStatus);
-  const { projects: knownProjects } = useProjects();
-  const saveRendez = useCallback(
-    (next: RendezSettingsValue) => {
-      setDraftRendez(next);
-      void updateSettings({ rendez: next })
-        .catch(() => {
-          // surfaced via the hook's error state
-        })
-        .finally(() => {
-          setDraftRendez(null);
-          // Turning a project off stops its observer.
-          refreshRendezWatching();
-        });
-    },
-    [refreshRendezWatching, updateSettings],
-  );
 
   const serverJoinWindowSeconds = settings?.deferredJoinWindowSeconds ?? 0;
   const serverProjectQueueQuietSeconds =
@@ -319,8 +224,6 @@ export function MessageDeliverySettings() {
   const serverComposeAnchorsEnabled = settings?.composeAnchorsEnabled ?? false;
   const serverReadinessCheck = settings?.projectQueueReadinessCheck ?? null;
   const serverTurnTimestamps = settings?.turnTimestamps ?? "off";
-  const serverBangCommandsEnabled =
-    settings?.clientDefaults?.bangCommandsEnabled ?? false;
   const serverBusyDefaultAction =
     settings?.clientDefaults?.busyComposerDefaultAction ?? "steer";
   const serverSteerNowDefault =
@@ -345,8 +248,6 @@ export function MessageDeliverySettings() {
         composeAnchorsEnabled: settings.composeAnchorsEnabled ?? false,
         projectQueueReadinessCheck: settings.projectQueueReadinessCheck ?? null,
         turnTimestamps: settings.turnTimestamps ?? "off",
-        bangCommandsEnabled:
-          settings.clientDefaults?.bangCommandsEnabled ?? false,
         busyComposerDefaultAction:
           settings.clientDefaults?.busyComposerDefaultAction ?? "steer",
         steerNowDefault:
@@ -363,7 +264,6 @@ export function MessageDeliverySettings() {
         keepMobileKeyboardOpenAfterDelivery,
         questionAsidesEnabled,
         attachmentQuality,
-        rendez: settings.rendez ?? RENDEZ_OFF,
       };
     }
   }, [
@@ -389,7 +289,6 @@ export function MessageDeliverySettings() {
   );
   const shownAnchors = draftAnchors ?? serverComposeAnchorsEnabled;
   const shownTurnTimestamps = draftTurnTimestamps ?? serverTurnTimestamps;
-  const shownBangCommands = draftBangCommands ?? serverBangCommandsEnabled;
   const shownBusyDefaultAction =
     draftBusyDefaultAction ?? serverBusyDefaultAction;
   const shownSteerNowDefault = draftSteerNow ?? serverSteerNowDefault;
@@ -488,14 +387,6 @@ export function MessageDeliverySettings() {
   }, [draftTurnTimestamps, serverTurnTimestamps]);
   useEffect(() => {
     if (
-      draftBangCommands !== null &&
-      draftBangCommands === serverBangCommandsEnabled
-    ) {
-      setDraftBangCommands(null);
-    }
-  }, [draftBangCommands, serverBangCommandsEnabled]);
-  useEffect(() => {
-    if (
       draftBusyDefaultAction !== null &&
       draftBusyDefaultAction === serverBusyDefaultAction
     ) {
@@ -539,8 +430,6 @@ export function MessageDeliverySettings() {
         JSON.stringify(serverReadinessCheck) !==
           JSON.stringify(baseline.projectQueueReadinessCheck)) ||
       shownTurnTimestamps !== baseline.turnTimestamps ||
-      (supportsBangCommands &&
-        shownBangCommands !== baseline.bangCommandsEnabled) ||
       shownBusyDefaultAction !== baseline.busyComposerDefaultAction ||
       shownSteerNowDefault !== baseline.steerNowDefault ||
       shownPatientQueueDefault !== baseline.patientQueueDefault ||
@@ -554,8 +443,7 @@ export function MessageDeliverySettings() {
       keepMobileKeyboardOpenAfterDelivery !==
         baseline.keepMobileKeyboardOpenAfterDelivery ||
       questionAsidesEnabled !== baseline.questionAsidesEnabled ||
-      attachmentQuality !== baseline.attachmentQuality ||
-      (supportsRendez && !sameRendezChoices(shownRendez, baseline.rendez)));
+      attachmentQuality !== baseline.attachmentQuality);
 
   const undo = useCallback(async () => {
     const snapshot = baselineRef.current;
@@ -567,7 +455,6 @@ export function MessageDeliverySettings() {
     setDraftClearloopInactivity(null);
     setDraftAnchors(null);
     setDraftTurnTimestamps(null);
-    setDraftBangCommands(null);
     setDraftBusyDefaultAction(null);
     setDraftSteerNow(null);
     setDraftPatientQueue(null);
@@ -576,15 +463,6 @@ export function MessageDeliverySettings() {
       snapshot.keepMobileKeyboardOpenAfterDelivery,
     );
     await updateSettings({
-      ...(supportsRendez
-        ? {
-            rendez: {
-              ...settings?.rendez,
-              enabled: snapshot.rendez.enabled,
-              projects: snapshot.rendez.projects,
-            },
-          }
-        : {}),
       deferredJoinWindowSeconds: snapshot.joinWindowSeconds,
       ...(supportsProjectQueue
         ? { projectQueueQuietSeconds: snapshot.projectQueueQuietSeconds }
@@ -598,9 +476,6 @@ export function MessageDeliverySettings() {
         : {}),
       turnTimestamps: snapshot.turnTimestamps,
       clientDefaults: {
-        ...(supportsBangCommands
-          ? { bangCommandsEnabled: snapshot.bangCommandsEnabled }
-          : {}),
         busyComposerDefaultAction: snapshot.busyComposerDefaultAction,
         steerNowDefault: snapshot.steerNowDefault,
         patientQueueDefault: snapshot.patientQueueDefault,
@@ -625,13 +500,10 @@ export function MessageDeliverySettings() {
     setAttachmentQuality,
     setKeepMobileKeyboardOpenAfterDelivery,
     setQuestionAsidesEnabled,
-    supportsBangCommands,
     supportsClearloop,
     supportsProjectQueue,
     supportsReadinessCheck,
-    supportsRendez,
     supportsTopicShift,
-    settings?.rendez,
     updateSettings,
   ]);
 
@@ -925,64 +797,56 @@ export function MessageDeliverySettings() {
           </SettingsItem>
         </div>
       </SettingsSection>
-      <SettingsSection title={t("projectQueueTitle")}>
-        <div className="settings-group">
-          {supportsProjectQueue && (
-            <>
-              <SettingsItem
-                label={t("messageDeliveryProjectQueueQuietTitle")}
-                description={t("messageDeliveryProjectQueueQuietDescription")}
-                valueText={shownProjectQueueQuietText}
-                className="model-settings-item"
-              >
-                <span className="output-appearance-slider-row">
-                  <CommittedRangeInput
-                    id="message-delivery-project-queue-quiet"
+      {supportsProjectQueue && (
+        <SettingsSection title={t("projectQueueTitle")}>
+          <div className="settings-group">
+            <SettingsItem
+              label={t("messageDeliveryProjectQueueQuietTitle")}
+              description={t("messageDeliveryProjectQueueQuietDescription")}
+              valueText={shownProjectQueueQuietText}
+              className="model-settings-item"
+            >
+              <span className="output-appearance-slider-row">
+                <CommittedRangeInput
+                  id="message-delivery-project-queue-quiet"
+                  min={0}
+                  max={MAX_PROJECT_QUEUE_QUIET_SECONDS}
+                  step={5}
+                  value={shownProjectQueueQuietSeconds}
+                  aria-label={t("messageDeliveryProjectQueueQuietTitle")}
+                  onCommit={(value) => setDraftProjectQueueQuiet(String(value))}
+                />
+                <span className="output-appearance-number-wrap">
+                  <input
+                    type="number"
+                    className="settings-input-small output-appearance-number"
                     min={0}
                     max={MAX_PROJECT_QUEUE_QUIET_SECONDS}
-                    step={5}
-                    value={shownProjectQueueQuietSeconds}
+                    value={shownProjectQueueQuietText}
+                    onChange={(e) => setDraftProjectQueueQuiet(e.target.value)}
                     aria-label={t("messageDeliveryProjectQueueQuietTitle")}
-                    onCommit={(value) =>
-                      setDraftProjectQueueQuiet(String(value))
-                    }
                   />
-                  <span className="output-appearance-number-wrap">
-                    <input
-                      type="number"
-                      className="settings-input-small output-appearance-number"
-                      min={0}
-                      max={MAX_PROJECT_QUEUE_QUIET_SECONDS}
-                      value={shownProjectQueueQuietText}
-                      onChange={(e) =>
-                        setDraftProjectQueueQuiet(e.target.value)
-                      }
-                      aria-label={t("messageDeliveryProjectQueueQuietTitle")}
-                    />
-                    <span className="output-appearance-unit">s</span>
-                  </span>
+                  <span className="output-appearance-unit">s</span>
                 </span>
-                <span className="settings-hint">
-                  {shownProjectQueueQuietSeconds === 0
-                    ? t("messageDeliveryProjectQueueQuietOffHint")
-                    : t("messageDeliveryProjectQueueQuietOnHint", {
-                        seconds: String(shownProjectQueueQuietSeconds),
-                      })}
-                </span>
-              </SettingsItem>
-              {supportsReadinessCheck && (
-                <ProjectQueueReadinessSettings
-                  command={serverReadinessCheck}
-                  onSave={async (command) => {
-                    await updateSettings({
-                      projectQueueReadinessCheck: command,
-                    });
-                  }}
-                />
-              )}
-            </>
-          )}
-          {supportsProjectQueue && (
+              </span>
+              <span className="settings-hint">
+                {shownProjectQueueQuietSeconds === 0
+                  ? t("messageDeliveryProjectQueueQuietOffHint")
+                  : t("messageDeliveryProjectQueueQuietOnHint", {
+                      seconds: String(shownProjectQueueQuietSeconds),
+                    })}
+              </span>
+            </SettingsItem>
+            {supportsReadinessCheck && (
+              <ProjectQueueReadinessSettings
+                command={serverReadinessCheck}
+                onSave={async (command) => {
+                  await updateSettings({
+                    projectQueueReadinessCheck: command,
+                  });
+                }}
+              />
+            )}
             <SettingsItem
               as="label"
               label={t("messageDeliveryProjectQueueShortcutTitle")}
@@ -1008,51 +872,11 @@ export function MessageDeliverySettings() {
                 aria-label={t("messageDeliveryProjectQueueShortcutTitle")}
               />
             </SettingsItem>
-          )}
-          {supportsRendez ? (
-            <RendezSettings
-              value={shownRendez}
-              projects={knownProjects}
-              watching={rendezWatching}
-              saving={draftRendez !== null}
-              onChange={saveRendez}
-            />
-          ) : (
-            <SettingsItem
-              label={t("rendezDefaultTitle")}
-              description={t("rendezDefaultDescription")}
-              descriptionLayout="full-width-on-narrow"
-              keywords={["rendez", ".rendez", "rendezvous", "upload", "watch"]}
-            >
-              <span className="settings-hint">{t("rendezUnavailable")}</span>
-            </SettingsItem>
-          )}
-        </div>
-      </SettingsSection>
+          </div>
+        </SettingsSection>
+      )}
       <SettingsSection title={t("settingsDeliveryOtherSection")}>
         <div className="settings-group">
-          {supportsBangCommands && (
-            <SettingsItem
-              as="label"
-              label={t("messageDeliveryBangCommandsTitle")}
-              description={t("messageDeliveryBangCommandsDescription")}
-            >
-              <input
-                type="checkbox"
-                checked={shownBangCommands}
-                onChange={(e) => {
-                  const next = e.target.checked;
-                  setDraftBangCommands(next);
-                  void updateSettings({
-                    clientDefaults: { bangCommandsEnabled: next },
-                  }).catch(() => {
-                    // surfaced via the hook's error state
-                  });
-                }}
-                aria-label={t("messageDeliveryBangCommandsTitle")}
-              />
-            </SettingsItem>
-          )}
           <SettingsItem
             scope="local"
             as="label"

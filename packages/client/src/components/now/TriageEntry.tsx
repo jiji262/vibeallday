@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { useI18n } from "../../i18n";
 import { Count } from "../garden/Count";
+import { StatusDot } from "../garden/StatusDot";
 import styles from "./TriageEntry.module.css";
 
 interface TriageEntryProps {
@@ -26,18 +27,22 @@ export function TriageEntryButton(props: TriageEntryProps) {
       to={triageHref(props)}
       aria-label={t("inboxTriageEntryLabel", { count: props.count })}
     >
+      <StatusDot state="attn" />
       {t("inboxTriageEntry")}
       <Count tone="attn">{props.count}</Count>
     </Link>
   );
 }
 
-/** Phone banner above the sections; the desktop button covers wide screens. */
+/** High-signal amber Studio callout band above sections on phone. */
 export function TriageBanner(props: TriageEntryProps) {
   const { t } = useI18n();
   if (props.count <= 0) return null;
   return (
     <Link className={styles.banner} to={triageHref(props)}>
+      <span className={styles.bannerDot} aria-hidden="true">
+        <StatusDot state="attn" />
+      </span>
       <span className={styles.bannerText}>
         <span className={styles.bannerTitle}>
           {t("inboxTriageBannerTitle", { count: props.count })}

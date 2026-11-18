@@ -1,14 +1,12 @@
-/* Source Control page intro (design Git boards). The page is a full-height
-   workbench, so the intro keeps its rows tight: project title with the
-   identity bar and Sync on the right, then the mode tabs as a full-width
-   underline strip. */
+/* Studio Source Control Deck intro: compact title row with project switcher pill,
+   bordered repository status bar + sync split on the right, and mode tabs below. */
 .intro {
   flex-shrink: 0;
 }
 
-/* The project switcher reads as the page title at the inherited size. */
 .title {
   display: inline-flex;
+  align-items: center;
   min-width: 0;
   max-width: 100%;
 }
@@ -18,18 +16,25 @@
   max-width: 100%;
 }
 
-/* The selector button bleeds its hover padding into the gutter with negative
-   inline margins (ProjectSelector.module.css), so the column it may fill is
-   100% plus that bleed. Capping it at 100% shrank the border box by the bleed
-   and clipped the last glyphs of the name even with free room. */
+/* Single-project selector renders a plain `.session-title` span. */
+.title :global(.session-title) {
+  font: inherit;
+  letter-spacing: -0.02em;
+}
+
+/* Project switcher pill: compensates for ProjectSelector's inline bleed so
+   long project names never clip prematurely, with crisp Studio hover chrome. */
 .title button {
   min-width: 0;
   max-width: calc(100% + 2 * var(--space-2));
+  border-radius: var(--r-md);
   font: inherit;
-  letter-spacing: inherit;
+  letter-spacing: -0.02em;
+  transition:
+    background-color 120ms ease,
+    color 120ms ease;
 }
 
-/* Block, not the selector's inline-flex, so a real overflow ellipsizes. */
 .title button > span {
   display: block;
   min-width: 0;
@@ -37,17 +42,16 @@
   text-overflow: ellipsis;
 }
 
-/* A single-project selector renders a plain `.session-title` span. */
-.title :global(.session-title) {
-  font: inherit;
+.title button:hover {
+  background: var(--surface-2);
 }
 
-/* Identity bar and Sync sit together and wrap as one cluster. */
+/* Repository status bar and Sync split cluster together on a crisp 8px grid. */
 .identity {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   min-width: 0;
   max-width: 100%;
 }
@@ -61,9 +65,9 @@
     max-width: calc(100dvw - 80px);
   }
 
-  /* Phone: the identity bar takes its own row; Sync follows it. */
   .identity {
     width: 100%;
+    gap: 6px;
   }
 
   .repoStatus {

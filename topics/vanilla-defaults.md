@@ -65,6 +65,12 @@ novelty must never be the out-of-the-box experience.
 - **Options must pay rent.** A default-off option that turns out not to
   be useful should be removed, not accumulated. The configuration
   surface is itself a user-visible cost.
+- **Internal ergonomics pick one default instead of adding a toggle.**
+  Default-off + configurable applies to behavior that alters first-party
+  provider expectations, mutates submitted payloads, or writes to project
+  filesystems. Internal workbench chrome, icon styles, micro-typography,
+  and engineering cache/memory budgets should ship with one well-chosen
+  default rather than proliferating Settings rows.
 
 Synthetic `/done` is a direct instance of this rule. Its toolbar presence
 defaults to Off, so an agent or installed skill named `/done` continues to

@@ -1,9 +1,11 @@
 import type { HostAgentProcessObservation } from "@vibeallday/shared";
-import { StatCard, StatGrid } from "../components/garden/StatCard";
 import type { ProcessInfo } from "../hooks/useProcesses";
 import { useI18n } from "../i18n";
-import styles from "./AgentsPage.module.css";
+import styles from "./AgentsProcessStats.module.css";
 import { formatCpu, formatMemory, meterPercent } from "./agentsFormat";
+
+const EMPTY_METRIC = "—";
+const HIGH_CPU_PERCENT = 70;
 
 export interface ProcessStats {
   live: number;
@@ -15,6 +17,8 @@ export interface ProcessStats {
   memoryBytes: number | null;
   /** Host-observed external processes; null when host metrics are off. */
   external: number | null;
+  /** Whether host-level process telemetry is active. */
+  hostMetrics: boolean;
 }
 
 interface StatsInput {
@@ -59,60 +63,100 @@ export function computeProcessStats({
           (observation) => observation.supervision === "external",
         ).length
       : null,
+    hostMetrics,
   };
 }
 
-function CpuStat({ percent }: { percent: number }) {
+function CpuStatCard({ percent }: { percent: number | null }) {
   const { t } = useI18n();
-  const value = formatCpu(percent);
+  const value = percent !== null ? formatCpu(percent) : EMPTY_METRIC;
+  const high = percent !== null && percent >= HIGH_CPU_PERCENT;
   return (
-    <StatCard
-      label={t("agentsColumnCpu")}
-      value={value}
-      foot={
+    <div className={styles.card}>
+      <div className={styles.cardHead}>
+        <span className={styles.label}>{t("agentsColumnCpu")}</span>
         <span
-          className={`${styles.meter} ${styles.statMeter}`}
-          role="img"
-          aria-label={t("agentsStatCpuLabel", { percent: value })}
-        >
+          className={`${styles.dot} ${high ? styles.dotAttn : percent !== null ? styles.dotAccent : styles.dotIdle}`}
+          aria-hidden="true"
+        />
+      </div>
+      <div className={styles.value}>{value}</div>
+      <div className={styles.meterWrap}>
+        {percent !== null ? (
           <span
-            className={styles.meterFill}
-            style={{ width: `${meterPercent(percent)}%` }}
-          />
-        </span>
-      }
-    />
+            className={styles.meter}
+            role="img"
+            aria-label={t("agentsStatCpuLabel", { percent: value })}
+          >
+            <span
+              className={`${styles.meterFill} ${high ? styles.meterFillAttn : ""}`}
+              style={{ width: `${meterPercent(percent)}%` }}
+            />
+          </span>
+        ) : (
+          <span className={styles.meter} aria-hidden="true" />
+        )}
+      </div>
+    </div>
   );
 }
 
 /** Count, CPU and memory totals, and the external count, above the lists. */
 export function ProcessStatsStrip({ stats }: { stats: ProcessStats }) {
   const { t } = useI18n();
+  const showHostTelemetry =
+    stats.hostMetrics ||
+    stats.cpuPercent !== null ||
+    stats.memoryBytes !== null;
   return (
-    <StatGrid label={t("agentsStatsLabel")} className={styles.stats}>
-      <StatCard
-        label={t("agentsStatProcesses")}
-        value={stats.live}
-        foot={t("agentsStatBreakdown", {
-          active: stats.active,
-          idle: stats.idle,
-        })}
-      />
-      {stats.cpuPercent !== null && <CpuStat percent={stats.cpuPercent} />}
-      {stats.memoryBytes !== null && (
-        <StatCard
-          label={t("agentsColumnMemory")}
-          value={formatMemory(stats.memoryBytes)}
-          foot={t("agentsStatMemoryFoot")}
-        />
+    <section aria-label={t("agentsStatsLabel")} className={styles.grid}>
+      <div className={styles.card}>
+        <div className={styles.cardHead}>
+          <span className={styles.label}>{t("agentsStatProcesses")}</span>
+          <span
+            className={`${styles.dot} ${stats.active > 0 ? styles.dotRun : styles.dotIdle}`}
+            aria-hidden="true"
+          />
+        </div>
+        <div className={styles.value}>{stats.live}</div>
+        <div className={styles.foot}>
+          {t("agentsStatBreakdown", {
+            active: stats.active,
+            idle: stats.idle,
+          })}
+        </div>
+      </div>
+      {showHostTelemetry && <CpuStatCard percent={stats.cpuPercent} />}
+      {showHostTelemetry && (
+        <div className={styles.card}>
+          <div className={styles.cardHead}>
+            <span className={styles.label}>{t("agentsColumnMemory")}</span>
+            <span
+              className={`${styles.dot} ${stats.memoryBytes !== null ? styles.dotAccent : styles.dotIdle}`}
+              aria-hidden="true"
+            />
+          </div>
+          <div className={styles.value}>
+            {stats.memoryBytes !== null
+              ? formatMemory(stats.memoryBytes)
+              : EMPTY_METRIC}
+          </div>
+          <div className={styles.foot}>{t("agentsStatMemoryFoot")}</div>
+        </div>
       )}
       {stats.external !== null && (
-        <StatCard
-          label={t("agentsStatExternal")}
-          value={stats.external}
-          foot={t("agentsStatExternalFoot")}
-        />
+        <div className={styles.card}>
+          <div className={styles.cardHead}>
+            <span className={styles.label}>{t("agentsStatExternal")}</span>
+            <span
+              className={`${styles.dot} ${stats.external > 0 ? styles.dotAttn : styles.dotIdle}`}
+              aria-hidden="true"
+            />
+          </div>
+          <div className={styles.value}>{stats.external}</div>
+          <div className={styles.foot}>{t("agentsStatExternalFoot")}</div>
+        </div>
       )}
-    </StatGrid>
+    </section>
   );
 }

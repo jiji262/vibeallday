@@ -80,7 +80,7 @@ export function ReviewCommentsPanel({
 
   if (pending.length === 0) {
     return (
-      <section className={styles.panel}>
+      <section className={`${styles.panel} ${styles.emptyCard}`}>
         <EmptyState
           title={t("sourceReviewNoPending")}
           hint={t("sourceReviewCommentsHint")}
@@ -123,7 +123,11 @@ export function ReviewCommentsPanel({
                   </button>
                   <button
                     type="button"
-                    className={styles.delete}
+                    className={
+                      confirmId === comment.id
+                        ? `${styles.delete} ${styles.deleteConfirm}`
+                        : styles.delete
+                    }
                     disabled={busyId === comment.id}
                     onClick={() => void handleDelete(comment.id)}
                   >

@@ -14,6 +14,10 @@ import {
   getSessionIdFromPath,
   normalizeProjectPathForDedup,
   readCwdFromSessionFile,
+  resolveGrokHome,
+  resolveGrokSessionsDir,
+  resolvePiAgentDir,
+  resolvePiSessionsDir,
 } from "../../src/projects/paths.js";
 
 describe("Project Path Utilities", () => {
@@ -393,6 +397,63 @@ describe("Project Path Utilities", () => {
 
       const cwd = await readCwdFromSessionFile(sessionFile);
       expect(cwd).toBe("/home/user/project");
+    });
+  });
+
+  describe("relocated Grok and Pi roots", () => {
+    let testDir: string;
+
+    beforeEach(async () => {
+      testDir = join(tmpdir(), `relocated-roots-test-${randomUUID()}`);
+      await mkdir(testDir, { recursive: true });
+    });
+
+    afterEach(async () => {
+      await rm(testDir, { recursive: true, force: true });
+    });
+
+    it("resolves GROK_HOME with tilde expansion and defaults to ~/.grok", () => {
+      expect(resolveGrokHome({}, "/home/tester")).toBe("/home/tester/.grok");
+      expect(
+        resolveGrokHome({ GROK_HOME: "~/custom-grok" }, "/home/tester"),
+      ).toBe("/home/tester/custom-grok");
+      expect(
+        resolveGrokSessionsDir({ GROK_HOME: "/srv/grok" }, "/home/tester"),
+      ).toBe("/srv/grok/sessions");
+    });
+
+    it("honors PI_CODING_AGENT_SESSION_DIR, settings.json sessionDir, and skips .omp stores", async () => {
+      const customAgentDir = join(testDir, "pi-agent");
+      await mkdir(customAgentDir, { recursive: true });
+      await writeFile(
+        join(customAgentDir, "settings.json"),
+        JSON.stringify({ sessionDir: "~/pi-custom-sessions" }),
+      );
+
+      expect(
+        resolvePiAgentDir({ PI_CODING_AGENT_DIR: customAgentDir }, testDir),
+      ).toBe(customAgentDir);
+      expect(
+        resolvePiSessionsDir({ PI_CODING_AGENT_DIR: customAgentDir }, testDir),
+      ).toBe(join(testDir, "pi-custom-sessions"));
+
+      // Explicit PI_CODING_AGENT_SESSION_DIR outranks settings.json sessionDir
+      expect(
+        resolvePiSessionsDir(
+          {
+            PI_CODING_AGENT_DIR: customAgentDir,
+            PI_CODING_AGENT_SESSION_DIR: "~/override-sessions",
+          },
+          testDir,
+        ),
+      ).toBe(join(testDir, "override-sessions"));
+
+      // Oh-My-Pi (.omp) stores are ignored so VIBEALLDAY falls back to Pi's store
+      const ompAgentDir = join(testDir, ".omp", "agent");
+      await mkdir(ompAgentDir, { recursive: true });
+      expect(
+        resolvePiAgentDir({ PI_CODING_AGENT_DIR: ompAgentDir }, testDir),
+      ).toBe(join(testDir, ".pi", "agent"));
     });
   });
 });

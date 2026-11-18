@@ -55,12 +55,32 @@ vi.mock("../../../i18n", () => ({
   useI18n: () => ({ t: (key: string) => key }),
 }));
 
-vi.mock("../SettingsPaneTitleContext", () => ({
-  useSettingsPaneTitle: vi.fn(),
+vi.mock("../SettingsPaneTitleContext", async () => {
+  const actual = await vi.importActual<
+    typeof import("../SettingsPaneTitleContext")
+  >("../SettingsPaneTitleContext");
+  return {
+    ...actual,
+    useSettingsPaneTitle: vi.fn(),
+  };
+});
+
+vi.mock("../SettingsUndoContext", async () => {
+  const actual = await vi.importActual<typeof import("../SettingsUndoContext")>(
+    "../SettingsUndoContext",
+  );
+  return {
+    ...actual,
+    useSettingsUndoBaseline: vi.fn(),
+  };
+});
+
+vi.mock("../IssueSettings", () => ({
+  IssueSettings: () => null,
 }));
 
-vi.mock("../SettingsUndoContext", () => ({
-  useSettingsUndoBaseline: vi.fn(),
+vi.mock("../LifecycleWebhooksSettings", () => ({
+  LifecycleWebhooksSettings: () => null,
 }));
 
 describe("SourceControlSettings", () => {

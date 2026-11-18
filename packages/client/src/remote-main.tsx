@@ -1,106 +1,46 @@
 /**
  * Remote client entry point.
  *
- * This is a separate entry point for the remote (static) client that:
- * - Uses SecureConnection for all communication (SRP + NaCl encryption)
- * - Shows a login page before connecting
- * - Does NOT use cookie-based auth (uses SRP instead)
- *
- * Route structure:
- * - UnauthenticatedGate: wraps login routes, redirects to app if already connected
- * - ConnectionGate: wraps direct-mode app routes (no relay username in URL)
- * - RelayConnectionGate: wraps relay-mode app routes (/-/relay/:relayUsername/...)
- *
- * ConnectionGate and RelayConnectionGate share the same APP_ROUTES.
- * This avoids duplicating route definitions or provider wrapping.
+ * Uses SecureConnection (SRP + NaCl encryption) for direct and relay hosts,
+ * sharing startup initialization and authenticated app routes with `main.tsx`.
  */
-
-console.log("[RemoteClient] Loading remote-main.tsx entry point");
 
 import "./lib/developmentPerformanceBootstrap";
 import { Fragment, lazy, StrictMode } from "react";
 import { createRoot } from "react-dom/client";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import { initializeClientEnvironment } from "./bootstrap/initializeClientEnvironment";
+import {
+  cachedModule,
+  preloadNewSessionRouteModules,
+  SHARED_NAVIGATION_LAYOUT_ROUTE,
+  sharedPageModuleLoaders,
+} from "./bootstrap/sharedAppRoutes";
+import { PrebootComposerRetirement } from "./components/PrebootComposerRetirement";
+import { RouteModule, routeModule } from "./components/RouteModule";
+import { TooltipLayer } from "./components/ui/TooltipLayer";
+import { I18nProvider } from "./i18n";
+import { preloadableComponent } from "./lib/preloadableComponent";
+import {
+  getInitialRemoteRouteModuleKeys,
+  type RemoteRouteModuleKey,
+} from "./lib/remoteRoutePreload";
+import { loadSessionCoreModules } from "./lib/sessionRouteModules";
+import "./styles/index.css";
 
 // Toggle to disable StrictMode for easier debugging (avoids double renders)
 const STRICT_MODE = false;
 const Wrapper = STRICT_MODE ? StrictMode : Fragment;
 
-import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
-import { PrebootComposerRetirement } from "./components/PrebootComposerRetirement";
-import { RouteModule, routeModule } from "./components/RouteModule";
-import { TooltipLayer } from "./components/ui/TooltipLayer";
-import { initializeContentMaxWidth } from "./hooks/useContentMaxWidth";
-import { initializeFontSize } from "./hooks/useFontSize";
-import { initializeSidebarSpacing } from "./hooks/useSidebarSpacing";
-import { initializeOutputAppearance } from "./hooks/useOutputAppearance";
-import { initializeTabSize } from "./hooks/useTabSize";
-import { initializeTheme } from "./hooks/useTheme";
-import { initializeTooltipAppearance } from "./hooks/useTooltipAppearance";
-import { initializeUnicodeProseMath } from "./lib/unicodeProseMath";
-import { I18nProvider } from "./i18n";
-import {
-  getInitialRemoteRouteModuleKeys,
-  type RemoteRouteModuleKey,
-} from "./lib/remoteRoutePreload";
-import { installModifierChordTracking } from "./lib/modifierChords";
-import { installFontDiagnostics } from "./lib/diagnostics/fontDiagnostics";
-import { loadSessionCoreModules } from "./lib/sessionRouteModules";
-import { preloadableComponent } from "./lib/preloadableComponent";
-import "./styles/index.css";
-
-function cachedModule<T>(load: () => Promise<T>): () => Promise<T> {
-  let promise: Promise<T> | undefined;
-  return () => {
-    promise ??= load();
-    return promise;
-  };
-}
-
 const loadRemoteAppModule = cachedModule(() => import("./RemoteApp"));
-const loadLayoutsModule = cachedModule(() => import("./layouts"));
-const loadAgentsPageModule = cachedModule(() => import("./pages/AgentsPage"));
-const loadBangCommandsPageModule = cachedModule(
-  () => import("./pages/BangCommandsPage"),
-);
-const loadMorePageModule = cachedModule(() => import("./pages/MorePage"));
 const loadDirectLoginPageModule = cachedModule(
   () => import("./pages/DirectLoginPage"),
-);
-const loadFilePageModule = cachedModule(() => import("./pages/FilePage"));
-const loadLocalSourcePageModule = cachedModule(
-  () => import("./pages/LocalSourcePage"),
-);
-const loadGitStatusPageModule = cachedModule(
-  () => import("./pages/GitStatusPage"),
-);
-const loadGlobalSessionsPageModule = cachedModule(
-  () => import("./pages/GlobalSessionsPage"),
 );
 const loadHostPickerPageModule = cachedModule(
   () => import("./pages/HostPickerPage"),
 );
-const loadInboxPageModule = cachedModule(() => import("./pages/InboxPage"));
-const loadIssuesPageModule = cachedModule(() => import("./pages/IssuesPage"));
 const loadLegacyRelayRouteRedirectModule = cachedModule(
   () => import("./pages/LegacyRelayRouteRedirect"),
-);
-const ConversationPreviewPage = lazy(() =>
-  import("./pages/ConversationPreviewPage").then(
-    ({ ConversationPreviewPage }) => ({ default: ConversationPreviewPage }),
-  ),
-);
-const loadMultiHostMonitorPageModule = cachedModule(
-  () => import("./pages/MultiHostMonitorPage"),
-);
-const loadProjectHomePageModule = cachedModule(
-  () => import("./pages/ProjectHomePage"),
-);
-const loadTriagePageModule = cachedModule(() => import("./pages/TriagePage"));
-const loadNewSessionPageModule = cachedModule(
-  () => import("./pages/NewSessionPage"),
-);
-const loadProjectsPageModule = cachedModule(
-  () => import("./pages/ProjectsPage"),
 );
 const loadPublicShareFilePageModule = cachedModule(
   () => import("./pages/PublicShareFilePage"),
@@ -114,11 +54,6 @@ const loadRelayConnectionGateModule = cachedModule(
 const loadRelayLoginPageModule = cachedModule(
   () => import("./pages/RelayLoginPage"),
 );
-const loadSessionPageModule = cachedModule(() => import("./pages/SessionPage"));
-const loadProviderChildSessionPageModule = cachedModule(
-  () => import("./pages/ProviderChildSessionPage"),
-);
-const loadSettingsModule = cachedModule(() => import("./pages/settings"));
 
 const ConnectionGate = preloadableComponent(async () => ({
   default: (await loadRemoteAppModule()).ConnectionGate,
@@ -131,56 +66,18 @@ const UnauthenticatedGate = lazy(() =>
     default: UnauthenticatedGate,
   })),
 );
-const NavigationLayout = preloadableComponent(async () => ({
-  default: (await loadLayoutsModule()).NavigationLayout,
+const RelayConnectionGate = preloadableComponent(async () => ({
+  default: (await loadRelayConnectionGateModule()).RelayConnectionGate,
 }));
-const SessionDomLingerRouteMarker = lazy(() =>
-  loadLayoutsModule().then(({ SessionDomLingerRouteMarker }) => ({
-    default: SessionDomLingerRouteMarker,
-  })),
-);
 
-const AgentsPage = lazy(() =>
-  loadAgentsPageModule().then(({ AgentsPage }) => ({
-    default: AgentsPage,
-  })),
-);
-const BangCommandsPage = lazy(() =>
-  loadBangCommandsPageModule().then(({ BangCommandsPage }) => ({
-    default: BangCommandsPage,
-  })),
-);
-const MorePage = lazy(() =>
-  loadMorePageModule().then(({ MorePage }) => ({
-    default: MorePage,
-  })),
+const ConversationPreviewPage = lazy(() =>
+  import("./pages/ConversationPreviewPage").then(
+    ({ ConversationPreviewPage }) => ({ default: ConversationPreviewPage }),
+  ),
 );
 const DirectLoginPage = lazy(() =>
   loadDirectLoginPageModule().then(({ DirectLoginPage }) => ({
     default: DirectLoginPage,
-  })),
-);
-const FilePage = lazy(() =>
-  loadFilePageModule().then(({ FilePage }) => ({ default: FilePage })),
-);
-const LocalSourcePage = lazy(() =>
-  loadLocalSourcePageModule().then(({ LocalSourcePage }) => ({
-    default: LocalSourcePage,
-  })),
-);
-const ViewerModePage = lazy(() =>
-  import("./pages/ViewerModePage").then(({ ViewerModePage }) => ({
-    default: ViewerModePage,
-  })),
-);
-const GitStatusPage = lazy(() =>
-  loadGitStatusPageModule().then(({ GitStatusPage }) => ({
-    default: GitStatusPage,
-  })),
-);
-const GlobalSessionsPage = lazy(() =>
-  loadGlobalSessionsPageModule().then(({ GlobalSessionsPage }) => ({
-    default: GlobalSessionsPage,
   })),
 );
 const HostPickerPage = lazy(() =>
@@ -188,45 +85,9 @@ const HostPickerPage = lazy(() =>
     default: HostPickerPage,
   })),
 );
-const InboxPage = lazy(() =>
-  loadInboxPageModule().then(({ InboxPage }) => ({
-    default: InboxPage,
-  })),
-);
-const IssuesPage = lazy(() =>
-  loadIssuesPageModule().then(({ IssuesPage }) => ({ default: IssuesPage })),
-);
 const LegacyRelayRouteRedirect = lazy(() =>
   loadLegacyRelayRouteRedirectModule().then(({ LegacyRelayRouteRedirect }) => ({
     default: LegacyRelayRouteRedirect,
-  })),
-);
-const MultiHostMonitorPage = lazy(() =>
-  loadMultiHostMonitorPageModule().then(({ MultiHostMonitorPage }) => ({
-    default: MultiHostMonitorPage,
-  })),
-);
-const ProjectHomePage = lazy(() =>
-  loadProjectHomePageModule().then(({ ProjectHomePage }) => ({
-    default: ProjectHomePage,
-  })),
-);
-const TriagePage = lazy(() =>
-  loadTriagePageModule().then(({ TriagePage }) => ({
-    default: TriagePage,
-  })),
-);
-const NewSessionPage = preloadableComponent(async () => ({
-  default: (await loadNewSessionPageModule()).NewSessionPage,
-}));
-const ProjectAppPage = lazy(() =>
-  import("./pages/ProjectAppPage").then(({ ProjectAppPage }) => ({
-    default: ProjectAppPage,
-  })),
-);
-const ProjectsPage = lazy(() =>
-  loadProjectsPageModule().then(({ ProjectsPage }) => ({
-    default: ProjectsPage,
   })),
 );
 const PublicShareFilePage = lazy(() =>
@@ -239,32 +100,9 @@ const PublicSharePage = lazy(() =>
     default: PublicSharePage,
   })),
 );
-const RelayConnectionGate = preloadableComponent(async () => ({
-  default: (await loadRelayConnectionGateModule()).RelayConnectionGate,
-}));
 const RelayLoginPage = lazy(() =>
   loadRelayLoginPageModule().then(({ RelayLoginPage }) => ({
     default: RelayLoginPage,
-  })),
-);
-const SessionPage = lazy(() =>
-  loadSessionPageModule().then(({ SessionPage }) => ({
-    default: SessionPage,
-  })),
-);
-const ProviderChildSessionPage = lazy(() =>
-  loadProviderChildSessionPageModule().then(({ ProviderChildSessionPage }) => ({
-    default: ProviderChildSessionPage,
-  })),
-);
-const SettingsLayout = lazy(() =>
-  loadSettingsModule().then(({ SettingsLayout }) => ({
-    default: SettingsLayout,
-  })),
-);
-const ProviderSignInPage = lazy(() =>
-  import("./pages/ProviderSignInPage").then((m) => ({
-    default: m.ProviderSignInPage,
   })),
 );
 
@@ -272,32 +110,30 @@ const initialRemoteModuleLoaders: Record<
   RemoteRouteModuleKey,
   () => Promise<unknown>
 > = {
-  agentsPage: loadAgentsPageModule,
-  bangCommandsPage: loadBangCommandsPageModule,
+  agentsPage: sharedPageModuleLoaders.agentsPage,
   directLoginPage: loadDirectLoginPageModule,
-  filePage: loadFilePageModule,
-  localSourcePage: loadLocalSourcePageModule,
-  gitStatusPage: loadGitStatusPageModule,
-  globalSessionsPage: loadGlobalSessionsPageModule,
+  filePage: sharedPageModuleLoaders.filePage,
+  localSourcePage: sharedPageModuleLoaders.localSourcePage,
+  gitStatusPage: sharedPageModuleLoaders.gitStatusPage,
+  globalSessionsPage: sharedPageModuleLoaders.globalSessionsPage,
   hostPickerPage: loadHostPickerPageModule,
-  inboxPage: loadInboxPageModule,
-  issuesPage: loadIssuesPageModule,
-  layouts: loadLayoutsModule,
+  inboxPage: sharedPageModuleLoaders.inboxPage,
+  issuesPage: sharedPageModuleLoaders.issuesPage,
+  layouts: sharedPageModuleLoaders.layouts,
   legacyRelayRouteRedirect: loadLegacyRelayRouteRedirectModule,
-  morePage: loadMorePageModule,
-  multiHostMonitorPage: loadMultiHostMonitorPageModule,
-  newSessionPage: loadNewSessionPageModule,
-  projectHomePage: loadProjectHomePageModule,
-  projectsPage: loadProjectsPageModule,
+  morePage: sharedPageModuleLoaders.morePage,
+  newSessionPage: sharedPageModuleLoaders.newSessionPage,
+  projectHomePage: sharedPageModuleLoaders.projectHomePage,
+  projectsPage: sharedPageModuleLoaders.projectsPage,
   publicShareFilePage: loadPublicShareFilePageModule,
   publicSharePage: loadPublicSharePageModule,
   relayConnectionGate: loadRelayConnectionGateModule,
   relayLoginPage: loadRelayLoginPageModule,
   remoteApp: loadRemoteAppModule,
   sessionCore: loadSessionCoreModules,
-  sessionPage: loadSessionPageModule,
-  settings: loadSettingsModule,
-  triagePage: loadTriagePageModule,
+  sessionPage: sharedPageModuleLoaders.sessionPage,
+  settings: sharedPageModuleLoaders.settings,
+  triagePage: sharedPageModuleLoaders.triagePage,
 };
 
 const initialRouteModuleKeys = getInitialRemoteRouteModuleKeys(
@@ -307,125 +143,25 @@ const initialRouteModuleKeys = getInitialRemoteRouteModuleKeys(
 void Promise.allSettled(
   initialRouteModuleKeys.map((key) => initialRemoteModuleLoaders[key]()),
 );
-// Downloading a module does not resolve React.lazy's component wrapper.
-// The inline composer holds typing until the entire initial New Session path
-// can mount without committing module fallbacks and their minimum duration.
+
 const initialModules = initialRouteModuleKeys.includes("newSessionPage")
   ? Promise.all([
       RemoteApp.preload(),
-      NavigationLayout.preload(),
-      NewSessionPage.preload(),
+      preloadNewSessionRouteModules(),
       initialRouteModuleKeys.includes("relayConnectionGate")
         ? RelayConnectionGate.preload()
         : ConnectionGate.preload(),
     ])
   : undefined;
 
-installModifierChordTracking();
-// Apply saved preferences before React renders to avoid flash
-initializeTheme();
-initializeFontSize();
-initializeSidebarSpacing();
-initializeOutputAppearance();
-installFontDiagnostics();
-initializeTabSize();
-initializeContentMaxWidth();
-initializeTooltipAppearance();
-initializeUnicodeProseMath();
+initializeClientEnvironment();
 
-// Register SW at startup so PWA install is available without visiting settings
-void import("./lib/registerServiceWorker").then(
-  ({ registerServiceWorkerAtStartup }) => registerServiceWorkerAtStartup(),
-);
-
-// Get base URL for router (Vite sets this based on --base flag)
-// Remove trailing slash for BrowserRouter basename
 const basename = import.meta.env.BASE_URL.replace(/\/$/, "") || undefined;
 
-/**
- * Shared app routes used by both direct mode (ConnectionGate) and
- * relay mode (RelayConnectionGate). Uses relative paths so they resolve
- * correctly under both "/" and "/-/relay/:relayUsername/".
- */
 const APP_ROUTES = (
   <>
     <Route index element={<Navigate to="inbox" replace />} />
-
-    {/* IMPORTANT: Keep routes in sync with main.tsx — adding a route here? Add it there too! */}
-    <Route
-      element={
-        <RouteModule>
-          <NavigationLayout
-            sessionElement={(
-              route,
-              { parked, progressiveRenderPauseSignal },
-            ) => (
-              <RouteModule key={route.key}>
-                <SessionPage
-                  projectId={route.projectId}
-                  sessionId={route.sessionId}
-                  routeLocation={route.location}
-                  isDomLingerParked={parked}
-                  progressiveRenderPauseSignal={progressiveRenderPauseSignal}
-                />
-              </RouteModule>
-            )}
-          />
-        </RouteModule>
-      }
-    >
-      <Route path="projects" element={routeModule(<ProjectsPage />)} />
-      <Route
-        path="projects/:projectId/app"
-        element={routeModule(<ProjectAppPage />)}
-      />
-      <Route
-        path="projects/:projectId"
-        element={routeModule(<ProjectHomePage />)}
-      />
-      <Route path="sessions" element={routeModule(<GlobalSessionsPage />)} />
-      <Route path="agents" element={routeModule(<AgentsPage />)} />
-      <Route path="inbox" element={routeModule(<InboxPage />)} />
-      <Route path="triage" element={routeModule(<TriagePage />)} />
-      <Route path="more" element={routeModule(<MorePage />)} />
-      <Route path="issues" element={routeModule(<IssuesPage />)} />
-      <Route path="git-status" element={routeModule(<GitStatusPage />)} />
-      <Route path="bang-commands" element={routeModule(<BangCommandsPage />)} />
-
-      <Route
-        path="provider-sign-in/:provider"
-        element={routeModule(<ProviderSignInPage />)}
-      />
-      <Route path="settings" element={routeModule(<SettingsLayout />)} />
-      <Route
-        path="settings/:category"
-        element={routeModule(<SettingsLayout />)}
-      />
-      <Route
-        path="settings/:category/:itemId"
-        element={routeModule(<SettingsLayout />)}
-      />
-      <Route path="new-session" element={routeModule(<NewSessionPage />)} />
-      <Route
-        path="projects/:projectId/file"
-        element={routeModule(<FilePage />)}
-      />
-      <Route
-        path="projects/:projectId/browse"
-        element={routeModule(<LocalSourcePage />)}
-      />
-      <Route path="file-view" element={routeModule(<ViewerModePage />)} />
-      <Route
-        path="projects/:projectId/sessions/:sessionId"
-        element={routeModule(<SessionDomLingerRouteMarker />)}
-      />
-      <Route
-        path="projects/:projectId/sessions/:sessionId/agents/:agentId"
-        element={routeModule(<ProviderChildSessionPage />)}
-      />
-    </Route>
-
-    {/* Catch-all redirect to projects (must use ../ to escape splat route's relative resolution) */}
+    {SHARED_NAVIGATION_LAYOUT_ROUTE}
     <Route path="*" element={<Navigate to="../inbox" replace />} />
   </>
 );
@@ -440,7 +176,6 @@ const app = (
     <TooltipLayer />
     <BrowserRouter basename={basename}>
       <PrebootComposerRetirement />
-
       <I18nProvider>
         <Routes>
           <Route
@@ -464,16 +199,11 @@ const app = (
             element={routeModule(<ConversationPreviewPage />)}
           />
           <Route
-            path="/-/monitor"
-            element={routeModule(<MultiHostMonitorPage />)}
-          />
-          <Route
             path="*"
             element={
               <RouteModule>
                 <RemoteApp>
                   <Routes>
-                    {/* Login routes — redirect to app if already connected */}
                     <Route element={routeModule(<UnauthenticatedGate />)}>
                       <Route
                         path="/login"
@@ -489,12 +219,10 @@ const app = (
                       />
                     </Route>
 
-                    {/* Direct mode — requires connection, no relay username in URL */}
                     <Route element={routeModule(<ConnectionGate />)}>
                       {APP_ROUTES}
                     </Route>
 
-                    {/* Canonical relay routes live under a reserved namespace. */}
                     <Route
                       path="/-/relay/:relayUsername"
                       element={routeModule(<RelayConnectionGate />)}
@@ -502,7 +230,6 @@ const app = (
                       {APP_ROUTES}
                     </Route>
 
-                    {/* Old username-at-root links redirect only when unambiguous. */}
                     <Route
                       path="/:legacyRelayUsername/*"
                       element={routeModule(<LegacyRelayRouteRedirect />)}
@@ -517,6 +244,7 @@ const app = (
     </BrowserRouter>
   </Wrapper>
 );
+
 const renderApp = () => createRoot(rootElement).render(app);
 if (initialModules) void initialModules.then(renderApp, renderApp);
 else renderApp();

@@ -8,6 +8,7 @@ import {
   PublicShareProvider,
 } from "../contexts/PublicShareContext";
 import { useI18n } from "../i18n";
+import styles from "./PublicShareFilePage.module.css";
 
 function parsePositiveInteger(value: string | null): number | undefined {
   if (!value) {
@@ -87,15 +88,24 @@ export function PublicShareFilePage() {
   }, [filePath, publicShareContext, relayConfig.error]);
 
   const content = (
-    <div className="file-page">
+    <div className={`file-page ${styles.page}`}>
       {!standaloneFile && (
-        <div className="file-page-nav">
-          <Link to={shareHref} className="file-page-back-link">
+        <div className={`file-page-nav ${styles.nav}`}>
+          <Link
+            to={shareHref}
+            className={`file-page-back-link ${styles.backLink}`}
+          >
+            <span aria-hidden="true">←</span>
             <span>{t("publicShareBackToShare" as never)}</span>
           </Link>
+          {filePath && (
+            <span className={styles.pathChip} title={filePath}>
+              {filePath}
+            </span>
+          )}
         </div>
       )}
-      <div className="file-page-content">
+      <div className={`file-page-content ${styles.content}`}>
         {source ? (
           <FileViewer
             projectId={projectId ?? ""}
@@ -108,7 +118,7 @@ export function PublicShareFilePage() {
           />
         ) : (
           <div className="file-viewer">
-            <div className="file-viewer-error">
+            <div className={`file-viewer-error ${styles.errorBox}`}>
               {relayConfig.error || t("fileInvalidUrl" as never)}
             </div>
           </div>

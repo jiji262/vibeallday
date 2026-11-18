@@ -13,17 +13,16 @@
  * deliberately, rather than quietly shipping them a broken pane.
  */
 const LIMITED_USER_SETTINGS_CATEGORIES: ReadonlySet<string> = new Set([
-  // Browser-local presentation, which is genuinely theirs.
+  // Browser-local presentation and toolbar controls, which are genuinely theirs.
   "appearance",
-  "toolbar",
-  "message-delivery",
   // Dictation choices are browser-local, and the speech routes they use are
-  // open to them; the pane hides its backend setup and vocabulary sections.
+  // open to them; the pane hides its backend setup section.
   "speech",
   // Push lives on their own device; subscribe/unsubscribe are self-writes.
   "notifications",
   // Their own account: username, grants, lock, and Log out.
   "users",
+  // Version/help info plus browser-local Performance settings.
   "about",
 ]);
 

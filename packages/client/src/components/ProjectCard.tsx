@@ -4,8 +4,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { useI18n } from "../i18n";
 import { shortenPath } from "../lib/text";
 import type { Project } from "../types";
-import { Button, IconButton } from "./garden/Button";
-import { MoreHorizontalIcon, PlusIcon } from "./garden/icons";
+import { IconButton } from "./garden/Button";
+import { FolderIcon, MoreHorizontalIcon, PlusIcon } from "./garden/icons";
 import { ActionSheet, type ActionSheetItem } from "./garden/Sheet";
 import { StatusDot } from "./garden/StatusDot";
 import styles from "./ProjectCard.module.css";
@@ -14,7 +14,7 @@ import { ProjectCodeNameEditor } from "./ProjectCodeNameEditor";
 import { formatProjectAge } from "./projectRelativeTime";
 import type { ModalAnchorRect } from "./ui/Modal";
 
-interface ProjectCardProps {
+export interface ProjectCardProps {
   appEnabled?: boolean;
   project: Project;
   /** Number of sessions needing approval/input in this project */
@@ -42,7 +42,8 @@ interface ProjectCardProps {
   isDeleting?: boolean;
 }
 
-const ACTION_ICON_SIZE = 14;
+const REPO_ICON_SIZE = 15;
+const ACTION_ICON_SIZE = 15;
 
 function stop(event: MouseEvent) {
   event.preventDefault();
@@ -90,7 +91,7 @@ function projectMenuItems(
   return candidates.filter((item): item is ActionSheetItem => Boolean(item));
 }
 
-/** Name linking to the project home, code-name chip and mono path tail. */
+/** Folder badge, bold title linking to project home, and quiet mono codeName tag. */
 function ProjectIdentity({
   project,
   basePath = "",
@@ -127,19 +128,17 @@ function ProjectIdentity({
           {codeNameError}
         </span>
       )}
-      <span className={styles.path} title={project.path}>
-        <bdi>{shortenPath(project.path)}</bdi>
-      </span>
     </div>
   );
 }
 
 /**
- * Needs-you, running and queued counts as status dots (only when non-zero),
- * then the session total and last activity.
+ * Structured Studio footer separating live status pills (Needs You, Running,
+ * Queued) and session count on the left from relative timestamp + Open link.
  */
-function ProjectStats({
+function ProjectFooter({
   project,
+  basePath = "",
   needsAttentionCount,
   thinkingCount,
   queueCount = 0,
@@ -147,6 +146,7 @@ function ProjectStats({
 }: Pick<
   ProjectCardProps,
   | "project"
+  | "basePath"
   | "needsAttentionCount"
   | "thinkingCount"
   | "queueCount"
@@ -154,59 +154,66 @@ function ProjectStats({
 >) {
   const { t } = useI18n();
   return (
-    <div className={styles.stats}>
-      {needsAttentionCount > 0 && (
-        <span className={`${styles.stat} ${styles.attn}`}>
-          <StatusDot state="attn" />
-          {t("projectCardNeedsYou", { count: needsAttentionCount })}
-        </span>
-      )}
-      {thinkingCount > 0 && (
-        <span className={styles.stat}>
-          <StatusDot state="run" />
-          {t("projectCardRunning", { count: thinkingCount })}
-        </span>
-      )}
-      {queueCount > 0 && (
-        <span
-          className={styles.stat}
-          title={t("projectCardQueueCount", { count: queueCount })}
-        >
-          <StatusDot state="queued" />
-          {t("projectCardQueued", { count: queueCount })}
-        </span>
-      )}
-      {hasQueueWarning && (
-        <span
-          className={styles.queueWarning}
-          role="img"
-          title={t("projectCardQueueWarning")}
-          aria-label={t("projectCardQueueWarning")}
-        >
-          !
-        </span>
-      )}
-      <span className={styles.meta}>
-        {t(
-          project.sessionCount === 1
-            ? "projectCardSessionOne"
-            : "projectCardSessions",
-          { count: project.sessionCount },
+    <div className={styles.footer}>
+      <div className={styles.stats}>
+        {needsAttentionCount > 0 && (
+          <span className={`${styles.statPill} ${styles.statAttn}`}>
+            <StatusDot state="attn" />
+            {t("projectCardNeedsYou", { count: needsAttentionCount })}
+          </span>
         )}
-      </span>
-      {project.lastActivity && (
-        <span className={styles.meta}>
-          {formatProjectAge(project.lastActivity, t)}
+        {thinkingCount > 0 && (
+          <span className={`${styles.statPill} ${styles.statRun}`}>
+            <StatusDot state="run" />
+            {t("projectCardRunning", { count: thinkingCount })}
+          </span>
+        )}
+        {queueCount > 0 && (
+          <span
+            className={`${styles.statPill} ${styles.statQueued}`}
+            title={t("projectCardQueueCount", { count: queueCount })}
+          >
+            <StatusDot state="queued" />
+            {t("projectCardQueued", { count: queueCount })}
+          </span>
+        )}
+        {hasQueueWarning && (
+          <span
+            className={styles.queueWarning}
+            role="img"
+            title={t("projectCardQueueWarning")}
+            aria-label={t("projectCardQueueWarning")}
+          >
+            !
+          </span>
+        )}
+        <span className={styles.sessionCount}>
+          {t(
+            project.sessionCount === 1
+              ? "projectCardSessionOne"
+              : "projectCardSessions",
+            { count: project.sessionCount },
+          )}
         </span>
-      )}
+      </div>
+      <div className={styles.footerRight}>
+        {project.lastActivity && (
+          <span className={styles.timestamp}>
+            {formatProjectAge(project.lastActivity, t)}
+          </span>
+        )}
+        <Link to={`${basePath}/projects/${project.id}`} className={styles.open}>
+          {t("projectCardOpen")}
+        </Link>
+      </div>
     </div>
   );
 }
 
 /**
- * One project in the projects grid: identity (the name opens the project
- * home), caption, live counts, and New session / Open, with an overflow
- * sheet for App, Copy, Settings and Remove.
+ * Elevated Studio repository card: repo badge + bold title + codeName +
+ * new-session & overflow icon triggers, one-line caption slot, truncated mono
+ * path pill on `--surface-2`, and structured status/timestamp footer.
  */
 export function ProjectCard(props: ProjectCardProps) {
   const { project, basePath = "" } = props;
@@ -227,40 +234,54 @@ export function ProjectCard(props: ProjectCardProps) {
   };
 
   return (
-    <li className={styles.card}>
+    <li
+      className={`${styles.card}${
+        props.needsAttentionCount > 0 ? ` ${styles.cardAttn}` : ""
+      }`}
+    >
       <div className={styles.head}>
+        <span className={styles.repoBadge} aria-hidden="true">
+          <FolderIcon size={REPO_ICON_SIZE} />
+        </span>
         <ProjectIdentity {...props} />
-        {menuItems.length > 0 && (
+        <div className={styles.headActions}>
           <IconButton
-            label={t("projectCardActions")}
-            className={styles.more}
-            aria-haspopup="menu"
-            onClick={openMenu}
+            label={t("projectCardNewSession")}
+            className={styles.iconAction}
+            onClick={() =>
+              navigate(`${basePath}/new-session?projectId=${project.id}`)
+            }
           >
-            <MoreHorizontalIcon />
+            <PlusIcon size={ACTION_ICON_SIZE} />
           </IconButton>
-        )}
+          {menuItems.length > 0 && (
+            <IconButton
+              label={t("projectCardActions")}
+              className={styles.iconAction}
+              aria-haspopup="menu"
+              onClick={openMenu}
+            >
+              <MoreHorizontalIcon />
+            </IconButton>
+          )}
+        </div>
       </div>
-      <ProjectCaptionEditor
-        project={project}
-        onUpdateCaption={props.onUpdateCaption}
-      />
-      <ProjectStats {...props} />
-      <div className={styles.actions}>
-        <Button
-          variant="secondary"
-          size="sm"
-          icon={<PlusIcon size={ACTION_ICON_SIZE} />}
-          onClick={() =>
-            navigate(`${basePath}/new-session?projectId=${project.id}`)
-          }
-        >
-          {t("projectCardNewSession")}
-        </Button>
-        <Link to={`${basePath}/projects/${project.id}`} className={styles.open}>
-          {t("projectCardOpen")}
-        </Link>
+
+      <div className={styles.captionSlot}>
+        <ProjectCaptionEditor
+          project={project}
+          onUpdateCaption={props.onUpdateCaption}
+        />
       </div>
+
+      <div className={styles.pathPill}>
+        <span className={styles.path} title={project.path}>
+          <bdi>{shortenPath(project.path)}</bdi>
+        </span>
+      </div>
+
+      <ProjectFooter {...props} />
+
       {menuOpen && (
         <ActionSheet
           title={projectDisplayName(project)}

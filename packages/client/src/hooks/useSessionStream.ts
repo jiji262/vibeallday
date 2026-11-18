@@ -7,7 +7,7 @@ import {
 } from "react";
 import { useCurrentSourceRuntime } from "../contexts/SourceRuntimeContext";
 import { isNonRetryableError } from "../lib/connection/types";
-import { logSessionUiTrace } from "../lib/diagnostics/uiTrace";
+import { useSessionUiTrace } from "../lib/diagnostics/useSessionUiTrace";
 import {
   isSemanticUiActionHarnessEnabled,
   observeSemanticUiServerEvent,
@@ -62,6 +62,7 @@ export function useSessionStream(
   const [connected, setConnected] = useState(false);
   const [resubscribing, setResubscribing] = useState(false);
   const runtime = useCurrentSourceRuntime();
+  const logSessionUiTrace = useSessionUiTrace();
   const wantsLiveDeltas = useSyncExternalStore(
     subscribeStreamingEnabled,
     getStreamingEnabled,
@@ -93,7 +94,7 @@ export function useSessionStream(
     // and declines only for an already terminal or closed stream whose
     // published state is the one we still want to show.
     stream.restart({ delayMs: 50 });
-  }, [sessionId]);
+  }, [logSessionUiTrace, sessionId]);
   useResubscribeOnFrontendSourceChange(reconnect);
 
   useEffect(() => {
@@ -200,6 +201,7 @@ export function useSessionStream(
       stream.close();
     };
   }, [
+    logSessionUiTrace,
     runtime.sourceKey,
     runtime.transport,
     sessionId,

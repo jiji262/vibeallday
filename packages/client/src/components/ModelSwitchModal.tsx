@@ -610,7 +610,7 @@ export function ModelSwitchModal({
             {processId && (
               <section className="model-switch-section">
                 <div className="model-switch-section-header">
-                  <strong>{t("newSessionThinkingMode")}</strong>
+                  <strong>{t("modelSettingsThinkingTitle")}</strong>
                 </div>
                 <div className="model-switch-chip-group">
                   {thinkingModeOptions.map((mode) => {

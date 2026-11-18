@@ -68,9 +68,10 @@ describe("ClientLogCollector", () => {
     const sourceKey = asClientSummarySourceKey("test:client-log");
     setCurrentClientSummarySourceKey(sourceKey);
     transport = new FakeSourceTransport({
-      kind: "secure",
+      kind: "localhost",
+      fetch: (path, init) => fetchJSON(path, init),
       initialSnapshot: {
-        kind: "secure",
+        kind: "localhost",
         state: "disconnected",
         channels: [],
       },
@@ -103,6 +104,7 @@ describe("ClientLogCollector", () => {
     await new Promise((r) => setTimeout(r, 10));
 
     vi.mocked(fetchJSON).mockResolvedValueOnce({ received: 4 });
+    transport.setState("ready");
     await collector.flush();
 
     expect(fetchJSON).toHaveBeenCalledTimes(1);
@@ -126,6 +128,7 @@ describe("ClientLogCollector", () => {
     await new Promise((r) => setTimeout(r, 10));
 
     vi.mocked(fetchJSON).mockResolvedValueOnce({ received: 2 });
+    transport.setState("ready");
     await collector.flush();
 
     const body = JSON.parse(
@@ -157,6 +160,7 @@ describe("ClientLogCollector", () => {
     await new Promise((r) => setTimeout(r, 10));
 
     vi.mocked(fetchJSON).mockResolvedValueOnce({ received: 3 });
+    transport.setState("ready");
     await collector.flush();
 
     const body = JSON.parse(
@@ -203,6 +207,7 @@ describe("ClientLogCollector", () => {
     await collector.start();
     collector.record("info", "[RepairTest]", "repair marker");
     await new Promise((resolve) => setTimeout(resolve, 10));
+    transport.setState("ready");
     await collector.flush();
 
     const body = JSON.parse(
@@ -220,16 +225,17 @@ describe("ClientLogCollector", () => {
       request.onsuccess = () => resolve(request.result);
       request.onerror = () => reject(request.error);
     });
-    expect(db.version).toBe(2);
+    expect(db.version).toBe(3);
     expect(db.objectStoreNames.contains(CLIENT_LOG_STORE_NAME)).toBe(true);
     db.close();
   });
 
   it("falls back when a current database is missing its store", async () => {
-    await createEmptyClientLogDatabase(2);
+    await createEmptyClientLogDatabase(3);
 
     await collector.start();
     collector.record("info", "[FallbackTest]", "fallback marker");
+    transport.setState("ready");
     await collector.flush();
 
     const body = JSON.parse(

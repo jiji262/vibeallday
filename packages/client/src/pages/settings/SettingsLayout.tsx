@@ -1,5 +1,4 @@
 import {
-  BROWSER_SETTINGS_BACKUP_CAPABILITY,
   type ServerCapabilitySource,
   serverHasCapability,
 } from "@vibeallday/shared";
@@ -23,16 +22,18 @@ import { Notice } from "../../components/garden/Notice";
 import { PageHeader } from "../../components/PageHeader";
 import { PageIntro } from "../../components/shell/PageIntro";
 import { pageWidthClass } from "../../components/shell/pageWidth";
-import { useRemoteBasePath } from "../../hooks/useRemoteBasePath";
 import { useActingPrincipal } from "../../hooks/useActingPrincipal";
+import { useRemoteBasePath } from "../../hooks/useRemoteBasePath";
 import { useVersion } from "../../hooks/useVersion";
-import { limitedUserMaySeeSettingsCategory } from "../../lib/limitedUserSettings";
 import { useI18n } from "../../i18n";
 import { getSettingsCategories } from "../../i18n-settings";
 import { MainContent, useNavigationLayout } from "../../layouts";
-import { SettingsBackupActions } from "./SettingsBackupActions";
+import { limitedUserMaySeeSettingsCategory } from "../../lib/limitedUserSettings";
+import { CATEGORY_COMPONENTS } from "./settingsCategoryComponents";
+import { groupSettingsCategories } from "./settingsGroups";
 import { SettingsClipboardTransfer } from "./SettingsClipboardTransfer";
 import { SettingsHome, SettingsOverview } from "./SettingsHome";
+import styles from "./SettingsLayout.module.css";
 import { SettingsLayoutRail } from "./SettingsLayoutRail";
 import {
   type SettingsDetailCrumb,
@@ -40,31 +41,45 @@ import {
   SettingsPane,
 } from "./SettingsPane";
 import {
+  SettingsPaneTitleProvider,
+  useSettingsPaneTitleRegistration,
+} from "./SettingsPaneTitleContext";
+import {
   SettingsSearchBar,
   useSettingsSearchMatchValues,
 } from "./SettingsSearchBar";
 import { SettingsJumpTargetProvider } from "./SettingsSearchContext";
 import { SettingsSearchResults } from "./SettingsSearchResults";
-import {
-  SettingsPaneTitleProvider,
-  useSettingsPaneTitleRegistration,
-} from "./SettingsPaneTitleContext";
+import { SettingsUndoButton } from "./SettingsUndoButton";
 import {
   SettingsUndoProvider,
   useSettingsUndoRegistration,
 } from "./SettingsUndoContext";
-import { SettingsUndoButton } from "./SettingsUndoButton";
 import { useSettingsUndoToast } from "./SettingsUndoToast";
-import { CATEGORY_COMPONENTS } from "./settingsCategoryComponents";
-import { groupSettingsCategories } from "./settingsGroups";
 import type { SettingsCategory } from "./types";
-import styles from "./SettingsLayout.module.css";
 
 // Reserve the 272px category rail and responsive page insets; detail
 // controls wrap within the remaining pane's container width.
 export const SETTINGS_TWO_COLUMN_MIN_WIDTH = 700;
 
-const IMPORT_EXPORT_CATEGORY_ID = "import-export";
+const STORAGE_CATEGORY_ID = "storage";
+
+export const LEGACY_SETTINGS_CATEGORY_REDIRECTS: Readonly<
+  Record<string, string>
+> = {
+  toolbar: "appearance",
+  "agent-context": "model",
+  "agent-behavior": "model",
+  "message-delivery": "model",
+  "cache-miss-billing": "model",
+  devices: "remote",
+  issues: "source-control",
+  webhooks: "source-control",
+  "import-export": "storage",
+  performance: "about",
+  environment: "about",
+  development: "about",
+};
 
 export function shouldUseSettingsTwoColumn(availableWidth: number): boolean {
   return availableWidth >= SETTINGS_TWO_COLUMN_MIN_WIDTH;
@@ -170,10 +185,6 @@ export function SettingsLayout() {
   const { version: versionInfo, loading: versionLoading } = useVersion();
   const { principal: actingPrincipal, resolved: principalResolved } =
     useActingPrincipal();
-  const serverBacksUpBrowserSettings = serverHasCapability(
-    versionInfo,
-    BROWSER_SETTINGS_BACKUP_CAPABILITY,
-  );
   const {
     registration: undoRegistration,
     setRegistration: setUndoRegistration,
@@ -219,14 +230,13 @@ export function SettingsLayout() {
     : actingAsLimitedUser
       ? categories.filter((item) => limitedUserMaySeeSettingsCategory(item.id))
       : categories;
-  // The backup slot is server-wide and `/api/browser-settings-backup` is
-  // denied for a limited user, so the buttons would only ever fail for them.
-  const canBackUpBrowserSettings =
-    serverBacksUpBrowserSettings && principalResolved && !actingAsLimitedUser;
 
   // The settings index is the overview (desktop panel, phone home); no
   // category is opened on the user's behalf.
   const effectiveCategory = category;
+  const legacyRedirectTarget = effectiveCategory
+    ? LEGACY_SETTINGS_CATEGORY_REDIRECTS[effectiveCategory]
+    : undefined;
 
   const setSettingsScrollContainerRef = useCallback(
     (element: HTMLElement | null) => {
@@ -295,17 +305,15 @@ export function SettingsLayout() {
   }, [basePath, category, navigate, useTwoColumnSettings]);
 
   const groups = groupSettingsCategories(visibleCategories);
-  // Once an Import/Export category exists it owns backup and transfer, and
-  // the navigation stops carrying its own copies.
-  const hasImportExportCategory = visibleCategories.some(
-    (item) => item.id === IMPORT_EXPORT_CATEGORY_ID,
+  // Storage owns clipboard preference transfer for administrators; limited
+  // users keep browser-local copy/paste directly on their Settings rail/home.
+  const hasStorageCategory = visibleCategories.some(
+    (item) => item.id === STORAGE_CATEGORY_ID,
   );
-  const transferTools = hasImportExportCategory ? null : (
-    <>
-      {canBackUpBrowserSettings && <SettingsBackupActions />}
-      {principalResolved && <SettingsClipboardTransfer />}
-    </>
-  );
+  const transferTools =
+    principalResolved && !hasStorageCategory ? (
+      <SettingsClipboardTransfer />
+    ) : null;
 
   const searchResults =
     searchActive && principalResolved ? (
@@ -331,9 +339,10 @@ export function SettingsLayout() {
   const withheldFromPrincipal =
     actingAsLimitedUser &&
     effectiveCategory !== undefined &&
+    !legacyRedirectTarget &&
     !limitedUserMaySeeSettingsCategory(effectiveCategory);
   const unservedCategory =
-    principalResolved && !withheldFromPrincipal
+    principalResolved && !withheldFromPrincipal && !legacyRedirectTarget
       ? allCategories.find(
           (c) =>
             c.id === effectiveCategory &&
@@ -346,6 +355,7 @@ export function SettingsLayout() {
   const CategoryComponent =
     effectiveCategory &&
     principalResolved &&
+    !legacyRedirectTarget &&
     !withheldFromPrincipal &&
     !unservedCategory
       ? CATEGORY_COMPONENTS[effectiveCategory]
@@ -418,6 +428,16 @@ export function SettingsLayout() {
       </SettingsPaneTitleProvider>
     </SettingsJumpTargetProvider>
   );
+
+  if (legacyRedirectTarget) {
+    return (
+      <Navigate
+        to={`${settingsRoot}/${legacyRedirectTarget}`}
+        replace
+        state={location.state}
+      />
+    );
+  }
 
   // An unknown category, or one withheld from this principal, has no pane
   // and no rail entry: answer its URL with the settings index instead.
