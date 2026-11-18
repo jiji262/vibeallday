@@ -60,13 +60,21 @@ HAPI 的说明见 [工作原理](https://hapi.run/docs/guide/how-it-works) 与 [
 
 ## 界面预览
 
-**会话详情**：把需求、Agent 回复、工具活动和继续对话放在一起。
+**会话详情**：把需求、Agent 回复、上下文侧栏（变更 / 计划 / 上下文 / 子代理）与继续对话放在同一视口。
 
-![会话详情：查看购物车校验任务的改动说明并继续对话](docs/images/session.png)
+![会话详情：查看购物车校验任务的改动说明、右侧变更摘要并继续对话](docs/images/session.png)
 
-**代码审查**：检查真实渲染的 Git diff，再把具体意见交回 Agent。
+**项目工作台**：集中查看本机代码仓库、待处理审批与运行中会话计数，快速发起新任务。
+
+![项目工作台：集中查看演示仓库路径、待处理状态与活动会话数](docs/images/projects.png)
+
+**代码审查**：检查真实渲染的 Git diff，支持统一/并排视图切换与行级批注，再把具体意见交回 Agent。
 
 ![源码管理：检查虚构购物车代码的库存与数量校验 diff](docs/images/source-control.png)
+
+**深色工作台**：内置明亮与石墨深色两套 Studio Workbench 主题，长时间审阅代码与追踪长会话同样清晰。
+
+![深色工作台：石墨深色主题下的会话收件箱与内联审批卡片](docs/images/overview-dark.png)
 
 ### 手机上的使用流程
 
@@ -77,7 +85,7 @@ HAPI 的说明见 [工作原理](https://hapi.run/docs/guide/how-it-works) 与 [
   <img src="docs/images/mobile-session.png" alt="手机会话详情：阅读虚构购物车任务的改动说明并继续对话" width="280" />
 </p>
 
-**处理审批与检查代码**：核对即将运行的命令，在手机上批准或拒绝；打开 diff 检查具体修改。
+**处理审批与检查代码**：使用“逐个处理”模式核对即将运行的命令，在手机上批准或拒绝；打开 diff 抽屉检查具体修改。
 
 <p>
   <img src="docs/images/mobile-approval.png" alt="手机审批：审核虚构会话请求运行的购物车测试命令" width="280" />

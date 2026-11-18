@@ -149,10 +149,7 @@ export const SHARED_NAVIGATION_LAYOUT_ROUTE = (
     element={
       <RouteModule>
         <NavigationLayout
-          sessionElement={(
-            route,
-            { parked, progressiveRenderPauseSignal },
-          ) => (
+          sessionElement={(route, { parked, progressiveRenderPauseSignal }) => (
             <RouteModule key={route.key}>
               <SessionPage
                 projectId={route.projectId}

@@ -5,7 +5,10 @@ import { useI18n } from "../../i18n";
 import { RECENT_SHORTCUT_LIMIT } from "../../lib/sessionOverview";
 import { getSessionDisplayTitle } from "../../utils";
 import { CompactResumeButton } from "../CompactResumeButton";
-import { SessionListItem, type SessionNavigationIntent } from "../SessionListItem";
+import {
+  SessionListItem,
+  type SessionNavigationIntent,
+} from "../SessionListItem";
 import sidebarStyles from "../Sidebar.module.css";
 import {
   CATEGORY_SECTION_PREFIX,
